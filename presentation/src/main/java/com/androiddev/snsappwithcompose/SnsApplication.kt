@@ -10,6 +10,5 @@ class SnsApplication : Application() {
     override fun onCreate() {
         super.onCreate()
        KakaoSdk.init(this, BuildConfig.KAKAO_API_KEY)
-
     }
 }
