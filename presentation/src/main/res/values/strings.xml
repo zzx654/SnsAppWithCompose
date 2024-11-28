@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">개</string>
+    <string name="email">이메일</string>
+    <string name="email_hint">이메일 입력</string>
+    <string name="password_hint">비밀번호 입력</string>
+    <string name="find_id">아이디 찾기</string>
+    <string name="find_pw">비밀번호 찾기</string>
+    <string name="login">로그인</string>
+    <string name="social_login">간편로그인</string>
+    <string name="no_account">아이디가 없으신가요?</string>
+    <string name="create_account">계정생성</string>
+    <string name="auth_phone">휴대폰 번호를 인증해주세요</string>
+    <string name="enter_phone">휴대폰 번호를 입력해주세요</string>
+    <string name="send_authcode">인증번호 발송</string>
+    <string name="incorrect_authcode">인증번호를 다시 확인해주세요</string>
+    <string name="enter_authcode">인증번호 입력</string>
+    <string name="authenticate">인증하기</string>
+
 </resources>

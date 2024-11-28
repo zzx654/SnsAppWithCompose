@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    kotlin("plugin.serialization") version "1.9.23"
 }
 fun getApiKey(propertyKey: String): String {
     return gradleLocalProperties(rootDir).getProperty(propertyKey)
@@ -77,12 +78,13 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.50")
     kapt ("androidx.hilt:hilt-compiler:1.0.0")
 
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("androidx.navigation:navigation-compose:2.8.4")
     // implementation("androidx.compose.material:material-icons-extended:$compose_ui_version")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     //구글로그인
-    implementation("com.google.gms:google-services:4.3.15")
-    implementation("com.google.android.gms:play-services-auth:20.5.0")
+    implementation("com.google.gms:google-services:4.4.2")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     //카톡로그인
     implementation("com.kakao.sdk:v2-all:2.12.1") // 전체 모듈 설치, 2.11.0 버전부터 지원
