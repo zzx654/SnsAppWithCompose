@@ -27,7 +27,8 @@ android {
         }
         buildConfigField("String", "KAKAO_API_KEY", getApiKey("KAKAO_API_KEY"))
         resValue("string", "KAKAO_REDIRECT_URI", "kakao${getApiKey("KAKAO_API_KEY")}")
-        buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", getApiKey("GOOGLE_OAUTH_CLIENT_ID"))
+        buildConfigField("String", "NAVER_CLIENT_ID", getApiKey("NAVER_CLIENT_ID"))
+        buildConfigField("String", "NAVER_CLIENT_SECRET", getApiKey("NAVER_CLIENT_SECRET"))
     }
 
     buildTypes {
@@ -64,6 +65,9 @@ dependencies {
 
     implementation(project(":domain"))
     implementation(project(":data"))
+    //DataStore
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.datastore:datastore-core:1.1.1")
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
@@ -73,6 +77,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:5.0.0-alpha.2")
     implementation ("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
+
     // Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
@@ -82,9 +87,12 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.4")
     // implementation("androidx.compose.material:material-icons-extended:$compose_ui_version")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    //구글로그인
-    implementation("com.google.gms:google-services:4.4.2")
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    //네이버로그인
+    implementation("com.navercorp.nid:oauth:5.10.0")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation ("androidx.legacy:legacy-support-core-utils:1.0.0")
+    implementation ("androidx.browser:browser:1.4.0")
 
     //카톡로그인
     implementation("com.kakao.sdk:v2-all:2.12.1") // 전체 모듈 설치, 2.11.0 버전부터 지원

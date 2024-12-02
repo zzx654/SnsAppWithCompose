@@ -19,7 +19,6 @@ import androidx.navigation.compose.rememberNavController
 import com.androiddev.snsappwithcompose.navigation.components.Navigation
 import com.androiddev.snsappwithcompose.ui.theme.Background
 import com.androiddev.snsappwithcompose.ui.theme.SnsAppWithComposeTheme
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

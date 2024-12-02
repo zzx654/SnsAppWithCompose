@@ -121,9 +121,9 @@ fun SignInScreen(navController: NavController) {
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                SocialMediaLogIn(icon = R.drawable.kakaotalklogo,onClick= {})
+                SocialMediaLogIn(icon = R.drawable.kakaotalk_logo,onClick= {})
                 Spacer(modifier = Modifier.width(20.dp))
-                SocialMediaLogIn(icon = R.drawable.googlelogo,onClick= {})
+                SocialMediaLogIn(icon = R.drawable.naver_logo,onClick= {})
             }
             Spacer(modifier = Modifier.height(30.dp))
             Row(
