@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.auth.signin
 
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -37,9 +38,11 @@ import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.AuthTextField
+import com.androiddev.snsappwithcompose.auth.components.KakaoSignInButton
+import com.androiddev.snsappwithcompose.auth.components.NaverSignInButton
 import com.androiddev.snsappwithcompose.auth.components.OutlinedTextFieldBackground
-import com.androiddev.snsappwithcompose.auth.components.SocialMediaLogIn
 import com.androiddev.snsappwithcompose.util.Screen
+
 
 @Composable
 fun SignInScreen(navController: NavController) {
@@ -121,9 +124,15 @@ fun SignInScreen(navController: NavController) {
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                SocialMediaLogIn(icon = R.drawable.kakaotalk_logo,onClick= {})
+                KakaoSignInButton(
+                    onKaKaoSignInCompleted = {},
+                    onError =  {}
+                )
                 Spacer(modifier = Modifier.width(20.dp))
-                SocialMediaLogIn(icon = R.drawable.naver_logo,onClick= {})
+                NaverSignInButton(
+                    onNaverSignInCompleted = {} ,
+                    onError = {}
+                )
             }
             Spacer(modifier = Modifier.height(30.dp))
             Row(

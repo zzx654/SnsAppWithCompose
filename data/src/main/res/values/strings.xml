@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="server_error">서버에러가 발생했습니다</string>
+    <string name="unexpected_error">예상하지 못한 오류가 발생했습니다</string>
+    <string name="connection_error">인터넷 연결상태를 확인해주세요</string>
+
+</resources>
