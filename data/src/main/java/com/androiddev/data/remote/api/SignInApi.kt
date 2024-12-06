@@ -8,6 +8,12 @@ import retrofit2.http.POST
 
 interface SignInApi {
     @FormUrlEncoded
+    @POST("/emailSignIn")
+    suspend fun emailSignIn(
+        @Field("account")account: String,
+        @Field("password")password: String,
+    ): Response<SigninResponseDto>
+    @FormUrlEncoded
     @POST("/socialSign")
     suspend fun socialSignIn(
         @Field("platform")platform: String,

@@ -15,5 +15,9 @@
     <string name="incorrect_authcode">인증번호를 다시 확인해주세요</string>
     <string name="enter_authcode">인증번호 입력</string>
     <string name="authenticate">인증하기</string>
+    <string name="error">에러가 발생했습니다</string>
+    <string name="kakao">kakao</string>
+    <string name="naver">naver</string>
+
 
 </resources>

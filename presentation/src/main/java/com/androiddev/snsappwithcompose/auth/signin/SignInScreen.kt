@@ -1,6 +1,8 @@
 package com.androiddev.snsappwithcompose.auth.signin
 
 
+import android.view.Gravity
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -20,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +38,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.AuthTextField
@@ -42,11 +46,28 @@ import com.androiddev.snsappwithcompose.auth.components.KakaoSignInButton
 import com.androiddev.snsappwithcompose.auth.components.NaverSignInButton
 import com.androiddev.snsappwithcompose.auth.components.OutlinedTextFieldBackground
 import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.util.UiEvent
+import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
-fun SignInScreen(navController: NavController) {
+fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltViewModel()) {
     val context = LocalContext.current
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when(event) {
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                is UiEvent.navigate -> {
+                    navController.navigate(event.screen)
+                }
+            }
+        }
+    }
     var id by remember {
         mutableStateOf("")
     }
@@ -125,13 +146,13 @@ fun SignInScreen(navController: NavController) {
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 KakaoSignInButton(
-                    onKaKaoSignInCompleted = {},
-                    onError =  {}
+                    onKaKaoSignInCompleted = { account -> viewModel.onEvent(SignInEvent.socialSignIn(getString(context,R.string.kakao),account)) },
+                    onError =  { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
                 )
                 Spacer(modifier = Modifier.width(20.dp))
                 NaverSignInButton(
-                    onNaverSignInCompleted = {} ,
-                    onError = {}
+                    onNaverSignInCompleted = { account -> viewModel.onEvent(SignInEvent.socialSignIn(getString(context,R.string.naver),account)) } ,
+                    onError = { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
                 )
             }
             Spacer(modifier = Modifier.height(30.dp))

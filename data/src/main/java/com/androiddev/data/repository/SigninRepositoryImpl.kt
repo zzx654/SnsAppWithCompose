@@ -26,7 +26,7 @@ class SigninRepositoryImpl @Inject constructor(
                 api.socialSignIn(platform,account).body()?.let{ result ->
                     if(result.resultCode == 200) {
 
-                        val signinResponse = result.toSigninResponse(result.token)
+                        val signinResponse = result.toSigninResponse(result.isMember,result.profileWritten,result.token)
                         emit(Resource.Success(signinResponse))
                     }
                     else
