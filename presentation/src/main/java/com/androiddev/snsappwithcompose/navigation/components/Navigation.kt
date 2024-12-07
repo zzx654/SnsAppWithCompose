@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.androiddev.snsappwithcompose.auth.signin.SignInScreen
 import com.androiddev.snsappwithcompose.auth.signup.AuthPhoneScreen
+import com.androiddev.snsappwithcompose.auth.signup.EmailSignUpScreen
 import com.androiddev.snsappwithcompose.util.Screen
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -21,6 +22,9 @@ fun Navigation(navController: NavHostController) {
         }
         composable<Screen.AuthPhoneScreen> {
             AuthPhoneScreen(navController = navController, navBackStackEntry = it)
+        }
+        composable<Screen.SignUpScreen> {
+            EmailSignUpScreen(navController = navController, navBackStackEntry = it)
         }
     }
 }

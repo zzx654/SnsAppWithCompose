@@ -16,7 +16,7 @@ import javax.inject.Inject
 class SigninRepositoryImpl @Inject constructor(
     private val api: SignInApi,
 ) : SigninRepository {
-    override suspend fun socialSign(
+    override suspend fun socialSignIn(
         platform: String,
         account: String
     ): Flow<Resource<SigninResponse>> {

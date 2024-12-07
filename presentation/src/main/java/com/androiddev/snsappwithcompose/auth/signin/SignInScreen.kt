@@ -161,7 +161,7 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
             ) {
                 Text(text = stringResource(R.string.no_account), fontWeight = FontWeight.Bold,fontSize = 13.sp,color = Color.Gray)
                 Spacer(modifier = Modifier.width(15.dp))
-                Text(modifier = Modifier.clickable {  navController.navigate(Screen.AuthPhoneScreen(platform = getString(context,R.string.email),id = null))},text = stringResource(R.string.create_account), fontWeight = FontWeight.Bold,fontSize = 13.sp,color = Color.Black)
+                Text(modifier = Modifier.clickable {  navController.navigate(Screen.AuthPhoneScreen(platform = getString(context,R.string.email),account = null))},text = stringResource(R.string.create_account), fontWeight = FontWeight.Bold,fontSize = 13.sp,color = Color.Black)
             }
         }
     }

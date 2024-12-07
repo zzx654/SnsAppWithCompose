@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">개</string>
-    <string name="email">이메일</string>
+    <string name="email">email</string>
+    <string name="signup">회원가입</string>
     <string name="email_hint">이메일 입력</string>
     <string name="password_hint">비밀번호 입력</string>
     <string name="find_id">아이디 찾기</string>
@@ -12,12 +13,19 @@
     <string name="auth_phone">휴대폰 번호를 인증해주세요</string>
     <string name="enter_phone">휴대폰 번호를 입력해주세요</string>
     <string name="send_authcode">인증번호 발송</string>
+    <string name="resend_authcode">재발송</string>
     <string name="incorrect_authcode">인증번호를 다시 확인해주세요</string>
     <string name="enter_authcode">인증번호 입력</string>
     <string name="authenticate">인증하기</string>
+    <string name="enter_email">이메일을 입력해주세요</string>
+    <string name="check_email">이메일을 확인해주세요</string>
+    <string name="password_rule">영문,숫자,특수문자 포함 8자-15자</string>
+    <string name="enter_password">비밀번호를 입력해주세요</string>
     <string name="error">에러가 발생했습니다</string>
     <string name="kakao">kakao</string>
     <string name="naver">naver</string>
+    <string name="topbar_authphone">휴대폰 인증</string>
+    <string name="request_signup">회원 가입하기</string>
 
 
 </resources>

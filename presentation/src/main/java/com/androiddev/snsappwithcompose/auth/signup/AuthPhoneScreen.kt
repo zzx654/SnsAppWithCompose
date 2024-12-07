@@ -33,6 +33,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,7 +52,9 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.AuthNumberTextField
 import com.androiddev.snsappwithcompose.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
+import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -59,23 +63,41 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun AuthPhoneScreen(
     navController: NavController,
-    navBackStackEntry: NavBackStackEntry
+    navBackStackEntry: NavBackStackEntry,
+    viewModel: AuthPhoneViewModel = hiltViewModel()
 ) {
     var args = navBackStackEntry.toRoute<Screen.AuthPhoneScreen>()
     val context = LocalContext.current
+    val limitTime by viewModel.limitTime.collectAsState()
     LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when(event) {
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                is UiEvent.navigate -> {
+                    navController.navigate(event.screen)
+                }
+            }
+        }
+    }
+    LoadingDialog {
+        viewModel.isLoading.value
     }
     Scaffold(
         topBar = {
             Surface(shadowElevation = 3.dp) {
                 TopAppBar(
-                    title = { Text(text = "휴대폰 인증") },
+                    title = { Text(text = stringResource(R.string.topbar_authphone)) },
 
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack()}) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = ""
+                                contentDescription = null
                             )
                         }
                     }
@@ -86,12 +108,9 @@ fun AuthPhoneScreen(
 
     ) { contentPadding ->
 
-        println("플랫폼:${args.platform}아이디${args.id}")
-        println("리컴포즈1")
         Column(modifier = Modifier
             .imePadding()
         ) {
-            println("리컴포즈2")
             val scrollState = rememberScrollState()
             Column(modifier = Modifier
                 .weight(1f)
@@ -112,10 +131,10 @@ fun AuthPhoneScreen(
                         modifier = Modifier
                             .weight(5f)
                             .fillMaxHeight() ,
-                        text = {"" },
-                        onTextChange = { },
+                        text = {viewModel.phoneNumber.value },
+                        onTextChange = {viewModel.onEvent(AuthPhoneEvent.TypePhoneNumber(it)) },
                         keyboardType = KeyboardType.Number
-                    ).also{println("폰넘버 리컴포즈")}
+                    )
 
                     Spacer(modifier = Modifier.width(10.dp))
 
@@ -123,27 +142,27 @@ fun AuthPhoneScreen(
                         containerColor = Color.Black
                     ),modifier = Modifier
                         .weight(3f)
-                        .fillMaxHeight(),shape = RoundedCornerShape(4.dp),onClick = {}) {
+                        .fillMaxHeight(),shape = RoundedCornerShape(4.dp),onClick = {viewModel.onEvent(AuthPhoneEvent.RequestAuthCode)}) {
                         Text(
-                            text = stringResource(R.string.send_authcode),
+                            text = if(viewModel.isCodeReceived.value) stringResource(R.string.resend_authcode) else stringResource(R.string.send_authcode),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
                         )
                     }
                 }.also{}
                 Spacer(modifier = Modifier.height(20.dp))
                 AuthNumberTextField(
-                    isNumberReceived = { false },
-                    limitTime = { AUTH_LIMITEDTIME },
-                    number = { "" },
-                    onNumberChange = {  },
+                    isNumberReceived = { viewModel.isCodeReceived.value },
+                    limitTime = { limitTime },
+                    number = { viewModel.authCodeField.value.code },
+                    onNumberChange = { viewModel.onEvent(AuthPhoneEvent.TypeAuthCode(it)) },
                     hint = stringResource(R.string.enter_authcode),
-                    inCorrect = { false }
+                    inCorrect = { viewModel.authCodeField.value.isError }
                 )
             }
             BottomButton(
                 buttonText = stringResource(R.string.authenticate),
-                activeButton = { false },
-                onClick = {}
+                activeButton = { viewModel.isCodeReceived.value&&viewModel.authCodeField.value.code.isNotEmpty() },
+                onClick = { viewModel.onEvent(AuthPhoneEvent.AuthenticateCode(args.platform,args.account))}
             )
         }
     }

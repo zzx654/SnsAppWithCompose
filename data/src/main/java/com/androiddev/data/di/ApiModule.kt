@@ -1,6 +1,9 @@
 package com.androiddev.data.di
 
 import com.androiddev.data.BuildConfig
+import com.androiddev.data.remote.api.AuthPhoneApi
+import com.androiddev.data.remote.api.SignInApi
+import com.androiddev.data.remote.api.SignUpApi
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
@@ -41,5 +44,15 @@ object ApiModule {
             .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
             .build()
     }
+    @Provides
+    @Singleton
+    fun provideAuthPhoneApi(retrofit: Retrofit): AuthPhoneApi = retrofit.create(AuthPhoneApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideSignInApi(retrofit: Retrofit): SignInApi = retrofit.create(SignInApi::class.java)
+    @Provides
+    @Singleton
+    fun provideSignUpApi(retrofit: Retrofit): SignUpApi = retrofit.create(SignUpApi::class.java)
 
 }

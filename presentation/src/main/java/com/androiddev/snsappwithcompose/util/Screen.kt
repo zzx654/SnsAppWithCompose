@@ -8,6 +8,6 @@ sealed interface Screen {
     @Serializable
     data class SignUpScreen(val phoneNumber: String): Screen
     @Serializable
-    data class AuthPhoneScreen(val platform:String?,val id:String?): Screen
+    data class AuthPhoneScreen(val platform:String,val account:String?): Screen
 
 }

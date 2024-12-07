@@ -5,5 +5,5 @@ import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface SigninRepository {
-    suspend fun socialSign(platform: String,account: String) : Flow<Resource<SigninResponse>>
+    suspend fun socialSignIn(platform: String,account: String) : Flow<Resource<SigninResponse>>
 }

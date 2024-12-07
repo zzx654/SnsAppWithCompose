@@ -34,7 +34,7 @@ class SignInViewModel @Inject constructor(
         when(event) {
             is SignInEvent.socialSignIn -> {
                 viewModelScope.launch {
-                    signInUseCases.socialSignUseCase(event.platform,event.account)
+                    signInUseCases.socialSignIn(event.platform,event.account)
                         .collect { result ->
                             when(result) {
                                 is Resource.Success -> {
