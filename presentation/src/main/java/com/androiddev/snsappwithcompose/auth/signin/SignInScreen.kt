@@ -45,6 +45,8 @@ import com.androiddev.snsappwithcompose.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.auth.components.KakaoSignInButton
 import com.androiddev.snsappwithcompose.auth.components.NaverSignInButton
 import com.androiddev.snsappwithcompose.auth.components.OutlinedTextFieldBackground
+import com.androiddev.snsappwithcompose.components.AlertDialog
+import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.flow.collectLatest
@@ -68,12 +70,16 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
             }
         }
     }
-    var id by remember {
-        mutableStateOf("")
+    LoadingDialog {
+        viewModel.isLoading.value
     }
-    var password by remember {
-        mutableStateOf("")
-    }
+    AlertDialog(
+        title = {viewModel.alertDialogState.value.title},
+        cancelText = {viewModel.alertDialogState.value.cancelText},
+        confirmText = {viewModel.alertDialogState.value.confirmText},
+        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
+        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    )
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -98,17 +104,17 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
                 .padding(horizontal = 30.dp)
 
         ) {
-            Text(text = stringResource(R.string.email), fontWeight = FontWeight.Bold,fontSize = 13.sp,modifier = Modifier
+            Text(text = stringResource(R.string.signin), fontWeight = FontWeight.Bold,fontSize = 13.sp,modifier = Modifier
                 .align(Alignment.Start)
                 .padding(start = 10.dp))
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextFieldBackground(color = Color.White ) {
-                AuthTextField(modifier = Modifier.fillMaxWidth(), text = { id }, onTextChange = {id = it} , keyboardType = KeyboardType.Email,hint = stringResource(R.string.email_hint) )
+                AuthTextField(modifier = Modifier.fillMaxWidth(), text = { viewModel.account.value }, onTextChange = {viewModel.onEvent(SignInEvent.TypeAccount(it))} , keyboardType = KeyboardType.Email,hint = stringResource(R.string.email_hint) )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextFieldBackground(color = Color.White) {
-                AuthTextField(modifier = Modifier.fillMaxWidth(), text = { password }, onTextChange = {password = it} , keyboardType = KeyboardType.Password,hint = stringResource(R.string.password_hint) )
+                AuthTextField(modifier = Modifier.fillMaxWidth(), text = { viewModel.password.value }, onTextChange = {viewModel.onEvent(SignInEvent.TypePwd(it))} , keyboardType = KeyboardType.Password,hint = stringResource(R.string.password_hint) )
             }
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -124,7 +130,7 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
                 containerColor = Color.Black
             ),modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),onClick = { /*TODO*/ },shape = RoundedCornerShape(10.dp)
+                .height(50.dp),onClick = { viewModel.onEvent(SignInEvent.emailSignIn) },shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
                     text = stringResource(R.string.login),

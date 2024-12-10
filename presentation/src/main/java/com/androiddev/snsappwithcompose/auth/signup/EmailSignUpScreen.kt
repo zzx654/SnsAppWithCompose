@@ -42,16 +42,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.Constants.PASSWORD_REGEX
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.AuthNumberTextField
 import com.androiddev.snsappwithcompose.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.auth.components.CheckPassword
+import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
+import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 import java.util.regex.Pattern
@@ -64,12 +68,19 @@ fun EmailSignUpScreen(
     navBackStackEntry: NavBackStackEntry,
     viewModel: EmailSignUpViewModel = hiltViewModel()
 ) {
-
+    var args = navBackStackEntry.toRoute<Screen.SignUpScreen>()
     val context = LocalContext.current
     val limitTime by viewModel.limitTime.collectAsState()
     LoadingDialog {
         viewModel.isLoading.value
     }
+    AlertDialog(
+        title = {viewModel.alertDialogState.value.title},
+        cancelText = {viewModel.alertDialogState.value.cancelText},
+        confirmText = {viewModel.alertDialogState.value.confirmText},
+        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
+        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    )
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when(event) {
@@ -80,7 +91,7 @@ fun EmailSignUpScreen(
                     }
                 }
                 is UiEvent.navigate -> {//네비게이션
-                    navController.navigate(event.screen)
+                    navController.popBackStack(event.screen,false)
 
                 }
             }
@@ -93,7 +104,7 @@ fun EmailSignUpScreen(
                     title = { Text(text = stringResource(R.string.signup),fontWeight = FontWeight.Bold,fontSize = 16.sp) },
 
                     navigationIcon = {
-                        IconButton(onClick = {}) {
+                        IconButton(onClick = { navController.popBackStack(Screen.SignInScreen,false)}) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = null
@@ -190,7 +201,7 @@ fun EmailSignUpScreen(
                                 viewModel.isCodeReceived.value&&
                                 Pattern.matches( PASSWORD_REGEX,viewModel.password.value)&&
                                 viewModel.authCodeField.value.code.isNotEmpty() },
-                    onClick = {}
+                    onClick = { viewModel.onEvent(EmailSignUpEvent.EmailSignUp(args.phoneNumber))}
                 )
             }
         }

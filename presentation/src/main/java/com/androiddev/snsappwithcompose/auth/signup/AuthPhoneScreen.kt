@@ -52,6 +52,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.AuthNumberTextField
 import com.androiddev.snsappwithcompose.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
+import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
@@ -87,6 +88,13 @@ fun AuthPhoneScreen(
     LoadingDialog {
         viewModel.isLoading.value
     }
+    AlertDialog(
+        title = {viewModel.alertDialogState.value.title},
+        cancelText = {viewModel.alertDialogState.value.cancelText},
+        confirmText = {viewModel.alertDialogState.value.confirmText},
+        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
+        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    )
     Scaffold(
         topBar = {
             Surface(shadowElevation = 3.dp) {

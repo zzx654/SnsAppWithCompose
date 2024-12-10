@@ -1,9 +1,10 @@
 package com.androiddev.snsappwithcompose.auth.signup
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.InvalidPhoneNumberException
@@ -12,15 +13,10 @@ import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.Constants.AUTH_LIMITEDTIME
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.util.UserPreferences
+import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,11 +24,13 @@ import javax.inject.Inject
 class AuthPhoneViewModel @Inject constructor(
     private val authPhoneUseCases: AuthPhoneUseCases,
     private val signUpUseCase: SocialSignUpUseCase,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val context: Context
 ) : AuthViewModel() {
     private val _phoneNumber = mutableStateOf("")
     val phoneNumber: State<String>
         get() = _phoneNumber
+
 
     fun onEvent(event:AuthPhoneEvent) {
         when (event) {
@@ -51,17 +49,24 @@ class AuthPhoneViewModel @Inject constructor(
                             when (result) {
                                 is Resource.Success -> {
                                     _isLoading.value = false
-                                    _isCodeReceived.value = true
-                                    _limitTime.value = AUTH_LIMITEDTIME
-                                    _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
-                                    timerStart()
+                                    result.data?.let { phoneNumberExist ->
+                                        if(phoneNumberExist) {
+                                            showPhoneExistAlert()
+                                        } else {
+                                            _isCodeReceived.value = true
+                                            _limitTime.value = AUTH_LIMITEDTIME
+                                            _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
+                                            timerStart()
+                                        }
+                                    }
+
                                 }
 
                                 is Resource.Error -> {
                                     _isLoading.value = false
                                     _eventFlow.emit(
                                         UiEvent.ShowToast(
-                                            message = result.message ?: "에러가 발생했습니다"
+                                            message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
@@ -73,7 +78,7 @@ class AuthPhoneViewModel @Inject constructor(
                     } catch (e: InvalidPhoneNumberException) {
                         _eventFlow.emit(
                             UiEvent.ShowToast(
-                                message = e.message ?: "전화번호를 확인해주세요"
+                                message = e.message ?: getString(context,R.string.check_phonenumber)
                             )
                         )
                     }
@@ -92,11 +97,11 @@ class AuthPhoneViewModel @Inject constructor(
                                     result.data?.let { isCodeCorrect ->
                                         if(isCodeCorrect) {
                                             timerJob?.cancel()
-                                            if(event.platform == Resources.getSystem().getString(R.string.email)) {
+                                            if(event.platform == getString(context,R.string.email)) {
                                                 _eventFlow.emit(UiEvent.navigate(Screen.SignUpScreen(phoneNumber.value)))
                                             } else {
                                                 //sns가입시도
-                                                socialSignUp(event.platform,event.account!!)
+                                                socialSignUp(event.platform,event.account!!,phoneNumber.value)
                                             }
                                         }
                                         else
@@ -107,7 +112,7 @@ class AuthPhoneViewModel @Inject constructor(
                                     _isLoading.value = false
                                     _eventFlow.emit(
                                         UiEvent.ShowToast(
-                                            message = result.message ?: Resources.getSystem().getString(R.string.error)
+                                            message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
@@ -118,28 +123,28 @@ class AuthPhoneViewModel @Inject constructor(
                         }
                 }
             }
-            else -> null
         }
     }
 
-    private fun socialSignUp(platform: String,account: String) {
+    private fun socialSignUp(platform: String,account: String,phonenumber: String) {
         viewModelScope.launch {
-            signUpUseCase(platform,account)
+            signUpUseCase(platform,account,phonenumber)
                 .collect{ result ->
                     when(result) {
                         is Resource.Success -> {
+                            _isLoading.value = false
                             result.data?.let { userPreferences.saveAuthToken(it) }
-                            //_eventFlow.emit(
-                             //   UiEvent.navigate(
-                              //      프로필작성화면
-                               // )
-                           // )
+                            _eventFlow.emit(
+                                UiEvent.navigate(
+                                    Screen.CreateprofileScreen
+                                )
+                            )
                         }
                         is Resource.Error -> {
                             _isLoading.value = false
                             _eventFlow.emit(
                                 UiEvent.ShowToast(
-                                    message = result.message ?: Resources.getSystem().getString(R.string.error)
+                                    message = result.message ?: getString(context,R.string.error)
                                 )
                             )
                         }
@@ -150,6 +155,16 @@ class AuthPhoneViewModel @Inject constructor(
                 }
         }
     }
+    private fun showPhoneExistAlert() {
+        _alertDialogState.value = AlertDialogState(
+            title = getString(context,R.string.phonenumber_exist),
+            confirmText = getString(context,R.string.confirm),
+            onClickConfirm = {
+                resetDialogState()
+            }
+        )
+    }
+
     override fun onCleared() {
         super.onCleared()
         timerJob?.cancel()

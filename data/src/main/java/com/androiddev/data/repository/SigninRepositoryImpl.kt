@@ -1,6 +1,8 @@
 package com.androiddev.data.repository
 
+import android.content.Context
 import android.content.res.Resources
+import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.dto.toSigninResponse
@@ -15,6 +17,7 @@ import javax.inject.Inject
 
 class SigninRepositoryImpl @Inject constructor(
     private val api: SignInApi,
+    private val context: Context
 ) : SigninRepository {
     override suspend fun socialSignIn(
         platform: String,
@@ -25,18 +28,43 @@ class SigninRepositoryImpl @Inject constructor(
                 emit(Resource.Loading())
                 api.socialSignIn(platform,account).body()?.let{ result ->
                     if(result.resultCode == 200) {
+                        val signinResponse = result.toSigninResponse(result.isMember,result.profileWritten,result.token)
+                        emit(Resource.Success(signinResponse))
+                    }
+                    else
+                        emit(Resource.Error(getString(context,R.string.server_error)))
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context,R.string.connection_error)))
+            }
+
+        }
+
+    }
+    override suspend fun emailSignIn(
+        account: String,
+        password: String
+    ): Flow<Resource<SigninResponse>> {
+        return flow {
+            try {
+                emit(Resource.Loading())
+                api.emailSignIn(account,password).body()?.let{ result ->
+                    if(result.resultCode == 200) {
 
                         val signinResponse = result.toSigninResponse(result.isMember,result.profileWritten,result.token)
                         emit(Resource.Success(signinResponse))
                     }
                     else
-                        emit(Resource.Error(Resources.getSystem().getString(R.string.server_error)))
+                        emit(Resource.Error(getString(context,R.string.server_error)))
                 }
             } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: Resources.getSystem().getString(R.string.unexpected_error)))
+                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
 
             } catch(e: IOException) {
-                emit(Resource.Error(Resources.getSystem().getString(R.string.connection_error)))
+                emit(Resource.Error(getString(context,R.string.connection_error)))
             }
 
         }

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">개</string>
     <string name="email">email</string>
+    <string name="signin">로그인</string>
     <string name="signup">회원가입</string>
     <string name="email_hint">이메일 입력</string>
     <string name="password_hint">비밀번호 입력</string>
@@ -24,8 +25,17 @@
     <string name="error">에러가 발생했습니다</string>
     <string name="kakao">kakao</string>
     <string name="naver">naver</string>
+    <string name="check_phonenumber">전화번호를 확인해주세요</string>
     <string name="topbar_authphone">휴대폰 인증</string>
     <string name="request_signup">회원 가입하기</string>
+    <string name="cancel">취소</string>
+    <string name="phonenumber_exist">이미 가입된 휴대폰 번호입니다.</string>
+    <string name="signin_failed">아이디 또는 비밀번호 오류입니다</string>
+    <string name="email_exist">이미 가입된 휴대폰 번호입니다.</string>
+    <string name="wrong_code">인증번호가 틀렸습니다</string>
+    <string name="confirm">확인</string>
+    <string name="signup_completed">회원가입이 완료되었습니다.</string>
+
 
 
 </resources>

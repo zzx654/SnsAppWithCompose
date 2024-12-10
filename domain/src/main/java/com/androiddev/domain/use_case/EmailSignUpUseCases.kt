@@ -1,5 +1,6 @@
 package com.androiddev.domain.use_case
 
 data class EmailSignUpUseCases(
-    val requestAuthCode: RequestEmailAuthCode
+    val requestAuthCode: RequestEmailAuthCode,
+    val emailSignUp: EmailSignUp
 )

@@ -1,10 +1,12 @@
 package com.androiddev.snsappwithcompose.auth.signup
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androiddev.snsappwithcompose.Constants
+import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -29,7 +31,11 @@ abstract class AuthViewModel(): ViewModel() {
     protected val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
     var timerJob: Job? = null
-    fun timerStart() {
+
+    protected val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
+    val alertDialogState: State<AlertDialogState>
+        get() = _alertDialogState
+    protected fun timerStart() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while(limitTime.value >=0 && isCodeReceived.value) {
@@ -41,6 +47,9 @@ abstract class AuthViewModel(): ViewModel() {
                 }
             }
         }
+    }
+    protected fun resetDialogState() {
+        _alertDialogState.value = AlertDialogState()
     }
 
     override fun onCleared() {

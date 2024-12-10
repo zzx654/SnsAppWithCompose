@@ -1,14 +1,18 @@
 package com.androiddev.snsappwithcompose.auth.signup
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.use_case.EmailSignUpUseCases
 import com.androiddev.domain.use_case.InvalidEmailException
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.Constants
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.util.AlertDialogState
+import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -16,8 +20,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EmailSignUpViewModel @Inject constructor(
-    private val emailSignUpUseCases: EmailSignUpUseCases
+    private val emailSignUpUseCases: EmailSignUpUseCases,
+    private val context: Context
 ) : AuthViewModel() {
+
 
 
     private val _email = mutableStateOf("")
@@ -48,16 +54,23 @@ class EmailSignUpViewModel @Inject constructor(
                             when (result) {
                                 is Resource.Success -> {
                                     _isLoading.value = false
-                                    _isCodeReceived.value = true
-                                    _limitTime.value = Constants.AUTH_LIMITEDTIME
-                                    _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
-                                    timerStart()
+                                    result.data?.let { emailExist ->
+                                        if(emailExist) {
+                                            //다이얼로그 추가
+                                            showEmailExistAlert()
+                                        } else {
+                                            _isCodeReceived.value = true
+                                            _limitTime.value = Constants.AUTH_LIMITEDTIME
+                                            _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
+                                            timerStart()
+                                        }
+                                    }
                                 }
                                 is Resource.Error -> {
                                     _isLoading.value = false
                                     _eventFlow.emit(
                                         UiEvent.ShowToast(
-                                            message = result.message ?: Resources.getSystem().getString(R.string.error)
+                                            message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
@@ -69,7 +82,7 @@ class EmailSignUpViewModel @Inject constructor(
                     } catch (e: InvalidEmailException) {
                         _eventFlow.emit(
                             UiEvent.ShowToast(
-                                message = e.message ?: Resources.getSystem().getString(R.string.check_email)
+                                message = e.message ?: getString(context,R.string.check_email)
                             )
                         )
                     }
@@ -84,9 +97,72 @@ class EmailSignUpViewModel @Inject constructor(
             is EmailSignUpEvent.TypeRepeatPwd -> {
                 _repeatPw.value = event.repeatPwd
             }
+            is EmailSignUpEvent.EmailSignUp -> {
+                viewModelScope.launch {
+                    emailSignUpUseCases.emailSignUp(email.value,password.value,event.phonenumber,authCodeField.value.code)
+                        .collect { result ->
+                            when(result) {
+                                is Resource.Success -> {
+                                    _isLoading.value = false
+                                    result.data?.let { isCodeCorrect ->
+                                        if(isCodeCorrect) {
+                                            // 확인누르면 로그인화면으로 가는 다이얼로그추가
+                                            showSignUpCompletedAlert()
+                                        }
+                                        else {
+                                            //인증번호가 틀렸다는 다이얼로그 추가
+                                            showWrongCodeAlert()
+                                        }
+
+                                    }
+                                }
+                                is Resource.Error -> {
+                                    _isLoading.value = false
+                                    _eventFlow.emit(
+                                        UiEvent.ShowToast(
+                                            message = result.message ?: getString(context,R.string.error)
+                                        )
+                                    )
+                                }
+                                is Resource.Loading -> {
+                                    _isLoading.value = true
+                                }
+                            }
+
+                        }
+                }
+            }
         }
-
-
+    }
+    private fun showEmailExistAlert() {
+        _alertDialogState.value = AlertDialogState(
+            title = getString(context,R.string.email_exist),
+            confirmText = getString(context,R.string.confirm),
+            onClickConfirm = {
+                resetDialogState()
+            }
+        )
+    }
+    private fun showWrongCodeAlert() {
+        _alertDialogState.value = AlertDialogState(
+            title = getString(context,R.string.wrong_code),
+            confirmText = getString(context,R.string.confirm),
+            onClickConfirm = {
+                resetDialogState()
+            }
+        )
+    }
+    private fun showSignUpCompletedAlert() {
+        _alertDialogState.value = AlertDialogState(
+            title = getString(context,R.string.signup_completed),
+            confirmText = getString(context,R.string.confirm),
+            onClickConfirm = {
+                resetDialogState()
+                viewModelScope.launch {
+                    _eventFlow.emit(UiEvent.navigate(Screen.SignInScreen))
+                }
+            }
+        )
     }
 
 

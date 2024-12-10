@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface SigninRepository {
     suspend fun socialSignIn(platform: String,account: String) : Flow<Resource<SigninResponse>>
+    suspend fun emailSignIn(account: String,password: String) : Flow<Resource<SigninResponse>>
 }
