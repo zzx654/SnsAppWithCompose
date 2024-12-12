@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.auth.util
+package com.androiddev.data.util
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

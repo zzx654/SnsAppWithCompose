@@ -1,12 +1,13 @@
 package com.androiddev.data.repository
 
 import android.content.Context
-import android.content.res.Resources
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.dto.toSigninResponse
+import com.androiddev.data.remote.dto.toSigninWithTokenResponse
 import com.androiddev.domain.model.SigninResponse
+import com.androiddev.domain.model.SigninWithTokenResponse
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -71,4 +72,24 @@ class SigninRepositoryImpl @Inject constructor(
 
     }
 
+    override suspend fun signInWithToken(): Flow<Resource<SigninWithTokenResponse>> {
+        return flow {
+            try {
+                emit(Resource.Loading())
+                api.signInWithToken().body()?.let{ result ->
+                    if(result.resultCode == 200) {
+                        val signinResponse = result.toSigninWithTokenResponse(result.signInResult,result.profileWritten)
+                        emit(Resource.Success(signinResponse))
+                    }
+                    else
+                        emit(Resource.Error(getString(context,R.string.server_error)))
+                }
+            }catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context,R.string.connection_error)))
+            }
+        }
+    }
 }

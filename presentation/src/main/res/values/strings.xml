@@ -34,6 +34,7 @@
     <string name="email_exist">이미 가입된 휴대폰 번호입니다.</string>
     <string name="wrong_code">인증번호가 틀렸습니다</string>
     <string name="confirm">확인</string>
+    <string name="retry">재시도</string>
     <string name="signup_completed">회원가입이 완료되었습니다.</string>
 
 

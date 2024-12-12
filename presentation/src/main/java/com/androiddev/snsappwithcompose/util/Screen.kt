@@ -13,5 +13,7 @@ sealed interface Screen {
     data object CreateprofileScreen: Screen
     @Serializable
     data object HomeScreen: Screen
+    @Serializable
+    data object InitScreen: Screen
 
 }

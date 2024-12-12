@@ -9,11 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androiddev.data.util.UserPreferences
 import com.androiddev.domain.model.SigninResponse
 import com.androiddev.domain.use_case.SignInUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.auth.util.UserPreferences
 import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
@@ -141,6 +141,8 @@ class SignInViewModel @Inject constructor(
                         }
                 }
             }
+
+            else -> null
         }
     }
     private fun handleSigninResult(event:SignInEvent,signinResult:SigninResponse) {

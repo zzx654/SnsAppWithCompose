@@ -2,6 +2,7 @@ package com.androiddev.snsappwithcompose.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+val InitProgressBarColor = Color(0xFF5E584B)
 val Background = Color(0xFFFFF1CD)
 //Color(0xFFFDE2C2)
 val Black = Color(0xFF000113)

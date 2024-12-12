@@ -4,11 +4,14 @@ import com.androiddev.data.BuildConfig
 import com.androiddev.data.remote.api.AuthPhoneApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
+import com.androiddev.data.util.UserPreferences
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -24,13 +27,17 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(baseUrl:String): Retrofit {
+    fun provideRetrofit(baseUrl:String,userPreferences: UserPreferences): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(
                 OkHttpClient.Builder()
                     .addInterceptor { chain->
-                        chain.proceed(chain.request().newBuilder().build())
+                        val authToken:String?
+                        runBlocking { authToken = userPreferences.authToken.first() }
+                        chain.proceed(chain.request().newBuilder().also{
+                            it.addHeader("Authorization","Bearer $authToken")
+                        }.build())
                     }
                     .also{client->
                         if(BuildConfig.DEBUG){

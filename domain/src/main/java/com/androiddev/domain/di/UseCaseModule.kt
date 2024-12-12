@@ -12,6 +12,7 @@ import com.androiddev.domain.use_case.EmailSignUpUseCases
 import com.androiddev.domain.use_case.RequestEmailAuthCode
 import com.androiddev.domain.use_case.RequestPhoneAuthCode
 import com.androiddev.domain.use_case.SignInUseCases
+import com.androiddev.domain.use_case.SignInWithToken
 import com.androiddev.domain.use_case.SocialSignIn
 import com.androiddev.domain.use_case.SocialSignUpUseCase
 import dagger.Module
@@ -29,7 +30,8 @@ object UseCaseModule {
     fun provideSignInUseCases(repository: SigninRepository): SignInUseCases {
         return SignInUseCases(
             socialSignIn = SocialSignIn(repository),
-            emailSignIn = EmailSignIn(repository)
+            emailSignIn = EmailSignIn(repository),
+            signInWithToken = SignInWithToken(repository)
         )
     }
     @Provides

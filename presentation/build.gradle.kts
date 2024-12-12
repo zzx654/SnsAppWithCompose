@@ -65,9 +65,7 @@ dependencies {
 
     implementation(project(":domain"))
     implementation(project(":data"))
-    //DataStore
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.datastore:datastore-core:1.1.1")
+
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")

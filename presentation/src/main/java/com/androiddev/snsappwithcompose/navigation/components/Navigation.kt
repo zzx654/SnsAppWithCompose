@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.androiddev.snsappwithcompose.auth.signin.InitScreen
 import com.androiddev.snsappwithcompose.auth.signin.SignInScreen
 import com.androiddev.snsappwithcompose.auth.signup.AuthPhoneScreen
 import com.androiddev.snsappwithcompose.auth.signup.EmailSignUpScreen
@@ -18,7 +19,7 @@ import com.androiddev.snsappwithcompose.util.Screen
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun Navigation(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = Screen.SignInScreen) {
+    NavHost(navController = navController, startDestination = Screen.InitScreen) {
         composable<Screen.SignInScreen> {
             SignInScreen(navController)
         }
@@ -33,6 +34,9 @@ fun Navigation(navController: NavHostController) {
         }
         composable<Screen.HomeScreen> {
             HomeScreen(navController = navController)
+        }
+        composable<Screen.InitScreen> {
+            InitScreen(navController = navController)
         }
     }
 }

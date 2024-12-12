@@ -6,13 +6,13 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
+import com.androiddev.data.util.UserPreferences
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.InvalidPhoneNumberException
 import com.androiddev.domain.use_case.SocialSignUpUseCase
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.Constants.AUTH_LIMITEDTIME
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.auth.util.UserPreferences
 import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
