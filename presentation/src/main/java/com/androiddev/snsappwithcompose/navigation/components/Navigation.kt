@@ -19,7 +19,7 @@ import com.androiddev.snsappwithcompose.util.Screen
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun Navigation(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = Screen.InitScreen) {
+    NavHost(navController = navController, startDestination = Screen.CreateprofileScreen) {
         composable<Screen.SignInScreen> {
             SignInScreen(navController)
         }

@@ -36,6 +36,8 @@
     <string name="confirm">확인</string>
     <string name="retry">재시도</string>
     <string name="signup_completed">회원가입이 완료되었습니다.</string>
+    <string name="choose_from_gallery">갤러리에서 선택</string>
+    <string name="take_picture">사진 찍기</string>
 
 
 

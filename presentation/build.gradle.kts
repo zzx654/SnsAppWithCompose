@@ -66,6 +66,8 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
 
+    //Image Cropper
+    implementation("com.vanniktech:android-image-cropper:4.6.0")
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
