@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.androiddev.snsappwithcompose.auth.components.CropScreen
 import com.androiddev.snsappwithcompose.auth.signin.InitScreen
 import com.androiddev.snsappwithcompose.auth.signin.SignInScreen
 import com.androiddev.snsappwithcompose.auth.signup.AuthPhoneScreen
@@ -37,6 +38,9 @@ fun Navigation(navController: NavHostController) {
         }
         composable<Screen.InitScreen> {
             InitScreen(navController = navController)
+        }
+        composable<Screen.CropScreen> {
+            CropScreen(navController = navController,navBackStackEntry = it)
         }
     }
 }

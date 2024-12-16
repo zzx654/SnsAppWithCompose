@@ -56,32 +56,34 @@ fun CustomBottomSheetDialog(
         ) {
             Column(
                 modifier = Modifier
-                    .padding(top = 10.dp, start = 10.dp, end = 10.dp, bottom = bottomPadding)
                     .fillMaxWidth(),
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 items().forEach { item->
-                    Row(modifier = Modifier.clickable { scope.launch{
-                        modalBottomSheetState.hide()
-                    }.invokeOnCompletion { item.onClick() } }){
+
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .clickable { scope.launch{
+                                modalBottomSheetState.hide()
+                            }.invokeOnCompletion { item.onClick() } }){
                         Image(
-                            modifier = Modifier
-                                .padding(start = 20.dp)
-                                .size(20.dp),
+                            modifier = Modifier.size(25.dp),
                             painter = painterResource(id = item.icon),
                             contentDescription = null
                         )
-                        Spacer(modifier = Modifier.width(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = item.text,
                             style = TextStyle(
-                                fontSize = 14.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         )
 
                     }
                 }
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }

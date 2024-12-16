@@ -1,4 +1,5 @@
 package com.androiddev.snsappwithcompose.util
+import android.net.Uri
 import kotlinx.serialization.Serializable
 
 sealed interface Screen {
@@ -15,5 +16,7 @@ sealed interface Screen {
     data object HomeScreen: Screen
     @Serializable
     data object InitScreen: Screen
+    @Serializable
+    data class CropScreen(val encodedUri:String): Screen
 
 }

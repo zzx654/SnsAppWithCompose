@@ -66,6 +66,7 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
 
+    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     //Image Cropper
     implementation("com.vanniktech:android-image-cropper:4.6.0")
     // Coroutines
