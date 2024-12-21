@@ -1,14 +1,12 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-import org.gradle.kotlin.dsl.android
-
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    kotlin("kapt")
-    id("com.google.dagger.hilt.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-    kotlin("plugin.serialization") version "1.9.23"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.dagger.hilt)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.ksp)
 }
 fun getApiKey(propertyKey: String): String {
     return gradleLocalProperties(rootDir,providers).getProperty(propertyKey)
@@ -54,9 +52,7 @@ android {
         compose = true
         buildConfig = true
     }
-    //composeOptions {
-    //    kotlinCompilerExtensionVersion = "1.5.1"
-    // }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -69,49 +65,51 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
 
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
-    //Image Cropper
-    implementation("com.vanniktech:android-image-cropper:4.6.0")
+    implementation(libs.coil3.compose)
+
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
     // Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-android-compiler:2.50")
-    kapt ("androidx.hilt:hilt-compiler:1.2.0")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
 
 
-    implementation("androidx.navigation:navigation-compose:2.8.5")
-    // implementation("androidx.compose.material:material-icons-extended:$compose_ui_version")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.kotlinx.serialization.json)
+
+
+    implementation(libs.navigation.compose)
+    implementation(libs.hilt.navigation.compose)
 
     //네이버로그인
-    implementation("com.navercorp.nid:oauth:5.10.0")
-    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation ("androidx.legacy:legacy-support-core-utils:1.0.0")
-    implementation ("androidx.browser:browser:1.4.0")
+    implementation(libs.navercorp.nid.oauth)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.support.core.utils)
+    implementation(libs.navercorp.nid.oauth)
+    implementation (libs.androidx.security.crypto)
+    implementation (libs.support.core.utils)
+    implementation (libs.androidx.browser)
 
     //카톡로그인
-    implementation("com.kakao.sdk:v2-all:2.12.1") // 전체 모듈 설치, 2.11.0 버전부터 지원
-    implementation("com.kakao.sdk:v2-user:2.12.1")
+    implementation(libs.kakao.v2.all) // 전체 모듈 설치, 2.11.0 버전부터 지원
+    implementation(libs.kakao.v2.user)
 
-    implementation("androidx.core:core-ktx:1.10.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("androidx.activity:activity-compose:1.9.3")
-    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
     //implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material3:material3-android:1.3.1")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.12.01"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation(libs.androidx.material3)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

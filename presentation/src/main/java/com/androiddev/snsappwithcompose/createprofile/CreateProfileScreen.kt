@@ -29,7 +29,6 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.util.Screen
-import com.canhub.cropper.CropImageContract
 
 @Composable
 fun CreateProfileScreen(navController: NavController,viewModel: CreateProfileViewModel = hiltViewModel()) {
@@ -79,7 +78,7 @@ fun CreateProfileScreen(navController: NavController,viewModel: CreateProfileVie
         modifier = Modifier.fillMaxSize(),
 
     ){
-
+//
     }
     Box(
       modifier = Modifier.fillMaxSize(),
