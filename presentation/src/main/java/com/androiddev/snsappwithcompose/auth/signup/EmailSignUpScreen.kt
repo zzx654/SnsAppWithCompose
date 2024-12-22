@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,14 +34,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getString
+
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -57,6 +58,7 @@ import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
+import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import kotlinx.coroutines.flow.collectLatest
 import java.util.regex.Pattern
 
@@ -70,6 +72,7 @@ fun EmailSignUpScreen(
 ) {
     var args = navBackStackEntry.toRoute<Screen.SignUpScreen>()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val limitTime by viewModel.limitTime.collectAsState()
     LoadingDialog {
         viewModel.isLoading.value
@@ -114,10 +117,11 @@ fun EmailSignUpScreen(
                 )
             }
         },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().addFocusCleaner(focusManager)
 
     ) { contentPadding ->
         val scrollState = rememberScrollState()
+
         //Column
         Column(modifier = Modifier
             .imePadding()
@@ -142,7 +146,8 @@ fun EmailSignUpScreen(
                                 .weight(5f)
                                 .fillMaxHeight() ,
                             text = {
-                                viewModel.email.value /*TODO*/ },
+                                viewModel.email.value },
+                            focusManager = focusManager,
                             onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypeEmail(it)) },
                             keyboardType = KeyboardType.Email)
 
@@ -173,7 +178,9 @@ fun EmailSignUpScreen(
                     AuthTextField(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        text = { viewModel.password.value /*TODO*/ },
+                        text = { viewModel.password.value },
+                        focusManager = focusManager,
+                        onDone = { focusManager.moveFocus(FocusDirection.Next) },
                         onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypePwd(it)) },
                         keyboardType = KeyboardType.Password
                     )
@@ -181,7 +188,8 @@ fun EmailSignUpScreen(
                     AuthTextField(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        text = { viewModel.repeatPw.value /*TODO*/ },
+                        text = { viewModel.repeatPw.value  },
+                        focusManager = focusManager,
                         onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypeRepeatPwd(it)) },
                         keyboardType = KeyboardType.Password
                     )

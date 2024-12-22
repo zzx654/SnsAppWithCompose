@@ -23,14 +23,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,12 +47,15 @@ import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
+import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
 fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltViewModel()) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when(event) {
@@ -81,7 +82,9 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
         onClickCancel = viewModel.alertDialogState.value.onClickCancel
     )
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .addFocusCleaner(focusManager)
     ) {
         Box(
             modifier = Modifier
@@ -104,17 +107,33 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
                 .padding(horizontal = 30.dp)
 
         ) {
+
             Text(text = stringResource(R.string.signin), fontWeight = FontWeight.Bold,fontSize = 13.sp,modifier = Modifier
                 .align(Alignment.Start)
                 .padding(start = 10.dp))
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextFieldBackground(color = Color.White ) {
-                AuthTextField(modifier = Modifier.fillMaxWidth(), text = { viewModel.account.value }, onTextChange = {viewModel.onEvent(SignInEvent.TypeAccount(it))} , keyboardType = KeyboardType.Email,hint = stringResource(R.string.email_hint) )
+                AuthTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = { viewModel.account.value },
+                    focusManager = focusManager,
+                    onDone = { focusManager.moveFocus(FocusDirection.Next) },
+                    onTextChange = {viewModel.onEvent(SignInEvent.TypeAccount(it))} ,
+                    keyboardType = KeyboardType.Email,
+                    hint = stringResource(R.string.email_hint)
+                )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextFieldBackground(color = Color.White) {
-                AuthTextField(modifier = Modifier.fillMaxWidth(), text = { viewModel.password.value }, onTextChange = {viewModel.onEvent(SignInEvent.TypePwd(it))} , keyboardType = KeyboardType.Password,hint = stringResource(R.string.password_hint) )
+                AuthTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = { viewModel.password.value },
+                    focusManager = focusManager,
+                    onTextChange = {viewModel.onEvent(SignInEvent.TypePwd(it))},
+                    keyboardType = KeyboardType.Password,
+                    hint = stringResource(R.string.password_hint)
+                )
             }
 
             Spacer(modifier = Modifier.height(15.dp))

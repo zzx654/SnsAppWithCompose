@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
@@ -56,6 +57,7 @@ import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
+import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -69,6 +71,7 @@ fun AuthPhoneScreen(
 ) {
     var args = navBackStackEntry.toRoute<Screen.AuthPhoneScreen>()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val limitTime by viewModel.limitTime.collectAsState()
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -112,7 +115,9 @@ fun AuthPhoneScreen(
                 )
             }
         },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .addFocusCleaner(focusManager)
 
     ) { contentPadding ->
 
@@ -140,6 +145,7 @@ fun AuthPhoneScreen(
                             .weight(5f)
                             .fillMaxHeight() ,
                         text = {viewModel.phoneNumber.value },
+                        focusManager = focusManager,
                         onTextChange = {viewModel.onEvent(AuthPhoneEvent.TypePhoneNumber(it)) },
                         keyboardType = KeyboardType.Number
                     )
