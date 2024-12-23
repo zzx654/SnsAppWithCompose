@@ -1,7 +1,6 @@
-package com.androiddev.snsappwithcompose.auth.components
+package com.androiddev.snsappwithcompose.components
 
 import android.annotation.SuppressLint
-import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -11,14 +10,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,12 +37,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.util.encodeToBase64
 import java.io.IOException
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -181,10 +179,6 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
                 drawHandle(bottomRight)
                 restoreToCount(checkPoint)
             }
-
-
-
-
         }
         Button(
             onClick = {
@@ -194,9 +188,10 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
                     canvasWidth = constraints.maxWidth.toFloat(),
                     canvasHeight = constraints.maxHeight.toFloat()
                 )
-
+                navController.previousBackStackEntry?.savedStateHandle?.set(getString(context,R.string.encodedBitmap),encodeToBase64(croppedBitmap, Bitmap.CompressFormat.JPEG, 100))
+                navController.popBackStack()
                 //set the cropped image to the composable
-                image = croppedBitmap.asImageBitmap()
+                //image = croppedBitmap.asImageBitmap()
             }, modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(16.dp)
@@ -204,19 +199,6 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
             Text(text = "Show Cropped Image")
         }
     }
-    //Box(
-     //   modifier = Modifier.fillMaxSize()
-    //) {
-     //   AsyncImage(
-      //      model = ImageRequest.Builder(context).data(uri).build(),
-       //     contentDescription = null,
-        //    contentScale = ContentScale.Crop,
-         //   modifier = Modifier.fillMaxSize()
-        //)
-   // }
-
-
-
 }
 fun Offset.isNear(point:Offset, threshold:Float = 50f):Boolean {
     return (this-point).getDistance() <= threshold

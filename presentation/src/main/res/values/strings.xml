@@ -38,6 +38,7 @@
     <string name="signup_completed">회원가입이 완료되었습니다.</string>
     <string name="choose_from_gallery">갤러리에서 선택</string>
     <string name="take_picture">사진 찍기</string>
+    <string name="encodedBitmap">encodedBitmap</string>
 
 
 

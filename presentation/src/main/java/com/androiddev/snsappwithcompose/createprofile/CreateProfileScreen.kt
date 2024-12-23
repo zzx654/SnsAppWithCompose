@@ -5,52 +5,67 @@ import android.graphics.Matrix
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
 import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.auth.components.BottomButton
+import com.androiddev.snsappwithcompose.components.EditProfileImage
+import com.androiddev.snsappwithcompose.util.decodeBase64
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateProfileScreen(navController: NavController,viewModel: CreateProfileViewModel = hiltViewModel()) {
+fun CreateProfileScreen(
+    navController: NavController,
+    navBackStackEntry: NavBackStackEntry,
+    viewModel: CreateProfileViewModel = hiltViewModel()
+) {
 
     val rotateMatrix = Matrix().also{
         it.postRotate(90f)
     }
     val context = LocalContext.current
+    val encodedCroppedBitmap = navBackStackEntry.savedStateHandle.get<String>(getString(context,R.string.encodedBitmap))
+    encodedCroppedBitmap?.let {
+        viewModel.setProfileBmap(decodeBase64(it))
+    }
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()){ uri ->
-
         val encoded = Uri.encode(uri.toString())
-
-        viewModel.setImageUri(uri)
-        viewModel.setBitmapImage(null)
         navController.navigate(Screen.CropScreen(encoded))
     }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()){ bitmapImage ->
         bitmapImage?.let {
-            viewModel.setBitmapImage(Bitmap.createBitmap(it, 0, 0,        it.getWidth(), it.getHeight(), rotateMatrix, false))
-            viewModel.setImageUri(null)
+            viewModel.setProfileBmap(Bitmap.createBitmap(it, 0, 0,it.getWidth(), it.getHeight(), rotateMatrix, false))
         }
     }
     val cameraPermission = rememberLauncherForActivityResult(
@@ -74,38 +89,53 @@ fun CreateProfileScreen(navController: NavController,viewModel: CreateProfileVie
         {viewModel.customBottomSheetDialogState.value.items},
         viewModel.customBottomSheetDialogState.value.onClickCancel
     )
-    Column(
-        modifier = Modifier.fillMaxSize(),
+    Scaffold(
 
-    ){
-//
-    }
-    Box(
-      modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+        topBar = {
+            Surface(shadowElevation = 3.dp) {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = "프로필 작성",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                        ) },
+                )
+            }
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { contentPadding ->
+        val scrollState = rememberScrollState()
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+
         ) {
-            Text(text = "createProfile",modifier = Modifier
-                .clickable { viewModel.showBottomSheetDialog() })
-            if(viewModel.bitmapImage.value!=null||viewModel.imageUri.value !=null) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context).data(viewModel.imageUri.value).build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Inside,
-                    modifier = Modifier.fillMaxWidth().fillMaxWidth(0.8f)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 30.dp)
+                    .padding(contentPadding)
+                    .verticalScroll(scrollState)
+            ) {
+                Spacer(modifier = Modifier.height(30.dp))
+                EditProfileImage(
+                    profileBmap = viewModel.profileBmap.value,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() } // This is mandatory
+                    ){viewModel.showBottomSheetDialog() }
                 )
             }
-            if(viewModel.bitmapImage.value!=null) {
-                Image(
-                    bitmap = viewModel.bitmapImage.value!!.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit
-                )
-            }
+            BottomButton(
+                buttonText = stringResource(id = R.string.request_signup),
+                activeButton = {
+                    false
+                },
+                onClick = {}
+            )
         }
-
     }
-
 }
