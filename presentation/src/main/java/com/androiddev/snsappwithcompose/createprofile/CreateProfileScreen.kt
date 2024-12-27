@@ -128,13 +128,14 @@ fun CreateProfileScreen(
                         interactionSource = remember { MutableInteractionSource() } // This is mandatory
                     ){viewModel.showBottomSheetDialog() }
                 )
+                Spacer(modifier = Modifier.height(50.dp))
             }
             BottomButton(
                 buttonText = stringResource(id = R.string.request_signup),
                 activeButton = {
-                    false
+                    true
                 },
-                onClick = {}
+                onClick = { viewModel.onEvent(CreateProfileEvent.uploadImage)}
             )
         }
     }

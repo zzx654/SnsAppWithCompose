@@ -2,6 +2,7 @@ package com.androiddev.data.di
 
 import com.androiddev.data.BuildConfig
 import com.androiddev.data.remote.api.AuthPhoneApi
+import com.androiddev.data.remote.api.CreateProfileApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.util.UserPreferences
@@ -61,5 +62,9 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideSignUpApi(retrofit: Retrofit): SignUpApi = retrofit.create(SignUpApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideCreateProfileApi(retrofit: Retrofit): CreateProfileApi = retrofit.create(CreateProfileApi::class.java)
 
 }

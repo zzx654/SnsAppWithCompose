@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
 }
-fun getApiKey(propertyKey: String): String {
+fun getProperties(propertyKey: String): String {
     return gradleLocalProperties(rootDir,providers).getProperty(propertyKey)
 }
 android {
@@ -26,10 +26,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        buildConfigField("String", "KAKAO_API_KEY", getApiKey("KAKAO_API_KEY"))
-        resValue("string", "KAKAO_REDIRECT_URI", "kakao${getApiKey("KAKAO_API_KEY")}")
-        buildConfigField("String", "NAVER_CLIENT_ID", getApiKey("NAVER_CLIENT_ID"))
-        buildConfigField("String", "NAVER_CLIENT_SECRET", getApiKey("NAVER_CLIENT_SECRET"))
+        buildConfigField("String", "KAKAO_API_KEY", getProperties("KAKAO_API_KEY"))
+        resValue("string", "KAKAO_REDIRECT_URI", "kakao${getProperties("KAKAO_API_KEY")}")
+        buildConfigField("String", "NAVER_CLIENT_ID", getProperties("NAVER_CLIENT_ID"))
+        buildConfigField("String", "NAVER_CLIENT_SECRET", getProperties("NAVER_CLIENT_SECRET"))
+        buildConfigField("String", "BASE_URL", getProperties("BASE_URL"))
     }
 
     buildTypes {
@@ -66,6 +67,8 @@ dependencies {
     implementation(project(":data"))
 
     implementation(libs.coil3.compose)
+    implementation(libs.coil3.okhttp)
+
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)

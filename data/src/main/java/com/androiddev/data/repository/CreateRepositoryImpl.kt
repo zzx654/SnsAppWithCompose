@@ -1,0 +1,45 @@
+package com.androiddev.data.repository
+
+import android.content.Context
+import android.graphics.Bitmap
+import androidx.core.content.ContextCompat.getString
+import com.androiddev.data.R
+import com.androiddev.data.remote.api.CreateProfileApi
+import com.androiddev.data.remote.dto.toUploadImageResponse
+import com.androiddev.domain.model.UploadImageResponse
+import com.androiddev.domain.repository.CreateProfileRepository
+import com.androiddev.domain.util.Resource
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import okhttp3.MultipartBody
+import retrofit2.HttpException
+import java.io.IOException
+import javax.inject.Inject
+
+class CreateRepositoryImpl @Inject constructor(
+    private val api: CreateProfileApi,
+    private val context: Context
+) : CreateProfileRepository {
+    override suspend fun uploadImage(requestBody: MultipartBody.Part): Flow<Resource<UploadImageResponse>> {
+        return flow {
+            try{
+                emit(Resource.Loading())
+                api.uploadimg(requestBody).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        val uploadImageResponse = result.toUploadImageResponse(result.imageUrl)
+                        emit(Resource.Success(uploadImageResponse))
+                    } else {
+                        emit(Resource.Error(getString(context,R.string.server_error)))
+                    }
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context,R.string.connection_error)))
+            }
+
+        }
+    }
+
+}

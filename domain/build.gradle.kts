@@ -43,6 +43,8 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     ksp (libs.androidx.hilt.compiler)
 
+    implementation (libs.okhttp)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
