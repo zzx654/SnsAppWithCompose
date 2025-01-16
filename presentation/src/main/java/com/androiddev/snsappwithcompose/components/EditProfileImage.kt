@@ -26,7 +26,6 @@ fun EditProfileImage(
     modifier:Modifier,
     profileBmap:Bitmap?
 ) {
-
     Box(
         modifier = modifier
           .width(IntrinsicSize.Min)

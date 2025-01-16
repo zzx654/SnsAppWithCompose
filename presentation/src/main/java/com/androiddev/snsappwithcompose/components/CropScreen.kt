@@ -9,11 +9,14 @@ import android.provider.MediaStore
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +40,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -86,7 +90,7 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color.DarkGray)
     ) {
         Image(
             bitmap = image!!,
@@ -145,10 +149,6 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
                                 bottomRight += dragAmount
                             }
                         }
-                        println("topLeft:$topLeft")
-                        println("topRight:$topRight")
-                        println("bottomLeft:$bottomLeft")
-                        println("bottomRight:$bottomRight")
 
                     },
                     onDragEnd = {
@@ -157,7 +157,6 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
                     }
                 )
             }){
-            val canvasWidth = size.width
             with(drawContext.canvas.nativeCanvas) {
                 val checkPoint = saveLayer(null, null)
                 val rectSize = Size(
@@ -180,24 +179,35 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
                 restoreToCount(checkPoint)
             }
         }
-        Button(
-            onClick = {
-                val croppedBitmap = getCroppedBitmap(
-                    image!!,
-                    Rect(topLeft, bottomRight),
-                    canvasWidth = constraints.maxWidth.toFloat(),
-                    canvasHeight = constraints.maxHeight.toFloat()
-                )
-                navController.previousBackStackEntry?.savedStateHandle?.set(getString(context,R.string.encodedBitmap),encodeToBase64(croppedBitmap, Bitmap.CompressFormat.JPEG, 100))
-                navController.popBackStack()
-                //set the cropped image to the composable
-                //image = croppedBitmap.asImageBitmap()
-            }, modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-        ) {
-            Text(text = "Show Cropped Image")
-        }
+        Text(
+            text = getString(context,R.string.confirm),
+            fontSize = 20.sp,
+            color = Color.White,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(17.dp)
+                .clickable{
+                    val croppedBitmap = getCroppedBitmap(
+                        image!!,
+                        Rect(topLeft, bottomRight),
+                        canvasWidth = constraints.maxWidth.toFloat(),
+                        canvasHeight = constraints.maxHeight.toFloat()
+                    )
+                    navController.previousBackStackEntry?.savedStateHandle?.set(getString(context,R.string.encodedBitmap),encodeToBase64(croppedBitmap, Bitmap.CompressFormat.JPEG, 100))
+                    navController.popBackStack()
+                }
+        )
+        Text(
+            text = getString(context,R.string.cancel),
+            fontSize = 20.sp,
+            color = Color.White,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(17.dp)
+                .clickable{
+                    navController.popBackStack()
+                }
+        )
     }
 }
 fun Offset.isNear(point:Offset, threshold:Float = 50f):Boolean {

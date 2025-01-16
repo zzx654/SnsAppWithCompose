@@ -12,7 +12,6 @@ object FileUtil {
         val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File(storageDir, fileName)
     }
-
     // 파일 내용 스트림 복사
     fun copyToFile(context: Context, uri: Uri, file: File) {
         val inputStream = context.contentResolver.openInputStream(uri)
