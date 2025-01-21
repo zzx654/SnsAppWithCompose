@@ -16,6 +16,7 @@ import com.androiddev.snsappwithcompose.util.BottomSheetItem
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.util.getMultipartBody
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,6 +43,17 @@ class CreateProfileViewModel @Inject constructor(
     val isLoading : State<Boolean>
         get() = _isLoading
 
+    private val _isTyping = mutableStateOf(false)
+    val isTyping: State<Boolean>
+        get() = _isTyping
+    private val _nickname = mutableStateOf("")
+    val nickname: State<String>
+        get() = _nickname
+
+    private val _isNicknameValid = mutableStateOf(false)
+    val isNicknameValid: State<Boolean>
+        get() = _isNicknameValid
+
     var launchCamera:()->Unit = {}
     var launchGallery:()->Unit = {}
     fun setLauncher(cameraLauncher:()->Unit,galleryLauncher:()->Unit) {
@@ -65,7 +77,6 @@ class CreateProfileViewModel @Inject constructor(
                                     is Resource.Success -> {
                                         result.data?.let { it ->
                                             _imageUrl.value = it.imageUrl
-                                            println("imageUrl${it.imageUrl}")
                                         }
                                     }
                                     is Resource.Error -> {
@@ -77,6 +88,23 @@ class CreateProfileViewModel @Inject constructor(
                                 }
                             }
                     }
+                }
+            }
+            is CreateProfileEvent.TypeNickname -> {
+                _nickname.value = event.nickname
+                _isTyping.value = true
+
+                viewModelScope.launch {
+                    delay(1000)
+                    _isTyping.value = false
+                }
+                if(event.nickname.length >= 2) {
+                    viewModelScope.launch {
+                        delay(500L)
+                        //검색 수행하고 결과에 따라 isNicknameValid 변경
+                    }
+                } else {
+                    _isNicknameValid.value = false
                 }
             }
         }

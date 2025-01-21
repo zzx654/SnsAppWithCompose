@@ -53,7 +53,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.AuthNumberTextField
 import com.androiddev.snsappwithcompose.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
-import com.androiddev.snsappwithcompose.auth.components.CheckPassword
+import com.androiddev.snsappwithcompose.auth.components.PasswordHelper
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.util.Screen
@@ -194,7 +194,7 @@ fun EmailSignUpScreen(
                         keyboardType = KeyboardType.Password
                     )
                     Spacer(modifier = Modifier.height(13.dp))
-                    CheckPassword {
+                    PasswordHelper {
                         viewModel.password.value == viewModel.repeatPw.value &&
                                 Pattern.matches(
                                     PASSWORD_REGEX,

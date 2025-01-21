@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.androiddev.snsappwithcompose.R
 
 @Composable
-fun CheckPassword(pwdChecked: ()-> Boolean) {
+fun PasswordHelper(pwdChecked: ()-> Boolean) {
     Column (
         modifier = Modifier.fillMaxSize()
     ) {

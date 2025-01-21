@@ -22,10 +22,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,6 +41,8 @@ import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.components.EditProfileImage
+import com.androiddev.snsappwithcompose.components.NicknameTextField
+import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.util.decodeBase64
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +56,7 @@ fun CreateProfileScreen(
     val rotateMatrix = Matrix().also{
         it.postRotate(90f)
     }
+    val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val encodedCroppedBitmap = navBackStackEntry.savedStateHandle.get<String>(getString(context,R.string.encodedBitmap))
     encodedCroppedBitmap?.let {
@@ -82,11 +87,12 @@ fun CreateProfileScreen(
         }else {
         }
     }
+
     viewModel.setLauncher({cameraPermission.launch(android.Manifest.permission.CAMERA)},{photoPermission.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)})
     
     CustomBottomSheetDialog(
-        {viewModel.customBottomSheetDialogState.value.showDialog},
-        {viewModel.customBottomSheetDialogState.value.items},
+        { viewModel.customBottomSheetDialogState.value.showDialog },
+        { viewModel.customBottomSheetDialogState.value.items },
         viewModel.customBottomSheetDialogState.value.onClickCancel
     )
     Scaffold(
@@ -103,7 +109,7 @@ fun CreateProfileScreen(
                 )
             }
         },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().addFocusCleaner(focusManager)
     ) { contentPadding ->
         val scrollState = rememberScrollState()
         Column(
@@ -129,6 +135,26 @@ fun CreateProfileScreen(
                     ){viewModel.showBottomSheetDialog() }
                 )
                 Spacer(modifier = Modifier.height(50.dp))
+
+                NicknameTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    focusManager = focusManager,
+                    text = { viewModel.nickname.value },
+                    hint = "닉네임",
+                    onTextChange = {
+                        viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
+                    },
+                    isTyping = { viewModel.isTyping.value },
+                    isNicknameValid = { viewModel.isNicknameValid.value }
+                )
+                Spacer(modifier = Modifier.height(50.dp))
+                //NicknameHelper(
+                  //  isTyping = { viewModel.isTyping.value },
+                   // isNicknameValid = { viewModel.isNicknameValid.value },
+                    //nickname = { viewModel.nickname.value }
+
+                //)
+
             }
             BottomButton(
                 buttonText = stringResource(id = R.string.request_signup),

@@ -1,5 +1,9 @@
 package com.androiddev.snsappwithcompose.auth.components
 
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,8 +24,8 @@ fun AuthTextField(
     modifier: Modifier, text:()->String,
     focusManager: FocusManager,
     onDone: KeyboardActionScope.() -> Unit = { focusManager.clearFocus() },
-    onTextChange: (String) -> Unit,
-    keyboardType: KeyboardType,
+    onTextChange: (String) -> Unit = {},
+    keyboardType: KeyboardType = KeyboardType.Text,
     hint: String = ""
 ) {
 
