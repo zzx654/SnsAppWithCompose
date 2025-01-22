@@ -6,7 +6,7 @@ import com.androiddev.data.remote.api.CreateProfileApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.repository.AuthPhoneRepositoryImpl
-import com.androiddev.data.repository.CreateRepositoryImpl
+import com.androiddev.data.repository.CreateProfileRepositoryImpl
 import com.androiddev.data.repository.SigninRepositoryImpl
 import com.androiddev.data.repository.SignupRepositoryImpl
 import com.androiddev.domain.repository.AuthPhoneRepository
@@ -41,6 +41,6 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideCreateProfileRepository(api: CreateProfileApi,@ApplicationContext context: Context): CreateProfileRepository {
-        return CreateRepositoryImpl(api,context)
+        return CreateProfileRepositoryImpl(api,context)
     }
 }

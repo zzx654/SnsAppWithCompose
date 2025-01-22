@@ -7,6 +7,7 @@ import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.AuthenticateCode
+import com.androiddev.domain.use_case.CheckNickname
 import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.use_case.EmailSignIn
 import com.androiddev.domain.use_case.EmailSignUp
@@ -62,7 +63,8 @@ object UseCaseModule {
     @Singleton
     fun provideCreateProfileUseCases(repository: CreateProfileRepository): CreateProfileUseCases {
         return CreateProfileUseCases(
-            uploadImage = UploadImage(repository)
+            uploadImage = UploadImage(repository),
+            checkNickname = CheckNickname(repository)
         )
     }
 

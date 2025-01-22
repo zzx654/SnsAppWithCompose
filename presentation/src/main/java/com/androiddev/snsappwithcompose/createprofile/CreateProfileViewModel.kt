@@ -25,20 +25,23 @@ class CreateProfileViewModel @Inject constructor(
     private val createProfileUseCases: CreateProfileUseCases,
     private val context: Context
 ): ViewModel() {
-    val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
+    private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
         CustomBottomSheetDialogState()
     )
     val customBottomSheetDialogState: State<CustomBottomSheetDialogState>
         get() = _customBottomSheetDialogState
 
-    val _profileBmap:MutableState<Bitmap?> = mutableStateOf(null)
+    private val _profileBmap:MutableState<Bitmap?> = mutableStateOf(null)
     val profileBmap:State<Bitmap?>
         get() = _profileBmap
 
-    val _imageUrl:MutableState<String?> = mutableStateOf(null)
+    private val _imageUrl:MutableState<String?> = mutableStateOf(null)
     val imageUrl:State<String?>
         get() = _imageUrl
 
+    private val _isNicknameChecking = mutableStateOf(false)
+    val isNicknameChecking: State<Boolean>
+        get() = _isNicknameChecking
     private val _isLoading = mutableStateOf(false)
     val isLoading : State<Boolean>
         get() = _isLoading
@@ -101,7 +104,23 @@ class CreateProfileViewModel @Inject constructor(
                 if(event.nickname.length >= 2) {
                     viewModelScope.launch {
                         delay(500L)
-                        //검색 수행하고 결과에 따라 isNicknameValid 변경
+                        createProfileUseCases.checkNickname(event.nickname)
+                            .collect { result ->
+                                when(result) {
+                                    is Resource.Success -> {
+                                        _isNicknameChecking.value = false
+                                        result.data?.let { isValid ->
+                                            _isNicknameValid.value = isValid
+                                        }
+                                    }
+                                    is Resource.Error -> {
+                                        _isNicknameChecking.value = false
+                                    }
+                                    is Resource.Loading -> {
+                                        _isNicknameChecking.value = true
+                                    }
+                                }
+                            }
                     }
                 } else {
                     _isNicknameValid.value = false

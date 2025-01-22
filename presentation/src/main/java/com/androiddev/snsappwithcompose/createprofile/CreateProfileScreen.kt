@@ -22,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -145,15 +144,10 @@ fun CreateProfileScreen(
                         viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
                     },
                     isTyping = { viewModel.isTyping.value },
-                    isNicknameValid = { viewModel.isNicknameValid.value }
+                    isNicknameValid = { viewModel.isNicknameValid.value },
+                    isNicknameChecking = { viewModel.isNicknameChecking.value }
                 )
                 Spacer(modifier = Modifier.height(50.dp))
-                //NicknameHelper(
-                  //  isTyping = { viewModel.isTyping.value },
-                   // isNicknameValid = { viewModel.isNicknameValid.value },
-                    //nickname = { viewModel.nickname.value }
-
-                //)
 
             }
             BottomButton(

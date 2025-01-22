@@ -1,10 +1,8 @@
 package com.androiddev.data.remote.api
 
-import com.androiddev.data.remote.dto.SigninResponseDto
 import com.androiddev.domain.model.AuthCodeResponse
-import com.androiddev.domain.model.RequestCodeResponse
-import com.androiddev.domain.model.ResultCodeResponse
 import com.androiddev.domain.model.SocialSignupResponse
+import com.androiddev.domain.model.ValidationResponse
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -15,7 +13,7 @@ interface SignUpApi {
     @POST("/requestEmailAuthCode")
     suspend fun requestAuthCode(
         @Field("email")email: String
-    ): Response<RequestCodeResponse>
+    ): Response<ValidationResponse>
     @FormUrlEncoded
     @POST("/emailSignUp")
     suspend fun emailSignUp(
@@ -31,4 +29,5 @@ interface SignUpApi {
         @Field("account")account: String,
         @Field("phonenumber")phonenumber: String
     ): Response<SocialSignupResponse>
+
 }

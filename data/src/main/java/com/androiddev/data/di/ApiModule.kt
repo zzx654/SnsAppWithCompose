@@ -67,4 +67,5 @@ object ApiModule {
     @Singleton
     fun provideCreateProfileApi(retrofit: Retrofit): CreateProfileApi = retrofit.create(CreateProfileApi::class.java)
 
+
 }

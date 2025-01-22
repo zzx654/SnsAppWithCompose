@@ -16,7 +16,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class CreateRepositoryImpl @Inject constructor(
+class CreateProfileRepositoryImpl @Inject constructor(
     private val api: CreateProfileApi,
     private val context: Context
 ) : CreateProfileRepository {
@@ -28,6 +28,27 @@ class CreateRepositoryImpl @Inject constructor(
                     if(result.resultCode == 200) {
                         val uploadImageResponse = result.toUploadImageResponse(result.imageUrl)
                         emit(Resource.Success(uploadImageResponse))
+                    } else {
+                        emit(Resource.Error(getString(context,R.string.server_error)))
+                    }
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context,R.string.connection_error)))
+            }
+
+        }
+    }
+
+    override suspend fun checkNickname(nickname: String): Flow<Resource<Boolean>> {
+        return flow {
+            try{
+                emit(Resource.Loading())
+                api.checkNickname(nickname).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        emit(Resource.Success(result.isValid))
                     } else {
                         emit(Resource.Error(getString(context,R.string.server_error)))
                     }

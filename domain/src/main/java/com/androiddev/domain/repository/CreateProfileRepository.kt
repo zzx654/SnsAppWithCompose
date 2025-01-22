@@ -7,4 +7,5 @@ import okhttp3.MultipartBody
 
 interface CreateProfileRepository {
     suspend fun uploadImage(requestBody: MultipartBody.Part) : Flow<Resource<UploadImageResponse>>
+    suspend fun checkNickname(nickname: String): Flow<Resource<Boolean>>
 }

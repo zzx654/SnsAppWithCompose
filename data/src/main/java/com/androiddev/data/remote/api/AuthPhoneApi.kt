@@ -1,8 +1,7 @@
 package com.androiddev.data.remote.api
 
 import com.androiddev.domain.model.AuthCodeResponse
-import com.androiddev.domain.model.RequestCodeResponse
-import com.androiddev.domain.model.ResultCodeResponse
+import com.androiddev.domain.model.ValidationResponse
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -13,7 +12,7 @@ interface AuthPhoneApi {
     @POST("/requestPhoneAuthCode")
     suspend fun requestAuthCode(
         @Field("phoneNumber")phoneNumber: String
-    ): Response<RequestCodeResponse>
+    ): Response<ValidationResponse>
     @FormUrlEncoded
     @POST("/authenticateCode")
     suspend fun authenticateCode(

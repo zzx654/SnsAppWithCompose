@@ -34,6 +34,7 @@ fun NicknameTextField(
     hint: String = "",
     isTyping: () -> Boolean,
     isNicknameValid: ()-> Boolean,
+    isNicknameChecking: ()-> Boolean
 ) {
     OutlinedTextField(modifier = modifier,
         value = text() ,
@@ -55,7 +56,12 @@ fun NicknameTextField(
                 ) {
                     if(!isTyping()) {
                         Image(
-                            painterResource(if(text().length<2) R.drawable.notification else R.drawable.wrong ),
+                            painterResource(
+                                if(text().length<2) R.drawable.notification
+                                else if(isNicknameChecking()) R.drawable.heart
+                                else if(isNicknameValid()) R.drawable.checked_circle
+                                else R.drawable.wrong
+                            ),
                             contentDescription = "",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxHeight()
@@ -63,10 +69,15 @@ fun NicknameTextField(
                     }
 
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = if(isTyping()) "입력중입니다.." else if(text().length<2) "2자이상 입력해주세요" else if(isNicknameValid()) "사용가능한 닉네임 입니다" else "사용할 수 없는 닉네임 입니다",modifier = Modifier.align(Alignment.CenterVertically) )
-
+                    Text(
+                        text = if(isTyping()) "입력중입니다.."
+                        else if(text().length<2) "2자이상 입력해주세요"
+                        else if (isNicknameChecking()) "유효성 검사중.."
+                        else if(isNicknameValid()) "사용가능한 닉네임 입니다"
+                        else "사용할 수 없는 닉네임 입니다",
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
                 }
-
         },
 
     )

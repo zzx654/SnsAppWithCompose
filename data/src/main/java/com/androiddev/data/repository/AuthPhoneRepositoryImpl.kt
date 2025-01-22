@@ -26,7 +26,7 @@ class AuthPhoneRepositoryImpl @Inject constructor(
                 api.requestAuthCode(phoneNumber).body()?.let{ result ->
 
                     if(result.resultCode == 200) {
-                        emit(Resource.Success(result.exist))
+                        emit(Resource.Success(result.isValid))
                     }
                     else
                         emit(Resource.Error(getString(context, R.string.server_error)))
