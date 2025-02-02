@@ -44,11 +44,9 @@ fun CustomBottomSheetDialog(
     items:()->List<BottomSheetItem>,
     onClickCancel:()->Unit
 ) {
-    val context = LocalContext.current
     if(showDialog()) {
         val modalBottomSheetState = rememberModalBottomSheetState()
         val scope = rememberCoroutineScope()
-        val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         ModalBottomSheet(
             onDismissRequest = { onClickCancel() },
             sheetState = modalBottomSheetState,

@@ -149,7 +149,7 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
                 containerColor = Color.Black
             ),modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),onClick = { viewModel.onEvent(SignInEvent.emailSignIn) },shape = RoundedCornerShape(10.dp)
+                .height(50.dp),onClick = { viewModel.onEvent(SignInEvent.EmailSignIn) },shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
                     text = stringResource(R.string.login),
@@ -171,12 +171,12 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 KakaoSignInButton(
-                    onKaKaoSignInCompleted = { account -> viewModel.onEvent(SignInEvent.socialSignIn(getString(context,R.string.kakao),account)) },
+                    onKaKaoSignInCompleted = { account -> viewModel.onEvent(SignInEvent.SocialSignIn(getString(context,R.string.kakao),account)) },
                     onError =  { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
                 )
                 Spacer(modifier = Modifier.width(20.dp))
                 NaverSignInButton(
-                    onNaverSignInCompleted = { account -> viewModel.onEvent(SignInEvent.socialSignIn(getString(context,R.string.naver),account)) } ,
+                    onNaverSignInCompleted = { account -> viewModel.onEvent(SignInEvent.SocialSignIn(getString(context,R.string.naver),account)) } ,
                     onError = { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
                 )
             }

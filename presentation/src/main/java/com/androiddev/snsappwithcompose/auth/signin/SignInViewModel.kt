@@ -89,7 +89,7 @@ class SignInViewModel @Inject constructor(
             is SignInEvent.TypePwd -> {
                 _password.value = event.password
             }
-            is SignInEvent.emailSignIn -> {
+            is SignInEvent.EmailSignIn -> {
                 viewModelScope.launch {
                     signInUseCases.emailSignIn(account.value,password.value)
                         .collect { result ->
@@ -115,7 +115,7 @@ class SignInViewModel @Inject constructor(
                         }
                 }
             }
-            is SignInEvent.socialSignIn -> {
+            is SignInEvent.SocialSignIn -> {
                 viewModelScope.launch {
                     signInUseCases.socialSignIn(event.platform,event.account)
                         .collect { result ->
@@ -168,7 +168,7 @@ class SignInViewModel @Inject constructor(
                 }
             } else {
                 //가입안된 계정일때 핸드폰 인증화면으로 이동
-                if(event is SignInEvent.socialSignIn) {
+                if(event is SignInEvent.SocialSignIn) {
                     _eventFlow.emit(
                         UiEvent.navigate(
                             screen = Screen.AuthPhoneScreen(event.platform,event.account)

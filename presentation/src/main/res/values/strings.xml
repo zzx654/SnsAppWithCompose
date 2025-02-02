@@ -39,6 +39,17 @@
     <string name="choose_from_gallery">갤러리에서 선택</string>
     <string name="take_picture">사진 찍기</string>
     <string name="encodedBitmap">encodedBitmap</string>
+    <string name="createProfile">프로필 설정</string>
+    <string name="nickname_hint">닉네임</string>
+    <string name="typing">입력중...</string>
+    <string name="nickname_condition">2자 이상 입력해주세요</string>
+    <string name="valid_nickname">사용 가능한 닉네임 입니다</string>
+    <string name="invalid_nickname">사용할 수 없는 닉네임 입니다</string>
+    <string name="validating">유효성 검사중...</string>
+    <string name="set_birth">출생 선택</string>
+    <string name="birth_year">출생 년도</string>
+
+
 
 
 

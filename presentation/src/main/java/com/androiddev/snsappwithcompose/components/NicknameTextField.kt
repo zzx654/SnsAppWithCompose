@@ -19,9 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import com.androiddev.snsappwithcompose.R
 
 @Composable
@@ -36,6 +38,7 @@ fun NicknameTextField(
     isNicknameValid: ()-> Boolean,
     isNicknameChecking: ()-> Boolean
 ) {
+    val context = LocalContext.current
     OutlinedTextField(modifier = modifier,
         value = text() ,
         singleLine = true,
@@ -67,14 +70,13 @@ fun NicknameTextField(
                             modifier = Modifier.fillMaxHeight()
                         )
                     }
-
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = if(isTyping()) "입력중입니다.."
-                        else if(text().length<2) "2자이상 입력해주세요"
-                        else if (isNicknameChecking()) "유효성 검사중.."
-                        else if(isNicknameValid()) "사용가능한 닉네임 입니다"
-                        else "사용할 수 없는 닉네임 입니다",
+                        text = if(isTyping()) getString(context,R.string.typing)
+                        else if(text().length<2) getString(context,R.string.nickname_condition)
+                        else if (isNicknameChecking()) getString(context,R.string.validating)
+                        else if(isNicknameValid()) getString(context,R.string.valid_nickname)
+                        else getString(context,R.string.invalid_nickname),
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
                 }

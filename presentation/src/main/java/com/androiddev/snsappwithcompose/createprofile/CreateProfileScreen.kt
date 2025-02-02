@@ -38,11 +38,14 @@ import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.auth.components.BirthTextField
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
+import com.androiddev.snsappwithcompose.components.BottomWheelPicker
 import com.androiddev.snsappwithcompose.components.EditProfileImage
 import com.androiddev.snsappwithcompose.components.NicknameTextField
 import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.util.decodeBase64
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,17 +79,16 @@ fun CreateProfileScreen(
         contract = ActivityResultContracts.RequestPermission()){ isGranted ->
         if(isGranted){
             cameraLauncher.launch(null)
-        }else {
         }
     }
     val photoPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()){ isGranted ->
         if(isGranted){
             galleryLauncher.launch("image/*")
-        }else {
         }
     }
 
+    val year = Calendar.getInstance().get(Calendar.YEAR)
     viewModel.setLauncher({cameraPermission.launch(android.Manifest.permission.CAMERA)},{photoPermission.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)})
     
     CustomBottomSheetDialog(
@@ -94,14 +96,24 @@ fun CreateProfileScreen(
         { viewModel.customBottomSheetDialogState.value.items },
         viewModel.customBottomSheetDialogState.value.onClickCancel
     )
+    BottomWheelPicker(
+        initValue = { viewModel.birthYear.value?: 2005 },
+        min = year-70,
+        max = year-15,
+        pickerMaxHeight = 250,
+        showDialog = { viewModel.bottomWheelState.value.showDialog },
+        onClickConfirm = {
+            viewModel.onEvent(CreateProfileEvent.SetBirthYear(it))
+        },
+        onClickCancel = viewModel.bottomWheelState.value.onClickCancel,
+    )
     Scaffold(
-
         topBar = {
             Surface(shadowElevation = 3.dp) {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            text = "프로필 작성",
+                            text = getString(context,R.string.createProfile),
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
                         ) },
@@ -115,7 +127,6 @@ fun CreateProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
-
         ) {
             Column(
                 modifier = Modifier
@@ -131,7 +142,7 @@ fun CreateProfileScreen(
                     modifier = Modifier.align(Alignment.CenterHorizontally).clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() } // This is mandatory
-                    ){viewModel.showBottomSheetDialog() }
+                    ){ viewModel.showBottomSheetDialog() }
                 )
                 Spacer(modifier = Modifier.height(50.dp))
 
@@ -139,7 +150,7 @@ fun CreateProfileScreen(
                     modifier = Modifier.fillMaxWidth(),
                     focusManager = focusManager,
                     text = { viewModel.nickname.value },
-                    hint = "닉네임",
+                    hint = getString(context,R.string.nickname_hint),
                     onTextChange = {
                         viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
                     },
@@ -147,8 +158,11 @@ fun CreateProfileScreen(
                     isNicknameValid = { viewModel.isNicknameValid.value },
                     isNicknameChecking = { viewModel.isNicknameChecking.value }
                 )
-                Spacer(modifier = Modifier.height(50.dp))
-
+                Spacer(modifier = Modifier.height(10.dp))
+                BirthTextField(
+                    birth = { viewModel.birthYear.value },
+                    onClick = { viewModel.showBottomWheelDialog() }
+                )
             }
             BottomButton(
                 buttonText = stringResource(id = R.string.request_signup),

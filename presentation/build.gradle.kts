@@ -98,6 +98,8 @@ dependencies {
     //카톡로그인
     implementation(libs.kakao.v2.all) // 전체 모듈 설치, 2.11.0 버전부터 지원
     implementation(libs.kakao.v2.user)
+    //snapper fling behavior
+    implementation(libs.dev.chrisbanes.snapper)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

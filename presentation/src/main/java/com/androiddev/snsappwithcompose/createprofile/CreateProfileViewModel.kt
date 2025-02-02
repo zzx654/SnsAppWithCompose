@@ -13,6 +13,7 @@ import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.BottomSheetItem
+import com.androiddev.snsappwithcompose.util.BottomWheelState
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.util.getMultipartBody
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +32,11 @@ class CreateProfileViewModel @Inject constructor(
     val customBottomSheetDialogState: State<CustomBottomSheetDialogState>
         get() = _customBottomSheetDialogState
 
+    private val _bottomWheelDialogState: MutableState<BottomWheelState> = mutableStateOf(
+        BottomWheelState()
+    )
+    val bottomWheelState: State<BottomWheelState>
+        get() = _bottomWheelDialogState
     private val _profileBmap:MutableState<Bitmap?> = mutableStateOf(null)
     val profileBmap:State<Bitmap?>
         get() = _profileBmap
@@ -57,6 +63,10 @@ class CreateProfileViewModel @Inject constructor(
     val isNicknameValid: State<Boolean>
         get() = _isNicknameValid
 
+    private val _birthYear = mutableStateOf<Int?>(null)
+    val birthYear: State<Int?>
+        get() = _birthYear
+
     var launchCamera:()->Unit = {}
     var launchGallery:()->Unit = {}
     fun setLauncher(cameraLauncher:()->Unit,galleryLauncher:()->Unit) {
@@ -69,6 +79,10 @@ class CreateProfileViewModel @Inject constructor(
     }
     fun onEvent(event: CreateProfileEvent) {
         when(event) {
+            is CreateProfileEvent.SetBirthYear -> {
+                _birthYear.value = event.birthYear
+                resetBottomWheelDialogState()
+            }
             is CreateProfileEvent.uploadImage -> {
                 viewModelScope.launch {
 
@@ -145,5 +159,14 @@ class CreateProfileViewModel @Inject constructor(
     }
     private fun resetBottomSheetDialogState() {
         _customBottomSheetDialogState.value = CustomBottomSheetDialogState()
+    }
+    fun showBottomWheelDialog() {
+        _bottomWheelDialogState.value = BottomWheelState(
+            showDialog = true,
+            onClickCancel = { resetBottomWheelDialogState() }
+        )
+    }
+    private fun resetBottomWheelDialogState() {
+        _bottomWheelDialogState.value = BottomWheelState()
     }
 }
