@@ -4,8 +4,14 @@ import com.androiddev.domain.model.UploadImageResponse
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 interface CreateProfileRepository {
-    suspend fun uploadImage(requestBody: MultipartBody.Part) : Flow<Resource<UploadImageResponse>>
+    suspend fun uploadImage(
+        profileImage: MultipartBody.Part?,
+        nickname: RequestBody,
+        birth: Int,
+        gender: RequestBody
+    ) : Flow<Resource<UploadImageResponse>>
     suspend fun checkNickname(nickname: String): Flow<Resource<Boolean>>
 }

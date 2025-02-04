@@ -3,6 +3,7 @@ package com.androiddev.data.remote.api
 import com.androiddev.data.remote.dto.UploadImageResponseDto
 import com.androiddev.domain.model.ValidationResponse
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -14,7 +15,11 @@ interface CreateProfileApi {
     @Multipart
     @POST("/uploadimg")
     suspend fun uploadimg(
-        @Part imageFile: MultipartBody.Part): Response<UploadImageResponseDto>
+        @Part imageFile: MultipartBody.Part?,
+        @Part("nickname")nickname: RequestBody,
+        @Part("birth")birth: Int,
+        @Part("gender")gender: RequestBody
+    ): Response<UploadImageResponseDto>
     @FormUrlEncoded
     @POST("/checkNickname")
     suspend fun checkNickname(

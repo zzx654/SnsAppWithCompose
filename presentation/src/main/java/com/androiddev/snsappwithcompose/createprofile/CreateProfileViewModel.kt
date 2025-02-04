@@ -19,6 +19,9 @@ import com.androiddev.snsappwithcompose.util.getMultipartBody
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 @HiltViewModel
@@ -67,6 +70,10 @@ class CreateProfileViewModel @Inject constructor(
     val birthYear: State<Int?>
         get() = _birthYear
 
+    private val _gender = mutableStateOf("")
+    val gender: State<String>
+        get() = _gender
+
     var launchCamera:()->Unit = {}
     var launchGallery:()->Unit = {}
     fun setLauncher(cameraLauncher:()->Unit,galleryLauncher:()->Unit) {
@@ -79,6 +86,9 @@ class CreateProfileViewModel @Inject constructor(
     }
     fun onEvent(event: CreateProfileEvent) {
         when(event) {
+            is CreateProfileEvent.SetGender -> {
+                _gender.value = event.gender
+            }
             is CreateProfileEvent.SetBirthYear -> {
                 _birthYear.value = event.birthYear
                 resetBottomWheelDialogState()
@@ -86,25 +96,27 @@ class CreateProfileViewModel @Inject constructor(
             is CreateProfileEvent.uploadImage -> {
                 viewModelScope.launch {
 
-                    profileBmap.value?.let { bmap ->
-                        val requestBody = getMultipartBody(getImageUri(context,bmap),context)
-                        createProfileUseCases.uploadImage(requestBody)
-                            .collect { result ->
-                                when(result) {
-                                    is Resource.Success -> {
-                                        result.data?.let { it ->
-                                            _imageUrl.value = it.imageUrl
-                                        }
-                                    }
-                                    is Resource.Error -> {
-                                        _isLoading.value = false
-                                    }
-                                    is Resource.Loading -> {
-                                            _isLoading.value = true
+                    var requestImage: MultipartBody.Part? = null
+                    val requestNickname = nickname.value.toRequestBody("text/plain".toMediaTypeOrNull())
+                    val requestGender = gender.value.toRequestBody("text/plain".toMediaTypeOrNull())
+                    profileBmap.value?.let { requestImage = getMultipartBody(getImageUri(context,it),context) }
+                    createProfileUseCases.uploadImage(requestImage,requestNickname,birthYear.value!!,requestGender)
+                        .collect { result ->
+                            when(result) {
+                                is Resource.Success -> {
+                                    result.data?.let { it ->
+                                        _imageUrl.value = it.imageUrl
                                     }
                                 }
+                                is Resource.Error -> {
+                                    _isLoading.value = false
+                                }
+                                is Resource.Loading -> {
+                                    _isLoading.value = true
+                                }
                             }
-                    }
+                        }
+
                 }
             }
             is CreateProfileEvent.TypeNickname -> {

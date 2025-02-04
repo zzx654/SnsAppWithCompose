@@ -12,6 +12,7 @@ import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
@@ -20,11 +21,16 @@ class CreateProfileRepositoryImpl @Inject constructor(
     private val api: CreateProfileApi,
     private val context: Context
 ) : CreateProfileRepository {
-    override suspend fun uploadImage(requestBody: MultipartBody.Part): Flow<Resource<UploadImageResponse>> {
+    override suspend fun uploadImage(
+        profileImage: MultipartBody.Part?,
+        nickname: RequestBody,
+        birth: Int,
+        gender: RequestBody
+    ): Flow<Resource<UploadImageResponse>> {
         return flow {
             try{
                 emit(Resource.Loading())
-                api.uploadimg(requestBody).body()?.let { result ->
+                api.uploadimg(profileImage,nickname,birth,gender).body()?.let { result ->
                     if(result.resultCode == 200) {
                         val uploadImageResponse = result.toUploadImageResponse(result.imageUrl)
                         emit(Resource.Success(uploadImageResponse))

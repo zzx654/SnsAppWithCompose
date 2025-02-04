@@ -48,6 +48,10 @@
     <string name="validating">유효성 검사중...</string>
     <string name="set_birth">출생 선택</string>
     <string name="birth_year">출생 년도</string>
+    <string name="male">남성</string>
+    <string name="female">여성</string>
+    <string name="private_info">비공개</string>
+
 
 
 

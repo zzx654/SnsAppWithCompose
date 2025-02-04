@@ -9,19 +9,18 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.androiddev.snsappwithcompose.navigation.components.Navigation
 import com.androiddev.snsappwithcompose.ui.theme.Background
 import com.androiddev.snsappwithcompose.ui.theme.SnsAppWithComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -32,7 +31,9 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             SnsAppWithComposeTheme {
-                // A surface container using the 'background' color from the theme
+
+                val yearListState = rememberLazyListState(2005 - 1955)
+                val year by remember { derivedStateOf { yearListState.firstVisibleItemIndex + 1955 } }
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
@@ -49,3 +50,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+

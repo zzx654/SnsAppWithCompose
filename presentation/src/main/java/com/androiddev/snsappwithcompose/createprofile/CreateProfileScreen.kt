@@ -3,11 +3,15 @@ package com.androiddev.snsappwithcompose.createprofile
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,10 +47,12 @@ import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.components.BottomWheelPicker
 import com.androiddev.snsappwithcompose.components.EditProfileImage
 import com.androiddev.snsappwithcompose.components.NicknameTextField
+import com.androiddev.snsappwithcompose.components.RadioButtons
 import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.util.decodeBase64
 import java.util.Calendar
 
+@RequiresApi(Build.VERSION_CODES.N)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProfileScreen(
@@ -144,7 +150,7 @@ fun CreateProfileScreen(
                         interactionSource = remember { MutableInteractionSource() } // This is mandatory
                     ){ viewModel.showBottomSheetDialog() }
                 )
-                Spacer(modifier = Modifier.height(50.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
                 NicknameTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -158,16 +164,31 @@ fun CreateProfileScreen(
                     isNicknameValid = { viewModel.isNicknameValid.value },
                     isNicknameChecking = { viewModel.isNicknameChecking.value }
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 BirthTextField(
                     birth = { viewModel.birthYear.value },
                     onClick = { viewModel.showBottomWheelDialog() }
                 )
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+
+                ) {
+                    RadioButtons(
+                        listOf(getString(context,R.string.male),getString(context,R.string.female),getString(context,R.string.private_info)),
+                        { viewModel.gender.value },
+                        { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
+                    )
+                }
+
             }
             BottomButton(
                 buttonText = stringResource(id = R.string.request_signup),
                 activeButton = {
-                    true
+                    viewModel.isNicknameValid.value
+                    && viewModel.birthYear.value != null
+                    && viewModel.gender.value.isNotBlank()
                 },
                 onClick = { viewModel.onEvent(CreateProfileEvent.uploadImage)}
             )
