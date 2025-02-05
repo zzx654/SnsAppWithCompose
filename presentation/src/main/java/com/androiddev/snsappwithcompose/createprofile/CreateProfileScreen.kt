@@ -26,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,9 @@ import com.androiddev.snsappwithcompose.components.RadioButtons
 import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.util.decodeBase64
 import java.util.Calendar
+import android.Manifest
+import android.util.Log
+import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
 
 @RequiresApi(Build.VERSION_CODES.N)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +97,30 @@ fun CreateProfileScreen(
             galleryLauncher.launch("image/*")
         }
     }
-
+    val launcherMultiplePermissions = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissionsMap ->
+        val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
+        /** 권한 요청시 동의 했을 경우 **/
+        if (areGranted) {
+            Log.d("permission", "권한이 동의되었습니다.")
+        }
+        /** 권한 요청시 거부 했을 경우 **/
+        else {
+            Log.d("permission", "권한이 거부되었습니다.")
+        }
+    }
+    LaunchedEffect(true) {
+        val permissions = arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        checkAndRequestPermissions(
+            context,
+            permissions,
+            launcherMultiplePermissions
+        )
+    }
     val year = Calendar.getInstance().get(Calendar.YEAR)
     viewModel.setLauncher({cameraPermission.launch(android.Manifest.permission.CAMERA)},{photoPermission.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)})
     
