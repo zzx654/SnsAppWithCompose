@@ -1,6 +1,6 @@
 package com.androiddev.data.remote.api
 
-import com.androiddev.data.remote.dto.UploadImageResponseDto
+import com.androiddev.domain.model.CreateProfileResponse
 import com.androiddev.domain.model.ValidationResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -19,7 +19,7 @@ interface CreateProfileApi {
         @Part("nickname")nickname: RequestBody,
         @Part("birth")birth: Int,
         @Part("gender")gender: RequestBody
-    ): Response<UploadImageResponseDto>
+    ): Response<CreateProfileResponse>
     @FormUrlEncoded
     @POST("/checkNickname")
     suspend fun checkNickname(

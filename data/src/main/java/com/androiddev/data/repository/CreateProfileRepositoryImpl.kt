@@ -1,12 +1,9 @@
 package com.androiddev.data.repository
 
 import android.content.Context
-import android.graphics.Bitmap
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.CreateProfileApi
-import com.androiddev.data.remote.dto.toUploadImageResponse
-import com.androiddev.domain.model.UploadImageResponse
 import com.androiddev.domain.repository.CreateProfileRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -26,14 +23,13 @@ class CreateProfileRepositoryImpl @Inject constructor(
         nickname: RequestBody,
         birth: Int,
         gender: RequestBody
-    ): Flow<Resource<UploadImageResponse>> {
+    ): Flow<Resource<Boolean>> {
         return flow {
             try{
                 emit(Resource.Loading())
                 api.uploadimg(profileImage,nickname,birth,gender).body()?.let { result ->
                     if(result.resultCode == 200) {
-                        val uploadImageResponse = result.toUploadImageResponse(result.imageUrl)
-                        emit(Resource.Success(uploadImageResponse))
+                        emit(Resource.Success(result.isTokenValid))
                     } else {
                         emit(Resource.Error(getString(context,R.string.server_error)))
                     }

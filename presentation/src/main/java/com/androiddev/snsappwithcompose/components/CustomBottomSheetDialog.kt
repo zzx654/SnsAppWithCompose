@@ -50,13 +50,14 @@ fun CustomBottomSheetDialog(
         ModalBottomSheet(
             onDismissRequest = { onClickCancel() },
             sheetState = modalBottomSheetState,
-            dragHandle = { BottomSheetDefaults.DragHandle() },
+            dragHandle = null,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(8.dp))
                 items().forEach { item->
 
                     Row(verticalAlignment = Alignment.CenterVertically,

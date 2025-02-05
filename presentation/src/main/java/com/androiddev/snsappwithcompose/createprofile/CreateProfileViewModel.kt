@@ -44,10 +44,6 @@ class CreateProfileViewModel @Inject constructor(
     val profileBmap:State<Bitmap?>
         get() = _profileBmap
 
-    private val _imageUrl:MutableState<String?> = mutableStateOf(null)
-    val imageUrl:State<String?>
-        get() = _imageUrl
-
     private val _isNicknameChecking = mutableStateOf(false)
     val isNicknameChecking: State<Boolean>
         get() = _isNicknameChecking
@@ -104,8 +100,9 @@ class CreateProfileViewModel @Inject constructor(
                         .collect { result ->
                             when(result) {
                                 is Resource.Success -> {
-                                    result.data?.let { it ->
-                                        _imageUrl.value = it.imageUrl
+                                    result.data?.let { isTokenValid ->
+                                        //토큰이 유효하지 않으면 로그인 화면으로
+                                        //유효하면 홈화면으로
                                     }
                                 }
                                 is Resource.Error -> {
@@ -155,18 +152,26 @@ class CreateProfileViewModel @Inject constructor(
         }
     }
     fun showBottomSheetDialog() {
+        val items: MutableList<BottomSheetItem> = mutableListOf(
+            BottomSheetItem(R.drawable.camera_outlined,getString(context,R.string.take_picture)) {
+                resetBottomSheetDialogState()
+                launchCamera()
+
+            },
+            BottomSheetItem(R.drawable.photo_library,getString(context,R.string.choose_from_gallery)) {
+                resetBottomSheetDialogState()
+                launchGallery()
+            }
+        )
+        profileBmap.value?.let {
+            items.add(BottomSheetItem(R.drawable.delete,getString(context,R.string.delete_profileimage)){
+                resetBottomSheetDialogState()
+                _profileBmap.value = null
+            })
+        }
         _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
             showDialog = true,
-            listOf(
-                BottomSheetItem(R.drawable.photo_library,getString(context,R.string.choose_from_gallery)) {
-                    resetBottomSheetDialogState()
-                    launchGallery()
-                },
-                BottomSheetItem(R.drawable.camera_outlined,getString(context,R.string.take_picture)) {
-                    resetBottomSheetDialogState()
-                    launchCamera()
-
-                })
+            items,
         ) { resetBottomSheetDialogState() }
     }
     private fun resetBottomSheetDialogState() {

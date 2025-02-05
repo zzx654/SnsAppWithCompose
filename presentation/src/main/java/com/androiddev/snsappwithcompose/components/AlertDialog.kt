@@ -40,7 +40,6 @@ fun AlertDialog(
     onClickCancel: ()->Unit,
     onClickConfirm: () -> Unit
 ) {
-    val a = onClickCancel()
     if(title().isNotBlank()) {
         Dialog(
             onDismissRequest = { onClickCancel() },

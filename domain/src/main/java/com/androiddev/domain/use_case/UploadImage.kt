@@ -1,7 +1,5 @@
 package com.androiddev.domain.use_case
 
-import android.graphics.Bitmap
-import com.androiddev.domain.model.UploadImageResponse
 import com.androiddev.domain.repository.CreateProfileRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -17,5 +15,5 @@ class UploadImage @Inject constructor(
         nickname: RequestBody,
         birth: Int,
         gender: RequestBody
-    ):Flow<Resource<UploadImageResponse>> = repository.uploadImage(profileImage,nickname,birth,gender)
+    ):Flow<Resource<Boolean>> = repository.uploadImage(profileImage,nickname,birth,gender)
 }

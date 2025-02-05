@@ -51,6 +51,7 @@
     <string name="male">남성</string>
     <string name="female">여성</string>
     <string name="private_info">비공개</string>
+    <string name="delete_profileimage">프로필 사진 지우기</string>
 
 
 
