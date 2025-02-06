@@ -12,6 +12,7 @@ import com.androiddev.snsappwithcompose.util.getImageUri
 import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.BottomSheetItem
 import com.androiddev.snsappwithcompose.util.BottomWheelState
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
@@ -69,7 +70,9 @@ class CreateProfileViewModel @Inject constructor(
     private val _gender = mutableStateOf("")
     val gender: State<String>
         get() = _gender
-
+    private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
+    val alertDialogState: State<AlertDialogState>
+        get() = _alertDialogState
     var launchCamera:()->Unit = {}
     var launchGallery:()->Unit = {}
     fun setLauncher(cameraLauncher:()->Unit,galleryLauncher:()->Unit) {
@@ -82,39 +85,18 @@ class CreateProfileViewModel @Inject constructor(
     }
     fun onEvent(event: CreateProfileEvent) {
         when(event) {
+            is CreateProfileEvent.ShowProfileImageOptions -> {
+                showBottomSheetDialog()
+            }
+            is CreateProfileEvent.ShowBirthYearOptions -> {
+                showBottomWheelDialog()
+            }
             is CreateProfileEvent.SetGender -> {
                 _gender.value = event.gender
             }
             is CreateProfileEvent.SetBirthYear -> {
                 _birthYear.value = event.birthYear
                 resetBottomWheelDialogState()
-            }
-            is CreateProfileEvent.uploadImage -> {
-                viewModelScope.launch {
-
-                    var requestImage: MultipartBody.Part? = null
-                    val requestNickname = nickname.value.toRequestBody("text/plain".toMediaTypeOrNull())
-                    val requestGender = gender.value.toRequestBody("text/plain".toMediaTypeOrNull())
-                    profileBmap.value?.let { requestImage = getMultipartBody(getImageUri(context,it),context) }
-                    createProfileUseCases.uploadImage(requestImage,requestNickname,birthYear.value!!,requestGender)
-                        .collect { result ->
-                            when(result) {
-                                is Resource.Success -> {
-                                    result.data?.let { isTokenValid ->
-                                        //토큰이 유효하지 않으면 로그인 화면으로
-                                        //유효하면 홈화면으로
-                                    }
-                                }
-                                is Resource.Error -> {
-                                    _isLoading.value = false
-                                }
-                                is Resource.Loading -> {
-                                    _isLoading.value = true
-                                }
-                            }
-                        }
-
-                }
             }
             is CreateProfileEvent.TypeNickname -> {
                 _nickname.value = event.nickname
@@ -149,9 +131,12 @@ class CreateProfileViewModel @Inject constructor(
                     _isNicknameValid.value = false
                 }
             }
+            is CreateProfileEvent.ShowCreateProfileAlert -> {
+                showCreateProfileAlert()
+            }
         }
     }
-    fun showBottomSheetDialog() {
+    private fun showBottomSheetDialog() {
         val items: MutableList<BottomSheetItem> = mutableListOf(
             BottomSheetItem(R.drawable.camera_outlined,getString(context,R.string.take_picture)) {
                 resetBottomSheetDialogState()
@@ -164,10 +149,12 @@ class CreateProfileViewModel @Inject constructor(
             }
         )
         profileBmap.value?.let {
-            items.add(BottomSheetItem(R.drawable.delete,getString(context,R.string.delete_profileimage)){
-                resetBottomSheetDialogState()
-                _profileBmap.value = null
-            })
+            items.add(
+                BottomSheetItem(R.drawable.delete,getString(context,R.string.delete_profileimage)){
+                    resetBottomSheetDialogState()
+                    _profileBmap.value = null
+                }
+            )
         }
         _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
             showDialog = true,
@@ -177,7 +164,7 @@ class CreateProfileViewModel @Inject constructor(
     private fun resetBottomSheetDialogState() {
         _customBottomSheetDialogState.value = CustomBottomSheetDialogState()
     }
-    fun showBottomWheelDialog() {
+    private fun showBottomWheelDialog() {
         _bottomWheelDialogState.value = BottomWheelState(
             showDialog = true,
             onClickCancel = { resetBottomWheelDialogState() }
@@ -185,5 +172,47 @@ class CreateProfileViewModel @Inject constructor(
     }
     private fun resetBottomWheelDialogState() {
         _bottomWheelDialogState.value = BottomWheelState()
+    }
+    private fun showCreateProfileAlert() {
+        _alertDialogState.value = AlertDialogState(
+            title = getString(context,R.string.check_profile),
+            cancelText = getString(context,R.string.cancel),
+            confirmText = getString(context,R.string.confirm),
+            onClickCancel = {
+                resetDialogState()
+            },
+            onClickConfirm = {
+                viewModelScope.launch {
+
+                    var requestImage: MultipartBody.Part? = null
+                    val requestNickname = nickname.value.toRequestBody("text/plain".toMediaTypeOrNull())
+                    val requestGender = gender.value.toRequestBody("text/plain".toMediaTypeOrNull())
+                    profileBmap.value?.let { requestImage = getMultipartBody(getImageUri(context,it),context) }
+                    createProfileUseCases.createProfile(requestImage,requestNickname,birthYear.value!!,requestGender)
+                        .collect { result ->
+                            when(result) {
+                                is Resource.Success -> {
+                                    result.data?.let { isTokenValid ->
+                                        //토큰이 유효하지 않으면 로그인 화면으로
+                                        //유효하면 홈화면으로
+                                    }
+                                }
+                                is Resource.Error -> {
+                                    _isLoading.value = false
+                                }
+                                is Resource.Loading -> {
+                                    _isLoading.value = true
+                                }
+                            }
+                        }
+
+                }
+                resetDialogState()
+            }
+        )
+    }
+
+    protected fun resetDialogState() {
+        _alertDialogState.value = AlertDialogState()
     }
 }

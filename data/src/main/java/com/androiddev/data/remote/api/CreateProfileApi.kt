@@ -13,8 +13,8 @@ import retrofit2.http.Part
 
 interface CreateProfileApi {
     @Multipart
-    @POST("/uploadimg")
-    suspend fun uploadimg(
+    @POST("/createProfile")
+    suspend fun createProfile(
         @Part imageFile: MultipartBody.Part?,
         @Part("nickname")nickname: RequestBody,
         @Part("birth")birth: Int,

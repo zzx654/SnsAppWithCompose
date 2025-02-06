@@ -7,7 +7,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import javax.inject.Inject
 
-class UploadImage @Inject constructor(
+class CreateProfile @Inject constructor(
     private val repository: CreateProfileRepository
 ) {
     suspend operator fun invoke(
@@ -15,5 +15,5 @@ class UploadImage @Inject constructor(
         nickname: RequestBody,
         birth: Int,
         gender: RequestBody
-    ):Flow<Resource<Boolean>> = repository.uploadImage(profileImage,nickname,birth,gender)
+    ):Flow<Resource<Boolean>> = repository.createProfile(profileImage,nickname,birth,gender)
 }

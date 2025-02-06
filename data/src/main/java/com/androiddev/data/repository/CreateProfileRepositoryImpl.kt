@@ -18,7 +18,7 @@ class CreateProfileRepositoryImpl @Inject constructor(
     private val api: CreateProfileApi,
     private val context: Context
 ) : CreateProfileRepository {
-    override suspend fun uploadImage(
+    override suspend fun createProfile(
         profileImage: MultipartBody.Part?,
         nickname: RequestBody,
         birth: Int,
@@ -27,7 +27,7 @@ class CreateProfileRepositoryImpl @Inject constructor(
         return flow {
             try{
                 emit(Resource.Loading())
-                api.uploadimg(profileImage,nickname,birth,gender).body()?.let { result ->
+                api.createProfile(profileImage,nickname,birth,gender).body()?.let { result ->
                     if(result.resultCode == 200) {
                         emit(Resource.Success(result.isTokenValid))
                     } else {

@@ -8,6 +8,7 @@ import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.AuthenticateCode
 import com.androiddev.domain.use_case.CheckNickname
+import com.androiddev.domain.use_case.CreateProfile
 import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.use_case.EmailSignIn
 import com.androiddev.domain.use_case.EmailSignUp
@@ -18,7 +19,6 @@ import com.androiddev.domain.use_case.SignInUseCases
 import com.androiddev.domain.use_case.SignInWithToken
 import com.androiddev.domain.use_case.SocialSignIn
 import com.androiddev.domain.use_case.SocialSignUpUseCase
-import com.androiddev.domain.use_case.UploadImage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -63,7 +63,7 @@ object UseCaseModule {
     @Singleton
     fun provideCreateProfileUseCases(repository: CreateProfileRepository): CreateProfileUseCases {
         return CreateProfileUseCases(
-            uploadImage = UploadImage(repository),
+            createProfile = CreateProfile(repository),
             checkNickname = CheckNickname(repository)
         )
     }

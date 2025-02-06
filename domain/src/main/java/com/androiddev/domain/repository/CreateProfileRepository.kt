@@ -6,7 +6,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
 interface CreateProfileRepository {
-    suspend fun uploadImage(
+    suspend fun createProfile(
         profileImage: MultipartBody.Part?,
         nickname: RequestBody,
         birth: Int,

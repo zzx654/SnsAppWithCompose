@@ -54,6 +54,17 @@ import com.androiddev.snsappwithcompose.util.decodeBase64
 import java.util.Calendar
 import android.Manifest
 import android.util.Log
+import androidx.compose.foundation.background
+import com.androiddev.snsappwithcompose.ui.theme.LightGray
+
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
+
+import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -73,6 +84,7 @@ fun CreateProfileScreen(
     val encodedCroppedBitmap = navBackStackEntry.savedStateHandle.get<String>(getString(context,R.string.encodedBitmap))
     encodedCroppedBitmap?.let {
         viewModel.setProfileBmap(decodeBase64(it))
+        navBackStackEntry.savedStateHandle.set<String>(getString(context,R.string.encodedBitmap),null)
     }
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()){ uri ->
@@ -140,6 +152,44 @@ fun CreateProfileScreen(
         },
         onClickCancel = viewModel.bottomWheelState.value.onClickCancel,
     )
+    AlertDialog(
+        title = {viewModel.alertDialogState.value.title},
+        cancelText = {viewModel.alertDialogState.value.cancelText},
+        confirmText = {viewModel.alertDialogState.value.confirmText},
+        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
+        onClickCancel = viewModel.alertDialogState.value.onClickCancel,
+        content = {
+            Box(modifier = Modifier
+                .width(160.dp)
+                .height(120.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(color = LightGray),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "닉네임: ${viewModel.nickname.value}",
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                        )
+                    Text(
+                        text = "성별: ${viewModel.gender.value}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "출생: ${viewModel.birthYear.value}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    )
     Scaffold(
         topBar = {
             Surface(shadowElevation = 3.dp) {
@@ -171,11 +221,13 @@ fun CreateProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(30.dp))
                 EditProfileImage(
-                    profileBmap = viewModel.profileBmap.value,
+                    profileBmap = {viewModel.profileBmap.value},
                     modifier = Modifier.align(Alignment.CenterHorizontally).clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() } // This is mandatory
-                    ){ viewModel.showBottomSheetDialog() }
+                    ){
+                        viewModel.onEvent(CreateProfileEvent.ShowProfileImageOptions)
+                    }
                 )
                 Spacer(modifier = Modifier.height(30.dp))
 
@@ -194,7 +246,7 @@ fun CreateProfileScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 BirthTextField(
                     birth = { viewModel.birthYear.value },
-                    onClick = { viewModel.showBottomWheelDialog() }
+                    onClick = { viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions) }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
@@ -217,7 +269,7 @@ fun CreateProfileScreen(
                     && viewModel.birthYear.value != null
                     && viewModel.gender.value.isNotBlank()
                 },
-                onClick = { viewModel.onEvent(CreateProfileEvent.uploadImage)}
+                onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert)}
             )
         }
     }

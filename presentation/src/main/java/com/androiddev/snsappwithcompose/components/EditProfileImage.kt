@@ -25,15 +25,15 @@ import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 
 @Composable
 fun EditProfileImage(
-    modifier:Modifier,
-    profileBmap:Bitmap?
+    modifier: Modifier,
+    profileBmap: () -> Bitmap?
 ) {
     Box(
         modifier = modifier
           .width(IntrinsicSize.Min)
           .height(IntrinsicSize.Min)
     ) {
-        if(profileBmap == null) {
+        if(profileBmap() == null) {
             Image(
                 contentScale = ContentScale.Crop,
                 painter = painterResource(id = R.drawable.person_none),
@@ -46,7 +46,7 @@ fun EditProfileImage(
         } else {
             Image(
                 contentScale = ContentScale.Crop,
-                bitmap = profileBmap.asImageBitmap(),
+                bitmap = profileBmap()!!.asImageBitmap(),
                 contentDescription = null,
                 modifier = Modifier
                     .size(128.dp)

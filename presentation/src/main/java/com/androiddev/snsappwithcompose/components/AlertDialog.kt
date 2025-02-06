@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,12 +28,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Dialog
-import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.util.AlertDialogState
 
 @Composable
 fun AlertDialog(
     title: () -> String,
+    content: @Composable () -> Unit = {},
     cancelText:() ->String,
     confirmText:()->String,
     onClickCancel: ()->Unit,
@@ -74,8 +72,9 @@ fun AlertDialog(
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(40.dp))
-
+                    Spacer(modifier = Modifier.height(25.dp))
+                    content()
+                    Spacer(modifier = Modifier.height(25.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
