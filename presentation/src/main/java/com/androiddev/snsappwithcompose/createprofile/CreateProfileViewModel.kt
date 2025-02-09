@@ -6,16 +6,18 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androiddev.snsappwithcompose.util.getImageUri
 import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.AlertDialogState
+import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.BottomSheetItem
 import com.androiddev.snsappwithcompose.util.BottomWheelState
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
+import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.getMultipartBody
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -29,7 +31,7 @@ import javax.inject.Inject
 class CreateProfileViewModel @Inject constructor(
     private val createProfileUseCases: CreateProfileUseCases,
     private val context: Context
-): ViewModel() {
+): BaseViewModel() {
     private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
         CustomBottomSheetDialogState()
     )
@@ -48,9 +50,6 @@ class CreateProfileViewModel @Inject constructor(
     private val _isNicknameChecking = mutableStateOf(false)
     val isNicknameChecking: State<Boolean>
         get() = _isNicknameChecking
-    private val _isLoading = mutableStateOf(false)
-    val isLoading : State<Boolean>
-        get() = _isLoading
 
     private val _isTyping = mutableStateOf(false)
     val isTyping: State<Boolean>
@@ -195,17 +194,31 @@ class CreateProfileViewModel @Inject constructor(
                                     result.data?.let { isTokenValid ->
                                         //토큰이 유효하지 않으면 로그인 화면으로
                                         //유효하면 홈화면으로
+                                        if(isTokenValid) {
+
+                                        }
+                                        else {
+                                            setEvent(
+                                                UiEvent.navigate(
+                                                    screen = Screen.SignInScreen
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                                 is Resource.Error -> {
-                                    _isLoading.value = false
+                                    setLoading(false)
+                                    setEvent(
+                                        UiEvent.ShowToast(
+                                            message = result.message ?: getString(context,R.string.error)
+                                        )
+                                    )
                                 }
                                 is Resource.Loading -> {
-                                    _isLoading.value = true
+                                    setLoading(true)
                                 }
                             }
                         }
-
                 }
                 resetDialogState()
             }

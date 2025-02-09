@@ -1,13 +1,11 @@
 package com.androiddev.snsappwithcompose.auth.signin
 
 import android.content.Context
-import android.content.res.Resources
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androiddev.data.util.UserPreferences
 import com.androiddev.domain.model.SigninResponse
@@ -15,6 +13,7 @@ import com.androiddev.domain.use_case.SignInUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.AlertDialogState
+import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.kakao.sdk.user.UserApiClient
@@ -22,8 +21,6 @@ import com.navercorp.nid.NaverIdLoginSDK
 import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 @HiltViewModel
@@ -31,12 +28,7 @@ class SignInViewModel @Inject constructor(
     private val signInUseCases: SignInUseCases,
     private val userPreferences: UserPreferences,
     private val context: Context,
-) : ViewModel() {
-    private val _isLoading = mutableStateOf(false)
-    val isLoading : State<Boolean>
-        get() = _isLoading
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
+) : BaseViewModel() {
     private val _account = mutableStateOf("")
     val account: State<String>
         get() = _account
@@ -95,21 +87,21 @@ class SignInViewModel @Inject constructor(
                         .collect { result ->
                             when(result) {
                                 is Resource.Success -> {
-                                    _isLoading.value = false
+                                    setLoading(false)
                                     result.data?.let {
                                         handleSigninResult(event,it)
                                     }
                                 }
                                 is Resource.Error -> {
-                                    _isLoading.value = false
-                                    _eventFlow.emit(
+                                    setLoading(false)
+                                    setEvent(
                                         UiEvent.ShowToast(
                                             message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
                                 is Resource.Loading -> {
-                                    _isLoading.value = true
+                                    setLoading(true)
                                 }
                             }
                         }
@@ -121,27 +113,26 @@ class SignInViewModel @Inject constructor(
                         .collect { result ->
                             when(result) {
                                 is Resource.Success -> {
-                                    _isLoading.value = false
+                                    setLoading(false)
                                     result.data?.let {
                                         handleSigninResult(event,it)
                                     }
                                 }
                                 is Resource.Error -> {
-                                    _isLoading.value = false
-                                    _eventFlow.emit(
+                                    setLoading(false)
+                                    setEvent(
                                         UiEvent.ShowToast(
                                             message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
                                 is Resource.Loading -> {
-                                    _isLoading.value = true
+                                    setLoading(true)
                                 }
                             }
                         }
                 }
             }
-
             else -> null
         }
     }
@@ -152,7 +143,7 @@ class SignInViewModel @Inject constructor(
                 userPreferences.saveAuthToken(signinResult.token)
                 if(signinResult.profileWritten) {
                     //홈화면으로 이동
-                    _eventFlow.emit(
+                    setEvent(
                         UiEvent.navigate(
                             screen = Screen.HomeScreen
                         )
@@ -160,7 +151,7 @@ class SignInViewModel @Inject constructor(
                 }
                 else {
                     //프로필 작성화면으로이동
-                    _eventFlow.emit(
+                    setEvent(
                         UiEvent.navigate(
                             screen = Screen.CreateprofileScreen
                         )
@@ -169,7 +160,7 @@ class SignInViewModel @Inject constructor(
             } else {
                 //가입안된 계정일때 핸드폰 인증화면으로 이동
                 if(event is SignInEvent.SocialSignIn) {
-                    _eventFlow.emit(
+                    setEvent(
                         UiEvent.navigate(
                             screen = Screen.AuthPhoneScreen(event.platform,event.account)
                         )

@@ -1,7 +1,6 @@
 package com.androiddev.snsappwithcompose.auth.signup
 
 import android.content.Context
-import android.content.res.Resources
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
@@ -48,7 +47,7 @@ class AuthPhoneViewModel @Inject constructor(
                         authPhoneUseCases.requestAuthCode(phoneNumber.value).collect { result ->
                             when (result) {
                                 is Resource.Success -> {
-                                    _isLoading.value = false
+                                    setLoading(false)
                                     result.data?.let { phoneNumberExist ->
                                         if(phoneNumberExist) {
                                             showPhoneExistAlert()
@@ -64,19 +63,19 @@ class AuthPhoneViewModel @Inject constructor(
 
                                 is Resource.Error -> {
                                     _isLoading.value = false
-                                    _eventFlow.emit(
+                                    setEvent(
                                         UiEvent.ShowToast(
                                             message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
                                 is Resource.Loading -> {
-                                    _isLoading.value = true
+                                    setLoading(true)
                                 }
                             }
                         }
                     } catch (e: InvalidPhoneNumberException) {
-                        _eventFlow.emit(
+                        setEvent(
                             UiEvent.ShowToast(
                                 message = e.message ?: getString(context,R.string.check_phonenumber)
                             )
@@ -93,12 +92,14 @@ class AuthPhoneViewModel @Inject constructor(
                         .collect { result ->
                             when (result) {
                                 is Resource.Success -> {
-                                    _isLoading.value = false
+                                    setLoading(false)
                                     result.data?.let { isCodeCorrect ->
                                         if(isCodeCorrect) {
                                             timerJob?.cancel()
                                             if(event.platform == getString(context,R.string.email)) {
-                                                _eventFlow.emit(UiEvent.navigate(Screen.SignUpScreen(phoneNumber.value)))
+                                                setEvent(
+                                                    UiEvent.navigate(Screen.SignUpScreen(phoneNumber.value))
+                                                )
                                             } else {
                                                 //sns가입시도
                                                 socialSignUp(event.platform,event.account!!,phoneNumber.value)
@@ -109,15 +110,15 @@ class AuthPhoneViewModel @Inject constructor(
                                     }
                                 }
                                 is Resource.Error -> {
-                                    _isLoading.value = false
-                                    _eventFlow.emit(
+                                    setLoading(false)
+                                    setEvent(
                                         UiEvent.ShowToast(
                                             message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
                                 is Resource.Loading -> {
-                                    _isLoading.value = true
+                                    setLoading(true)
                                 }
                             }
                         }
@@ -132,24 +133,24 @@ class AuthPhoneViewModel @Inject constructor(
                 .collect{ result ->
                     when(result) {
                         is Resource.Success -> {
-                            _isLoading.value = false
+                            setLoading(false)
                             result.data?.let { userPreferences.saveAuthToken(it) }
-                            _eventFlow.emit(
+                            setEvent(
                                 UiEvent.navigate(
                                     Screen.CreateprofileScreen
                                 )
                             )
                         }
                         is Resource.Error -> {
-                            _isLoading.value = false
-                            _eventFlow.emit(
+                            setLoading(false)
+                            setEvent(
                                 UiEvent.ShowToast(
                                     message = result.message ?: getString(context,R.string.error)
                                 )
                             )
                         }
                         is Resource.Loading -> {
-                            _isLoading.value = true
+                            setLoading(true)
                         }
                     }
                 }

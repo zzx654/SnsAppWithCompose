@@ -1,7 +1,6 @@
 package com.androiddev.snsappwithcompose.auth.signup
 
 import android.content.Context
-import android.content.res.Resources
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
@@ -53,7 +52,7 @@ class EmailSignUpViewModel @Inject constructor(
                         emailSignUpUseCases.requestAuthCode(email.value).collect { result ->
                             when (result) {
                                 is Resource.Success -> {
-                                    _isLoading.value = false
+                                    setLoading(false)
                                     result.data?.let { emailExist ->
                                         if(emailExist) {
                                             //다이얼로그 추가
@@ -67,20 +66,20 @@ class EmailSignUpViewModel @Inject constructor(
                                     }
                                 }
                                 is Resource.Error -> {
-                                    _isLoading.value = false
-                                    _eventFlow.emit(
+                                    setLoading(false)
+                                    setEvent(
                                         UiEvent.ShowToast(
                                             message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
                                 is Resource.Loading -> {
-                                    _isLoading.value = true
+                                    setLoading(true)
                                 }
                             }
                         }
                     } catch (e: InvalidEmailException) {
-                        _eventFlow.emit(
+                        setEvent(
                             UiEvent.ShowToast(
                                 message = e.message ?: getString(context,R.string.check_email)
                             )
@@ -103,7 +102,7 @@ class EmailSignUpViewModel @Inject constructor(
                         .collect { result ->
                             when(result) {
                                 is Resource.Success -> {
-                                    _isLoading.value = false
+                                    setLoading(false)
                                     result.data?.let { isCodeCorrect ->
                                         if(isCodeCorrect) {
                                             // 확인누르면 로그인화면으로 가는 다이얼로그추가
@@ -117,15 +116,15 @@ class EmailSignUpViewModel @Inject constructor(
                                     }
                                 }
                                 is Resource.Error -> {
-                                    _isLoading.value = false
-                                    _eventFlow.emit(
+                                    setLoading(false)
+                                    setEvent(
                                         UiEvent.ShowToast(
                                             message = result.message ?: getString(context,R.string.error)
                                         )
                                     )
                                 }
                                 is Resource.Loading -> {
-                                    _isLoading.value = true
+                                    setLoading(true)
                                 }
                             }
 
@@ -159,11 +158,9 @@ class EmailSignUpViewModel @Inject constructor(
             onClickConfirm = {
                 resetDialogState()
                 viewModelScope.launch {
-                    _eventFlow.emit(UiEvent.navigate(Screen.SignInScreen))
+                    setEvent(UiEvent.navigate(Screen.SignInScreen))
                 }
             }
         )
     }
-
-
 }

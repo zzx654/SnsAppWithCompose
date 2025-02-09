@@ -54,18 +54,20 @@ import com.androiddev.snsappwithcompose.util.decodeBase64
 import java.util.Calendar
 import android.Manifest
 import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
 import androidx.compose.foundation.background
 import com.androiddev.snsappwithcompose.ui.theme.LightGray
-
-
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
-
 import com.androiddev.snsappwithcompose.components.AlertDialog
+import com.androiddev.snsappwithcompose.components.LoadingProgressIndicator
+import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
+import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.N)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -132,7 +134,21 @@ fun CreateProfileScreen(
             permissions,
             launcherMultiplePermissions
         )
+        viewModel.eventFlow.collectLatest { event ->
+            when(event) {
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                is UiEvent.navigate -> {
+                    navController.navigate(event.screen)
+                }
+            }
+        }
     }
+
     val year = Calendar.getInstance().get(Calendar.YEAR)
     viewModel.setLauncher({cameraPermission.launch(android.Manifest.permission.CAMERA)},{photoPermission.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)})
     
@@ -152,6 +168,7 @@ fun CreateProfileScreen(
         },
         onClickCancel = viewModel.bottomWheelState.value.onClickCancel,
     )
+    LoadingProgressIndicator({viewModel.isLoading.value})
     AlertDialog(
         title = {viewModel.alertDialogState.value.title},
         cancelText = {viewModel.alertDialogState.value.cancelText},
