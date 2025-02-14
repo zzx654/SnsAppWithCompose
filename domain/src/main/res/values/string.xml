@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="empty_phone">휴대폰번호를 입력해주세요</string>
+    <string name="invalid_phone">유효하지 않은 전화번호입니다</string>
+    <string name="empty_email">이메일을 입력해주세요</string>
+    <string name="invalid_email">유효하지 않은 이메일입니다</string>
+</resources>

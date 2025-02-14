@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">개</string>
+    <string name="email">email</string>
+    <string name="signin">로그인</string>
+    <string name="signup">회원가입</string>
+    <string name="email_hint">이메일 입력</string>
+    <string name="password_hint">비밀번호 입력</string>
+    <string name="find_id">아이디 찾기</string>
+    <string name="find_pw">비밀번호 찾기</string>
+    <string name="login">로그인</string>
+    <string name="social_login">간편로그인</string>
+    <string name="no_account">아이디가 없으신가요?</string>
+    <string name="create_account">계정생성</string>
+    <string name="auth_phone">휴대폰 번호를 인증해주세요</string>
+    <string name="enter_phone">휴대폰 번호를 입력해주세요</string>
+    <string name="send_authcode">인증번호 발송</string>
+    <string name="resend_authcode">재발송</string>
+    <string name="incorrect_authcode">인증번호를 다시 확인해주세요</string>
+    <string name="enter_authcode">인증번호 입력</string>
+    <string name="authenticate">인증하기</string>
+    <string name="enter_email">이메일을 입력해주세요</string>
+    <string name="check_email">이메일을 확인해주세요</string>
+    <string name="password_rule">영문,숫자,특수문자 포함 8자-15자</string>
+    <string name="enter_password">비밀번호를 입력해주세요</string>
+    <string name="error">에러가 발생했습니다</string>
+    <string name="kakao">kakao</string>
+    <string name="naver">naver</string>
+    <string name="check_phonenumber">전화번호를 확인해주세요</string>
+    <string name="topbar_authphone">휴대폰 인증</string>
+    <string name="request_signup">회원 가입하기</string>
+    <string name="cancel">취소</string>
+    <string name="phonenumber_exist">이미 가입된 휴대폰 번호입니다.</string>
+    <string name="signin_failed">아이디 또는 비밀번호 오류입니다</string>
+    <string name="email_exist">이미 가입된 휴대폰 번호입니다.</string>
+    <string name="wrong_code">인증번호가 틀렸습니다</string>
+    <string name="confirm">확인</string>
+    <string name="retry">재시도</string>
+    <string name="signup_completed">회원가입이 완료되었습니다.</string>
+    <string name="choose_from_gallery">갤러리에서 선택</string>
+    <string name="take_picture">사진 찍기</string>
+    <string name="encodedBitmap">encodedBitmap</string>
+    <string name="createProfile">프로필 설정</string>
+    <string name="nickname_hint">닉네임</string>
+    <string name="typing">입력중...</string>
+    <string name="nickname_condition">2자 이상 입력해주세요</string>
+    <string name="valid_nickname">사용 가능한 닉네임 입니다</string>
+    <string name="invalid_nickname">사용할 수 없는 닉네임 입니다</string>
+    <string name="validating">유효성 검사중...</string>
+    <string name="set_birth">출생 선택</string>
+    <string name="birth_year">출생 년도</string>
+    <string name="male">남성</string>
+    <string name="female">여성</string>
+    <string name="private_info">비공개</string>
+    <string name="delete_profileimage">프로필 사진 지우기</string>
+    <string name="check_profile">입력하신 내용을 확인해 주세요</string>
+
+
+
+
+
+
+</resources>

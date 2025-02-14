@@ -11,9 +11,11 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = java.net.URI("https://devrepo.kakao.com/nexus/content/groups/public/") }
+        maven(url = "https://jitpack.io")
     }
 }
 
 rootProject.name = "SnsAppWithCompose"
-include(":app")
- 
+include(":presentation")
+include(":domain")
+include(":data")
