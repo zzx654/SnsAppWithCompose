@@ -15,6 +15,8 @@ sealed interface Screen {
     @Serializable
     data object HomeScreen: Screen
     @Serializable
+    data object UploadPostScreen: Screen
+    @Serializable
     data object InitScreen: Screen
     @Serializable
     data class CropScreen(val encodedUri:String): Screen

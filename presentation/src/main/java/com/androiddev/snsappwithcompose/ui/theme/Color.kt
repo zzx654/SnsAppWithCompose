@@ -5,6 +5,9 @@ import androidx.compose.ui.graphics.Color
 val InitProgressBarColor = Color(0xFF5E584B)
 val Background = Color(0xFFFCFDF3)
 
+val BottomBar = Color(0xFFFFF9F9)
+val BottomSelected = Color(0xFF3A2424)
+val BottomUnSelected = Color(0xFFA08E8E)
 val profileBorder = Color(0x909EA8A8)
 val LightGray = Color(0xFFF9FAF3)
 //Color(0xFFFDE2C2)
