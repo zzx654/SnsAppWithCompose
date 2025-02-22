@@ -49,7 +49,8 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val navBackStackEntryState = navController.currentBackStackEntryAsState()
                 navBackStackEntryState.value?.destination?.let {
-                    isBottomBarVisible = it.hasRoute(HomeScreen::class)||it.hasRoute(UploadPostScreen::class)
+                    isBottomBarVisible = it.hasRoute(HomeScreen::class)
+                            //||it.hasRoute(UploadPostScreen::class)
                 }
 
                 Surface(
@@ -79,13 +80,15 @@ class MainActivity : ComponentActivity() {
                                     onItemClick = {
 
                                         navController.navigate(it.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
+                                            if(it.route != Screen.UploadPostScreen) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                // 같은아이템 재선택시 같은 desination 생성 방지
+                                                launchSingleTop = true
+                                                //아이템 선택시 state 복구
+                                                restoreState = true
                                             }
-                                            // 같은아이템 재선택시 같은 desination 생성 방지
-                                            launchSingleTop = true
-                                            //아이템 선택시 state 복구
-                                            restoreState = true
                                         }
                                     }
                                 )
@@ -101,11 +104,6 @@ class MainActivity : ComponentActivity() {
 
                 }
             }
-            onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    // 뒤로가기 버튼 동작을 막음
-                }
-            })
         }
     }
 
