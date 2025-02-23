@@ -38,7 +38,7 @@ import com.androiddev.snsappwithcompose.util.Screen.UploadPostScreen
 class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterialApi::class)
-    @SuppressLint("RestrictedApi")
+    @SuppressLint("RestrictedApi", "UnusedMaterial3ScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     ) {
-                        Box(modifier = Modifier.fillMaxSize().padding(it)) {
+                        Box(modifier = Modifier.fillMaxSize()) {
                             Navigation(navController = navController)
 
                         }
