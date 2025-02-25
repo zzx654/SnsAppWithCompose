@@ -5,32 +5,19 @@ import android.os.Build
 import android.view.Gravity
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,16 +35,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
-import com.androiddev.snsappwithcompose.Constants.AUTH_LIMITEDTIME
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.AuthNumberTextField
 import com.androiddev.snsappwithcompose.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
+import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
+import com.androiddev.snsappwithcompose.components.TopBar
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
-import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -98,86 +85,64 @@ fun AuthPhoneScreen(
         onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
         onClickCancel = viewModel.alertDialogState.value.onClickCancel
     )
-    Scaffold(
+    ScreenWithTopBar(
+        focusManager = focusManager,
         topBar = {
-            Surface(shadowElevation = 3.dp) {
-                TopAppBar(
-                    title = { Text(text = stringResource(R.string.topbar_authphone)) },
-
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack()}) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                )
-            }
+            TopBar(
+                title = stringResource(R.string.topbar_authphone),
+                onBackClick = { navController.popBackStack() }
+            )
         },
-        modifier = Modifier
-            .fillMaxSize()
-            .addFocusCleaner(focusManager)
-
-    ) { contentPadding ->
-
-        Column(modifier = Modifier
-            .imePadding()
-        ) {
-            val scrollState = rememberScrollState()
-            Column(modifier = Modifier
-                .weight(1f)
+        content = {
+            Spacer(modifier = Modifier.height(30.dp))
+            Text(text = stringResource(R.string.auth_phone), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(50.dp))
+            Text(text = stringResource(R.string.enter_phone),fontSize = 13.sp)
+            Spacer(modifier = Modifier.height(13.dp))
+            Row(modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(contentPadding)
-                .verticalScroll(scrollState)) {
-                Spacer(modifier = Modifier.height(30.dp))
-                Text(text = stringResource(R.string.auth_phone), fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(50.dp))
-                Text(text = stringResource(R.string.enter_phone),fontSize = 13.sp)
-                Spacer(modifier = Modifier.height(13.dp))
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Max)) {
+                .height(IntrinsicSize.Max)) {
 
-                    AuthTextField(
-                        modifier = Modifier
-                            .weight(5f)
-                            .fillMaxHeight() ,
-                        text = {viewModel.phoneNumber.value },
-                        focusManager = focusManager,
-                        onTextChange = {viewModel.onEvent(AuthPhoneEvent.TypePhoneNumber(it)) },
-                        keyboardType = KeyboardType.Number
-                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Button(   colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black
-                    ),modifier = Modifier
-                        .weight(3f)
-                        .fillMaxHeight(),shape = RoundedCornerShape(4.dp),onClick = {viewModel.onEvent(AuthPhoneEvent.RequestAuthCode)}) {
-                        Text(
-                            text = if(viewModel.isCodeReceived.value) stringResource(R.string.resend_authcode) else stringResource(R.string.send_authcode),
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
-                        )
-                    }
-                }.also{}
-                Spacer(modifier = Modifier.height(20.dp))
-                AuthNumberTextField(
-                    isNumberReceived = { viewModel.isCodeReceived.value },
-                    limitTime = { limitTime },
-                    number = { viewModel.authCodeField.value.code },
-                    onNumberChange = { viewModel.onEvent(AuthPhoneEvent.TypeAuthCode(it)) },
-                    hint = stringResource(R.string.enter_authcode),
-                    inCorrect = { viewModel.authCodeField.value.isError }
+                AuthTextField(
+                    modifier = Modifier
+                        .weight(5f)
+                        .fillMaxHeight() ,
+                    text = {viewModel.phoneNumber.value },
+                    focusManager = focusManager,
+                    onTextChange = {viewModel.onEvent(AuthPhoneEvent.TypePhoneNumber(it)) },
+                    keyboardType = KeyboardType.Number
                 )
-            }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Button(   colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black
+                ),modifier = Modifier
+                    .weight(3f)
+                    .fillMaxHeight(),shape = RoundedCornerShape(4.dp),onClick = {viewModel.onEvent(AuthPhoneEvent.RequestAuthCode)}) {
+                    Text(
+                        text = if(viewModel.isCodeReceived.value) stringResource(R.string.resend_authcode) else stringResource(R.string.send_authcode),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+                    )
+                }
+            }.also{}
+            Spacer(modifier = Modifier.height(20.dp))
+            AuthNumberTextField(
+                isNumberReceived = { viewModel.isCodeReceived.value },
+                limitTime = { limitTime },
+                number = { viewModel.authCodeField.value.code },
+                onNumberChange = { viewModel.onEvent(AuthPhoneEvent.TypeAuthCode(it)) },
+                hint = stringResource(R.string.enter_authcode),
+                inCorrect = { viewModel.authCodeField.value.isError }
+            )
+        },
+        bottomBar = {
             BottomButton(
                 buttonText = stringResource(R.string.authenticate),
                 activeButton = { viewModel.isCodeReceived.value&&viewModel.authCodeField.value.code.isNotEmpty() },
                 onClick = { viewModel.onEvent(AuthPhoneEvent.AuthenticateCode(args.platform,args.account))}
             )
         }
-    }
+
+    )
 }

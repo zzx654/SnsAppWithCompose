@@ -195,7 +195,11 @@ class CreateProfileViewModel @Inject constructor(
                                         //토큰이 유효하지 않으면 로그인 화면으로
                                         //유효하면 홈화면으로
                                         if(isTokenValid) {
-
+                                            setEvent(
+                                                UiEvent.navigate(
+                                                    screen = Screen.HomeScreen
+                                                )
+                                            )
                                         }
                                         else {
                                             setEvent(

@@ -13,17 +13,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +43,6 @@ import com.androiddev.snsappwithcompose.components.BottomWheelPicker
 import com.androiddev.snsappwithcompose.components.EditProfileImage
 import com.androiddev.snsappwithcompose.components.NicknameTextField
 import com.androiddev.snsappwithcompose.components.RadioButtons
-import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.util.decodeBase64
 import java.util.Calendar
 import android.Manifest
@@ -64,7 +57,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import com.androiddev.snsappwithcompose.components.AlertDialog
-import com.androiddev.snsappwithcompose.components.LoadingProgressIndicator
+import com.androiddev.snsappwithcompose.components.LoadingDialog
+import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
 import kotlinx.coroutines.flow.collectLatest
@@ -168,7 +162,7 @@ fun CreateProfileScreen(
         },
         onClickCancel = viewModel.bottomWheelState.value.onClickCancel,
     )
-    LoadingProgressIndicator({viewModel.isLoading.value})
+    LoadingDialog { viewModel.isLoading.value }
     AlertDialog(
         title = {viewModel.alertDialogState.value.title},
         cancelText = {viewModel.alertDialogState.value.cancelText},
@@ -207,87 +201,76 @@ fun CreateProfileScreen(
             }
         }
     )
-    Scaffold(
+    ScreenWithTopBar(
+        focusManager = focusManager,
         topBar = {
-            Surface(shadowElevation = 3.dp) {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = getString(context,R.string.createProfile),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                        ) },
-                )
-            }
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = getString(context,R.string.createProfile),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                    ) },
+            )
         },
-        modifier = Modifier.fillMaxSize().addFocusCleaner(focusManager)
-    ) { contentPadding ->
-        val scrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding()
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp)
-                    .padding(contentPadding)
-                    .verticalScroll(scrollState)
+        content = {
+            Spacer(modifier = Modifier.height(30.dp))
+            Box(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Spacer(modifier = Modifier.height(30.dp))
                 EditProfileImage(
                     profileBmap = {viewModel.profileBmap.value},
-                    modifier = Modifier.align(Alignment.CenterHorizontally).clickable(
+                    modifier = Modifier.align(Alignment.Center).clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() } // This is mandatory
                     ){
                         viewModel.onEvent(CreateProfileEvent.ShowProfileImageOptions)
                     }
                 )
-                Spacer(modifier = Modifier.height(30.dp))
-
-                NicknameTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    focusManager = focusManager,
-                    text = { viewModel.nickname.value },
-                    hint = getString(context,R.string.nickname_hint),
-                    onTextChange = {
-                        viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
-                    },
-                    isTyping = { viewModel.isTyping.value },
-                    isNicknameValid = { viewModel.isNicknameValid.value },
-                    isNicknameChecking = { viewModel.isNicknameChecking.value }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                BirthTextField(
-                    birth = { viewModel.birthYear.value },
-                    onClick = { viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions) }
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-
-                ) {
-                    RadioButtons(
-                        listOf(getString(context,R.string.male),getString(context,R.string.female),getString(context,R.string.private_info)),
-                        { viewModel.gender.value },
-                        { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
-                    )
-                }
-
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            NicknameTextField(
+                modifier = Modifier.fillMaxWidth(),
+                focusManager = focusManager,
+                text = { viewModel.nickname.value },
+                hint = getString(context,R.string.nickname_hint),
+                onTextChange = {
+                    viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
+                },
+                isTyping = { viewModel.isTyping.value },
+                isNicknameValid = { viewModel.isNicknameValid.value },
+                isNicknameChecking = { viewModel.isNicknameChecking.value }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            BirthTextField(
+                birth = { viewModel.birthYear.value },
+                onClick = { viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions) }
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+
+            ) {
+                RadioButtons(
+                    listOf(getString(context,R.string.male),getString(context,R.string.female),getString(context,R.string.private_info)),
+                    { viewModel.gender.value },
+                    { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
+                )
+            }
+        },
+        bottomBar = {
             BottomButton(
                 buttonText = stringResource(id = R.string.request_signup),
                 activeButton = {
                     viewModel.isNicknameValid.value
-                    && viewModel.birthYear.value != null
-                    && viewModel.gender.value.isNotBlank()
+                            && viewModel.birthYear.value != null
+                            && viewModel.gender.value.isNotBlank()
                 },
                 onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert)}
             )
         }
-    }
+    )
 }
