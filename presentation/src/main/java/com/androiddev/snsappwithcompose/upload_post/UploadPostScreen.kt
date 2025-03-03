@@ -3,6 +3,7 @@ package com.androiddev.snsappwithcompose.upload_post
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -20,6 +21,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
+import com.androiddev.snsappwithcompose.components.SearchTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -45,8 +47,12 @@ fun UploadPostScreen(navController: NavController) {
         content =  {
 
             Spacer(modifier = Modifier.height(30.dp))
-                Text(text = "uploadPostScreen",modifier = Modifier.clickable{ navController.popBackStack()})
-
+            SearchTextField(
+                modifier = Modifier.fillMaxWidth(),
+                text = { ""},
+                onTextChange = {},
+                hint = "태그를 검색해 보세요"
+            )
         },
         bottomBar = {
             BottomButton(
