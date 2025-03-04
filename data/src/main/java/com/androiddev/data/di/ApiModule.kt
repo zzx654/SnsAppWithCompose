@@ -5,6 +5,7 @@ import com.androiddev.data.remote.api.AuthPhoneApi
 import com.androiddev.data.remote.api.CreateProfileApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
+import com.androiddev.data.remote.api.UploadPostApi
 import com.androiddev.data.util.UserPreferences
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -67,5 +68,7 @@ object ApiModule {
     @Singleton
     fun provideCreateProfileApi(retrofit: Retrofit): CreateProfileApi = retrofit.create(CreateProfileApi::class.java)
 
-
+    @Provides
+    @Singleton
+    fun provideUploadPostApi(retrofit: Retrofit): UploadPostApi = retrofit.create(UploadPostApi::class.java)
 }

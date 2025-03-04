@@ -5,6 +5,7 @@ import com.androiddev.domain.repository.AuthPhoneRepository
 import com.androiddev.domain.repository.CreateProfileRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
+import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.AuthenticateCode
 import com.androiddev.domain.use_case.CheckNickname
@@ -15,10 +16,12 @@ import com.androiddev.domain.use_case.EmailSignUp
 import com.androiddev.domain.use_case.EmailSignUpUseCases
 import com.androiddev.domain.use_case.RequestEmailAuthCode
 import com.androiddev.domain.use_case.RequestPhoneAuthCode
+import com.androiddev.domain.use_case.SearchTag
 import com.androiddev.domain.use_case.SignInUseCases
 import com.androiddev.domain.use_case.SignInWithToken
 import com.androiddev.domain.use_case.SocialSignIn
 import com.androiddev.domain.use_case.SocialSignUpUseCase
+import com.androiddev.domain.use_case.UploadPostUseCases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,6 +68,13 @@ object UseCaseModule {
         return CreateProfileUseCases(
             createProfile = CreateProfile(repository),
             checkNickname = CheckNickname(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideUploadPostUseCases(repository: UploadPostRepository): UploadPostUseCases {
+        return UploadPostUseCases(
+            searchTag = SearchTag(repository)
         )
     }
 
