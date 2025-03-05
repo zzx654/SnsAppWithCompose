@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,8 @@ import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
+import com.androiddev.snsappwithcompose.components.Chips
+import com.androiddev.snsappwithcompose.components.CustomChip
 import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.components.SearchTextField
 
@@ -46,11 +49,34 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
         content =  {
 
             Spacer(modifier = Modifier.height(30.dp))
+            Chips(
+                modifier = Modifier.fillMaxWidth(),
+                list = viewModel.addedTags.value.toList(),
+                chip = { data: String, index: Int ->
+                    CustomChip(
+                        backgroundColor = Color.Gray,
+                        text = data,
+                        onDeleteClick = { viewModel.onEvent(UploadPostEvent.DeleteTag(data))}
+                    )
+                }
+            )
             SearchTextField(
                 modifier = Modifier.fillMaxWidth(),
                 text = { viewModel.tagTextField.value },
                 onTextChange = { viewModel.onEvent(UploadPostEvent.TypeTag(it))},
                 hint = "태그를 검색해 보세요"
+            )
+
+            Chips(
+                modifier = Modifier.fillMaxWidth(),
+                list = viewModel.searchedTags.value.map { "${it.tagname}(${it.count})" },
+                chip = { data: String, index: Int ->
+                    CustomChip(
+                        backgroundColor = Color.Gray,
+                        text = data,
+                        onChipClicked = { viewModel.onEvent(UploadPostEvent.AddTag(index)) }
+                    )
+                }
             )
         },
         bottomBar = {

@@ -27,18 +27,22 @@ class UploadPostViewModel @Inject constructor(
     private val _searchedTags = mutableStateOf(listOf<TagInfo>())
     val searchedTags: State<List<TagInfo>>
         get() = _searchedTags
+    private val _addedTags = mutableStateOf(mutableSetOf<String>())
+    val addedTags: State<MutableSet<String>>
+        get() = _addedTags
     fun onEvent(event: UploadPostEvent) {
         when(event) {
             is UploadPostEvent.TypeTag -> {
                 _tagTextField.value = event.tag
                 if(event.tag.isNotEmpty()) {
                     viewModelScope.launch {
-                        delay(500L)
+                        delay(50L)
                         uploadPostUseCases.searchTag(event.tag)
                             .collect { result ->
                                 when(result) {
                                     is Resource.Success -> {
                                         result.data?.let {
+                                            if(tagTextField.value.isNotEmpty())
                                             _searchedTags.value = it
                                         }
                                     }
@@ -56,6 +60,14 @@ class UploadPostViewModel @Inject constructor(
                 } else {
                     _searchedTags.value = listOf()
                 }
+            }
+            is UploadPostEvent.AddTag -> {
+                _tagTextField.value = ""
+                _addedTags.value.add(searchedTags.value[event.tagIndex].tagname)
+                _searchedTags.value = listOf()
+            }
+            is UploadPostEvent.DeleteTag -> {
+                _addedTags.value.remove(event.tag)
             }
             else -> null
         }
