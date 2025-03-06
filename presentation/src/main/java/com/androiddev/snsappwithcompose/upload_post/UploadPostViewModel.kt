@@ -30,6 +30,12 @@ class UploadPostViewModel @Inject constructor(
     private val _addedTags = mutableStateOf(mutableSetOf<String>())
     val addedTags: State<MutableSet<String>>
         get() = _addedTags
+    private val _contentTextField = mutableStateOf("")
+    val contentTextField: State<String>
+        get() = _contentTextField
+    private val _anonymous = mutableStateOf(false)
+    val anonymous: State<Boolean>
+        get() = _anonymous
     fun onEvent(event: UploadPostEvent) {
         when(event) {
             is UploadPostEvent.TypeTag -> {
@@ -68,6 +74,12 @@ class UploadPostViewModel @Inject constructor(
             }
             is UploadPostEvent.DeleteTag -> {
                 _addedTags.value.remove(event.tag)
+            }
+            is UploadPostEvent.TypeContent -> {
+                _contentTextField.value = event.text
+            }
+            is UploadPostEvent.ToggleCheckBox -> {
+                _anonymous.value = event.isChecked
             }
             else -> null
         }

@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,34 +25,27 @@ import androidx.compose.ui.unit.sp
 import com.androiddev.snsappwithcompose.ui.theme.TextFieldBackground
 
 @Composable
-fun SearchTextField(
-    modifier: Modifier,
+fun ContentTextField(
     text: () -> String,
     onTextChange: (String) -> Unit = {},
     hint: String = ""
 ) {
-
     BasicTextField(
+        //modifier = Modifier.height(200.dp),
         value = text(),
         onValueChange = {
             onTextChange(it)
         },
-        maxLines = 1,
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .defaultMinSize(minHeight = 360.dp)
                     .background(color = TextFieldBackground.copy(alpha = 0.1f), shape = RoundedCornerShape(size = 16.dp))
                     .padding(all = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "",
-                    tint = Color.DarkGray,
-                )
                 Spacer(modifier = Modifier.width(width = 8.dp))
-                Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.CenterStart) {
+                Box(contentAlignment = Alignment.TopStart) {
                     if(text().isEmpty()) {
                         Text(
                             text = hint,
@@ -61,9 +56,6 @@ fun SearchTextField(
                     innerTextField()
 
                 }
-
-
-
             }
         }
     )

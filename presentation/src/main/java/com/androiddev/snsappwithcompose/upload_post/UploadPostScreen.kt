@@ -20,7 +20,9 @@ import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
+import com.androiddev.snsappwithcompose.components.CheckBoxWithText
 import com.androiddev.snsappwithcompose.components.Chips
+import com.androiddev.snsappwithcompose.components.ContentTextField
 import com.androiddev.snsappwithcompose.components.CustomChip
 import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.components.SearchTextField
@@ -78,13 +80,25 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                     )
                 }
             )
+            Spacer(modifier = Modifier.height(20.dp))
+            ContentTextField(
+                text = { viewModel.contentTextField.value },
+                onTextChange = { viewModel.onEvent(UploadPostEvent.TypeContent(it))},
+                hint = "자신의 생각을 말해보세요!"
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            CheckBoxWithText(
+              text = "익명",
+              checked = { viewModel.anonymous.value },
+              onCheckedChange = { viewModel.onEvent(UploadPostEvent.ToggleCheckBox(it))}
+            )
         },
         bottomBar = {
             BottomButton(
                 buttonText = stringResource(id = R.string.request_signup),
                 activeButton = { true
                 },
-                onClick = { }
+                onClick = { println(viewModel.anonymous.value) }
             )
         }
     )
