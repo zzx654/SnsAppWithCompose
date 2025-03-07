@@ -1,16 +1,26 @@
 package com.androiddev.snsappwithcompose.upload_post
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.HowToVote
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -18,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.components.CheckBoxWithText
 import com.androiddev.snsappwithcompose.components.Chips
@@ -45,6 +54,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                             contentDescription = null
                         )
                     }
+
                 }
             )
         },
@@ -93,13 +103,52 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
               onCheckedChange = { viewModel.onEvent(UploadPostEvent.ToggleCheckBox(it))}
             )
         },
-        bottomBar = {
-            BottomButton(
-                buttonText = stringResource(id = R.string.request_signup),
-                activeButton = { true
-                },
-                onClick = { println(viewModel.anonymous.value) }
-            )
+        bottomBar = {//이미지,마이크,투표,위치
+            Surface(shadowElevation = 10.dp) {
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.DarkGray.copy(0.2f)),
+                ){
+                    Spacer(modifier = Modifier.width(5.dp))
+                    IconButton(
+                        modifier = Modifier.size(58.dp),
+                        onClick = { /* do something */ }
+                    ) {
+                        Icon(
+                            Icons.Default.Photo,
+                            contentDescription = null,
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.size(58.dp),
+                        onClick = { /* do something */ }
+                    ) {
+                        Icon(
+                            Icons.Default.Mic,
+                            contentDescription = null,
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.size(58.dp),
+                        onClick = { /* do something */ }
+                    ) {
+                        Icon(
+                            Icons.Default.HowToVote,
+                            contentDescription = null,
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.size(58.dp),
+                        onClick = { /* do something */ }
+                    ) {
+                        Icon(
+                            Icons.Default.Place,
+                            contentDescription = null,
+                        )
+                    }
+                }
+            }
         }
     )
 }
