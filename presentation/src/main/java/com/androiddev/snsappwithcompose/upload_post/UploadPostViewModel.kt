@@ -1,8 +1,11 @@
 package com.androiddev.snsappwithcompose.upload_post
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.TagInfo
@@ -36,6 +39,9 @@ class UploadPostViewModel @Inject constructor(
     private val _anonymous = mutableStateOf(false)
     val anonymous: State<Boolean>
         get() = _anonymous
+    private val _selectedImages = mutableStateListOf<Uri>()
+    val selectedImages: SnapshotStateList<Uri>
+        get() = _selectedImages
     fun onEvent(event: UploadPostEvent) {
         when(event) {
             is UploadPostEvent.TypeTag -> {
@@ -80,6 +86,14 @@ class UploadPostViewModel @Inject constructor(
             }
             is UploadPostEvent.ToggleCheckBox -> {
                 _anonymous.value = event.isChecked
+            }
+            is UploadPostEvent.AddImages -> {
+                event.images.forEach{
+
+                }
+                _selectedImages.addAll(event.images)
+
+
             }
             else -> null
         }

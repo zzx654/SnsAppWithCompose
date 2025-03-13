@@ -1,6 +1,10 @@
 package com.androiddev.snsappwithcompose.upload_post
 
 import android.annotation.SuppressLint
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,8 +23,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -35,12 +40,30 @@ import com.androiddev.snsappwithcompose.components.ContentTextField
 import com.androiddev.snsappwithcompose.components.CustomChip
 import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.components.SearchTextField
-
+import com.androiddev.snsappwithcompose.components.SelectedImageCards
+import androidx.compose.runtime.*
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel = hiltViewModel()) {
     val focusManager = LocalFocusManager.current
+    //val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
+     //   viewModel.onEvent(UploadPostEvent.AddImages(it))
+    //}
+    var selectedImageUriList by remember {
+        mutableStateOf<List<Uri>>(emptyList())
+    }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(),
+        onResult = { uriList ->
+            print("진짜로 뭐지")
+            uriList.forEach{
+                println(it)
+            }
+            selectedImageUriList = uriList
+            viewModel.onEvent(UploadPostEvent.AddImages(uriList))
+        }
+    )
     ScreenWithTopBar(
         focusManager = focusManager,
         topBar = {
@@ -102,6 +125,18 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
               checked = { viewModel.anonymous.value },
               onCheckedChange = { viewModel.onEvent(UploadPostEvent.ToggleCheckBox(it))}
             )
+            Spacer(modifier = Modifier.height(10.dp))
+            SelectedImageCards(
+                selectedImageUris = {
+                    viewModel.selectedImages
+
+                    //selectedImageUriList
+                },
+                onImageClick = {
+                    print("온이미지클릭")
+                    println(it)
+                }
+            )
         },
         bottomBar = {//이미지,마이크,투표,위치
             Surface(shadowElevation = 10.dp) {
@@ -113,7 +148,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                     Spacer(modifier = Modifier.width(5.dp))
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = { /* do something */ }
+                        onClick = { launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
                     ) {
                         Icon(
                             Icons.Default.Photo,
