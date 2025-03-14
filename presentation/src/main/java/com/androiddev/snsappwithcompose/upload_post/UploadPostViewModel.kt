@@ -88,12 +88,10 @@ class UploadPostViewModel @Inject constructor(
                 _anonymous.value = event.isChecked
             }
             is UploadPostEvent.AddImages -> {
-                event.images.forEach{
-
-                }
                 _selectedImages.addAll(event.images)
-
-
+            }
+            is UploadPostEvent.DeleteImage -> {
+                _selectedImages.remove(event.image)
             }
             else -> null
         }

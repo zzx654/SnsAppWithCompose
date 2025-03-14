@@ -9,4 +9,5 @@ sealed class UploadPostEvent {
     data class TypeContent(val text: String) : UploadPostEvent()
     data class ToggleCheckBox(val isChecked: Boolean) : UploadPostEvent()
     data class AddImages(val images: List<Uri>) : UploadPostEvent()
+    data class DeleteImage(val image: Uri) : UploadPostEvent()
 }

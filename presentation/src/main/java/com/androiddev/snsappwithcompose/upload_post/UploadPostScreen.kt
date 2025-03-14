@@ -15,9 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HowToVote
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Photo
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,21 +42,21 @@ import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.components.SearchTextField
 import com.androiddev.snsappwithcompose.components.SelectedImageCards
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat.getString
+
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel = hiltViewModel()) {
     val focusManager = LocalFocusManager.current
-    //val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
-     //   viewModel.onEvent(UploadPostEvent.AddImages(it))
-    //}
+    val context = LocalContext.current
     var selectedImageUriList by remember {
         mutableStateOf<List<Uri>>(emptyList())
     }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { uriList ->
-            print("진짜로 뭐지")
             uriList.forEach{
                 println(it)
             }
@@ -99,7 +99,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                 modifier = Modifier.fillMaxWidth(),
                 text = { viewModel.tagTextField.value },
                 onTextChange = { viewModel.onEvent(UploadPostEvent.TypeTag(it))},
-                hint = "태그를 검색해 보세요"
+                hint = getString(context,R.string.searchtag_hint)
             )
 
             Chips(
@@ -117,11 +117,11 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
             ContentTextField(
                 text = { viewModel.contentTextField.value },
                 onTextChange = { viewModel.onEvent(UploadPostEvent.TypeContent(it))},
-                hint = "자신의 생각을 말해보세요!"
+                hint = getString(context,R.string.uploadtext_hint)
             )
             Spacer(modifier = Modifier.height(10.dp))
             CheckBoxWithText(
-              text = "익명",
+              text = getString(context,R.string.anonymous),
               checked = { viewModel.anonymous.value },
               onCheckedChange = { viewModel.onEvent(UploadPostEvent.ToggleCheckBox(it))}
             )
@@ -129,12 +129,9 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
             SelectedImageCards(
                 selectedImageUris = {
                     viewModel.selectedImages
-
-                    //selectedImageUriList
                 },
-                onImageClick = {
-                    print("온이미지클릭")
-                    println(it)
+                onDeleteClick = {
+                    viewModel.onEvent(UploadPostEvent.DeleteImage(it))
                 }
             )
         },
@@ -178,7 +175,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                         onClick = { /* do something */ }
                     ) {
                         Icon(
-                            Icons.Default.Place,
+                            Icons.Default.LocationOn,
                             contentDescription = null,
                         )
                     }

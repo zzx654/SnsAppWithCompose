@@ -1,7 +1,6 @@
 package com.androiddev.snsappwithcompose.components
 
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +29,7 @@ import com.androiddev.snsappwithcompose.ui.theme.Black
 @Composable
 fun SelectedImageCards(
     selectedImageUris:()-> List<Uri>,
-    onImageClick:(Uri) -> Unit
+    onDeleteClick:(Uri) -> Unit
 
 ) {
     LazyRow(
@@ -47,7 +46,7 @@ fun SelectedImageCards(
                 modifier = Modifier
                     .width(IntrinsicSize.Min)
                     .height(IntrinsicSize.Min)
-                    .clickable { onImageClick(uri)  }
+
             ) {
                 AsyncImage(
                     model = uri,
@@ -65,6 +64,7 @@ fun SelectedImageCards(
                         .padding(horizontal = 5.dp)
                         .size(12.dp)
                         .align(Alignment.TopStart)
+                        .clickable { onDeleteClick(uri)  }
                         .drawBehind {
                             drawCircle(
                                 color = Black,
