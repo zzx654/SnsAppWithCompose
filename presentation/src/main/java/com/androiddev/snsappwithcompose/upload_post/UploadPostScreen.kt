@@ -1,7 +1,11 @@
 package com.androiddev.snsappwithcompose.upload_post
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HowToVote
+import androidx.compose.material.icons.filled.LocationOff
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Photo
@@ -44,6 +49,9 @@ import com.androiddev.snsappwithcompose.components.SelectedImageCards
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.getString
+import com.androiddev.snsappwithcompose.util.UiEvent
+import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -54,7 +62,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
     var selectedImageUriList by remember {
         mutableStateOf<List<Uri>>(emptyList())
     }
-    val launcher = rememberLauncherForActivityResult(
+    val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { uriList ->
             uriList.forEach{
@@ -64,6 +72,32 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
             viewModel.onEvent(UploadPostEvent.AddImages(uriList))
         }
     )
+    val launcherMultiplePermissions = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissionsMap ->
+        val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
+        viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))
+        if (areGranted) {
+        }
+        else {
+        }
+    }
+    LaunchedEffect(true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when(event) {
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                is UiEvent.navigate -> {
+                    navController.navigate(event.screen)
+                }
+            }
+        }
+    }
+
     ScreenWithTopBar(
         focusManager = focusManager,
         topBar = {
@@ -145,7 +179,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                     Spacer(modifier = Modifier.width(5.dp))
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = { launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+                        onClick = { imageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
                     ) {
                         Icon(
                             Icons.Default.Photo,
@@ -172,10 +206,19 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                     }
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = { /* do something */ }
+                        onClick = {
+                            checkAndRequestPermissions(
+                                context = context,
+                                permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION),
+                                launcher = launcherMultiplePermissions,
+                                onGranted = { viewModel.onEvent(UploadPostEvent.ToggleLocationOnOff(!viewModel.locationOnOff.value))},
+                                onUnGranted = { viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))}
+                            )
+                        }
                     ) {
                         Icon(
-                            Icons.Default.LocationOn,
+                            imageVector = if(viewModel.locationOnOff.value) Icons.Default.LocationOn else Icons.Default.LocationOff,
                             contentDescription = null,
                         )
                     }

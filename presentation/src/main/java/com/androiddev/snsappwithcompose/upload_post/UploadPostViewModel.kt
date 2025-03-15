@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.upload_post
 
+import android.Manifest
 import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.State
@@ -14,6 +15,7 @@ import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.UiEvent
+import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -42,6 +44,18 @@ class UploadPostViewModel @Inject constructor(
     private val _selectedImages = mutableStateListOf<Uri>()
     val selectedImages: SnapshotStateList<Uri>
         get() = _selectedImages
+    private val _locationOnOff = mutableStateOf(false)
+    val locationOnOff: State<Boolean>
+        get() = _locationOnOff
+    init {
+        checkAndRequestPermissions(
+            context = context,
+            permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION),
+            onGranted = { _locationOnOff.value = true },
+            onUnGranted = { _locationOnOff.value = false }
+        )
+    }
     fun onEvent(event: UploadPostEvent) {
         when(event) {
             is UploadPostEvent.TypeTag -> {
@@ -86,12 +100,35 @@ class UploadPostViewModel @Inject constructor(
             }
             is UploadPostEvent.ToggleCheckBox -> {
                 _anonymous.value = event.isChecked
+                val message = if(event.isChecked)"익명이 활성화 되었습니다" else "익명이 비활성화 되었습니다"
+                viewModelScope.launch {
+                    setEvent(
+                        UiEvent.ShowToast(
+                            message = message
+                        )
+                    )
+                }
+
             }
             is UploadPostEvent.AddImages -> {
                 _selectedImages.addAll(event.images)
             }
             is UploadPostEvent.DeleteImage -> {
                 _selectedImages.remove(event.image)
+            }
+            is UploadPostEvent.SetLocationOnOff -> {
+                _locationOnOff.value = event.onOff
+            }
+            is UploadPostEvent.ToggleLocationOnOff -> {
+                val message = if(event.onOff)"위치가 함께 저장됩니다" else "위치가 비활성화 되었습니다"
+                viewModelScope.launch {
+                    setEvent(
+                        UiEvent.ShowToast(
+                            message = message
+                        )
+                    )
+                    _locationOnOff.value = event.onOff
+                }
             }
             else -> null
         }

@@ -9,7 +9,9 @@ import androidx.core.content.ContextCompat
 fun checkAndRequestPermissions(
     context: Context,
     permissions: Array<String>,
-    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>,
+    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>? = null,
+    onGranted: () -> Unit = {},
+    onUnGranted: () -> Unit = {}
 ) {
 
     /** 권한이 이미 있는 경우 **/
@@ -19,12 +21,14 @@ fun checkAndRequestPermissions(
                 it
             ) == PackageManager.PERMISSION_GRANTED
         }) {
+        onGranted()
         Log.d("test5", "권한이 이미 존재합니다.")
     }
 
     /** 권한이 없는 경우 **/
     else {
-        launcher.launch(permissions)
+        launcher?.launch(permissions)
+        onUnGranted()
         Log.d("test5", "권한을 요청하였습니다.")
     }
 }
