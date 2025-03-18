@@ -12,4 +12,5 @@ sealed class UploadPostEvent {
     data class DeleteImage(val image: Uri) : UploadPostEvent()
     data class SetLocationOnOff(val onOff: Boolean): UploadPostEvent()
     data class ToggleLocationOnOff(val onOff: Boolean): UploadPostEvent()
+    data object UploadPost: UploadPostEvent()
 }

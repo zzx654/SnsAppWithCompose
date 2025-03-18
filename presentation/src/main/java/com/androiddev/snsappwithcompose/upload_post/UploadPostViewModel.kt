@@ -16,9 +16,16 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
+import com.androiddev.snsappwithcompose.util.getImageUri
+import com.androiddev.snsappwithcompose.util.getMultipartBody
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.http.Multipart
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,11 +36,11 @@ class UploadPostViewModel @Inject constructor(
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
         get() = _tagTextField
-    private val _searchedTags = mutableStateOf(listOf<TagInfo>())
-    val searchedTags: State<List<TagInfo>>
+    private val _searchedTags = mutableStateListOf<TagInfo>()
+    val searchedTags: SnapshotStateList<TagInfo>
         get() = _searchedTags
-    private val _addedTags = mutableStateOf(mutableSetOf<String>())
-    val addedTags: State<MutableSet<String>>
+    private val _addedTags = mutableStateListOf<String>()
+    val addedTags: SnapshotStateList<String>
         get() = _addedTags
     private val _contentTextField = mutableStateOf("")
     val contentTextField: State<String>
@@ -68,8 +75,14 @@ class UploadPostViewModel @Inject constructor(
                                 when(result) {
                                     is Resource.Success -> {
                                         result.data?.let {
-                                            if(tagTextField.value.isNotEmpty())
-                                            _searchedTags.value = it
+                                            if(tagTextField.value.isNotEmpty()) {
+                                                _searchedTags.clear()
+                                                if(it.isEmpty()) {
+                                                    _searchedTags.add(TagInfo(event.tag.replace("#",""),0))
+                                                } else {
+                                                    _searchedTags.addAll(it)
+                                                }
+                                            }
                                         }
                                     }
                                     is Resource.Error -> {
@@ -84,23 +97,24 @@ class UploadPostViewModel @Inject constructor(
                             }
                     }
                 } else {
-                    _searchedTags.value = listOf()
+                    _searchedTags.clear()
                 }
             }
             is UploadPostEvent.AddTag -> {
                 _tagTextField.value = ""
-                _addedTags.value.add(searchedTags.value[event.tagIndex].tagname)
-                _searchedTags.value = listOf()
+                if(!_addedTags.contains(searchedTags[event.tagIndex].tagname))
+                    _addedTags.add(searchedTags[event.tagIndex].tagname)
+                _searchedTags.clear()
             }
             is UploadPostEvent.DeleteTag -> {
-                _addedTags.value.remove(event.tag)
+                _addedTags.remove(event.tag)
             }
             is UploadPostEvent.TypeContent -> {
                 _contentTextField.value = event.text
             }
             is UploadPostEvent.ToggleCheckBox -> {
                 _anonymous.value = event.isChecked
-                val message = if(event.isChecked)"익명이 활성화 되었습니다" else "익명이 비활성화 되었습니다"
+                val message = if(event.isChecked) getString(context,R.string.anonymous_on) else getString(context,R.string.anonymous_off)
                 viewModelScope.launch {
                     setEvent(
                         UiEvent.ShowToast(
@@ -120,7 +134,7 @@ class UploadPostViewModel @Inject constructor(
                 _locationOnOff.value = event.onOff
             }
             is UploadPostEvent.ToggleLocationOnOff -> {
-                val message = if(event.onOff)"위치가 함께 저장됩니다" else "위치가 비활성화 되었습니다"
+                val message = if(event.onOff) getString(context,R.string.location_on) else getString(context,R.string.location_off)
                 viewModelScope.launch {
                     setEvent(
                         UiEvent.ShowToast(
@@ -129,6 +143,41 @@ class UploadPostViewModel @Inject constructor(
                     )
                     _locationOnOff.value = event.onOff
                 }
+            }
+            is UploadPostEvent.UploadPost -> {
+                viewModelScope.launch {
+
+                    var requestTags: RequestBody? = null
+                    requestTags = addedTags.joinToString("#").toRequestBody("text/plain".toMediaTypeOrNull())
+
+                    var requestImages: List<MultipartBody.Part>? = null
+                    val requestText = contentTextField.value.toRequestBody("text/plain".toMediaTypeOrNull())
+                    if(selectedImages.isNotEmpty()) {
+                        requestImages = selectedImages.map{ getMultipartBody(it,context)}
+                    }
+                    uploadPostUseCases.uploadPost(requestTags,requestImages,requestText)
+                        .collect { result ->
+                            when(result) {
+                                is Resource.Success -> {
+
+                                }
+                                is Resource.Error -> {
+                                    setEvent(
+                                        UiEvent.ShowToast(
+                                            message = result.message ?: getString(context,R.string.error)
+                                        )
+                                    )
+                                }
+                                is Resource.Loading -> {
+
+                                }
+                                else -> null
+                            }
+
+
+                        }
+                }
+
             }
             else -> null
         }

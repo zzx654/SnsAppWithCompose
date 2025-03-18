@@ -9,6 +9,8 @@ import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
@@ -24,6 +26,26 @@ class UploadPostRepositoryImpl @Inject constructor(
                 api.searchTag(tag).body()?.let{ result ->
                     if(result.resultCode == 200) {
                         emit(Resource.Success(result.tags))
+                    }
+                    else
+                        emit(Resource.Error(getString(context,R.string.server_error)))
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context,R.string.connection_error)))
+            }
+        }
+    }
+
+    override suspend fun uploadPost(tags: RequestBody?, images: List<MultipartBody.Part>?, text: RequestBody): Flow<Resource<Unit>> {
+        return flow {
+            try {
+                emit(Resource.Loading())
+                api.uploadPost(tags,images,text).body()?.let{ result ->
+                    if(result.resultCode == 200) {
+                        emit(Resource.Success(Unit))
                     }
                     else
                         emit(Resource.Error(getString(context,R.string.server_error)))

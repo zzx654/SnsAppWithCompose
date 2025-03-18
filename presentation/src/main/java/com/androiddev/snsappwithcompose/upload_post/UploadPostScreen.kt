@@ -105,7 +105,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                 title = stringResource(R.string.upload_post),
                 onBackClick = { navController.popBackStack() },
                 actions = {
-                    IconButton( onClick = { }) {
+                    IconButton( onClick = { viewModel.onEvent(UploadPostEvent.UploadPost)}) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null
@@ -120,7 +120,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
             Spacer(modifier = Modifier.height(30.dp))
             Chips(
                 modifier = Modifier.fillMaxWidth(),
-                list = viewModel.addedTags.value.toList(),
+                list = viewModel.addedTags,
                 chip = { data: String, index: Int ->
                     CustomChip(
                         backgroundColor = Color.Gray,
@@ -138,7 +138,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
 
             Chips(
                 modifier = Modifier.fillMaxWidth(),
-                list = viewModel.searchedTags.value.map { "${it.tagname}(${it.count})" },
+                list = viewModel.searchedTags.map { "${it.tagname}(${it.count})" },
                 chip = { data: String, index: Int ->
                     CustomChip(
                         backgroundColor = Color.Gray,
