@@ -63,6 +63,7 @@ android {
 
 dependencies {
 
+
     implementation(project(":domain"))
     implementation(project(":data"))
 
@@ -70,6 +71,8 @@ dependencies {
     implementation(libs.coil3.okhttp)
 
 
+    //location service
+    implementation(libs.service.location)
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)

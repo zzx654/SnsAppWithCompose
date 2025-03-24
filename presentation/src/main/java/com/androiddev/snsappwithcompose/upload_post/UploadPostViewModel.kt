@@ -15,8 +15,7 @@ import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.UiEvent
-import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
-import com.androiddev.snsappwithcompose.util.getImageUri
+import com.androiddev.snsappwithcompose.util.checkPermissions
 import com.androiddev.snsappwithcompose.util.getMultipartBody
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -25,7 +24,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.http.Multipart
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,7 +53,7 @@ class UploadPostViewModel @Inject constructor(
     val locationOnOff: State<Boolean>
         get() = _locationOnOff
     init {
-        checkAndRequestPermissions(
+        checkPermissions(
             context = context,
             permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION),
@@ -148,15 +146,38 @@ class UploadPostViewModel @Inject constructor(
                 viewModelScope.launch {
 
                     var requestTags: RequestBody? = null
-                    requestTags = addedTags.joinToString("#").toRequestBody("text/plain".toMediaTypeOrNull())
+                    if(addedTags.isNotEmpty())
+                        requestTags = addedTags.joinToString("#").toRequestBody("text/plain".toMediaTypeOrNull())
 
                     var requestImages: List<MultipartBody.Part>? = null
                     val requestText = contentTextField.value.toRequestBody("text/plain".toMediaTypeOrNull())
+                    var requestLat: MultipartBody.Part? = null
+                    var requestLong: MultipartBody.Part? =  null
+                    val charlist = listOf("a", "b", "c", "d", "e","f","g","h","i","j","1","2","3","4","0","5","6","7","8","9")
+                    var anonymousNick: RequestBody?= null
+                    var tempNick = ""
+                    if(anonymous.value) {
+                        repeat(6) {
+                            tempNick+=charlist.random()
+                        }
+                        anonymousNick = tempNick.toRequestBody("text/plain".toMediaTypeOrNull())
+                    }
+
                     if(selectedImages.isNotEmpty()) {
                         requestImages = selectedImages.map{ getMultipartBody(it,context)}
                     }
-                    uploadPostUseCases.uploadPost(requestTags,requestImages,requestText)
-                        .collect { result ->
+                    event.lat?.let {
+                        requestLat = MultipartBody.Part.createFormData("latitude",event.lat.toString())
+                        requestLong = MultipartBody.Part.createFormData("longitude",event.long.toString())
+                    }
+                    uploadPostUseCases.uploadPost(
+                        anonymousNick = anonymousNick,
+                        tags = requestTags,
+                        images = requestImages,
+                        text = requestText,
+                        latitude = requestLat,
+                        longitude = requestLong
+                    ).collect { result ->
                             when(result) {
                                 is Resource.Success -> {
 
@@ -169,6 +190,7 @@ class UploadPostViewModel @Inject constructor(
                                     )
                                 }
                                 is Resource.Loading -> {
+                                    setLoading(true)
 
                                 }
                                 else -> null

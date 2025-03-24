@@ -39,11 +39,19 @@ class UploadPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun uploadPost(tags: RequestBody?, images: List<MultipartBody.Part>?, text: RequestBody): Flow<Resource<Unit>> {
+
+    override suspend fun uploadPost(
+        anonymousNick: RequestBody?,
+        tags: RequestBody?,
+        images: List<MultipartBody.Part>?,
+        text: RequestBody,
+        latitude: MultipartBody.Part?,
+        longitude: MultipartBody.Part?
+    ): Flow<Resource<Unit>> {
         return flow {
             try {
                 emit(Resource.Loading())
-                api.uploadPost(tags,images,text).body()?.let{ result ->
+                api.uploadPost(anonymousNick,tags,images,text,latitude,longitude).body()?.let{ result ->
                     if(result.resultCode == 200) {
                         emit(Resource.Success(Unit))
                     }

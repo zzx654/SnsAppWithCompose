@@ -31,6 +31,7 @@ material = "1.12.0"
 composematerial = "1.7.8"
 ksp = "2.0.0-1.0.22"
 snapper = "0.2.0"
+serviceslocation = "21.1.0"
 
 [libraries]
 #retrofit
@@ -68,6 +69,8 @@ androidx-browser = { group = "androidx.browser", name = "browser", version.ref =
 kakao-v2-all = { group = "com.kakao.sdk", name = "v2-all", version.ref = "kakaosdk"}
 kakao-v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaosdk"}
 
+#구글 위치
+service-location = {group = "com.google.android.gms", name = "play-services-location", version.ref = "serviceslocation"}
 #snapping fling behavior
 dev-chrisbanes-snapper = { group = "dev.chrisbanes.snapper", name = "snapper", version.ref = "snapper" }
 

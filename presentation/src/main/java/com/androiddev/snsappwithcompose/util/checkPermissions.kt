@@ -3,13 +3,12 @@ package com.androiddev.snsappwithcompose.util
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.core.content.ContextCompat
 
-fun checkAndRequestPermissions(
+fun checkPermissions(
     context: Context,
     permissions: Array<String>,
-    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>? = null,
+    //launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>? = null,
     onGranted: () -> Unit = {},
     onUnGranted: () -> Unit = {}
 ) {
@@ -27,7 +26,7 @@ fun checkAndRequestPermissions(
 
     /** 권한이 없는 경우 **/
     else {
-        launcher?.launch(permissions)
+        //launcher?.launch(permissions)
         onUnGranted()
         Log.d("test5", "권한을 요청하였습니다.")
     }

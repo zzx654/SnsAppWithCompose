@@ -60,7 +60,7 @@ import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.util.UiEvent
-import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
+import com.androiddev.snsappwithcompose.util.checkPermissions
 import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -121,10 +121,12 @@ fun CreateProfileScreen(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION
         )
-        checkAndRequestPermissions(
+        checkPermissions(
             context,
             permissions,
-            launcherMultiplePermissions
+            onUnGranted = {
+                launcherMultiplePermissions.launch(permissions)
+            }
         )
         viewModel.eventFlow.collectLatest { event ->
             when(event) {

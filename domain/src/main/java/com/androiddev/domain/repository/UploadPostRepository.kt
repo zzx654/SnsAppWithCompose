@@ -10,6 +10,13 @@ interface UploadPostRepository {
 
     suspend fun searchTag(tag: String): Flow<Resource<List<TagInfo>>>
 
-    suspend fun uploadPost(tags: RequestBody?, image:List<MultipartBody.Part>?, text: RequestBody): Flow<Resource<Unit>>
+    suspend fun uploadPost(
+        anonymousNick: RequestBody?,
+        tags: RequestBody?,
+        image:List<MultipartBody.Part>?,
+        text: RequestBody,
+        latitude: MultipartBody.Part?,
+        longitude: MultipartBody.Part?
+    ): Flow<Resource<Unit>>
 
 }

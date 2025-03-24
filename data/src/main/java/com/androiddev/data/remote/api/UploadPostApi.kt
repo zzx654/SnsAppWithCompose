@@ -21,9 +21,12 @@ interface UploadPostApi {
     @Multipart
     @POST("/uploadPost")
     suspend fun uploadPost(
+        @Part ("anonymousNick") anonymousNick: RequestBody?,
         @Part ("tags") tags: RequestBody?,
         @Part imageFiles: List<MultipartBody.Part>?,
-        @Part ("text") text: RequestBody
+        @Part ("text") text: RequestBody,
+        @Part latitude: MultipartBody.Part?,
+        @Part longitude: MultipartBody.Part?
     ): Response<ResultCodeResponse>
 
 }

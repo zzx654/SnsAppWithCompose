@@ -10,6 +10,13 @@ import javax.inject.Inject
 class UploadPost @Inject constructor(
     private val repository: UploadPostRepository
 ) {
-    suspend operator fun invoke(tags: RequestBody?, images:List<MultipartBody.Part>?, text: RequestBody): Flow<Resource<Unit>> = repository.uploadPost(tags,images,text)
+    suspend operator fun invoke(
+        anonymousNick: RequestBody?,
+        tags: RequestBody?,
+        images:List<MultipartBody.Part>?,
+        text: RequestBody,
+        latitude: MultipartBody.Part? = null,
+        longitude: MultipartBody.Part? = null
+    ): Flow<Resource<Unit>> = repository.uploadPost(anonymousNick,tags,images,text,latitude,longitude)
 
 }

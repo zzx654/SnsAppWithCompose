@@ -3,7 +3,6 @@ package com.androiddev.snsappwithcompose.upload_post
 import android.Manifest
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -50,7 +49,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.snsappwithcompose.util.UiEvent
-import com.androiddev.snsappwithcompose.util.checkAndRequestPermissions
+import com.androiddev.snsappwithcompose.util.checkPermissions
+import com.androiddev.snsappwithcompose.util.fetchLocation
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,15 +60,15 @@ import kotlinx.coroutines.flow.collectLatest
 fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel = hiltViewModel()) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    val fusedLocationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
     var selectedImageUriList by remember {
         mutableStateOf<List<Uri>>(emptyList())
     }
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { uriList ->
-            uriList.forEach{
-                println(it)
-            }
             selectedImageUriList = uriList
             viewModel.onEvent(UploadPostEvent.AddImages(uriList))
         }
@@ -76,11 +77,6 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
         val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
-        viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))
-        if (areGranted) {
-        }
-        else {
-        }
     }
     LaunchedEffect(true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -105,7 +101,31 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                 title = stringResource(R.string.upload_post),
                 onBackClick = { navController.popBackStack() },
                 actions = {
-                    IconButton( onClick = { viewModel.onEvent(UploadPostEvent.UploadPost)}) {
+                    IconButton( onClick = {
+                        if(viewModel.locationOnOff.value) {
+                            checkPermissions(
+                                context = context,
+                                permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION),
+                                onGranted = {
+                                    fetchLocation(fusedLocationClient) { latitude,longitude ->
+                                        viewModel.onEvent(UploadPostEvent.UploadPost(
+                                            lat = latitude,
+                                            long = longitude
+                                        )
+                                        )
+                                    }
+
+                                },
+                                onUnGranted = {
+                                    //viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))
+                                }
+                            )
+                        } else {
+                            viewModel.onEvent(UploadPostEvent.UploadPost())
+                        }
+
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null
@@ -207,13 +227,16 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                     IconButton(
                         modifier = Modifier.size(58.dp),
                         onClick = {
-                            checkAndRequestPermissions(
+                            checkPermissions(
                                 context = context,
                                 permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
                                     Manifest.permission.ACCESS_FINE_LOCATION),
-                                launcher = launcherMultiplePermissions,
                                 onGranted = { viewModel.onEvent(UploadPostEvent.ToggleLocationOnOff(!viewModel.locationOnOff.value))},
-                                onUnGranted = { viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))}
+                                onUnGranted = {
+                                    launcherMultiplePermissions.launch(arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        Manifest.permission.ACCESS_FINE_LOCATION))
+                                    viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))
+                                }
                             )
                         }
                     ) {
