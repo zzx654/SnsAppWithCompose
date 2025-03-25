@@ -13,7 +13,7 @@ fun getProperties(propertyKey: String): String {
 }
 android {
     namespace = "com.androiddev.data"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 21

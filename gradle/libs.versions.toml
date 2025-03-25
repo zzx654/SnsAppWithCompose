@@ -9,7 +9,8 @@ compose = "1.2.0"
 espressoCore = "3.6.1"
 junitVersion = "1.2.1"
 junit = "4.13.2"
-material3 = "1.3.1"
+material3android = "1.3.1"
+material3="1.4.0-alpha10"
 activityCompose = "1.9.3"
 lifecycleRuntimeKtx = "2.8.7"
 kakaosdk = "2.12.1"
@@ -32,6 +33,7 @@ composematerial = "1.7.8"
 ksp = "2.0.0-1.0.22"
 snapper = "0.2.0"
 serviceslocation = "21.1.0"
+accompanistpager="0.28.0"
 
 [libraries]
 #retrofit
@@ -73,14 +75,17 @@ kakao-v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kaka
 service-location = {group = "com.google.android.gms", name = "play-services-location", version.ref = "serviceslocation"}
 #snapping fling behavior
 dev-chrisbanes-snapper = { group = "dev.chrisbanes.snapper", name = "snapper", version.ref = "snapper" }
-
+#tabrow
+accompanist-pager = { group = "com.google.accompanist",name="accompanist-pager",version.ref="accompanistpager"}
+accompanist-pager-indicators ={ group = "com.google.accompanist",name="accompanist-pager-indicators",version.ref="accompanistpager"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3android" }
+androidx-material3 = {group = "androidx.compose.material3", name="material3",version.ref = "material3"}
 androidx-material = { group = "androidx.compose.material", name = "material", version.ref = "composematerial"}
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

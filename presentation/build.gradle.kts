@@ -13,7 +13,7 @@ fun getProperties(propertyKey: String): String {
 }
 android {
     namespace = "com.androiddev.snsappwithcompose"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.androiddev.snsappwithcompose"
@@ -71,6 +71,9 @@ dependencies {
     implementation(libs.coil3.okhttp)
 
 
+    //tabrow
+    implementation(libs.accompanist.pager)
+    implementation(libs.accompanist.pager.indicators)
     //location service
     implementation(libs.service.location)
     // Coroutines
@@ -113,6 +116,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material3.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

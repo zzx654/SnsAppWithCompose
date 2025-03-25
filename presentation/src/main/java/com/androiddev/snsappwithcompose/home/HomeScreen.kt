@@ -7,13 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.androiddev.snsappwithcompose.components.TabPager
 
 @Composable
 fun HomeScreen(navController: NavController) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(text = "homeScreen",modifier = Modifier.align(Alignment.Center))
+        TabPager()
     }
-
 }
