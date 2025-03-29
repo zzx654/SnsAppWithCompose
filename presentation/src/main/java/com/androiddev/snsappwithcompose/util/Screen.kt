@@ -20,5 +20,7 @@ sealed interface Screen {
     data object InitScreen: Screen
     @Serializable
     data class CropScreen(val encodedUri:String): Screen
+    @Serializable
+    data class PostDetailScreen(val param:String): Screen
 
 }

@@ -22,11 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.androiddev.snsappwithcompose.home.nearposts.NearPostsScreen
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun TabPager(
+    navController: NavController
     //pagerState: PagerState,
     //tabs: List<String>,
     //Screens: List<@Composable (() -> Unit)>
@@ -74,12 +77,20 @@ fun TabPager(
 
         HorizontalPager(state = pagerState, userScrollEnabled = true) {
 
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "${tabIndex}")
+            when(tabIndex) {
+                0 -> {
+                    NearPostsScreen(navController)
+                }
+                else -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "${tabIndex}")
+                    }
+                }
             }
+
         }
     }
 

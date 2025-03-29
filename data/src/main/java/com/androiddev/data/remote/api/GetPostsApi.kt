@@ -1,0 +1,21 @@
+package com.androiddev.data.remote.api
+
+import com.androiddev.data.remote.dto.GetPostsResponseDto
+import retrofit2.Response
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.POST
+
+interface GetPostsApi {
+    @FormUrlEncoded
+    @POST("/getNearPosts")
+    suspend fun getNearPosts(
+        @Field("postid")postid: Int?,
+        @Field("postdate")postdate: String?,
+        @Field("distancemax")distancemax : Int,
+        @Field("latitude")latitude:Double,
+        @Field("longitude")longitude:Double
+    ): Response<GetPostsResponseDto>
+
+
+}

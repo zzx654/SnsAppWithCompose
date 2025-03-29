@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.androiddev.snsappwithcompose.PostDetail.PostDetailScreen
 import com.androiddev.snsappwithcompose.components.CropScreen
 import com.androiddev.snsappwithcompose.auth.signin.InitScreen
 import com.androiddev.snsappwithcompose.auth.signin.SignInScreen
@@ -63,6 +64,12 @@ fun Navigation(navController: NavHostController) {
             }
             UploadPostScreen(navController = navController)
         }
+        composable<Screen.PostDetailScreen> {
+            BackHandler(true) {
+            }
+            PostDetailScreen(navController = navController,navBackStackEntry = it)
+        }
+
 
     }
 }

@@ -3,6 +3,7 @@ package com.androiddev.data.di
 import com.androiddev.data.BuildConfig
 import com.androiddev.data.remote.api.AuthPhoneApi
 import com.androiddev.data.remote.api.CreateProfileApi
+import com.androiddev.data.remote.api.GetPostsApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.remote.api.UploadPostApi
@@ -71,4 +72,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideUploadPostApi(retrofit: Retrofit): UploadPostApi = retrofit.create(UploadPostApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGetPostsApi(retrofit: Retrofit): GetPostsApi = retrofit.create(GetPostsApi::class.java)
 }

@@ -14,6 +14,6 @@ fun HomeScreen(navController: NavController) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        TabPager()
+        TabPager(navController)
     }
 }

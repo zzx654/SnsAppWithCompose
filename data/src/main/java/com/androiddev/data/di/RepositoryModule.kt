@@ -3,16 +3,19 @@ package com.androiddev.data.di
 import android.content.Context
 import com.androiddev.data.remote.api.AuthPhoneApi
 import com.androiddev.data.remote.api.CreateProfileApi
+import com.androiddev.data.remote.api.GetPostsApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.remote.api.UploadPostApi
 import com.androiddev.data.repository.AuthPhoneRepositoryImpl
 import com.androiddev.data.repository.CreateProfileRepositoryImpl
+import com.androiddev.data.repository.GetPostsRepositoryImpl
 import com.androiddev.data.repository.SigninRepositoryImpl
 import com.androiddev.data.repository.SignupRepositoryImpl
 import com.androiddev.data.repository.UploadPostRepositoryImpl
 import com.androiddev.domain.repository.AuthPhoneRepository
 import com.androiddev.domain.repository.CreateProfileRepository
+import com.androiddev.domain.repository.GetPostsRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.repository.UploadPostRepository
@@ -50,5 +53,10 @@ object RepositoryModule {
     @Singleton
     fun provideUploadPostRepository(api: UploadPostApi,@ApplicationContext context: Context): UploadPostRepository {
         return UploadPostRepositoryImpl(api,context)
+    }
+    @Provides
+    @Singleton
+    fun provideGetPostsRepository(api: GetPostsApi,@ApplicationContext context: Context): GetPostsRepository {
+        return GetPostsRepositoryImpl(api,context)
     }
 }

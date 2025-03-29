@@ -3,6 +3,7 @@ package com.androiddev.domain.di
 import android.content.Context
 import com.androiddev.domain.repository.AuthPhoneRepository
 import com.androiddev.domain.repository.CreateProfileRepository
+import com.androiddev.domain.repository.GetPostsRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.repository.UploadPostRepository
@@ -14,6 +15,8 @@ import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.use_case.EmailSignIn
 import com.androiddev.domain.use_case.EmailSignUp
 import com.androiddev.domain.use_case.EmailSignUpUseCases
+import com.androiddev.domain.use_case.GetNearPosts
+import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.use_case.RequestEmailAuthCode
 import com.androiddev.domain.use_case.RequestPhoneAuthCode
 import com.androiddev.domain.use_case.SearchTag
@@ -77,6 +80,13 @@ object UseCaseModule {
         return UploadPostUseCases(
             searchTag = SearchTag(repository),
             uploadPost = UploadPost(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideGetPostsUseCases(repository: GetPostsRepository): GetPostsUseCases {
+        return GetPostsUseCases(
+            getNearPosts = GetNearPosts(repository)
         )
     }
 }
