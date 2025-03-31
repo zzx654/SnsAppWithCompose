@@ -23,6 +23,9 @@ class NearPostsViewModel @Inject constructor(
     private val _isRefreshing = mutableStateOf(false)
     val isRefreshing: State<Boolean>
         get() = _isRefreshing
+    private val _distance = mutableStateOf(5)
+    val distance: State<Int>
+        get() = _distance
     fun p() {
         _num.value+=1
     }
@@ -59,6 +62,9 @@ class NearPostsViewModel @Inject constructor(
                     }
                 }
 
+            }
+            is GetNearPostsEvent.SetDistance -> {
+                _distance.value = event.distance
             }
         }
 

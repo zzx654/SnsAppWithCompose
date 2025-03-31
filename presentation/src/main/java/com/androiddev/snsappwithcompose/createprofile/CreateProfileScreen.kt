@@ -42,7 +42,6 @@ import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.components.BottomWheelPicker
 import com.androiddev.snsappwithcompose.components.EditProfileImage
 import com.androiddev.snsappwithcompose.components.NicknameTextField
-import com.androiddev.snsappwithcompose.components.RadioButtons
 import com.androiddev.snsappwithcompose.util.decodeBase64
 import java.util.Calendar
 import android.Manifest
@@ -57,6 +56,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import com.androiddev.snsappwithcompose.components.AlertDialog
+import com.androiddev.snsappwithcompose.components.GenderRadioButtons
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.util.UiEvent
@@ -254,7 +254,7 @@ fun CreateProfileScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
 
             ) {
-                RadioButtons(
+                GenderRadioButtons(
                     listOf(getString(context,R.string.male),getString(context,R.string.female),getString(context,R.string.private_info)),
                     { viewModel.gender.value },
                     { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
