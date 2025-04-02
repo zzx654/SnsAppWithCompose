@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.androiddev.domain.model.Post
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.util.BaseViewModel
@@ -26,6 +27,9 @@ class NearPostsViewModel @Inject constructor(
     private val _distance = mutableStateOf(5)
     val distance: State<Int>
         get() = _distance
+    private val _posts = mutableStateOf(emptyList<Post>())
+    val posts: State<List<Post>>
+        get() = _posts
     fun p() {
         _num.value+=1
     }
@@ -52,6 +56,9 @@ class NearPostsViewModel @Inject constructor(
                     ).collect { result ->
                         when(result) {
                             is Resource.Success -> {
+                                result.data?.let {
+                                    _posts.value = it.posts
+                                }
                             }
                             is Resource.Error -> {
                             }

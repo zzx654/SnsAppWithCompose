@@ -144,7 +144,8 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                     CustomChip(
                         backgroundColor = Color.Gray,
                         text = data,
-                        onDeleteClick = { viewModel.onEvent(UploadPostEvent.DeleteTag(data))}
+                        onDeleteClick = { viewModel.onEvent(UploadPostEvent.DeleteTag(data))},
+                        border = true
                     )
                 }
             )
@@ -162,7 +163,8 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                     CustomChip(
                         backgroundColor = Color.Gray,
                         text = data,
-                        onChipClicked = { viewModel.onEvent(UploadPostEvent.AddTag(index)) }
+                        onChipClicked = { viewModel.onEvent(UploadPostEvent.AddTag(index)) },
+                        border = true
                     )
                 }
             )

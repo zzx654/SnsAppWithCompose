@@ -31,13 +31,14 @@ fun CustomChip(
     text: String,
     onChipClicked: ()->Unit = {},
     onDeleteClick: (()->Unit)? = null,
+    border: Boolean = false
 
 ) {
 
     Chip(
         shape = RoundedCornerShape(50.dp),
         onClick = { onChipClicked()},
-        border = BorderStroke(1.dp, Black.copy(alpha = 0.9f)),
+        border = if(border) BorderStroke(0.dp, Black.copy(alpha = 0.9f)) else null,
 
 
     ){

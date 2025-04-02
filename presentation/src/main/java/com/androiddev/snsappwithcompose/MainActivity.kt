@@ -8,8 +8,10 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Surface
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.androiddev.snsappwithcompose.util.Screen
 import com.androiddev.snsappwithcompose.util.Screen.HomeScreen
@@ -32,7 +35,6 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.androiddev.snsappwithcompose.bottom_navigation.BottomNavItem
 import com.androiddev.snsappwithcompose.bottom_navigation.BottomNavigationBar
-import com.androiddev.snsappwithcompose.util.Screen.UploadPostScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -94,8 +96,9 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize().statusBarsPadding().systemBarsPadding()) {
+                    ) { contentPadding->
+                        Box(modifier = Modifier.fillMaxSize().padding(if(isBottomBarVisible) contentPadding else PaddingValues(0.dp)))//.statusBarsPadding().systemBarsPadding()
+                             {
                             Navigation(navController = navController)
 
                         }
