@@ -45,11 +45,13 @@ import com.androiddev.domain.model.Post
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.elapsedTime
+import kotlin.math.round
 
 @Composable
 fun PostPrevItem(
     post: Post
 ) {
+    //distance,vote,
     Column(
         modifier = Modifier.fillMaxWidth().background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -111,7 +113,7 @@ fun PostPrevItem(
                                 .background(Color.Black.copy(alpha = 0.4f))
                         )
                         Text(
-                            text = "+${it.size}",
+                            text = "+${it.size-1}",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -147,7 +149,11 @@ fun PostPrevItem(
                 tint = Color.DarkGray.copy(0.8f)
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text("0km",color = Color.DarkGray)
+            post.distance?.let { distance ->
+
+                Text("${round(distance).toInt()}km",color = Color.DarkGray)
+            }
+
             Spacer(modifier = Modifier.width(9.dp))
             Icon(
                 imageVector = Icons.Outlined.Comment,
@@ -155,7 +161,7 @@ fun PostPrevItem(
                 tint = Color.DarkGray.copy(0.8f)
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text("0",color = Color.DarkGray.copy(0.8f))
+            Text("${post.commentcount}",color = Color.DarkGray.copy(0.8f))
             Spacer(modifier = Modifier.width(9.dp))
             Icon(
                 imageVector = Icons.Outlined.ThumbUpAlt,
@@ -163,21 +169,26 @@ fun PostPrevItem(
                 tint = Color.DarkGray.copy(0.8f)
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text("0",color = Color.DarkGray.copy(0.8f))
+            Text("${post.likecount}",color = Color.DarkGray.copy(0.8f))
             Spacer(modifier = Modifier.width(9.dp))
-            Icon(
-                imageVector = Icons.Outlined.HowToVote,
-                contentDescription = null,
-                tint = Color.DarkGray.copy(0.8f)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text("0",color = Color.DarkGray.copy(0.8f))
-            Spacer(modifier = Modifier.width(9.dp))
-            Icon(
-                imageVector = Icons.Outlined.Mic,
-                contentDescription = null,
-                tint = Color.DarkGray.copy(0.8f)
-            )
+            post.vote?.let {
+                Icon(
+                    imageVector = Icons.Outlined.HowToVote,
+                    contentDescription = null,
+                    tint = Color.DarkGray.copy(0.8f)
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("${post.votecount?:0}",color = Color.DarkGray.copy(0.8f))
+                Spacer(modifier = Modifier.width(9.dp))
+            }
+            post.audio?.let {
+                Icon(
+                    imageVector = Icons.Outlined.Mic,
+                    contentDescription = null,
+                    tint = Color.DarkGray.copy(0.8f)
+                )
+            }
         }
     }
 }

@@ -16,5 +16,6 @@ data class Post(
     var likecount:Int,
     var isliked:Int?,
     var distance:Double?,
-    val vote:String,
+    val vote:String?,
+    val votecount:Int?
 )
