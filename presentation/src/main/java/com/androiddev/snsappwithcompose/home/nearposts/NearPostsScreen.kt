@@ -86,7 +86,7 @@ fun NearPostsScreen(
 
             items(viewModel.posts.value) {
 
-                PostPrevItem()
+                PostPrevItem(it)
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }

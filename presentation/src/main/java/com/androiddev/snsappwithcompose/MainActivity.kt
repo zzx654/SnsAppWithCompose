@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -26,7 +27,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.androiddev.snsappwithcompose.util.Screen
@@ -65,35 +68,39 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         bottomBar = {
                             if(isBottomBarVisible) {
-                                BottomNavigationBar(
-                                    items = listOf(
-                                        BottomNavItem(
-                                            name = "홈",
-                                            route = Screen.HomeScreen,
-                                            icon = Icons.Default.Home
+                                Column {
+                                    HorizontalDivider(color = Color.Gray,thickness = 0.5.dp)
+                                    BottomNavigationBar(
+                                        items = listOf(
+                                            BottomNavItem(
+                                                name = "홈",
+                                                route = Screen.HomeScreen,
+                                                icon = Icons.Default.Home
+                                            ),
+                                            BottomNavItem(
+                                                name = "글쓰기",
+                                                route = Screen.UploadPostScreen,
+                                                icon = Icons.Default.Create
+                                            ),
                                         ),
-                                        BottomNavItem(
-                                            name = "글쓰기",
-                                            route = Screen.UploadPostScreen,
-                                            icon = Icons.Default.Create
-                                        ),
-                                    ),
-                                    navController = navController,
-                                    onItemClick = {
+                                        navController = navController,
+                                        onItemClick = {
 
-                                        navController.navigate(it.route) {
-                                            if(it.route != Screen.UploadPostScreen) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
+                                            navController.navigate(it.route) {
+                                                if(it.route != Screen.UploadPostScreen) {
+                                                    popUpTo(navController.graph.findStartDestination().id) {
+                                                        saveState = true
+                                                    }
+                                                    // 같은아이템 재선택시 같은 desination 생성 방지
+                                                    launchSingleTop = true
+                                                    //아이템 선택시 state 복구
+                                                    restoreState = true
                                                 }
-                                                // 같은아이템 재선택시 같은 desination 생성 방지
-                                                launchSingleTop = true
-                                                //아이템 선택시 state 복구
-                                                restoreState = true
                                             }
                                         }
-                                    }
-                                )
+                                    )
+                                }
+
                             }
                         }
                     ) { contentPadding->
@@ -103,7 +110,6 @@ class MainActivity : ComponentActivity() {
 
                         }
                     }
-
 
                 }
             }
