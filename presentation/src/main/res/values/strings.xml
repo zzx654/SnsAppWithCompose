@@ -61,6 +61,7 @@
     <string name="anonymous_off">익명이 비활성화 되었습니다</string>
     <string name="location_on">위치가 함께 저장됩니다</string>
     <string name="location_off">위치가 비활성화 되었습니다</string>
+    <string name="locationpermission_needed">위치권한이 필요합니다</string>
 
 
 

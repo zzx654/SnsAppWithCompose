@@ -1,6 +1,8 @@
 package com.androiddev.snsappwithcompose.di
 
 import android.content.Context
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,4 +18,12 @@ object AppModule {
     fun provideApplicationContext(
         @ApplicationContext context: Context
     )=context
+    @Module
+    @InstallIn(SingletonComponent::class)
+    class LocationModule {
+        @Provides
+        fun provideFusedLocationProviderClient(
+            @ApplicationContext context: Context
+        ): FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+    }
 }
