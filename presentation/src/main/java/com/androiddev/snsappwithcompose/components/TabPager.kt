@@ -6,12 +6,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
-import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.Text
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.TabRowDefaults
@@ -24,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.home.nearposts.NearPostsScreen
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -52,7 +47,7 @@ fun TabPager(
             indicator = {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(tabIndex),
-                    color = Color.Red
+                    color = Color.Black
                 )
             }
         ) {
