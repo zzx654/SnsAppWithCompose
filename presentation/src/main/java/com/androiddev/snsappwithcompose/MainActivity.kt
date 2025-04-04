@@ -6,6 +6,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -42,7 +45,7 @@ import com.androiddev.snsappwithcompose.bottom_navigation.BottomNavigationBar
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
     @SuppressLint("RestrictedApi", "UnusedMaterial3ScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,11 +107,16 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     ) { contentPadding->
-                        Box(modifier = Modifier.fillMaxSize().padding(if(isBottomBarVisible) contentPadding else PaddingValues(0.dp)))//.statusBarsPadding().systemBarsPadding()
-                             {
-                            Navigation(navController = navController)
+                        CompositionLocalProvider(
+                            LocalOverscrollConfiguration provides null
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize().padding(if(isBottomBarVisible) contentPadding else PaddingValues(0.dp)))//.statusBarsPadding().systemBarsPadding()
+                            {
+                                Navigation(navController = navController)
 
+                            }
                         }
+
                     }
 
                 }

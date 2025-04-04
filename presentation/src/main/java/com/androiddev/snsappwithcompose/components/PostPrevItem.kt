@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,15 +44,20 @@ import coil3.request.ImageRequest
 import coil3.util.DebugLogger
 import com.androiddev.domain.model.Post
 import com.androiddev.snsappwithcompose.BuildConfig
-import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.elapsedTime
 import kotlin.math.round
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun PostPrevItem(
     post: Post
 ) {
-    //distance,vote,
+    //로딩이랑 거리버튼 누르면 로딩되면서 불러오는 것 추가,위치권한 확인후 안되어있으면 텍스트 표시//
+    //페이징추가
+    //게시물 상세 페이지 추가
+    //녹음추가
+
+
     Column(
         modifier = Modifier.fillMaxWidth().background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
