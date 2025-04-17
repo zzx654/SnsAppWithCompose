@@ -2,11 +2,15 @@ package com.androiddev.snsappwithcompose.home.nearposts
 
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
@@ -39,7 +43,7 @@ fun NearPostsScreen(
     LaunchedEffect(true) {
     }
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = viewModel.isRefreshing.value,
+        refreshing = viewModel.getPostState.value.isRefreshing,
         onRefresh = {
             viewModel.onEvent(GetNearPostsEvent.RefreshNearPosts)
         })
@@ -63,10 +67,26 @@ fun NearPostsScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)
                 ) {
-                    items(viewModel.posts.value) {
+                    items(viewModel.getPostState.value.posts.size) { index ->
 
-                        PostPrevItem(it)
+                        if(index >= viewModel.getPostState.value.posts.size - 1 && !viewModel.getPostState.value.endReached && !viewModel.getPostState.value.isLoading) {
+                            viewModel.onEvent(GetNearPostsEvent.LoadNextPosts)
+                        }
+
+                        PostPrevItem(viewModel.getPostState.value.posts[index])
                         Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    item {
+                        if(viewModel.getPostState.value.isLoading && viewModel.getPostState.value.posts.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
                     }
 
                 }
@@ -77,16 +97,13 @@ fun NearPostsScreen(
                 text = getString(context,R.string.locationpermission_needed),
                 modifier = Modifier.align(Alignment.Center))
         }
-        if(viewModel.isLoading.value&&viewModel.posts.value.isEmpty()) {
+        if(viewModel.getPostState.value.isLoading&&viewModel.getPostState.value.posts.isEmpty()) {
                 CircularProgressIndicator(color = Color.Black,modifier = Modifier.align(Alignment.Center))
         }
         PullRefreshIndicator(
             modifier = Modifier.align(Alignment.TopCenter),
-            refreshing = viewModel.isRefreshing.value,
+            refreshing = viewModel.getPostState.value.isRefreshing,
             state = pullRefreshState
         )
-
-
     }
-
 }
