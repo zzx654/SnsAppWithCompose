@@ -39,10 +39,9 @@ import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.auth.components.KakaoSignInButton
 import com.androiddev.snsappwithcompose.auth.components.NaverSignInButton
-import com.androiddev.snsappwithcompose.auth.components.OutlinedTextFieldBackground
+import com.androiddev.snsappwithcompose.auth.components.SignInTextField
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.util.Screen
@@ -89,13 +88,13 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(3f)
+                .weight(0.8f)
         ) {
             Image(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 20.dp)
-                    .size(120.dp),
+                    .size(100.dp),
                 painter = painterResource(id = R.drawable.dog),
                 contentDescription = null
             )
@@ -103,59 +102,85 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(7f)
+                .weight(1f)
                 .padding(horizontal = 30.dp)
 
         ) {
 
-            Text(text = stringResource(R.string.signin), fontWeight = FontWeight.Bold,fontSize = 13.sp,modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 10.dp))
+            Text(
+                text = stringResource(R.string.signin),
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 10.dp)
+            )
             Spacer(modifier = Modifier.height(10.dp))
-            OutlinedTextFieldBackground(color = Color.White ) {
-                AuthTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = { viewModel.account.value },
-                    focusManager = focusManager,
-                    onDone = { focusManager.moveFocus(FocusDirection.Next) },
-                    onTextChange = {viewModel.onEvent(SignInEvent.TypeAccount(it))} ,
-                    keyboardType = KeyboardType.Email,
-                    hint = stringResource(R.string.email_hint)
-                )
+            SignInTextField(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                text = { viewModel.account.value },
+                focusManager = focusManager,
+                onDone = { focusManager.moveFocus(FocusDirection.Next) },
+                onTextChange = { viewModel.onEvent(SignInEvent.TypeAccount(it)) },
+                keyboardType = KeyboardType.Email,
+                hint = stringResource(R.string.email_hint)
+            )
+            Spacer(modifier = Modifier.weight(0.2f))
+            SignInTextField(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                text = { viewModel.password.value },
+                focusManager = focusManager,
+                onTextChange = { viewModel.onEvent(SignInEvent.TypePwd(it)) },
+                keyboardType = KeyboardType.Password,
+                hint = stringResource(R.string.password_hint)
+            )
+
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                Row(
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Text(
+                        text = stringResource(R.string.find_id),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Text(
+                        text = stringResource(R.string.find_pw),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-            OutlinedTextFieldBackground(color = Color.White) {
-                AuthTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = { viewModel.password.value },
-                    focusManager = focusManager,
-                    onTextChange = {viewModel.onEvent(SignInEvent.TypePwd(it))},
-                    keyboardType = KeyboardType.Password,
-                    hint = stringResource(R.string.password_hint)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-            Row(
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text(text = stringResource(R.string.find_id), fontWeight = FontWeight.Bold,fontSize = 13.sp)
-                Spacer(modifier = Modifier.width(15.dp))
-                Text(text = stringResource(R.string.find_pw), fontWeight = FontWeight.Bold,fontSize = 13.sp)
-            }
-            Spacer(modifier = Modifier.height(15.dp))
-            Button(colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black
-            ),modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),onClick = { viewModel.onEvent(SignInEvent.EmailSignIn) },shape = RoundedCornerShape(10.dp)
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                onClick = { viewModel.onEvent(SignInEvent.EmailSignIn) },
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
                     text = stringResource(R.string.login),
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
                 )
             }
+        }
+
+
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = 30.dp)
+
+        ) {
+
+
             Spacer(modifier = Modifier.height(30.dp))
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically

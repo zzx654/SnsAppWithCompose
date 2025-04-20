@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             SnsAppWithComposeTheme {
@@ -110,7 +112,7 @@ class MainActivity : ComponentActivity() {
                         CompositionLocalProvider(
                             LocalOverscrollConfiguration provides null
                         ) {
-                            Box(modifier = Modifier.fillMaxSize().padding(if(isBottomBarVisible) contentPadding else PaddingValues(0.dp)))//.statusBarsPadding().systemBarsPadding()
+                            Box(modifier = Modifier.fillMaxSize().padding(if(isBottomBarVisible) contentPadding else PaddingValues(0.dp)).navigationBarsPadding())//.statusBarsPadding().systemBarsPadding()
                             {
                                 Navigation(navController = navController)
 
