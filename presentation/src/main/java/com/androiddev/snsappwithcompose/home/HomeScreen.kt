@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.components.TabPager
+import com.androiddev.snsappwithcompose.home.nearposts.NearPostsScreen
 
 @Composable
 fun HomeScreen(navController: NavController) {

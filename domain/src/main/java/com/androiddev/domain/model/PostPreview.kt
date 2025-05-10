@@ -1,0 +1,23 @@
+package com.androiddev.domain.model
+
+data class PostPreview(
+    val postId:Int,
+    val userId:Int,
+    val nickname:String,
+    val profileImage:String?,
+    val gender:String?,
+    val date:String,
+    val text:String,
+    val tags:List<String>?,
+    val images:List<String>?,
+    val firstImage:String?,
+    val imageSize:Int?,
+    val audio:String?,
+    var commentCount:Int,
+    var likecount:Int,
+    var isliked:Int?,
+    var distance:Int?,
+    val vote:String?,
+    val voteCount:Int?,
+    val elapsedTime:String,
+)

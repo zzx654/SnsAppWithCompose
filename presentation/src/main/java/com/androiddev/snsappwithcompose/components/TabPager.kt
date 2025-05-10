@@ -11,7 +11,6 @@ import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.TabRowDefaults
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -38,7 +37,6 @@ fun TabPager(
         initialPage = 0,
     )
     val tabIndex = pagerState.currentPage
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -69,7 +67,6 @@ fun TabPager(
                 }
             }
         }
-
         HorizontalPager(state = pagerState, userScrollEnabled = true) {
 
             when(tabIndex) {

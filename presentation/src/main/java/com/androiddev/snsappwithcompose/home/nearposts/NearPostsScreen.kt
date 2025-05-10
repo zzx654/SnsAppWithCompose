@@ -1,23 +1,13 @@
 package com.androiddev.snsappwithcompose.home.nearposts
-
-
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,7 +20,8 @@ import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.components.PostPrevItem
+import com.androiddev.snsappwithcompose.components.LoadingProgressIndicator
+import com.androiddev.snsappwithcompose.components.PostPrevItems
 import com.androiddev.snsappwithcompose.components.RadioChipButtons
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -53,8 +44,13 @@ fun NearPostsScreen(
             .background(Color.LightGray.copy(alpha = 0.6f)),
     ) {
 
+        LoadingProgressIndicator (modifier = Modifier.align(Alignment.Center)){
+            viewModel.getPostState.value.isLoading&&viewModel.getPostState.value.posts.isEmpty()
+        }
+
         if(viewModel.locationPermissionGranted.value) {
             Column(modifier = Modifier.fillMaxSize()) {
+
                 RadioChipButtons(
                     items = listOf(5,10,15,20,25,50,75,100),
                     selectedValue = { viewModel.distance.value },
@@ -63,42 +59,19 @@ fun NearPostsScreen(
                     }
                 )
                 Spacer(modifier = Modifier.height(1.dp))
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)
-                ) {
-                    items(viewModel.getPostState.value.posts.size) { index ->
-
-                        if(index >= viewModel.getPostState.value.posts.size - 1 && !viewModel.getPostState.value.endReached && !viewModel.getPostState.value.isLoading) {
-                            viewModel.onEvent(GetNearPostsEvent.LoadNextPosts)
-                        }
-
-                        PostPrevItem(viewModel.getPostState.value.posts[index])
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    item {
-                        if(viewModel.getPostState.value.isLoading && viewModel.getPostState.value.posts.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
-
-                }
+                PostPrevItems(
+                    isLoading = {viewModel.getPostState.value.isLoading},
+                    endReached = {viewModel.getPostState.value.endReached},
+                    posts = { viewModel.getPostState.value.posts },
+                    loadNextPosts = { viewModel.onEvent(GetNearPostsEvent.LoadNextPosts) },
+                    pullRefreshState = pullRefreshState
+                )
             }
         }
         else {
-            Text(
-                text = getString(context,R.string.locationpermission_needed),
-                modifier = Modifier.align(Alignment.Center))
-        }
-        if(viewModel.getPostState.value.isLoading&&viewModel.getPostState.value.posts.isEmpty()) {
-                CircularProgressIndicator(color = Color.Black,modifier = Modifier.align(Alignment.Center))
+          Text(
+              text = getString(context,R.string.locationpermission_needed),
+              modifier = Modifier.align(Alignment.Center))
         }
         PullRefreshIndicator(
             modifier = Modifier.align(Alignment.TopCenter),

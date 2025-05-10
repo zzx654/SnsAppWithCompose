@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntryState = navController.currentBackStackEntryAsState()
                 navBackStackEntryState.value?.destination?.let {
                     isBottomBarVisible = it.hasRoute(HomeScreen::class)
-                            //||it.hasRoute(UploadPostScreen::class)
+                    //||it.hasRoute(UploadPostScreen::class)
                 }
 
                 Surface(
@@ -127,5 +127,3 @@ class MainActivity : ComponentActivity() {
     }
 
 }
-
-

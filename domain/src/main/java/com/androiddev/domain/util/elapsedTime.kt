@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.util
+package com.androiddev.domain.util
 
 import java.text.SimpleDateFormat
 

@@ -1,15 +1,16 @@
 package com.androiddev.snsappwithcompose.util
 
 import com.androiddev.domain.model.GetPostsResponse
-import com.androiddev.domain.model.Post
+import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.util.Resource
+
 
 class PostPaginator (
     private val loadItems: ((Resource<GetPostsResponse>)->Unit) -> Unit,
     private val onRefreshUpdated: (Boolean) -> Unit,
     private val onLoadUpdated: (Boolean) -> Unit,
     private val onError:  (String) -> Unit,
-    private val onSuccess:  (Items:List<Post>) -> Unit
+    private val onSuccess:  (Items:List<PostPreview>) -> Unit
 ) {
 
 
@@ -22,42 +23,38 @@ class PostPaginator (
         isMakingRequest = true
         loadItems(
             { result->
-                handleResult(result,refresh)
+                when(result) {
+                    is Resource.Success -> {
+                        isMakingRequest = false
+
+                        result.data?.let {
+                                onSuccess(it.posts)
+                        }
+                        if(refresh)
+                            onRefreshUpdated(false)
+                        else
+                            onLoadUpdated(false)
+
+                    }
+                    is Resource.Error -> {
+                        isMakingRequest = false
+                        if(refresh)
+                            onRefreshUpdated(false)
+                        else
+                            onLoadUpdated(false)
+                        onError(result.message ?: "An unexpected error occured")
+                    }
+                    is Resource.Loading -> {
+                        if(refresh)
+                            onRefreshUpdated(true)
+                        else
+                            onLoadUpdated(true)
+                    }
+                }
             }
         )
 
     }
-    fun handleResult(result:Resource<GetPostsResponse>,refresh:Boolean) {
 
-        when(result) {
-            is Resource.Success -> {
-                isMakingRequest = false
-                if(refresh)
-                    onRefreshUpdated(false)
-                else
-                    onLoadUpdated(false)
-                result.data?.let {
-                    onSuccess(it.posts)
-                }
-
-            }
-            is Resource.Error -> {
-                isMakingRequest = false
-                if(refresh)
-                    onRefreshUpdated(false)
-                else
-                    onLoadUpdated(false)
-                onError(result.message ?: "An unexpected error occured")
-            }
-            is Resource.Loading -> {
-                if(refresh)
-                    onRefreshUpdated(true)
-                else
-                    onLoadUpdated(true)
-            }
-        }
-
-
-    }
 
 }

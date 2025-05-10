@@ -1,7 +1,6 @@
 package com.androiddev.snsappwithcompose.components
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.outlined.Comment
 import androidx.compose.material.icons.outlined.HowToVote
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.Textsms
 import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,7 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,15 +38,13 @@ import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.util.DebugLogger
-import com.androiddev.domain.model.Post
+import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.BuildConfig
-import com.androiddev.snsappwithcompose.util.elapsedTime
-import kotlin.math.round
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun PostPrevItem(
-    post: Post
+    post: PostPreview
 ) {
     //로딩이랑 거리버튼 누르면 로딩되면서 불러오는 것 추가,위치권한 확인후 안되어있으면 텍스트 표시//
     //페이징추가
@@ -62,10 +56,11 @@ fun PostPrevItem(
         modifier = Modifier.fillMaxWidth().background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        println("ppv")
         post.tags?.let { tags ->
             Chips(
                 modifier = Modifier.fillMaxWidth(0.9f).padding(top = 10.dp),
-                list = tags.split('#').map{"#${it}"},
+                list = tags,
                 chip = { data: String, index: Int ->
                     CustomChip(
                         backgroundColor = Color.Gray,
@@ -78,7 +73,7 @@ fun PostPrevItem(
             modifier = Modifier.fillMaxWidth(0.9f).height(IntrinsicSize.Min).padding(vertical = 15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
 
-        ) {
+            ) {
             Text(
                 text = post.text,
                 overflow = TextOverflow.Ellipsis,
@@ -89,59 +84,55 @@ fun PostPrevItem(
             )
             Spacer(modifier = Modifier.weight(0.08f))
             post.images?.let { images ->
-                images.split(',').let {
+
+                Box(
+                    modifier = Modifier
+                        .weight(0.25f)
+                        .size(90.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                ) {
+                    val imageLoader = LocalContext.current.imageLoader.newBuilder()
+                        .logger(DebugLogger())
+                        .build()
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(BuildConfig.BASE_URL+ post.firstImage)
+                            .build(),
+                        imageLoader = imageLoader,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(90.dp)
+                            .clip(RoundedCornerShape(16.dp)),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null
+                    )
                     Box(
                         modifier = Modifier
-                            .weight(0.25f)
+                            .fillMaxWidth()
                             .size(90.dp)
                             .clip(RoundedCornerShape(16.dp))
-                    ) {
-                        val imageLoader = LocalContext.current.imageLoader.newBuilder()
-                            .logger(DebugLogger())
-                            .build()
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(BuildConfig.BASE_URL+ it[0])
-                                    .build(),
-                                imageLoader = imageLoader,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .size(90.dp)
-                                    .clip(RoundedCornerShape(16.dp)),
-                                contentScale = ContentScale.Crop,
-                                contentDescription = null
-                            )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .size(90.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color.Black.copy(alpha = 0.4f))
-                        )
-                        Text(
-                            text = "+${it.size-1}",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            modifier = Modifier.align(Alignment.TopEnd).padding(7.dp)
-                        )
-                    }
+                            .background(Color.Black.copy(alpha = 0.4f))
+                    )
+                    Text(
+                        text = "+${post.imageSize}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(7.dp)
+                    )
                 }
 
-            }
 
+            }
 
         }
         Row(
-          modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 5.dp)
+            modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 5.dp)
         ) {
-            var nickname = post.nickname
-            post.anonymous?.let {
-                if(it!="NONE")
-                nickname = "익명[${it}]"
-            }
-            Text(text = "${nickname} · ${elapsedTime(post.date)}", fontSize = 14.sp,color = Color.Gray)
+
+            Text(text = "${post.nickname} · ${post.elapsedTime}", fontSize = 14.sp,color = Color.Gray)
         }
+
         Spacer(modifier = Modifier.height(7.dp))
         HorizontalDivider(color = Color.Gray.copy(0.7f), thickness = 1.dp)
         Spacer(modifier = Modifier.height(2.dp))
@@ -157,7 +148,7 @@ fun PostPrevItem(
             Spacer(modifier = Modifier.width(4.dp))
             post.distance?.let { distance ->
 
-                Text("${round(distance).toInt()}km",color = Color.DarkGray)
+                Text("${distance}km",color = Color.DarkGray)
             }
 
             Spacer(modifier = Modifier.width(9.dp))
@@ -167,7 +158,7 @@ fun PostPrevItem(
                 tint = Color.DarkGray.copy(0.8f)
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text("${post.commentcount}",color = Color.DarkGray.copy(0.8f))
+            Text("${post.commentCount}",color = Color.DarkGray.copy(0.8f))
             Spacer(modifier = Modifier.width(9.dp))
             Icon(
                 imageVector = Icons.Outlined.ThumbUpAlt,
@@ -185,7 +176,7 @@ fun PostPrevItem(
                 )
 
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("${post.votecount?:0}",color = Color.DarkGray.copy(0.8f))
+                Text("${post.voteCount?:0}",color = Color.DarkGray.copy(0.8f))
                 Spacer(modifier = Modifier.width(9.dp))
             }
             post.audio?.let {
