@@ -145,7 +145,7 @@ class SignInViewModel @Inject constructor(
                     //홈화면으로 이동
                     setEvent(
                         UiEvent.navigate(
-                            screen = Screen.HomeScreen
+                            screen = Screen.NearPostsScreen
                         )
                     )
                 }
