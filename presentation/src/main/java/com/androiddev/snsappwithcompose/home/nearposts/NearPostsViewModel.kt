@@ -33,7 +33,7 @@ class NearPostsViewModel @Inject constructor(
         get() = _locationPermissionGranted
 
     val postPaginator = PostPaginator(
-        loadItems = { handleResult ->
+        loadItems = { handleResult,refresh ->
 
             checkPermissions(
                 context = context,
@@ -47,12 +47,11 @@ class NearPostsViewModel @Inject constructor(
                             var lastPostId:Int? = null
                             var lastPostDate:String? = null
                             with(getPostState.value.posts) {
-                                if(isNotEmpty()) {
+                                if(isNotEmpty()&&!refresh) {
                                     lastPostDate = last().date
                                     lastPostId = last().postId
                                 }
                             }
-
                                 getPostsUseCases.getNearPosts(
                                     postid = lastPostId,
                                     postdate = lastPostDate,
@@ -62,8 +61,6 @@ class NearPostsViewModel @Inject constructor(
                                 ).collect { result ->
                                     handleResult(result)
                                 }
-
-
                         }
                     }
                 },
@@ -84,16 +81,14 @@ class NearPostsViewModel @Inject constructor(
         onError = { message ->
             _getPostState.value = getPostState.value.copy(error = message)
         },
-        onSuccess = { posts ->
+        onSuccess = { posts,refresh ->
 
 
             _getPostState.value = getPostState.value.copy(
-                posts = getPostState.value.posts + posts,
+                posts = if(refresh) posts else getPostState.value.posts + posts,
                 endReached = posts.isEmpty() && getPostState.value.posts.isNotEmpty()
             )
         }
-
-
     )
 
     init{

@@ -6,11 +6,11 @@ import com.androiddev.domain.util.Resource
 
 
 class PostPaginator (
-    private val loadItems: ((Resource<GetPostsResponse>)->Unit) -> Unit,
+    private val loadItems: ((Resource<GetPostsResponse>)->Unit,Boolean) -> Unit,
     private val onRefreshUpdated: (Boolean) -> Unit,
     private val onLoadUpdated: (Boolean) -> Unit,
     private val onError:  (String) -> Unit,
-    private val onSuccess:  (Items:List<PostPreview>) -> Unit
+    private val onSuccess:  (Items:List<PostPreview>,refresh:Boolean) -> Unit
 ) {
 
 
@@ -28,7 +28,7 @@ class PostPaginator (
                         isMakingRequest = false
 
                         result.data?.let {
-                                onSuccess(it.posts)
+                                onSuccess(it.posts,refresh)
                         }
                         if(refresh)
                             onRefreshUpdated(false)
@@ -51,7 +51,8 @@ class PostPaginator (
                             onLoadUpdated(true)
                     }
                 }
-            }
+            },
+            refresh
         )
 
     }
