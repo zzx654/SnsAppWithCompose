@@ -55,7 +55,7 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "RestrictedApi")
 @Composable
 fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel = hiltViewModel()) {
     val focusManager = LocalFocusManager.current
@@ -93,9 +93,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
             }
         }
     }
-
     ScreenWithTopBar(
-        focusManager = focusManager,
         topBar = {
             CenterAlignedTopBar(
                 title = stringResource(R.string.upload_post),
@@ -109,13 +107,13 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                                     Manifest.permission.ACCESS_FINE_LOCATION),
                                 onGranted = {
                                     fetchLocation(fusedLocationClient) { latitude,longitude ->
-                                        viewModel.onEvent(UploadPostEvent.UploadPost(
-                                            lat = latitude,
-                                            long = longitude
-                                        )
+                                        viewModel.onEvent(
+                                            UploadPostEvent.UploadPost(
+                                                lat = latitude,
+                                                long = longitude
+                                            )
                                         )
                                     }
-
                                 },
                                 onUnGranted = {
                                     //viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))
@@ -134,6 +132,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                 }
             )
         },
+        focusManager = focusManager,
         content =  {
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -196,7 +195,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.DarkGray.copy(0.2f)),
-                ){
+                    ){
                     Spacer(modifier = Modifier.width(5.dp))
                     IconButton(
                         modifier = Modifier.size(58.dp),
@@ -205,7 +204,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                         Icon(
                             Icons.Default.Photo,
                             contentDescription = null,
-                        )
+                            )
                     }
                     IconButton(
                         modifier = Modifier.size(58.dp),
@@ -214,7 +213,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                         Icon(
                             Icons.Default.Mic,
                             contentDescription = null,
-                        )
+                            )
                     }
                     IconButton(
                         modifier = Modifier.size(58.dp),
@@ -223,7 +222,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                         Icon(
                             Icons.Default.HowToVote,
                             contentDescription = null,
-                        )
+                            )
                     }
                     IconButton(
                         modifier = Modifier.size(58.dp),
@@ -244,7 +243,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
                         Icon(
                             imageVector = if(viewModel.locationOnOff.value) Icons.Default.LocationOn else Icons.Default.LocationOff,
                             contentDescription = null,
-                        )
+                            )
                     }
                 }
             }

@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,8 +23,8 @@ import com.androiddev.snsappwithcompose.util.Screen
 @RequiresApi(Build.VERSION_CODES.N)
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
-fun Navigation(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = Screen.InitScreen) {
+fun Navigation(navController: NavHostController,modifier:Modifier) {
+    NavHost(modifier = modifier,navController = navController, startDestination = Screen.InitScreen) {
         composable<Screen.SignInScreen> {
             BackHandler(true) {
             }

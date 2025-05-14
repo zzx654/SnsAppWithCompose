@@ -1,9 +1,11 @@
 package com.androiddev.snsappwithcompose.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.unit.dp
 import com.androiddev.snsappwithcompose.util.addFocusCleaner
-
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ScreenWithTopBar(
     focusManager: FocusManager,
-    topBar: @Composable (() -> Unit),
+    topBar: @Composable (() -> Unit) = {},
     content: @Composable (() -> Unit),
     bottomBar: @Composable (() -> Unit) = {}
 ) {
@@ -30,12 +32,13 @@ fun ScreenWithTopBar(
             }
         },
         modifier = Modifier.fillMaxSize().addFocusCleaner(focusManager)
-    ) { contentPadding ->
+    ) {  contentPadding ->
         val scrollState = rememberScrollState()
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .imePadding()
+
         ) {
             Column(
                 modifier = Modifier

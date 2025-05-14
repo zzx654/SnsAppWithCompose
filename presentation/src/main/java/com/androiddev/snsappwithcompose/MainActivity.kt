@@ -5,18 +5,14 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
@@ -67,10 +63,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .focusable(true)
-                        .navigationBarsPadding(),
+                        .navigationBarsPadding().systemBarsPadding(),
                     color = Background
                 ) {
                     Scaffold(
+                        modifier = Modifier.fillMaxSize(),
                         bottomBar = {
                             if(isBottomBarVisible) {
                                 Column {
@@ -112,15 +109,10 @@ class MainActivity : ComponentActivity() {
                         CompositionLocalProvider(
                             LocalOverscrollConfiguration provides null
                         ) {
-                            Box(modifier = Modifier.fillMaxSize().padding(if(isBottomBarVisible) contentPadding else PaddingValues(0.dp)).navigationBarsPadding())//.statusBarsPadding().systemBarsPadding()
-                            {
-                                Navigation(navController = navController)
+                            Navigation(navController = navController,modifier = Modifier.padding(contentPadding))
 
-                            }
                         }
-
                     }
-
                 }
             }
         }
