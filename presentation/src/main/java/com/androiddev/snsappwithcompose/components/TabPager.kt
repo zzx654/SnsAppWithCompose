@@ -47,7 +47,8 @@ fun TabPager(
                     modifier = Modifier.tabIndicatorOffset(tabIndex),
                     color = Color.Black
                 )
-            }
+            },
+            containerColor = Color.White
         ) {
             tabs.forEachIndexed { index, value ->
                 Tab(selected = tabIndex == index,

@@ -76,7 +76,7 @@ fun UploadPostScreen(navController: NavController,viewModel: UploadPostViewModel
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
-        val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
+        //val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
     }
     LaunchedEffect(true) {
         viewModel.eventFlow.collectLatest { event ->

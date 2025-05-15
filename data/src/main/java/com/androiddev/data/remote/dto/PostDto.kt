@@ -74,9 +74,5 @@ fun PostDto.toPostPreview(
         isliked = isliked,
         vote = vote,
         distance = distance?.let{ round(it).toInt()}
-
-
-
-
     )
 }

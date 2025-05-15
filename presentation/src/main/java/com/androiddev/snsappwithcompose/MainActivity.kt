@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,7 +52,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             SnsAppWithComposeTheme {
-                var isBottomBarVisible = true
+                var isBottomBarVisible = false
                 val navController = rememberNavController()
                 val navBackStackEntryState = navController.currentBackStackEntryAsState()
                 navBackStackEntryState.value?.destination?.let {
@@ -63,8 +64,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .focusable(true)
-                        .navigationBarsPadding().systemBarsPadding(),
-                    color = Background
+                        .navigationBarsPadding().systemBarsPadding()
                 ) {
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),

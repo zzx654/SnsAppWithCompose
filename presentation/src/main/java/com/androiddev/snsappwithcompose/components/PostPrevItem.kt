@@ -56,7 +56,6 @@ fun PostPrevItem(
         modifier = Modifier.fillMaxWidth().background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        println("ppv")
         post.tags?.let { tags ->
             Chips(
                 modifier = Modifier.fillMaxWidth(0.9f).padding(top = 10.dp),
