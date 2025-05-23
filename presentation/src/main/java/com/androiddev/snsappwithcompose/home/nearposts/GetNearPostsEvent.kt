@@ -6,5 +6,6 @@ sealed class GetNearPostsEvent {
     object RefreshNearPosts: GetNearPostsEvent()
     object LoadNextPosts: GetNearPostsEvent()
     data class SetDistance(val distance: Int): GetNearPostsEvent()
+    data class SelectPost(val postId: Int): GetNearPostsEvent()
     //data class PermissionChecked(val granted: Boolean): GetNearPostsEvent()
 }

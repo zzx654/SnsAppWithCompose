@@ -4,11 +4,15 @@ import android.Manifest
 import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.use_case.GetPostsUseCases
+import com.androiddev.domain.util.Resource
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.home.GetPostsState
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.PostPaginator
+import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.checkPermissions
 import com.androiddev.snsappwithcompose.util.fetchLocation
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -116,10 +120,52 @@ class NearPostsViewModel @Inject constructor(
                     postPaginator.loadNextItems(refresh = false)
                 }
             }
+            is GetNearPostsEvent.SelectPost -> {
+                checkPermissions(
+                    context = context,
+                    permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION),
+                    onGranted = {
+                        fetchLocation(locationClient) { latitude, longitude ->
+                            if(!_locationPermissionGranted.value)
+                                _locationPermissionGranted.value = true
+                            getSelectedPost(event.postId,latitude,longitude)
+                        }
+                    },
+                    onUnGranted = {
+                        //권한이 허용되지않았다는 값을 줘야함
+                       // _locationPermissionGranted.value = false
+                        getSelectedPost(event.postId,null,null)
+                    }
+                )
+            }
             //is GetNearPostsEvent.PermissionChecked -> {
              //   _locationPermissionGranted.value = event.granted
             //}
         }
 
+    }
+    fun getSelectedPost(postid:Int, latitude:Double?,longitude:Double?) {
+        viewModelScope.launch {
+            getPostsUseCases.getSelectedPost(postid = postid, latitude = latitude, longitude = longitude)
+                .collect { result ->
+                    when(result) {
+                        is Resource.Success -> {
+                            setLoading(false)
+                            result.data?.let {
+
+                            }
+                        }
+                        is Resource.Error -> {
+                            setLoading(false)
+                        }
+                        is Resource.Loading -> {
+                            setLoading(true)
+                        }
+                    }
+
+                }
+
+        }
     }
 }

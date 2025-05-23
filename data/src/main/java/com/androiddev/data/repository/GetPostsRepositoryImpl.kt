@@ -45,4 +45,30 @@ class GetPostsRepositoryImpl @Inject constructor(
        }
     }
 
+
+    override suspend fun GetSelectedPost(
+        postId: Int,
+        latitude: Double?,
+        longitude: Double?
+    ): Flow<Resource<GetPostsResponse>> {
+        return flow {
+            try{
+                emit(Resource.Loading())
+                api.getSelectedPost(postId,latitude,longitude).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        val getSelectedPostresult = result.toGetPostsResponse(posts = result.posts, isTokenValid = result.isTokenValid)
+                        emit(Resource.Success(getSelectedPostresult))
+                    } else {
+                        emit(Resource.Error(getString(context,R.string.server_error)))
+                    }
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context,R.string.connection_error)))
+            }
+        }
+    }
+
 }

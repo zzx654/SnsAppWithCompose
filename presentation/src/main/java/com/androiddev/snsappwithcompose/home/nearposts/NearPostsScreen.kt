@@ -64,7 +64,8 @@ fun NearPostsScreen(
                     endReached = {viewModel.getPostState.value.endReached},
                     posts = { viewModel.getPostState.value.posts },
                     loadNextPosts = { viewModel.onEvent(GetNearPostsEvent.LoadNextPosts) },
-                    pullRefreshState = pullRefreshState
+                    pullRefreshState = pullRefreshState,
+                    onPostClick = { postid -> viewModel.onEvent(GetNearPostsEvent.SelectPost(postid))}
                 )
             }
         }

@@ -44,6 +44,7 @@ import com.androiddev.snsappwithcompose.BuildConfig
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun PostPrevItem(
+    modifier:Modifier,
     post: PostPreview
 ) {
     //로딩이랑 거리버튼 누르면 로딩되면서 불러오는 것 추가,위치권한 확인후 안되어있으면 텍스트 표시//
@@ -53,7 +54,7 @@ fun PostPrevItem(
 
 
     Column(
-        modifier = Modifier.fillMaxWidth().background(Color.White),
+        modifier = modifier.fillMaxWidth().background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         post.tags?.let { tags ->

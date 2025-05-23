@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -26,7 +27,8 @@ fun PostPrevItems(
     endReached:()->Boolean,
     posts:()->List<PostPreview>,
     loadNextPosts:()->Unit,
-    pullRefreshState: PullRefreshState
+    pullRefreshState: PullRefreshState,
+    onPostClick:(Int)->Unit
 ) {
 
     LazyColumn(
@@ -42,7 +44,7 @@ fun PostPrevItems(
             if(index >= posts().size - 1 && !endReached() && !isLoading()) {
                 loadNextPosts()
             }
-            PostPrevItem(posts()[index])
+            PostPrevItem(post = posts()[index],modifier = Modifier.clickable{ onPostClick(posts()[index].postId) })
             Spacer(modifier = Modifier.height(4.dp))
         }
         item {
