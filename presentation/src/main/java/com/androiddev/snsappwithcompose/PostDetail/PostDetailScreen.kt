@@ -1,7 +1,5 @@
 package com.androiddev.snsappwithcompose.PostDetail
 
-import android.net.Uri
-import android.net.Uri.parse
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,25 +10,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.toRoute
-import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.domain.model.PostPreview
 
 @Composable
 fun PostDetailScreen(
+    post: PostPreview?,
     navController: NavController,
     navBackStackEntry: NavBackStackEntry
 ) {
-    var args = navBackStackEntry.toRoute<Screen.PostDetailScreen>()
     val context = LocalContext.current
-    val param = args.param
+    println(post?.tags)
+    println(post?.profileImage)
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = param,
+            text = post!!.text,
             modifier = Modifier.clickable{ navController.popBackStack()}
         )
     }
-
 }

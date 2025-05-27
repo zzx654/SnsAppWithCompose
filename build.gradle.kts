@@ -7,4 +7,5 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
 }

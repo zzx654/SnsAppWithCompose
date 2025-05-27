@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.PostDetail.PostDetailScreen
 import com.androiddev.snsappwithcompose.components.CropScreen
 import com.androiddev.snsappwithcompose.auth.signin.InitScreen
@@ -18,12 +19,12 @@ import com.androiddev.snsappwithcompose.auth.signup.EmailSignUpScreen
 import com.androiddev.snsappwithcompose.createprofile.CreateProfileScreen
 import com.androiddev.snsappwithcompose.home.HomeScreen
 import com.androiddev.snsappwithcompose.upload_post.UploadPostScreen
-import com.androiddev.snsappwithcompose.util.Screen
 
 @RequiresApi(Build.VERSION_CODES.N)
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun Navigation(navController: NavHostController,modifier:Modifier) {
+
     NavHost(modifier = modifier,navController = navController, startDestination = Screen.InitScreen) {
         composable<Screen.SignInScreen> {
             BackHandler(true) {
@@ -65,10 +66,13 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             }
             UploadPostScreen(navController = navController)
         }
-        composable<Screen.PostDetailScreen> {
-            BackHandler(true) {
+        composable<Screen.PostDetailScreen>(
+            typeMap = postTypeMap
+        ) {
+            val post = it.toRoute<Screen.PostDetailScreen>().post
+           BackHandler(true) {
             }
-            PostDetailScreen(navController = navController,navBackStackEntry = it)
+            PostDetailScreen(post = post,navController = navController,navBackStackEntry = it)
         }
 
 

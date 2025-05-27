@@ -4,12 +4,11 @@ import android.Manifest
 import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.util.Resource
-import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.home.GetPostsState
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.PostPaginator
 import com.androiddev.snsappwithcompose.util.UiEvent
@@ -153,6 +152,11 @@ class NearPostsViewModel @Inject constructor(
                         is Resource.Success -> {
                             setLoading(false)
                             result.data?.let {
+                                setEvent(
+                                    UiEvent.navigate(
+                                      Screen.PostDetailScreen(it.posts[0])
+                                    )
+                                )
 
                             }
                         }

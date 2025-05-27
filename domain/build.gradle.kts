@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.dagger.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.serialization)
 }
 
 android {
@@ -35,6 +37,7 @@ android {
 }
 
 dependencies {
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
@@ -42,6 +45,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     ksp (libs.androidx.hilt.compiler)
+
+    implementation(libs.kotlinx.serialization.json)
 
     implementation (libs.okhttp)
 
