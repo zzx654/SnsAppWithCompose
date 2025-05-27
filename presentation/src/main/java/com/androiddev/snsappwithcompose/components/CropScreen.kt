@@ -43,7 +43,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.encodeToBase64
 import java.io.IOException
 import kotlin.math.min

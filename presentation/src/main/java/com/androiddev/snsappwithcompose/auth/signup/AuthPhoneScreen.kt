@@ -43,7 +43,7 @@ import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.components.TopBar
-import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 

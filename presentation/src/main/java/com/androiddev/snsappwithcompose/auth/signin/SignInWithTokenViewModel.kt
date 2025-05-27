@@ -11,7 +11,7 @@ import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.BaseViewModel
-import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

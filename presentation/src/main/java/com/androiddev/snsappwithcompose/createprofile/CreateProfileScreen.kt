@@ -35,7 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
-import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.BirthTextField
 import com.androiddev.snsappwithcompose.auth.components.BottomButton

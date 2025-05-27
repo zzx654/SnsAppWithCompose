@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.androiddev.snsappwithcompose.navigation.components.Navigation
-import com.androiddev.snsappwithcompose.ui.theme.Background
 import com.androiddev.snsappwithcompose.ui.theme.SnsAppWithComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.material.ExperimentalMaterialApi
@@ -33,8 +31,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.androiddev.snsappwithcompose.util.Screen
-import com.androiddev.snsappwithcompose.util.Screen.HomeScreen
+import com.androiddev.snsappwithcompose.navigation.components.Screen
+import com.androiddev.snsappwithcompose.navigation.components.Screen.HomeScreen
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.androiddev.snsappwithcompose.bottom_navigation.BottomNavItem
@@ -76,7 +74,7 @@ class MainActivity : ComponentActivity() {
                                         items = listOf(
                                             BottomNavItem(
                                                 name = "홈",
-                                                route = Screen.HomeScreen,
+                                                route = HomeScreen,
                                                 icon = Icons.Default.Home
                                             ),
                                             BottomNavItem(

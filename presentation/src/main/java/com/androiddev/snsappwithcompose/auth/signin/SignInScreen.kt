@@ -44,7 +44,7 @@ import com.androiddev.snsappwithcompose.auth.components.NaverSignInButton
 import com.androiddev.snsappwithcompose.auth.components.SignInTextField
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
-import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import kotlinx.coroutines.flow.collectLatest

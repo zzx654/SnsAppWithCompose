@@ -16,7 +16,7 @@ import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.BottomSheetItem
 import com.androiddev.snsappwithcompose.util.BottomWheelState
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
-import com.androiddev.snsappwithcompose.util.Screen
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.getMultipartBody
 import dagger.hilt.android.lifecycle.HiltViewModel
