@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -37,6 +39,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.androiddev.snsappwithcompose.bottom_navigation.BottomNavItem
 import com.androiddev.snsappwithcompose.bottom_navigation.BottomNavigationBar
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -47,7 +50,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //enableEdgeToEdge()
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        //WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             SnsAppWithComposeTheme {
                 var isBottomBarVisible = false
@@ -64,6 +67,15 @@ class MainActivity : ComponentActivity() {
                         .focusable(true)
                         .navigationBarsPadding().systemBarsPadding()
                 ) {
+                    val systemUiController = rememberSystemUiController()
+                    val useDarkIcons = !isSystemInDarkTheme()
+
+                    SideEffect {
+                        systemUiController.setStatusBarColor(
+                            color = Color(0xFFF8F5F5),
+                            darkIcons = !useDarkIcons
+                        )
+                    }
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
                         bottomBar = {

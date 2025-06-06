@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.components.LoadingProgressIndicator
 import com.androiddev.snsappwithcompose.components.PostPrevItems
 import com.androiddev.snsappwithcompose.components.RadioChipButtons
@@ -55,6 +56,9 @@ fun NearPostsScreen(
         onRefresh = {
             viewModel.onEvent(GetNearPostsEvent.RefreshNearPosts)
         })
+    LoadingDialog {
+        viewModel.isLoading.value
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -64,6 +68,7 @@ fun NearPostsScreen(
         LoadingProgressIndicator (modifier = Modifier.align(Alignment.Center)){
             viewModel.getPostState.value.isLoading&&viewModel.getPostState.value.posts.isEmpty()
         }
+
 
         if(viewModel.locationPermissionGranted.value) {
             Column(modifier = Modifier.fillMaxSize()) {

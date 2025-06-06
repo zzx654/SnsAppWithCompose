@@ -70,7 +70,7 @@ dependencies {
     implementation(libs.coil3.compose)
     implementation(libs.coil3.okhttp)
 
-
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.17.0")
     //tabrow
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
