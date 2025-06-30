@@ -55,10 +55,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
+import com.androiddev.snsappwithcompose.BaseScaffold
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.GenderRadioButtons
 import com.androiddev.snsappwithcompose.components.LoadingDialog
-import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.checkPermissions
 import kotlinx.coroutines.flow.collectLatest
@@ -201,7 +201,7 @@ fun CreateProfileScreen(
             }
         }
     )
-    ScreenWithTopBar(
+    BaseScaffold(
         focusManager = focusManager,
         topBar = {
             CenterAlignedTopAppBar(
@@ -211,6 +211,17 @@ fun CreateProfileScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                     ) },
+            )
+        },
+        bottomBar = {
+            BottomButton(
+                buttonText = stringResource(id = R.string.request_signup),
+                activeButton = {
+                    viewModel.isNicknameValid.value
+                            && viewModel.birthYear.value != null
+                            && viewModel.gender.value.isNotBlank()
+                },
+                onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert)}
             )
         },
         content = {
@@ -260,17 +271,6 @@ fun CreateProfileScreen(
                     { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
                 )
             }
-        },
-        bottomBar = {
-            BottomButton(
-                buttonText = stringResource(id = R.string.request_signup),
-                activeButton = {
-                    viewModel.isNicknameValid.value
-                            && viewModel.birthYear.value != null
-                            && viewModel.gender.value.isNotBlank()
-                },
-                onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert)}
-            )
         }
     )
 }

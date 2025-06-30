@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,10 +28,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
+import com.androiddev.snsappwithcompose.BaseScaffold
 import com.androiddev.snsappwithcompose.Constants.PASSWORD_REGEX
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.auth.components.AuthNumberTextField
@@ -41,14 +42,12 @@ import com.androiddev.snsappwithcompose.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.auth.components.PasswordHelper
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingDialog
-import com.androiddev.snsappwithcompose.components.ScreenWithTopBar
 import com.androiddev.snsappwithcompose.components.TopBar
 import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 import java.util.regex.Pattern
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun EmailSignUpScreen(
@@ -86,12 +85,23 @@ fun EmailSignUpScreen(
             }
         }
     }
-    ScreenWithTopBar(
+    BaseScaffold(
         focusManager = focusManager,
         topBar = {
             TopBar(
-                title = stringResource(R.string.signup),
+                title = getString(context,R.string.signup),
                 onBackClick = { navController.popBackStack(Screen.SignInScreen,false) }
+            )
+        },
+        bottomBar = {
+            BottomButton(
+                buttonText = stringResource(id = R.string.request_signup),
+                activeButton = {
+                    viewModel.password.value == viewModel.repeatPw.value &&
+                            viewModel.isCodeReceived.value&&
+                            Pattern.matches( PASSWORD_REGEX,viewModel.password.value)&&
+                            viewModel.authCodeField.value.code.isNotEmpty() },
+                onClick = { viewModel.onEvent(EmailSignUpEvent.EmailSignUp(args.phoneNumber))}
             )
         },
         content = {
@@ -161,17 +171,6 @@ fun EmailSignUpScreen(
                             viewModel.password.value
                         )
             }
-        },
-        bottomBar = {
-            BottomButton(
-                buttonText = stringResource(id = R.string.request_signup),
-                activeButton = {
-                    viewModel.password.value == viewModel.repeatPw.value &&
-                            viewModel.isCodeReceived.value&&
-                            Pattern.matches( PASSWORD_REGEX,viewModel.password.value)&&
-                            viewModel.authCodeField.value.code.isNotEmpty() },
-                onClick = { viewModel.onEvent(EmailSignUpEvent.EmailSignUp(args.phoneNumber))}
-            )
         }
     )
 }

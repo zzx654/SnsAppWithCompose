@@ -4,9 +4,9 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -16,25 +16,30 @@ import com.androiddev.snsappwithcompose.ui.theme.BottomBar
 import com.androiddev.snsappwithcompose.ui.theme.BottomSelected
 import com.androiddev.snsappwithcompose.ui.theme.BottomUnSelected
 import androidx.navigation.NavDestination.Companion.hasRoute
+import com.androiddev.snsappwithcompose.navigation.components.Screen
+import kotlin.reflect.KClass
 
 @SuppressLint("RestrictedApi")
 @ExperimentalMaterialApi
 @Composable
 fun BottomNavigationBar(
     items: List<BottomNavItem>,
+    initialScreen: KClass<out Screen>,   // 초기 탭을 Screen 클래스 타입으로 받음
     navController: NavController,
     modifier: Modifier = Modifier,
     onItemClick: (BottomNavItem) -> Unit
 ) {
-    val backStackEntry = navController.currentBackStackEntryAsState()
+
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
     BottomNavigation(
         modifier = modifier,
         backgroundColor = BottomBar,
         elevation = 0.dp
     ) {
         items.forEach { item ->
-
-            val selected = backStackEntry.value?.destination?.hasRoute(item.route::class) == true
+            // 초기 상태이거나, 현재 destination과 일치하면 selected = true
+            val selected = currentDestination?.hasRoute(item.route::class) ?: (item.route::class == initialScreen)
             BottomNavigationItem(
                 selected = selected,
                 onClick = { onItemClick(item) },
@@ -56,7 +61,6 @@ fun BottomNavigationBar(
                     }
                 }
             )
-
         }
     }
 }

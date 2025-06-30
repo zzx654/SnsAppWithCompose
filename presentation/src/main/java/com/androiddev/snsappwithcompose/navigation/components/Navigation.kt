@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.androiddev.snsappwithcompose.MainScaffold
 import com.androiddev.snsappwithcompose.PostDetail.PostDetailScreen
 import com.androiddev.snsappwithcompose.components.CropScreen
 import com.androiddev.snsappwithcompose.auth.signin.InitScreen
@@ -17,45 +18,57 @@ import com.androiddev.snsappwithcompose.auth.signin.SignInScreen
 import com.androiddev.snsappwithcompose.auth.signup.AuthPhoneScreen
 import com.androiddev.snsappwithcompose.auth.signup.EmailSignUpScreen
 import com.androiddev.snsappwithcompose.createprofile.CreateProfileScreen
-import com.androiddev.snsappwithcompose.home.HomeScreen
 import com.androiddev.snsappwithcompose.upload_post.UploadPostScreen
 
 @RequiresApi(Build.VERSION_CODES.N)
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
-fun Navigation(navController: NavHostController,modifier:Modifier) {
+fun Navigation(navController: NavHostController, modifier:Modifier) {
 
-    NavHost(modifier = modifier,navController = navController, startDestination = Screen.InitScreen) {
-        composable<Screen.SignInScreen> {
-            BackHandler(true) {
-            }
-            SignInScreen(navController)
-        }
-        composable<Screen.AuthPhoneScreen> {
-            BackHandler(true) {
-            }
-            AuthPhoneScreen(navController = navController, navBackStackEntry = it)
-        }
-        composable<Screen.SignUpScreen> {
-            BackHandler(true) {
-            }
-            EmailSignUpScreen(navController = navController, navBackStackEntry = it)
-        }
-        composable<Screen.CreateprofileScreen> {
-            BackHandler(true) {
-            }
-            CreateProfileScreen(navController = navController, navBackStackEntry = it)
-        }
-        composable<Screen.HomeScreen> {
-            BackHandler(true) {
-            }
-            HomeScreen(navController = navController)
-        }
+    NavHost(
+        modifier = modifier,navController = navController,
+        startDestination = Screen.InitScreen
+    ) {
         composable<Screen.InitScreen> {
             BackHandler(true) {
             }
             InitScreen(navController = navController)
         }
+        composable<Screen.MainScreen> {
+            BackHandler(true) {
+            }
+            MainScaffold(rootNavController = navController,startTab = Screen.HomeScreen)
+        }
+        composable<Screen.SignInScreen> {
+            BackHandler(true) {
+            }
+            SignInScreen(navController = navController)
+        }
+        composable<Screen.AuthPhoneScreen> {
+            BackHandler(true) {
+            }
+            AuthPhoneScreen(
+                navController = navController,
+                navBackStackEntry = it
+            )
+        }
+        composable<Screen.SignUpScreen> {
+            BackHandler(true) {
+            }
+            EmailSignUpScreen(
+                navController = navController,
+                navBackStackEntry = it
+            )
+        }
+        composable<Screen.CreateprofileScreen> {
+            BackHandler(true) {
+            }
+            CreateProfileScreen(
+                navController = navController,
+                navBackStackEntry = it
+            )
+        }
+
         composable<Screen.CropScreen> {
             BackHandler(true) {
             }
@@ -72,7 +85,11 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             val post = it.toRoute<Screen.PostDetailScreen>().post
            BackHandler(true) {
             }
-            PostDetailScreen(post = post,navController = navController,navBackStackEntry = it)
+            PostDetailScreen(
+                post = post,
+                navController = navController,
+                navBackStackEntry = it
+            )
         }
 
 

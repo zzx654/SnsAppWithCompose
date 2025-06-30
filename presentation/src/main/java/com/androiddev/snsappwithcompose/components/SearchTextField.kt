@@ -4,11 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -41,6 +40,7 @@ fun SearchTextField(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .wrapContentHeight()
                     .background(color = TextFieldBackground.copy(alpha = 0.1f), shape = RoundedCornerShape(size = 16.dp))
                     .padding(all = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -51,7 +51,7 @@ fun SearchTextField(
                     tint = Color.DarkGray,
                 )
                 Spacer(modifier = Modifier.width(width = 8.dp))
-                Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.CenterStart) {
+                Box( contentAlignment = Alignment.CenterStart) {
                     if(text().isEmpty()) {
                         Text(
                             text = hint,

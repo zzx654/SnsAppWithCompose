@@ -50,7 +50,7 @@ class SignInWithTokenViewModel @Inject constructor(
                                             //홈화면
                                             setEvent(
                                                 UiEvent.navigate(
-                                                    screen = Screen.HomeScreen
+                                                    screen = Screen.MainScreen
                                                 )
                                             )
                                         } else {

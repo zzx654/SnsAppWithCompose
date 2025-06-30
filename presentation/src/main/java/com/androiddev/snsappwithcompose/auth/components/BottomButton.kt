@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -23,7 +24,8 @@ fun BottomButton(
 ) {
     Box(modifier = Modifier
         .fillMaxWidth()
-        .height(50.dp)) {
+        .height(50.dp)
+        .imePadding()) {
         Button(   colors = ButtonDefaults.buttonColors(
             containerColor = if(activeButton()) Color.Black else Color.Gray
         ),modifier = Modifier.fillMaxSize(),shape = RoundedCornerShape(0.dp),onClick = {if(activeButton()){onClick()} }) {

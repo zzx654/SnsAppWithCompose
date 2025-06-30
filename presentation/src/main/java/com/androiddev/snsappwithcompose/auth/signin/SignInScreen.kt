@@ -51,19 +51,23 @@ import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
-fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltViewModel()) {
+fun SignInScreen(
+    navController: NavController,
+    signinViewModel: SignInViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(key1 = true) {
-        viewModel.eventFlow.collectLatest { event ->
-            when(event) {
+        signinViewModel.eventFlow.collectLatest { event ->
+            when (event) {
                 is UiEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
                         it.setGravity(Gravity.BOTTOM, 0, 130)
                         it.show()
                     }
                 }
+
                 is UiEvent.navigate -> {
                     navController.navigate(event.screen)
                 }
@@ -71,15 +75,16 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
         }
     }
     LoadingDialog {
-        viewModel.isLoading.value
+        signinViewModel.isLoading.value
     }
     AlertDialog(
-        title = {viewModel.alertDialogState.value.title},
-        cancelText = {viewModel.alertDialogState.value.cancelText},
-        confirmText = {viewModel.alertDialogState.value.confirmText},
-        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+        title = { signinViewModel.alertDialogState.value.title },
+        cancelText = { signinViewModel.alertDialogState.value.cancelText },
+        confirmText = { signinViewModel.alertDialogState.value.confirmText },
+        onClickConfirm = signinViewModel.alertDialogState.value.onClickConfirm,
+        onClickCancel = signinViewModel.alertDialogState.value.onClickCancel
     )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -117,25 +122,31 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
             )
             Spacer(modifier = Modifier.height(10.dp))
             SignInTextField(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                text = { viewModel.account.value },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                text = { signinViewModel.account.value },
                 focusManager = focusManager,
                 onDone = { focusManager.moveFocus(FocusDirection.Next) },
-                onTextChange = { viewModel.onEvent(SignInEvent.TypeAccount(it)) },
+                onTextChange = { signinViewModel.onEvent(SignInEvent.TypeAccount(it)) },
                 keyboardType = KeyboardType.Email,
                 hint = stringResource(R.string.email_hint)
             )
             Spacer(modifier = Modifier.weight(0.2f))
             SignInTextField(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                text = { viewModel.password.value },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                text = { signinViewModel.password.value },
                 focusManager = focusManager,
-                onTextChange = { viewModel.onEvent(SignInEvent.TypePwd(it)) },
+                onTextChange = { signinViewModel.onEvent(SignInEvent.TypePwd(it)) },
                 keyboardType = KeyboardType.Password,
                 hint = stringResource(R.string.password_hint)
             )
 
-            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
                 Row(
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
@@ -160,7 +171,7 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                onClick = { viewModel.onEvent(SignInEvent.EmailSignIn) },
+                onClick = { signinViewModel.onEvent(SignInEvent.EmailSignIn) },
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
@@ -183,25 +194,52 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
 
             Spacer(modifier = Modifier.height(30.dp))
             Row(
-                modifier = Modifier.align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                HorizontalDivider(modifier = Modifier.width(50.dp),color = Color.Gray, thickness = 1.dp)
+                HorizontalDivider(
+                    modifier = Modifier.width(50.dp),
+                    color = Color.Gray,
+                    thickness = 1.dp
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.social_login), fontWeight = FontWeight.Bold,fontSize = 13.sp)
+                Text(
+                    text = stringResource(R.string.social_login),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                HorizontalDivider(modifier = Modifier.width(50.dp),color = Color.Gray, thickness = 1.dp)
+                HorizontalDivider(
+                    modifier = Modifier.width(50.dp),
+                    color = Color.Gray,
+                    thickness = 1.dp
+                )
             }
             Spacer(modifier = Modifier.height(30.dp))
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 KakaoSignInButton(
-                    onKaKaoSignInCompleted = { account -> viewModel.onEvent(SignInEvent.SocialSignIn(getString(context,R.string.kakao),account)) },
-                    onError =  { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
+                    onKaKaoSignInCompleted = { account ->
+                        signinViewModel.onEvent(
+                            SignInEvent.SocialSignIn(
+                                getString(context, R.string.kakao),
+                                account
+                            )
+                        )
+                    },
+                    onError = { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
                 )
                 Spacer(modifier = Modifier.width(20.dp))
                 NaverSignInButton(
-                    onNaverSignInCompleted = { account -> viewModel.onEvent(SignInEvent.SocialSignIn(getString(context,R.string.naver),account)) } ,
+                    onNaverSignInCompleted = { account ->
+                        signinViewModel.onEvent(
+                            SignInEvent.SocialSignIn(
+                                getString(context, R.string.naver),
+                                account
+                            )
+                        )
+                    },
                     onError = { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
                 )
             }
@@ -209,10 +247,29 @@ fun SignInScreen(navController: NavController,viewModel: SignInViewModel = hiltV
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text(text = stringResource(R.string.no_account), fontWeight = FontWeight.Bold,fontSize = 13.sp,color = Color.Gray)
+                Text(
+                    text = stringResource(R.string.no_account),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = Color.Gray
+                )
                 Spacer(modifier = Modifier.width(15.dp))
-                Text(modifier = Modifier.clickable {  navController.navigate(Screen.AuthPhoneScreen(platform = getString(context,R.string.email),account = null))},text = stringResource(R.string.create_account), fontWeight = FontWeight.Bold,fontSize = 13.sp,color = Color.Black)
+                Text(
+                    modifier = Modifier.clickable {
+                        navController.navigate(
+                            Screen.AuthPhoneScreen(
+                                platform = getString(context, R.string.email),
+                                account = null
+                            )
+                        )
+                    },
+                    text = stringResource(R.string.create_account),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = Color.Black
+                )
             }
         }
     }
+
 }

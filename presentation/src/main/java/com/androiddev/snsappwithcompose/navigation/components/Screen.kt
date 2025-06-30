@@ -10,6 +10,8 @@ import android.net.Uri
 sealed interface Screen {
 
     @Serializable
+    data object MainScreen: Screen
+    @Serializable
     data object SignInScreen: Screen
     @Serializable
     data class SignUpScreen(val phoneNumber: String): Screen

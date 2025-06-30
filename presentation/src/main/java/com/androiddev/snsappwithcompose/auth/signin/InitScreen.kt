@@ -3,7 +3,6 @@ package com.androiddev.snsappwithcompose.auth.signin
 import android.view.Gravity
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -28,7 +26,10 @@ import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun InitScreen(navController: NavController, viewModel: SignInWithTokenViewModel = hiltViewModel()) {
+fun InitScreen(
+    navController: NavController,
+    viewModel: SignInWithTokenViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -52,21 +53,22 @@ fun InitScreen(navController: NavController, viewModel: SignInWithTokenViewModel
         onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
         onClickCancel = viewModel.alertDialogState.value.onClickCancel
     )
-    Box(
-        modifier = Modifier.fillMaxSize(),
 
-    ){
-        Column (modifier = Modifier.align(Alignment.Center)){
-            Image(
-                modifier = Modifier.size(120.dp),
-                painter = painterResource(id = R.drawable.dog),
-                contentDescription = null
-            )
-            Spacer(modifier = Modifier.height(30.dp))
+        Box(
+            modifier = Modifier.fillMaxSize(),
+
+            ){
+            Column (modifier = Modifier.align(Alignment.Center)){
+                Image(
+                    modifier = Modifier.size(120.dp),
+                    painter = painterResource(id = R.drawable.dog),
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+            }
+
+            LoadingProgressIndicator(modifier = Modifier.align(Alignment.BottomCenter).padding(150.dp),{ viewModel.isLoading.value})
         }
 
 
-
-        LoadingProgressIndicator(modifier = Modifier.align(Alignment.BottomCenter).padding(150.dp),{viewModel.isLoading.value})
-    }
 }

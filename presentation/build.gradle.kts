@@ -69,7 +69,7 @@ dependencies {
 
     implementation(libs.coil3.compose)
     implementation(libs.coil3.okhttp)
-
+    implementation ("androidx.compose.foundation:foundation:1.8.3")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.17.0")
     //tabrow
     implementation(libs.accompanist.pager)
