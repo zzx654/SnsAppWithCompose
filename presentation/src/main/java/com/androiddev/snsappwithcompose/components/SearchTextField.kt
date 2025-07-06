@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androiddev.snsappwithcompose.AppTextStyles
 import com.androiddev.snsappwithcompose.ui.theme.TextFieldBackground
 
 @Composable
@@ -36,6 +37,7 @@ fun SearchTextField(
             onTextChange(it)
         },
         maxLines = 1,
+        textStyle = AppTextStyles.textStyle,
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
@@ -55,16 +57,12 @@ fun SearchTextField(
                     if(text().isEmpty()) {
                         Text(
                             text = hint,
-                            fontSize = 18.sp,
-                            color = Color.Gray,
+                            style = AppTextStyles.textStyle.copy(color = Color.Gray)
                         )
                     }
                     innerTextField()
 
                 }
-
-
-
             }
         }
     )

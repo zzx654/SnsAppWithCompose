@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HowToVote
@@ -52,9 +53,10 @@ import com.androiddev.snsappwithcompose.util.checkPermissions
 import com.androiddev.snsappwithcompose.util.fetchLocation
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.foundation.text.input.rememberTextFieldState
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "RestrictedApi")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "RestrictedApi", "SuspiciousIndentation")
 @Composable
 fun UploadPostScreen(
     navController: NavController,
@@ -62,6 +64,10 @@ fun UploadPostScreen(
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
+
+    val contentTextFieldState = rememberTextFieldState()
+
     val fusedLocationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
@@ -95,6 +101,9 @@ fun UploadPostScreen(
                 }
             }
         }
+    }
+    LaunchedEffect(contentTextFieldState.text) {
+        viewModel.onEvent(UploadPostEvent.TypeContent(contentTextFieldState.text.toString()))
     }
     BaseScaffold(
         focusManager = focusManager,
@@ -215,6 +224,7 @@ fun UploadPostScreen(
                 }
             }
         },
+        scrollState = scrollState,
         content = {
             Spacer(modifier = Modifier.height(30.dp))
             Chips(
@@ -249,10 +259,12 @@ fun UploadPostScreen(
                 }
             )
             Spacer(modifier = Modifier.height(20.dp))
+
             ContentTextField(
-                text = { viewModel.contentTextField.value },
-                onTextChange = { viewModel.onEvent(UploadPostEvent.TypeContent(it)) },
+                state = contentTextFieldState,
+                scrollState = scrollState,
                 hint = getString(context, R.string.uploadtext_hint)
+
             )
             Spacer(modifier = Modifier.height(10.dp))
             CheckBoxWithText(

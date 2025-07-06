@@ -1,6 +1,8 @@
 package com.androiddev.snsappwithcompose
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,8 +23,9 @@ import com.androiddev.snsappwithcompose.util.addFocusCleaner
 @Composable
 fun BaseScaffold(
     focusManager: FocusManager,
+    scrollState: ScrollState = rememberScrollState(),
     topBar: @Composable (() -> Unit) = {},
-    content: @Composable (() -> Unit),
+    content: @Composable () -> Unit,
     bottomBar: @Composable (() -> Unit) = {}
 ) {
     Scaffold(
@@ -35,29 +38,38 @@ fun BaseScaffold(
                 topBar()
             }
         },
+        bottomBar = {
+            Box(
+                modifier = Modifier.imePadding()
+            ) {
+                bottomBar()
+            }
+        },
         modifier = Modifier
             .fillMaxSize()
             .addFocusCleaner(focusManager)
-            .background(MaterialTheme.colorScheme.background), // 배경색 명시
-        contentColor = MaterialTheme.colorScheme.onBackground // 콘텐츠 색상 명시
+            .background(MaterialTheme.colorScheme.background),
+        contentColor = MaterialTheme.colorScheme.onBackground
     ) { contentPadding ->
-        val scrollState = rememberScrollState()
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        // contentPadding = Scaffold가 제공하는 top/bottom bar 공간 패딩
+        Box(
             modifier = Modifier
-                .imePadding()
-                .background(MaterialTheme.colorScheme.background) // 배경색 중복 방지용
+                .fillMaxSize()
+                .padding(contentPadding)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(0.85f)
-                    .padding(contentPadding)
-                    .verticalScroll(scrollState)
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                content()
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.85f)
+                ) {
+                    content()
+                }
             }
-            bottomBar()
         }
     }
 }
