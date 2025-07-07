@@ -74,7 +74,7 @@ fun PostDetailScreen(
     viewModel: PostDetailsViewModel = hiltViewModel(),
     keyboardviewModel: KeyboardViewModel = hiltViewModel()
 ) {
-    // 채팅 메시지 리스트 상태
+
 
 
 
