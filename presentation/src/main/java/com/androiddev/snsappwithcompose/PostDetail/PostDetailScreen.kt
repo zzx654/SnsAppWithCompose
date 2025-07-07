@@ -49,10 +49,19 @@ import androidx.navigation.NavController
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.util.KeyboardViewModel
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import com.androiddev.snsappwithcompose.BaseScaffold
+import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -72,7 +81,9 @@ fun PostDetailScreen(
         // 초기 스크롤 위치를 마지막 인덱스로 세팅 (맨 위로 보임)
      //   initialFirstVisibleItemIndex = messages.lastIndex
     //)
-
+    val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     val coroutineScope = rememberCoroutineScope()
     var inputText by remember { mutableStateOf("") }
@@ -108,21 +119,37 @@ fun PostDetailScreen(
             }
         }
     }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding() // 키보드 높이만큼 padding 적용
-                .background(Color(0xFFF0F0F0))
-        ) {
+    BaseScaffold(
+        focusManager = focusManager,
+        scrollState = scrollState,
+        topBar = {
+            if (post != null) {
+                CenterAlignedTopBar(
+                    title = post.nickname,
+                    onBackClick = { navController.popBackStack() },
+                    actions = {
+                        IconButton(onClick = { /* TODO: 메뉴 클릭 처리 */ }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More options"
+                            )
+                        }
+                    }
+                )
+            }
+
+        },
+        content = {
             ChatMessages(
                 listState = listState,
                 messages = viewModel.chatList,
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .padding(8.dp),
                 isLoad = viewModel.isLoad.value
             )
+        },
+        bottomBar = {
             ChatInput(
                 text = inputText,
                 onTextChange = { inputText = it },
@@ -137,7 +164,9 @@ fun PostDetailScreen(
                     .background(Color.White)
                     .padding(8.dp)
             )
-        }
+        },
+        lazyColumnExist = true
+    )
 
 
 
