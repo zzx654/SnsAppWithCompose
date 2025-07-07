@@ -77,10 +77,7 @@ fun PostDetailScreen(
     // 채팅 메시지 리스트 상태
 
 
-   //val listState = rememberLazyListState(
-        // 초기 스크롤 위치를 마지막 인덱스로 세팅 (맨 위로 보임)
-     //   initialFirstVisibleItemIndex = messages.lastIndex
-    //)
+
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
