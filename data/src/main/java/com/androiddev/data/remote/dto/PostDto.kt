@@ -11,7 +11,7 @@ data class PostDto(
     val nickname:String?,
     val anonymous:String?,
     val profileimage:String?,
-    val gender:String?,
+    val gender:String,
     val text:String,
     val tags:String?,
     val date:String,
@@ -31,7 +31,7 @@ fun PostDto.toPostPreview(
     nickname:String?,
     anonymous:String?,
     profileimage:String?,
-    gender:String?,
+    gender:String,
     text:String,
     tags:String?,
     date:String,
@@ -46,17 +46,22 @@ fun PostDto.toPostPreview(
 ): PostPreview {
     //닉네임 거리 태그 이미지 투표 경과시간
     var nick = ""
+    var anony = false
     nickname?.let {
         nick = nickname
     }
     anonymous?.let {
-        if(it!="NONE")
+        if(it!="NONE") {
             nick = "익명[${it}]"
+            anony = true
+        }
+
     }
     var imageList = images?.split(',')
     return PostPreview(
         postId = postid,
         userId = userid,
+        anonymous = anony,
         nickname = nick,
         profileImage = profileimage,
         gender = gender,

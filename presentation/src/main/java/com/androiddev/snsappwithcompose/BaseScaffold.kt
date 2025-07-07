@@ -22,6 +22,7 @@ import com.androiddev.snsappwithcompose.util.addFocusCleaner
 
 @Composable
 fun BaseScaffold(
+    modifier: Modifier = Modifier.fillMaxWidth(0.85f),
     focusManager: FocusManager,
     scrollState: ScrollState = rememberScrollState(),
     topBar: @Composable (() -> Unit) = {},
@@ -69,7 +70,7 @@ fun BaseScaffold(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.85f)
+                    modifier = modifier
                 ) {
                     content()
                 }

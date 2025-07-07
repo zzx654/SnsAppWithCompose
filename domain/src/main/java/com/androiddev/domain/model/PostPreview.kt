@@ -10,9 +10,10 @@ import kotlinx.serialization.Serializable
 data class PostPreview(
     val postId:Int,
     val userId:Int,
+    val anonymous:Boolean,
     val nickname:String,
     val profileImage:String?,
-    val gender:String?,
+    val gender:String,
     val date:String,
     val text:String,
     val tags:List<String>?,
