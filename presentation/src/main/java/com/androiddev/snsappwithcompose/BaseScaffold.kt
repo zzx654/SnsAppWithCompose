@@ -70,7 +70,8 @@ fun BaseScaffold(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
-                    modifier = modifier
+                    modifier = modifier,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     content()
                 }

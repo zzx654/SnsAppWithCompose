@@ -114,7 +114,7 @@ fun PostPrevItem(
                             .background(Color.Black.copy(alpha = 0.4f))
                     )
                     Text(
-                        text = "+${post.imageSize}",
+                        text = "+${post.imageSize?.minus(1)}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,

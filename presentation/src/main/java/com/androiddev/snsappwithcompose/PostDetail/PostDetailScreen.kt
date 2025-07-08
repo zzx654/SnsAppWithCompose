@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +57,6 @@ import com.androiddev.snsappwithcompose.util.KeyboardViewModel
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -72,7 +72,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
@@ -85,9 +84,13 @@ import com.androiddev.snsappwithcompose.components.Chips
 import com.androiddev.snsappwithcompose.components.CustomChip
 import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.HorizontalPagerIndicator
 
-@OptIn(ExperimentalLayoutApi::class)
+
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalPagerApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ContextCastToActivity")
 @Composable
 fun PostDetailScreen(
@@ -103,6 +106,9 @@ fun PostDetailScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
+    val pagerState = com.google.accompanist.pager.rememberPagerState(
+        initialPage = 0
+    )
     val coroutineScope = rememberCoroutineScope()
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
@@ -166,7 +172,7 @@ fun PostDetailScreen(
                     Spacer(modifier = Modifier.height(10.dp))
                     Chips(
                         modifier = Modifier
-                            .fillMaxWidth(0.85f)
+                            .fillMaxWidth()
                             .padding(horizontal = 24.dp),
                         list = tags,
                         chip = { data: String, index: Int ->
@@ -214,6 +220,46 @@ fun PostDetailScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp),
                 )
+                Spacer(modifier = Modifier.height(15.dp))
+                post.images?.let { images ->
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(270.dp),
+                        count = post?.imageSize?:0
+                    ) { page ->
+                        // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
+                        // 예시:
+                        // AsyncImage(model = images[page], contentDescription = null)
+                        val imageLoader = LocalContext.current.imageLoader.newBuilder()
+                            .logger(DebugLogger())
+                            .build()
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(BuildConfig.BASE_URL + images[page])
+                                .build(),
+                            imageLoader = imageLoader,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+
+                            contentScale = ContentScale.Crop,
+                            contentDescription = null
+                        )
+
+                    }
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    HorizontalPagerIndicator(
+                        pagerState = pagerState,
+                        //modifier = Modifier.padding(16.dp), // align 대신 padding 등으로 조절
+                        activeColor = Color.Black,
+                        inactiveColor = Color.LightGray
+                    )
+                }
+
 
 
             }
