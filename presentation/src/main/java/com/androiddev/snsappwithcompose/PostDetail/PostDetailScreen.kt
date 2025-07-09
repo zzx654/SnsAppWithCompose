@@ -8,6 +8,7 @@ import android.view.WindowManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +65,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ThumbUpAlt
+import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
@@ -101,7 +104,7 @@ fun PostDetailScreen(
     keyboardviewModel: KeyboardViewModel = hiltViewModel()
 ) {
 
-
+//바뀔수도 있는값 좋아요했는지, 북마크했는지,좋아요갯수,댓글수 <-얘네들 state만들고 하면됨
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -123,6 +126,9 @@ fun PostDetailScreen(
             coroutineScope.launch {
                 listState.scrollToItem(size)  // reverseLayout=true 이므로 0번이 가장 아래임
             }
+        }
+        post.let {
+            viewModel.loadPost(it?.isliked?:false)
         }
 
     }
@@ -259,7 +265,13 @@ fun PostDetailScreen(
                         inactiveColor = Color.LightGray
                     )
                 }
-
+                Spacer(modifier = Modifier.height(if(post.images == null) 15.dp else 0.dp))
+                androidx.compose.material3.Icon(
+                    imageVector = if(viewModel.isLiked.value)Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
+                    contentDescription = null,
+                    tint = Color.DarkGray.copy(0.8f),
+                    modifier = Modifier.clickable { viewModel.onEvent(PostDetailEvent.ToggleLikePost(post.postId)) }
+                )
 
 
             }

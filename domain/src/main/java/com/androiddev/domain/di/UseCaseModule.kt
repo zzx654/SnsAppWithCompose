@@ -6,6 +6,7 @@ import com.androiddev.domain.repository.CreateProfileRepository
 import com.androiddev.domain.repository.GetPostsRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
+import com.androiddev.domain.repository.ToggleLikePostRepository
 import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.AuthenticateCode
@@ -18,6 +19,7 @@ import com.androiddev.domain.use_case.EmailSignUpUseCases
 import com.androiddev.domain.use_case.GetNearPosts
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.use_case.GetSelectedPost
+import com.androiddev.domain.use_case.PostDetailUseCases
 import com.androiddev.domain.use_case.RequestEmailAuthCode
 import com.androiddev.domain.use_case.RequestPhoneAuthCode
 import com.androiddev.domain.use_case.SearchTag
@@ -25,6 +27,7 @@ import com.androiddev.domain.use_case.SignInUseCases
 import com.androiddev.domain.use_case.SignInWithToken
 import com.androiddev.domain.use_case.SocialSignIn
 import com.androiddev.domain.use_case.SocialSignUpUseCase
+import com.androiddev.domain.use_case.ToggleLikePost
 import com.androiddev.domain.use_case.UploadPost
 import com.androiddev.domain.use_case.UploadPostUseCases
 import dagger.Module
@@ -89,6 +92,15 @@ object UseCaseModule {
         return GetPostsUseCases(
             getNearPosts = GetNearPosts(repository),
             getSelectedPost = GetSelectedPost(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun providePostDetailUseCases(
+        toggleLikePostRepository: ToggleLikePostRepository
+    ): PostDetailUseCases {
+        return PostDetailUseCases(
+            ToggleLikePost = ToggleLikePost(toggleLikePostRepository)
         )
     }
 }

@@ -23,7 +23,7 @@ data class PostPreview(
     val audio:String?,
     var commentCount:Int,
     var likecount:Int,
-    var isliked:Int?,
+    var isliked:Boolean,
     var distance:Int?,
     val vote:String?,
     val voteCount:Int?,

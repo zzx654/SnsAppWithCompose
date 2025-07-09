@@ -1,11 +1,18 @@
 package com.androiddev.snsappwithcompose.PostDetail
 
+import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
+import com.androiddev.domain.model.TagInfo
+import com.androiddev.domain.use_case.PostDetailUseCases
+import com.androiddev.domain.util.Resource
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.BaseViewModel
+import com.androiddev.snsappwithcompose.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,6 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
+    private val postDetailUseCases: PostDetailUseCases,
+    private val context: Context
 ):BaseViewModel() {
     private val _uiEvent = MutableSharedFlow<KeyBoardEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
@@ -25,6 +34,10 @@ class PostDetailsViewModel @Inject constructor(
     val isLoad: State<Boolean>
         get() = _isLoad
 
+    val _isLiked = mutableStateOf(false)
+    val isLiked: State<Boolean>
+        get() = _isLiked
+
     val _showContainer = mutableStateOf(false)
     val showContainer: State<Boolean>
         get() = _showContainer
@@ -34,6 +47,42 @@ class PostDetailsViewModel @Inject constructor(
 
 
 
+    fun loadPost(isLiked:Boolean) {
+        _isLiked.value = isLiked
+
+    }
+    fun onEvent(event: PostDetailEvent) {
+        when(event) {
+            is PostDetailEvent.ToggleLikePost -> {
+                viewModelScope.launch {
+                    postDetailUseCases.ToggleLikePost(event.postid)
+                        .collect{ result ->
+                            when(result) {
+                                is Resource.Success -> {
+                                    result.data?.let {
+                                       _isLiked.value = it.isLiked
+                                    }
+                                }
+                                is Resource.Loading -> {
+
+                                }
+                                is Resource.Error -> {
+                                    setEvent(
+                                        UiEvent.ShowToast(
+                                            message = result.message ?: getString(context, R.string.error)
+                                        )
+                                    )
+                                }
+                                else -> null
+                            }
+
+                        }
+                }
+                event.postid
+            }
+        }
+
+    }
     fun onTextFieldFocused() {
         //이건 텍스트필드를 클릭해서 키보드가 올라오는경우(아무것도 안올라와있던상태 또는 이미 컨테이너가 올라와있는상태)
         viewModelScope.launch {

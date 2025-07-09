@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.MainScaffold
 import com.androiddev.snsappwithcompose.PostDetail.PostDetailScreen
 import com.androiddev.snsappwithcompose.components.CropScreen
