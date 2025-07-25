@@ -98,6 +98,7 @@ class NearPostsViewModel @Inject constructor(
         viewModelScope.launch {
             postPaginator.loadNextItems(refresh = false)
         }
+
     }
     fun onEvent(event: GetNearPostsEvent) {
         when(event) {

@@ -62,6 +62,10 @@
     <string name="location_on">위치가 함께 저장됩니다</string>
     <string name="location_off">위치가 비활성화 되었습니다</string>
     <string name="locationpermission_needed">위치권한이 필요합니다</string>
+    <string name="like">좋아요</string>
+    <string name="write_reply">답글쓰기</string>
+    <string name="comment_empty">아직 댓글이 없습니다\n첫 댓글을 달아주세요</string>
+    <string name="input_comment">댓글을 입력하세요...</string>
 
 
 

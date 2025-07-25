@@ -2,6 +2,7 @@ package com.androiddev.data.di
 
 import com.androiddev.data.BuildConfig
 import com.androiddev.data.remote.api.AuthPhoneApi
+import com.androiddev.data.remote.api.CommentApi
 import com.androiddev.data.remote.api.CreateProfileApi
 import com.androiddev.data.remote.api.GetPostsApi
 import com.androiddev.data.remote.api.SignInApi
@@ -81,4 +82,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideToggleLikePostApi(retrofit: Retrofit): ToggleLikePostApi = retrofit.create(ToggleLikePostApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideCommentApi(retrofit: Retrofit): CommentApi = retrofit.create(CommentApi::class.java)
 }

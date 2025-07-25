@@ -2,6 +2,7 @@ package com.androiddev.data.di
 
 import android.content.Context
 import com.androiddev.data.remote.api.AuthPhoneApi
+import com.androiddev.data.remote.api.CommentApi
 import com.androiddev.data.remote.api.CreateProfileApi
 import com.androiddev.data.remote.api.GetPostsApi
 import com.androiddev.data.remote.api.SignInApi
@@ -9,6 +10,7 @@ import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.remote.api.ToggleLikePostApi
 import com.androiddev.data.remote.api.UploadPostApi
 import com.androiddev.data.repository.AuthPhoneRepositoryImpl
+import com.androiddev.data.repository.CommentRepositoryImpl
 import com.androiddev.data.repository.CreateProfileRepositoryImpl
 import com.androiddev.data.repository.GetPostsRepositoryImpl
 import com.androiddev.data.repository.SigninRepositoryImpl
@@ -17,6 +19,7 @@ import com.androiddev.data.repository.ToggleLikePostRepositoryImpl
 import com.androiddev.data.repository.UploadPostRepositoryImpl
 import com.androiddev.domain.repository.AuthPhoneRepository
 import com.androiddev.domain.repository.CreateProfileRepository
+import com.androiddev.domain.repository.CommentRepository
 import com.androiddev.domain.repository.GetPostsRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
@@ -66,5 +69,11 @@ object RepositoryModule {
     @Singleton
     fun provideToggleLikePostRepository(api: ToggleLikePostApi,@ApplicationContext context: Context): ToggleLikePostRepository {
         return ToggleLikePostRepositoryImpl(api,context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetCommentsRepository(api: CommentApi, @ApplicationContext context: Context): CommentRepository {
+        return CommentRepositoryImpl(api,context)
     }
 }

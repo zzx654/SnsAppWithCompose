@@ -2,20 +2,26 @@ package com.androiddev.snsappwithcompose.PostDetail
 
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
+import android.view.Gravity
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
 
+
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +31,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -69,28 +74,42 @@ import androidx.compose.material.icons.filled.ThumbUpAlt
 import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.core.content.ContextCompat.getString
 import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.util.DebugLogger
 import com.androiddev.snsappwithcompose.BaseScaffold
 import com.androiddev.snsappwithcompose.BuildConfig
+import com.androiddev.snsappwithcompose.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.components.Chips
+import com.androiddev.snsappwithcompose.components.CommentInput
+import com.androiddev.snsappwithcompose.components.CommentItem
 import com.androiddev.snsappwithcompose.components.CustomChip
+import com.androiddev.snsappwithcompose.components.LoadingDialog
+import com.androiddev.snsappwithcompose.components.PostPrevItem
 import com.androiddev.snsappwithcompose.ui.theme.profileBorder
+import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.launch
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
-
+import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalPagerApi::class)
@@ -103,51 +122,71 @@ fun PostDetailScreen(
     viewModel: PostDetailsViewModel = hiltViewModel(),
     keyboardviewModel: KeyboardViewModel = hiltViewModel()
 ) {
-
-//바뀔수도 있는값 좋아요했는지, 북마크했는지,좋아요갯수,댓글수 <-얘네들 state만들고 하면됨
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    val pagerState = com.google.accompanist.pager.rememberPagerState(
+    val pagerState = rememberPagerState(
         initialPage = 0
     )
+    var pendingScrollByCount by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
-    var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
-    val shouldLoadMore = remember {
-        derivedStateOf {
-            val firstVisible = listState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
-            firstVisible != null && firstVisible == 0
+    var imeHeigh = remember { mutableStateOf(0) }
+    val ime = androidx.compose.foundation.layout.WindowInsets.ime
+    val localDensity = LocalDensity.current
+    LaunchedEffect(key1 = Unit) {
+        val keyboardFlow = snapshotFlow {
+            ime.getBottom(localDensity)
+        }
+
+        keyboardFlow.collect { keyboardHeight ->
+            val diff = keyboardHeight - imeHeigh.value
+
+            listState.scrollBy(diff.toFloat())
+
+            imeHeigh.value = keyboardHeight
         }
     }
-    LaunchedEffect(Unit) {
-        viewModel.initData() { size ->
-            coroutineScope.launch {
-                listState.scrollToItem(size)  // reverseLayout=true 이므로 0번이 가장 아래임
-            }
-        }
-        post.let {
-            viewModel.loadPost(it?.isliked?:false)
-        }
 
-    }
-    LaunchedEffect(shouldLoadMore.value) {
-        val firstVisibleItemIndex = listState.firstVisibleItemIndex
-        val firstVisibleItemOffset = listState.firstVisibleItemScrollOffset
-        if (shouldLoadMore.value && !viewModel.isLoad.value) {
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .distinctUntilChanged()
+            .collect { lastVisibleItemIndex ->
+                val totalItemsCount = listState.layoutInfo.totalItemsCount
+                if (lastVisibleItemIndex != null && lastVisibleItemIndex >= totalItemsCount - 1&&imeHeigh.value == 0&&totalItemsCount>=10) {
 
-
-            viewModel.initData {
-                coroutineScope.launch {
-                    listState.scrollToItem(
-                        firstVisibleItemIndex + 27,
-                        firstVisibleItemOffset
-                    )
+                    println("${lastVisibleItemIndex}:::${totalItemsCount}")
                 }
+            }
+    }
+    val getCommentsState = viewModel.getCommentsState.value
+    LaunchedEffect(post) {
+        post?.let {
+            println("??${post}")
+            viewModel.initPost(
+                isLiked = it.isliked,
+                it.postId
+            )
+        }
+    }
 
+    LaunchedEffect(Unit) {
+
+        viewModel.eventFlow.collectLatest { event ->
+            when(event){
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                else -> null
             }
         }
+    }
+    LoadingDialog {
+        viewModel.isLoading.value
     }
     BaseScaffold(
         modifier = Modifier.fillMaxWidth(),
@@ -171,125 +210,248 @@ fun PostDetailScreen(
 
         },
         content = {
+            LazyColumn(
+                state = listState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize(),
+            ) {
 
-            if (post != null) {
 
-                post.tags?.let { tags ->
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Chips(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        list = tags,
-                        chip = { data: String, index: Int ->
-                            CustomChip(
-                                backgroundColor = Color.Gray,
-                                text = data,
+
+
+                item {
+                    if (post != null) {
+
+                        Column {
+                            post.tags?.let { tags ->
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Chips(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 24.dp),
+                                    list = tags,
+                                    chip = { data: String, index: Int ->
+                                        CustomChip(
+                                            backgroundColor = Color.Gray,
+                                            text = data,
+                                        )
+                                    }
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(if (post.tags == null) 15.dp else 5.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                ProfileImage(post.profileImage, post.gender, post.anonymous,context)
+
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                Column {
+                                    Text(
+                                        post.nickname,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "${post.elapsedTime} · ${post.distance}km ",
+                                        fontSize = 13.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(15.dp))
+                            Divider(
+                                color = Color.LightGray,
+                                thickness = 1.dp, // 또는 0.5.dp 등
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp)
                             )
+                            Spacer(modifier = Modifier.height(15.dp))
+                            Text(
+                                text = "이건 정말정말정말정말정말정말정말정말정말정말정말정말정말정말정말정말 긴 문장입니다. 자동으로 개행이 잘 될까요?",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp),
+                            )
+                            Spacer(modifier = Modifier.height(15.dp))
+                            post.images?.let { images ->
+                                HorizontalPager(
+                                    state = pagerState,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(270.dp),
+                                    count = post.imageSize ?: 0
+                                ) { page ->
+                                    // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
+                                    // 예시:
+                                    // AsyncImage(model = images[page], contentDescription = null)
+                                    val imageLoader = LocalContext.current.imageLoader.newBuilder()
+                                        .logger(DebugLogger())
+                                        .build()
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(BuildConfig.BASE_URL + images[page])
+                                            .build(),
+                                        imageLoader = imageLoader,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 24.dp),
+
+                                        contentScale = ContentScale.Crop,
+                                        contentDescription = null
+                                    )
+
+                                }
+
+                                Spacer(modifier = Modifier.height(15.dp))
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.TopCenter
+                                ) {
+                                    HorizontalPagerIndicator(
+                                        //  modifier = Modifier.align(Alignment.TopCenter),
+                                        pagerState = pagerState,
+                                        //modifier = Modifier.padding(16.dp), // align 대신 padding 등으로 조절
+                                        activeColor = Color.Black,
+                                        inactiveColor = Color.LightGray
+                                    )
+                                }
+
+
+                            }
+                            Spacer(modifier = Modifier.height(if (post.images == null) 0.dp else 15.dp))
+                            Divider(
+                                color = Color.LightGray,
+                                thickness = 1.dp, // 또는 0.5.dp 등
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceAround
+
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier.padding(vertical = 13.dp)) {
+                                    androidx.compose.material3.Icon(
+                                        imageVector = if (viewModel.isLiked.value) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
+                                        contentDescription = null,
+                                        tint = Color.DarkGray.copy(0.8f),
+                                        modifier = Modifier
+                                            .clickable {
+                                                //viewModel.onEvent(
+                                                //    PostDetailEvent.ToggleLikePost(post.postId)
+                                                //)
+                                                coroutineScope.launch {
+                                                    listState.scrollToItem(100)  // reverseLayout=true 이므로 0번이 가장 아래임
+                                                }
+                                            }
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(text = getString(context,R.string.like), color = Color.DarkGray.copy(0.8f))
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier.padding(vertical = 13.dp)) {
+                                    androidx.compose.material3.Icon(
+                                        imageVector = if (viewModel.isLiked.value) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
+                                        contentDescription = null,
+                                        tint = Color.DarkGray.copy(0.8f),
+                                        modifier = Modifier
+                                            .clickable {
+                                                viewModel.onEvent(
+                                                    PostDetailEvent.ToggleLikePost(post.postId)
+                                                )
+                                            }
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(text = "좋아요",color = Color.DarkGray.copy(0.8f))
+                                }
+
+                            }
+                            Divider(
+                                color = Color.LightGray,
+                                thickness = 1.dp, // 또는 0.5.dp 등
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+
+
                         }
-                    )
-                }
-                Spacer(modifier = Modifier.height(if (post.tags == null) 15.dp else 5.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    ProfileImage(post.profileImage, post.gender, post.anonymous)
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Column {
-                        Text("${post.nickname}", fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "${post.elapsedTime} · ${post.distance}km ",
-                            fontSize = 13.sp,
-                            color = Color.Gray
-                        )
                     }
+
+
                 }
-                Spacer(modifier = Modifier.height(15.dp))
-                Divider(
-                    color = Color.LightGray,
-                    thickness = 1.dp, // 또는 0.5.dp 등
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                )
-                Spacer(modifier = Modifier.height(15.dp))
-                Text(
-                    text = "이건 정말정말정말정말정말정말정말정말정말정말정말정말정말정말정말정말 긴 문장입니다. 자동으로 개행이 잘 될까요?",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                )
-                Spacer(modifier = Modifier.height(15.dp))
-                post.images?.let { images ->
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(270.dp),
-                        count = post?.imageSize?:0
-                    ) { page ->
-                        // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
-                        // 예시:
-                        // AsyncImage(model = images[page], contentDescription = null)
-                        val imageLoader = LocalContext.current.imageLoader.newBuilder()
-                            .logger(DebugLogger())
-                            .build()
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(BuildConfig.BASE_URL + images[page])
-                                .build(),
-                            imageLoader = imageLoader,
+                item {
+                    if(getCommentsState.isRefreshing) {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 24.dp),
-
-                            contentScale = ContentScale.Crop,
-                            contentDescription = null
-                        )
-
+                                .height(150.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
+                }
+                items(
+                    getCommentsState.comments
+                ) { comment ->
 
-                    Spacer(modifier = Modifier.height(15.dp))
+                    //PostPrevItem(post = posts()[index],modifier = Modifier.clickable{ onPostClick(posts()[index].postId) })
 
-                    HorizontalPagerIndicator(
-                        pagerState = pagerState,
-                        //modifier = Modifier.padding(16.dp), // align 대신 padding 등으로 조절
-                        activeColor = Color.Black,
-                        inactiveColor = Color.LightGray
+                    CommentItem(comment)
+                    Divider(
+                        color = Color.LightGray,
+                        thickness = 1.dp
                     )
                 }
-                Spacer(modifier = Modifier.height(if(post.images == null) 15.dp else 0.dp))
-                androidx.compose.material3.Icon(
-                    imageVector = if(viewModel.isLiked.value)Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
-                    contentDescription = null,
-                    tint = Color.DarkGray.copy(0.8f),
-                    modifier = Modifier.clickable { viewModel.onEvent(PostDetailEvent.ToggleLikePost(post.postId)) }
-                )
-
+                item {
+                    if(getCommentsState.isLoading && getCommentsState.comments.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+                //로딩중이 아닐때, comment가 없는상태에서 불러온결과 없을때
+                item {
+                    if(!getCommentsState.isLoading&&viewModel.isCommentsEmpty.value) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = getString(context,R.string.comment_empty),
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
 
             }
+
         },
         bottomBar = {
-            ChatInput(
-                text = inputText,
-                onTextChange = { inputText = it },
-                onSendClick = {
-                    //if (inputText.isNotBlank()) {
-                    //     messages = messages + inputText
-                    //    inputText = ""
-                    // }
+            CommentInput(
+                comment = viewModel.commentText.value,
+                onCommentChange = { viewModel.onEvent(PostDetailEvent.TypeComment(it)) },
+                onPostClick = {
+                    if(viewModel.commentText.value.isNotEmpty())
+                        viewModel.onEvent(PostDetailEvent.PostComment)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(8.dp)
+                isAnonymous = viewModel.anonymousChecked.value,
+                onAnonymousChange = { viewModel.onEvent(PostDetailEvent.ToggleAnonymous(it)) }
             )
         },
         lazyColumnExist = true
@@ -299,12 +461,12 @@ fun PostDetailScreen(
 }
 
 @Composable
-fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean) {
+fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean,context: Context) {
 
     if (profileImage == null || anonymous) {
         Image(
             contentScale = ContentScale.Crop,
-            painter = painterResource(id = if (gender == "남성") R.drawable.person_male else if (gender == "여성") R.drawable.person_female else R.drawable.person_none),
+            painter = painterResource(id = if (gender == getString(context,R.string.male)) R.drawable.person_male else if (gender == getString(context,R.string.female)) R.drawable.person_female else R.drawable.person_none),
             contentDescription = null,
             modifier = Modifier
                 .size(42.dp)

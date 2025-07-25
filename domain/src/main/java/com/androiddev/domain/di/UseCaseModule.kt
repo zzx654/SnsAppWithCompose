@@ -2,6 +2,7 @@ package com.androiddev.domain.di
 
 import android.content.Context
 import com.androiddev.domain.repository.AuthPhoneRepository
+import com.androiddev.domain.repository.CommentRepository
 import com.androiddev.domain.repository.CreateProfileRepository
 import com.androiddev.domain.repository.GetPostsRepository
 import com.androiddev.domain.repository.SigninRepository
@@ -16,9 +17,11 @@ import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.use_case.EmailSignIn
 import com.androiddev.domain.use_case.EmailSignUp
 import com.androiddev.domain.use_case.EmailSignUpUseCases
+import com.androiddev.domain.use_case.GetComments
 import com.androiddev.domain.use_case.GetNearPosts
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.use_case.GetSelectedPost
+import com.androiddev.domain.use_case.PostComment
 import com.androiddev.domain.use_case.PostDetailUseCases
 import com.androiddev.domain.use_case.RequestEmailAuthCode
 import com.androiddev.domain.use_case.RequestPhoneAuthCode
@@ -97,10 +100,13 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun providePostDetailUseCases(
-        toggleLikePostRepository: ToggleLikePostRepository
+        toggleLikePostRepository: ToggleLikePostRepository,
+        commentRepository: CommentRepository
     ): PostDetailUseCases {
         return PostDetailUseCases(
-            ToggleLikePost = ToggleLikePost(toggleLikePostRepository)
+            ToggleLikePost = ToggleLikePost(toggleLikePostRepository),
+            GetComments = GetComments(commentRepository),
+            PostComment = PostComment(commentRepository)
         )
     }
 }
