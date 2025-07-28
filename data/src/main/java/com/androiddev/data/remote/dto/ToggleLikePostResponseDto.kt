@@ -1,17 +1,17 @@
 package com.androiddev.data.remote.dto
 
-import com.androiddev.domain.model.ToggleLikePostResponse
+import com.androiddev.domain.model.ToggleLikeResponse
 
 
-data class ToggleLikePostResponseDto(
+data class ToggleLikeResponseDto(
     val isLiked:Boolean,
     val isTokenValid:Boolean,
     val resultCode: Int
 )
-fun ToggleLikePostResponseDto.toToggleLikePostResponse(
+fun ToggleLikeResponseDto.toToggleLikeResponse(
     isLiked:Boolean,
-    isTokenValid: Boolean): ToggleLikePostResponse {
-    return ToggleLikePostResponse(
+    isTokenValid: Boolean): ToggleLikeResponse {
+    return ToggleLikeResponse(
         isLiked = isLiked,
         isTokenValid = isTokenValid
     )

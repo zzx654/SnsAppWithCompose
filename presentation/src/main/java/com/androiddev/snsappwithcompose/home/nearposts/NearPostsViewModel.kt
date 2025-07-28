@@ -56,8 +56,8 @@ class NearPostsViewModel @Inject constructor(
                                 }
                             }
                                 getPostsUseCases.getNearPosts(
-                                    postid = lastPostId,
-                                    postdate = lastPostDate,
+                                    postId = lastPostId,
+                                    postDate = lastPostDate,
                                     latitude = latitude!!,
                                     longitude = longitude!!,
                                     maxDistance = distance.value
@@ -147,7 +147,7 @@ class NearPostsViewModel @Inject constructor(
     }
     fun getSelectedPost(postid:Int, latitude:Double?,longitude:Double?) {
         viewModelScope.launch {
-            getPostsUseCases.getSelectedPost(postid = postid, latitude = latitude, longitude = longitude)
+            getPostsUseCases.getSelectedPost(postId = postid, latitude = latitude, longitude = longitude)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {

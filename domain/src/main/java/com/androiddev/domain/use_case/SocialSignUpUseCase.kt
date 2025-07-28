@@ -8,5 +8,5 @@ import javax.inject.Inject
 class SocialSignUpUseCase @Inject constructor(
 private val repository: SignupRepository
 ) {
-    suspend operator fun invoke(platform: String,account: String,phonenumber: String): Flow<Resource<String>> = repository.socialSignUp(platform,account,phonenumber)
+    suspend operator fun invoke(platform: String,account: String,phoneNumber: String): Flow<Resource<String>> = repository.socialSignUp(platform,account,phoneNumber)
 }

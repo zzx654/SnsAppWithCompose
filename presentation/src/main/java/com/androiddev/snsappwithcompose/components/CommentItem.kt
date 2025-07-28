@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,13 +28,18 @@ import androidx.compose.ui.unit.sp
 import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.PostDetail.ProfileImage
 import androidx.core.content.ContextCompat.getString
+import coil3.ImageLoader
 import com.androiddev.snsappwithcompose.R
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CommentItem(
-    comment: Comment
+    comment: Comment,
+    isLiked: Boolean,
+    likeCount: Int,
+    imageLoader: ImageLoader,
+    onLikeClick: ()->Unit
 ) {
     val context = LocalContext.current
     Row(
@@ -49,7 +55,13 @@ fun CommentItem(
                     .padding(horizontal = 0.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                ProfileImage(comment.profileImage, comment.gender, comment.anonymous,context)
+                ProfileImage(
+                    profileImage = comment.profileImage,
+                    gender = comment.gender,
+                    anonymous = comment.anonymous,
+                    context = context,
+                    imageLoader = imageLoader
+                )
 
                 Spacer(modifier = Modifier.width(10.dp))
 
@@ -73,9 +85,10 @@ fun CommentItem(
             Spacer(modifier = Modifier.height(15.dp))
             Row(modifier = Modifier.padding(horizontal = 50.dp)) {
                 Text(
-                    text = getString(context, R.string.like)+if(comment.likeCount!=0)" ${comment.likeCount}" else "",
-                    fontWeight = if(comment.commentLiked == 1) FontWeight.Bold else FontWeight.Normal,
-                    color = if(comment.commentLiked == 1) Color.Black else Color.Gray.copy(alpha = 0.8f)
+                    text = getString(context, R.string.like)+if(isLiked)" $likeCount" else "",
+                    fontWeight = if(isLiked) FontWeight.Bold else FontWeight.Normal,
+                    color = if(isLiked) Color.Black else Color.Gray.copy(alpha = 0.8f),
+                    modifier = Modifier.clickable { onLikeClick() }
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(text = getString(context, R.string.write_reply))

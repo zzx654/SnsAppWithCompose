@@ -5,8 +5,8 @@ import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.remote.api.ToggleLikePostApi
-import com.androiddev.data.remote.dto.toToggleLikePostResponse
-import com.androiddev.domain.model.ToggleLikePostResponse
+import com.androiddev.data.remote.dto.toToggleLikeResponse
+import com.androiddev.domain.model.ToggleLikeResponse
 import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.repository.ToggleLikePostRepository
 import com.androiddev.domain.util.Resource
@@ -21,13 +21,13 @@ class ToggleLikePostRepositoryImpl @Inject constructor(
     private val context: Context
 ) : ToggleLikePostRepository {
 
-    override suspend fun toggleLikePost(postid: Int): Flow<Resource<ToggleLikePostResponse>> {
+    override suspend fun toggleLikePost(postid: Int): Flow<Resource<ToggleLikeResponse>> {
         return flow {
             try {
                 emit(Resource.Loading())
                 api.toggleLikePost(postid).body()?.let{ result ->
                     if(result.resultCode == 200) {
-                        emit(Resource.Success(result.toToggleLikePostResponse(result.isLiked,result.isTokenValid)))
+                        emit(Resource.Success(result.toToggleLikeResponse(result.isLiked,result.isTokenValid)))
                     }
                     else
                         emit(Resource.Error(getString(context, R.string.server_error)))

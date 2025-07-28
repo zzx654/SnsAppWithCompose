@@ -1,6 +1,7 @@
 package com.androiddev.data.remote.api
 
-import com.androiddev.data.remote.dto.ToggleLikePostResponseDto
+
+import com.androiddev.data.remote.dto.ToggleLikeResponseDto
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -13,6 +14,6 @@ interface ToggleLikePostApi {
     @POST("/toggleLikePost")
     suspend fun toggleLikePost(
         @Field("postid")postid: Int,
-    ): Response<ToggleLikePostResponseDto>
+    ): Response<ToggleLikeResponseDto>
 
 }

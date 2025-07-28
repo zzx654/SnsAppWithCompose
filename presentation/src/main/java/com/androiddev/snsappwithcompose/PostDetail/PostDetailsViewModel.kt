@@ -3,10 +3,12 @@ package com.androiddev.snsappwithcompose.PostDetail
 import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.GetCommentsResponse
 import com.androiddev.domain.model.TagInfo
@@ -100,11 +102,16 @@ class PostDetailsViewModel @Inject constructor(
         }, onSuccess = { comments, refresh ->
             _isCommentsEmpty.value =
                 _getCommentsState.value.comments.isEmpty() && comments.isEmpty()
+            val newIds = comments.map { it.commentId }.toSet()
+            updateStatesForNewComments(comments)
             _getCommentsState.value = getCommentsState.value.copy(
-                comments = if (refresh) comments else getCommentsState.value.comments + comments,
+                comments = if (refresh) comments else getCommentsState.value.comments.filterNot{ it.commentId in newIds } + comments,
                 endReached = comments.isEmpty() && getCommentsState.value.comments.isNotEmpty()
             )
         }, extractItems = { response -> response.comments })
+
+    private val _commentLikeStatusMap = mutableStateMapOf<Int,CommentLikeState>()
+    val commentLikeStatusMap: Map<Int,CommentLikeState> get() = _commentLikeStatusMap
 
     fun initPost(isLiked: Boolean, postId: Int) {
         _isLiked.value = isLiked
@@ -145,10 +152,42 @@ class PostDetailsViewModel @Inject constructor(
                     commentPaginator.loadNextItems(refresh = false)
                 }
             }
+            is PostDetailEvent.ToggleLikeComment -> {
+                viewModelScope.launch {
+                    postDetailUseCases.ToggleLikeComment(event.commentId).collect { result ->
+                        when(result) {
+                            is Resource.Success -> {
+                                setLoading(false)
+                                result.data?.let {
+                                    val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
+                                    _commentLikeStatusMap[event.commentId] = CommentLikeState(
+                                        isLiked = it.isLiked,
+                                        likeCount = currentLikeStatus.likeCount.plus(if(it.isLiked) 1 else -1)
+                                    )
+                                }
+                            }
+                            is Resource.Loading -> Unit
+
+                            is Resource.Error -> {
+                                setLoading(false)
+                                setEvent(
+                                    UiEvent.ShowToast(
+                                        message = result.message ?: getString(
+                                            context, R.string.error
+                                        )
+                                    )
+                                )
+                            }
+                        }
+
+                    }
+                }
+
+            }
 
             is PostDetailEvent.ToggleLikePost -> {
                 viewModelScope.launch {
-                    postDetailUseCases.ToggleLikePost(event.postid).collect { result ->
+                    postDetailUseCases.ToggleLikePost(event.postId).collect { result ->
                             when (result) {
                                 is Resource.Success -> {
                                     setLoading(false)
@@ -192,6 +231,7 @@ class PostDetailsViewModel @Inject constructor(
                                 setLoading(false)
                                 _commentText.value = ""
                                 result.data?.let {
+                                    _isCommentsEmpty.value = false
                                     _getCommentsState.value = getCommentsState.value.copy(
                                         comments = listOf(it.comments[0])+getCommentsState.value.comments
                                     )
@@ -219,6 +259,16 @@ class PostDetailsViewModel @Inject constructor(
                 }
 
 
+            }
+        }
+    }
+    fun updateStatesForNewComments(newComments: List<Comment>) {
+        newComments.forEach { comment ->
+            comment.commentId?.let { commentId->
+                _commentLikeStatusMap[commentId] = CommentLikeState(
+                    isLiked = comment.commentLiked==1,
+                    likeCount = comment.likeCount
+                )
             }
         }
     }

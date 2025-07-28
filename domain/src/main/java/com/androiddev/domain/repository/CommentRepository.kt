@@ -2,6 +2,7 @@ package com.androiddev.domain.repository
 
 
 import com.androiddev.domain.model.GetCommentsResponse
+import com.androiddev.domain.model.ToggleLikeResponse
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
@@ -17,4 +18,6 @@ interface CommentRepository {
         text: String,
         anonymousNick:String?
     ): Flow<Resource<GetCommentsResponse>>
+
+    suspend fun toggleLikeComment(commentId:Int) : Flow<Resource<ToggleLikeResponse>>
 }

@@ -1,6 +1,7 @@
 package com.androiddev.data.remote.api
 
 import com.androiddev.data.remote.dto.GetCommentsResponseDto
+import com.androiddev.data.remote.dto.ToggleLikeResponseDto
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -21,4 +22,10 @@ interface CommentApi {
         @Field("text")text: String,
         @Field("anonymousNick")anonymousNick : String?
     ): Response<GetCommentsResponseDto>
+
+    @FormUrlEncoded
+    @POST("/toggleLikeComment")
+    suspend fun toggleLikeComment(
+        @Field("commentid")commentid: Int,
+    ): Response<ToggleLikeResponseDto>
 }

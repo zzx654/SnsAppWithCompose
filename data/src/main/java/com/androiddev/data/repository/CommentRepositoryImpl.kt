@@ -5,7 +5,9 @@ import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.CommentApi
 import com.androiddev.data.remote.dto.toGetCommentsResponse
+import com.androiddev.data.remote.dto.toToggleLikeResponse
 import com.androiddev.domain.model.GetCommentsResponse
+import com.androiddev.domain.model.ToggleLikeResponse
 import com.androiddev.domain.repository.CommentRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -66,6 +68,28 @@ class CommentRepositoryImpl @Inject constructor(
                 emit(Resource.Error(e.localizedMessage ?: getString(context,
                     R.string.unexpected_error)
                 ))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context, R.string.connection_error)))
+            }
+        }
+    }
+    override suspend fun toggleLikeComment(commentId: Int): Flow<Resource<ToggleLikeResponse>> {
+        return flow {
+            try {
+                emit(Resource.Loading())
+                api.toggleLikeComment(commentId).body()?.let{ result ->
+                    if(result.resultCode == 200) {
+                        emit(Resource.Success(result.toToggleLikeResponse(result.isLiked,result.isTokenValid)))
+                    }
+                    else
+                        emit(Resource.Error(getString(context, R.string.server_error)))
+                }
+            } catch(e: HttpException) {
+                emit(
+                    Resource.Error(e.localizedMessage ?: getString(context,
+                        R.string.unexpected_error)
+                    ))
 
             } catch(e: IOException) {
                 emit(Resource.Error(getString(context, R.string.connection_error)))

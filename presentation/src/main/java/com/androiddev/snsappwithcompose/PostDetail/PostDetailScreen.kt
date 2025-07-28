@@ -83,9 +83,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.core.content.ContextCompat.getString
+import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.imageLoader
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.request.error
+import coil3.request.placeholder
+import coil3.size.Scale
 import coil3.util.DebugLogger
 import com.androiddev.snsappwithcompose.BaseScaffold
 import com.androiddev.snsappwithcompose.BuildConfig
@@ -126,6 +132,12 @@ fun PostDetailScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
+    val imageLoader = remember {
+        context.imageLoader.newBuilder()
+            .crossfade(false)
+            .logger(DebugLogger())
+            .build()
+    }
     val pagerState = rememberPagerState(
         initialPage = 0
     )
@@ -156,7 +168,7 @@ fun PostDetailScreen(
                 val totalItemsCount = listState.layoutInfo.totalItemsCount
                 if (lastVisibleItemIndex != null && lastVisibleItemIndex >= totalItemsCount - 1&&imeHeigh.value == 0&&totalItemsCount>=10) {
 
-                    println("${lastVisibleItemIndex}:::${totalItemsCount}")
+                    viewModel.onEvent(PostDetailEvent.LoadNextComments)
                 }
             }
     }
@@ -246,7 +258,13 @@ fun PostDetailScreen(
                                     .padding(horizontal = 24.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                ProfileImage(post.profileImage, post.gender, post.anonymous,context)
+                                ProfileImage(
+                                    profileImage = post.profileImage,
+                                    gender = post.gender,
+                                    anonymous = post.anonymous,
+                                    context = context,
+                                    imageLoader = imageLoader
+                                )
 
                                 Spacer(modifier = Modifier.width(10.dp))
 
@@ -291,9 +309,6 @@ fun PostDetailScreen(
                                     // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
                                     // 예시:
                                     // AsyncImage(model = images[page], contentDescription = null)
-                                    val imageLoader = LocalContext.current.imageLoader.newBuilder()
-                                        .logger(DebugLogger())
-                                        .build()
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(BuildConfig.BASE_URL + images[page])
@@ -402,8 +417,24 @@ fun PostDetailScreen(
                 ) { comment ->
 
                     //PostPrevItem(post = posts()[index],modifier = Modifier.clickable{ onPostClick(posts()[index].postId) })
-
-                    CommentItem(comment)
+                    /**Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .background(Color.White)
+                    )**/
+                    val commentLikeStatus = viewModel.commentLikeStatusMap[comment.commentId]?:CommentLikeState(isLiked = false,likeCount = 0)
+                    CommentItem(
+                        comment = comment,
+                        isLiked = commentLikeStatus.isLiked,
+                        likeCount = commentLikeStatus.likeCount,
+                        imageLoader = imageLoader,
+                        onLikeClick = {
+                            comment.commentId?.let {
+                                viewModel.onEvent(PostDetailEvent.ToggleLikeComment(it))
+                            }
+                        }
+                    )
                     Divider(
                         color = Color.LightGray,
                         thickness = 1.dp
@@ -461,8 +492,9 @@ fun PostDetailScreen(
 }
 
 @Composable
-fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean,context: Context) {
-
+fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean,context: Context,imageLoader: ImageLoader) {
+    val sizeDp = 42.dp
+    val sizePx = with(LocalDensity.current) { sizeDp.roundToPx() }
     if (profileImage == null || anonymous) {
         Image(
             contentScale = ContentScale.Crop,
@@ -474,16 +506,23 @@ fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean,conte
                 .border(1.dp, profileBorder, CircleShape)
         )
     } else {
-        val imageLoader = LocalContext.current.imageLoader.newBuilder()
-            .logger(DebugLogger())
-            .build()
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
+        val imageRequest = remember(profileImage) {
+            ImageRequest.Builder(context)
                 .data(BuildConfig.BASE_URL + profileImage)
-                .build(),
+                .size(sizePx)
+                .scale(Scale.FILL)
+                .crossfade(true)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .placeholder(R.drawable.person_none)
+                .error(R.drawable.person_none)
+                .build()
+        }
+        AsyncImage(
+            model = imageRequest,
             imageLoader = imageLoader,
             modifier = Modifier
-                .size(40.dp)
+                .size(sizeDp)
                 .clip(CircleShape) // clip to the circle shape
                 .border(1.dp, profileBorder, CircleShape),
             contentScale = ContentScale.Crop,
