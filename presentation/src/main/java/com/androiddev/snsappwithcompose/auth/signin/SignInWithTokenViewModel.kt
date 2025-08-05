@@ -46,18 +46,21 @@ class SignInWithTokenViewModel @Inject constructor(
                                 setLoading(false)
                                 result.data?.let {
                                     if(it.signInResult) {
+
                                         if(it.profileWritten) {
                                             //홈화면
                                             setEvent(
                                                 UiEvent.navigate(
-                                                    screen = Screen.MainScreen
+                                                    screen = Screen.MainScreen,
+                                                    userId = it.userId
                                                 )
                                             )
                                         } else {
                                             //프로필화면
                                             setEvent(
                                                 UiEvent.navigate(
-                                                    screen = Screen.CreateprofileScreen
+                                                    screen = Screen.CreateprofileScreen,
+                                                    userId=  it.userId
                                                 )
                                             )
                                         }

@@ -98,6 +98,7 @@ import com.androiddev.snsappwithcompose.BaseScaffold
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.UserViewModel
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.components.Chips
 import com.androiddev.snsappwithcompose.components.CommentInput
@@ -126,6 +127,7 @@ fun PostDetailScreen(
     post: PostPreview?,
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
+    userViewModel: UserViewModel,
     viewModel: PostDetailsViewModel = hiltViewModel(),
     keyboardviewModel: KeyboardViewModel = hiltViewModel()
 ) {
@@ -176,7 +178,6 @@ fun PostDetailScreen(
     val getCommentsState = viewModel.getCommentsState.value
     LaunchedEffect(post) {
         post?.let {
-            println("??${post}")
             viewModel.initPost(
                 isLiked = it.isliked,
                 it.postId

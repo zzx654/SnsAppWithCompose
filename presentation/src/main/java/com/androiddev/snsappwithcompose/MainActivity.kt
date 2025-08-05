@@ -23,6 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @AndroidEntryPoint
@@ -60,6 +61,8 @@ class MainActivity : ComponentActivity() {
                     CompositionLocalProvider(
                         LocalOverscrollFactory provides null
                     ) {
+                        val userViewModel: UserViewModel = hiltViewModel()
+
                         Navigation(
                             navController = navController,
                             modifier = Modifier.fillMaxSize()

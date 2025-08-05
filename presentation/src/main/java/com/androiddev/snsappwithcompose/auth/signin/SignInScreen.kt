@@ -39,6 +39,7 @@ import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.UserViewModel
 import com.androiddev.snsappwithcompose.auth.components.KakaoSignInButton
 import com.androiddev.snsappwithcompose.auth.components.NaverSignInButton
 import com.androiddev.snsappwithcompose.auth.components.SignInTextField
@@ -53,6 +54,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SignInScreen(
     navController: NavController,
+    userViewModel: UserViewModel,
     signinViewModel: SignInViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -69,6 +71,9 @@ fun SignInScreen(
                 }
 
                 is UiEvent.navigate -> {
+                    event.userId?.let {
+                        userViewModel.setUserId(it)
+                    }
                     navController.navigate(event.screen)
                 }
             }

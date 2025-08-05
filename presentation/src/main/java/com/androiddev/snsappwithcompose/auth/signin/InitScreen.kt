@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.UserViewModel
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.LoadingProgressIndicator
 import com.androiddev.snsappwithcompose.util.UiEvent
@@ -28,7 +29,8 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun InitScreen(
     navController: NavController,
-    viewModel: SignInWithTokenViewModel = hiltViewModel()
+    viewModel: SignInWithTokenViewModel = hiltViewModel(),
+    userViewModel: UserViewModel
 ) {
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
@@ -41,6 +43,9 @@ fun InitScreen(
                     }
                 }
                 is UiEvent.navigate -> {
+                    event.userId?.let {
+                        userViewModel.setUserId(it)
+                    }
                     navController.navigate(event.screen)
                 }
             }

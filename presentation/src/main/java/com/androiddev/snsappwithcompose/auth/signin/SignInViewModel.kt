@@ -145,7 +145,8 @@ class SignInViewModel @Inject constructor(
                     //홈화면으로 이동
                     setEvent(
                         UiEvent.navigate(
-                            screen = Screen.MainScreen
+                            screen = Screen.MainScreen,
+                            userId = signinResult.userId
                         )
                     )
                 }
@@ -153,7 +154,8 @@ class SignInViewModel @Inject constructor(
                     //프로필 작성화면으로이동
                     setEvent(
                         UiEvent.navigate(
-                            screen = Screen.CreateprofileScreen
+                            screen = Screen.CreateprofileScreen,
+                            userId = signinResult.userId
                         )
                     )
                 }

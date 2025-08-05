@@ -32,7 +32,12 @@ class SigninRepositoryImpl @Inject constructor(
                     emit(Resource.Loading())
                     api.socialSignIn(platform,account).body()?.let{ result ->
                         if(result.resultCode == 200) {
-                            val signinResponse = result.toSigninResponse(result.isMember,result.profileWritten,result.token)
+                            val signinResponse = result.toSigninResponse(
+                                isMember = result.isMember,
+                                profileWritten = result.profileWritten,
+                                userId = result.userId,
+                                token = result.token
+                            )
                             emit(Resource.Success(signinResponse))
                         }
                         else
@@ -60,7 +65,12 @@ class SigninRepositoryImpl @Inject constructor(
                 api.emailSignIn(account,password).body()?.let{ result ->
                     if(result.resultCode == 200) {
 
-                        val signinResponse = result.toSigninResponse(result.isMember,result.profileWritten,result.token)
+                        val signinResponse = result.toSigninResponse(
+                            isMember = result.isMember,
+                            profileWritten = result.profileWritten,
+                            userId = result.userId,
+                            token = result.token
+                        )
                         emit(Resource.Success(signinResponse))
                     }
                     else
@@ -83,7 +93,11 @@ class SigninRepositoryImpl @Inject constructor(
                 emit(Resource.Loading())
                 api.signInWithToken().body()?.let{ result ->
                     if(result.resultCode == 200) {
-                        val signinResponse = result.toSigninWithTokenResponse(result.signInResult,result.profileWritten)
+                        val signinResponse = result.toSigninWithTokenResponse(
+                            signInResult = result.signInResult,
+                            profileWritten = result.profileWritten,
+                            userId = result.userId
+                        )
                         emit(Resource.Success(signinResponse))
                     }
                     else
