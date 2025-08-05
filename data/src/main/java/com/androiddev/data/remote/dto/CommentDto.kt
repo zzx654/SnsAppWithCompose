@@ -16,6 +16,7 @@ data class CommentDto (
     val profileimage: String?,
     val replycount: Int,
     val likecount: Int,
+    val score: Int = 0,
     val commentliked: Int
 )
 fun CommentDto.toComment(
@@ -31,6 +32,7 @@ fun CommentDto.toComment(
     gender: String,
     replycount: Int,
     likecount: Int,
+    score:Int,
     commentliked: Int
 ): Comment {
     var nick = ""
@@ -58,6 +60,7 @@ fun CommentDto.toComment(
         profileImage = profileimage,
         replyCount = replycount,
         likeCount = likecount,
+        score = score,
         commentLiked = commentliked,
         elapsedTime = elapsedTime(date)
     )

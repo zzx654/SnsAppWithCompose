@@ -14,5 +14,6 @@ data class Comment(
     val profileImage: String?,
     val replyCount: Int,
     val likeCount: Int,
+    val score:Int=0,
     val commentLiked: Int
 )

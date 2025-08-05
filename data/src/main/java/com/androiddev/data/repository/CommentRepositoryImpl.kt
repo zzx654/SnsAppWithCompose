@@ -21,6 +21,32 @@ class CommentRepositoryImpl @Inject constructor(
     private val api: CommentApi,
     private val context: Context
 ): CommentRepository {
+    override suspend fun getPopularComments(
+        postId: Int,
+        commentId: Int?,
+        score: Int
+    ): Flow<Resource<GetCommentsResponse>> {
+        return flow {
+            try{
+                emit(Resource.Loading())
+                api.getPopularComments(postId,commentId,score).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        val getCommentsresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
+                        emit(Resource.Success(getCommentsresult))
+                    } else {
+                        emit(Resource.Error(getString(context, R.string.server_error)))
+                    }
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,
+                    R.string.unexpected_error)
+                ))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context, R.string.connection_error)))
+            }
+        }
+    }
     override suspend fun getComments(
         postId: Int,
         commentId: Int?,

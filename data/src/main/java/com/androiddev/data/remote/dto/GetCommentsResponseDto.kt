@@ -25,7 +25,8 @@ fun GetCommentsResponseDto.toGetCommentsResponse(
                 profileimage = it.profileimage,
                 replycount = it.replycount,
                 likecount = it.likecount,
-                commentliked = it.commentliked
+                commentliked = it.commentliked,
+                score = it.score
             ) },
         isTokenValid = isTokenValid
     )

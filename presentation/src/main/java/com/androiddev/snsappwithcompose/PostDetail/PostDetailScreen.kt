@@ -14,6 +14,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
@@ -401,6 +402,31 @@ fun PostDetailScreen(
 
                 }
                 item {
+                    if(!viewModel.isCommentsEmpty.value) {
+                        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp,vertical = 10.dp), contentAlignment = Alignment.TopStart) {
+                            Row {
+                                SelectableDotText(
+                                    text = CommentSortType.OLDEST.text,
+                                    selected = viewModel.commentSortType.value == CommentSortType.OLDEST,
+                                    onClick = {//onEvent
+                                        viewModel.onEvent(PostDetailEvent.SetCommentSortType(CommentSortType.OLDEST))
+                                    },
+                                )
+                                Spacer(modifier = Modifier.width(9.dp))
+                                SelectableDotText(
+                                    text = CommentSortType.POPULAR.text,
+                                    selected = viewModel.commentSortType.value == CommentSortType.POPULAR,
+                                    onClick = {//onEvent
+                                        viewModel.onEvent(PostDetailEvent.SetCommentSortType(CommentSortType.POPULAR))
+                                    },
+                                )
+                            }
+                        }
+
+
+                    }
+                }
+                item {
                     if(getCommentsState.isRefreshing) {
                         Box(
                             modifier = Modifier
@@ -412,6 +438,7 @@ fun PostDetailScreen(
                         }
                     }
                 }
+
                 items(
                     getCommentsState.comments
                 ) { comment ->
@@ -530,7 +557,44 @@ fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean,conte
         )
     }
 }
+@SuppressLint("RememberReturnType")
+@Composable
+fun SelectableDotText(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dotColor = if (selected) Color.Black else Color.Gray.copy(alpha = 0.7f)
+    val textColor = if (selected) Color.Black else Color.Gray.copy(alpha = 0.7f)
+    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+    val interactionSource = remember { MutableInteractionSource() }
 
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            //.padding(8.dp)
+    ) {
+        Text(
+            text = "•",
+            color = dotColor,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(end = 4.dp)
+        )
+        Text(
+            text = text,
+            color = textColor,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp
+        )
+    }
+}
 @Composable
 fun ChatMessages(
     messages: List<String>,

@@ -16,6 +16,13 @@ interface CommentApi {
         @Field("commentdate")commentdate : String?
     ): Response<GetCommentsResponseDto>
     @FormUrlEncoded
+    @POST("/getPopularComments")
+    suspend fun getPopularComments(
+        @Field("postid")postid: Int,
+        @Field("commentid")commentid: Int?,
+        @Field("score")score : Int
+    ): Response<GetCommentsResponseDto>
+    @FormUrlEncoded
     @POST("/postComment")
     suspend fun postComments(
         @Field("postid")postid: Int,

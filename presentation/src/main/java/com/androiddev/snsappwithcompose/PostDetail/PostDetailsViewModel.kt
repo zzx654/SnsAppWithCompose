@@ -80,17 +80,27 @@ class PostDetailsViewModel @Inject constructor(
                 //등록순인지 인기순인지에 따라 요청하면됨
                 var lastCommentId: Int? = null
                 var lastCommentDate: String? = null
+                var lastCommentScore: Int = 0
                 with(getCommentsState.value.comments) {
                     if (isNotEmpty() && !refresh) {
                         lastCommentDate = last().date
                         lastCommentId = last().commentId
+                        lastCommentScore = last().score
                     }
                 }
                 //postid를 얻을방법
-                postDetailUseCases.GetComments(postId.value, lastCommentId, lastCommentDate)
-                    .collect {
-                        handleResult(it)
-                    }
+                if(commentSortType.value == CommentSortType.OLDEST) {
+                    postDetailUseCases.GetComments(postId.value, lastCommentId, lastCommentDate)
+                        .collect {
+                            handleResult(it)
+                        }
+                } else {
+                    postDetailUseCases.GetPopularComments(postId.value, lastCommentId, lastCommentScore)
+                        .collect {
+                            handleResult(it)
+                        }
+                }
+
             }
         }, onRefreshUpdated = { isRefreshing ->
             _getCommentsState.value =
@@ -218,6 +228,15 @@ class PostDetailsViewModel @Inject constructor(
                 }
             }
 
+            is PostDetailEvent.SetCommentSortType -> {
+                _commentSortType.value = event.commentSortType
+                viewModelScope.launch {
+                    _getCommentsState.value = GetCommentsState(comments = listOf())
+                    commentPaginator.loadNextItems(refresh = true)
+                }
+
+            }
+
             is PostDetailEvent.PostComment -> {
                 viewModelScope.launch {
                     postDetailUseCases.PostComment(
@@ -275,9 +294,8 @@ class PostDetailsViewModel @Inject constructor(
 
 }
 
-
-enum class CommentSortType {
-    OLDEST, POPULAR
+enum class CommentSortType(val text:String) {
+    OLDEST("등록순"), POPULAR("인기순")
 }
 
 sealed class KeyBoardEvent {

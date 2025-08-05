@@ -9,4 +9,5 @@ sealed class PostDetailEvent {
     data class ToggleAnonymous(val checked: Boolean): PostDetailEvent()
     data object LoadNextComments: PostDetailEvent()
     data class ToggleLikeComment(val commentId: Int) : PostDetailEvent()
+    data class SetCommentSortType(val commentSortType: CommentSortType): PostDetailEvent()
 }

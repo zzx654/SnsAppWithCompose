@@ -19,6 +19,7 @@ import com.androiddev.domain.use_case.EmailSignUp
 import com.androiddev.domain.use_case.EmailSignUpUseCases
 import com.androiddev.domain.use_case.GetComments
 import com.androiddev.domain.use_case.GetNearPosts
+import com.androiddev.domain.use_case.GetPopularComments
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.use_case.GetSelectedPost
 import com.androiddev.domain.use_case.PostComment
@@ -107,6 +108,7 @@ object UseCaseModule {
         return PostDetailUseCases(
             ToggleLikePost = ToggleLikePost(toggleLikePostRepository),
             GetComments = GetComments(commentRepository),
+            GetPopularComments = GetPopularComments(commentRepository),
             PostComment = PostComment(commentRepository),
             ToggleLikeComment = ToggleLikeComment(commentRepository)
         )

@@ -13,6 +13,11 @@ interface CommentRepository {
         commentDate: String?
     ): Flow<Resource<GetCommentsResponse>>
 
+    suspend fun getPopularComments(
+        postId: Int,
+        commentId: Int?,
+        score: Int,
+    ): Flow<Resource<GetCommentsResponse>>
     suspend fun postComment(
         postId:Int,
         text: String,
