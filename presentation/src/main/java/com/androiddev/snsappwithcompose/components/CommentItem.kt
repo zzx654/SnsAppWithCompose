@@ -39,7 +39,8 @@ fun CommentItem(
     isLiked: Boolean,
     likeCount: Int,
     imageLoader: ImageLoader,
-    onLikeClick: ()->Unit
+    onLikeClick: ()->Unit,
+    onOptionClick: ()->Unit
 ) {
     val context = LocalContext.current
     Row(
@@ -97,7 +98,7 @@ fun CommentItem(
         }
         CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
             IconButton(
-                onClick = { /* TODO: 메뉴 클릭 처리 */ },
+                onClick = { onOptionClick() },
                 modifier = Modifier.padding(top = 20.dp)
             ) {
                 Icon(

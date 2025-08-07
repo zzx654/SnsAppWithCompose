@@ -66,6 +66,15 @@
     <string name="write_reply">답글쓰기</string>
     <string name="comment_empty">아직 댓글이 없습니다\n첫 댓글을 달아주세요</string>
     <string name="input_comment">댓글을 입력하세요...</string>
+    <string name="report">신고하기</string>
+    <string name="block_user">차단하기</string>
+    <string name="request_chat">채팅요청하기</string>
+    <string name="delete">삭제하기</string>
+    <string name="edit">수정하기</string>
+    <string name="sort_by_popularity">인기순</string>
+    <string name="sort_by_date">등록순</string>
+
+
 
 
 

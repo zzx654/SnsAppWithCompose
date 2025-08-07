@@ -10,4 +10,5 @@ sealed class PostDetailEvent {
     data object LoadNextComments: PostDetailEvent()
     data class ToggleLikeComment(val commentId: Int) : PostDetailEvent()
     data class SetCommentSortType(val commentSortType: CommentSortType): PostDetailEvent()
+    data class ShowCommentOptions(val myUserId:Int, val commentUserId:Int): PostDetailEvent()
 }

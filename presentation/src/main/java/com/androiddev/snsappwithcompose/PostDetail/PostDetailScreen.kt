@@ -5,25 +5,17 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.view.Gravity
-import android.view.WindowInsets
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-
 import androidx.compose.foundation.layout.Column
-
-
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-
-
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +57,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -73,7 +66,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ThumbUpAlt
 import androidx.compose.material.icons.outlined.ThumbUpAlt
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.draw.clip
@@ -96,28 +89,25 @@ import coil3.size.Scale
 import coil3.util.DebugLogger
 import com.androiddev.snsappwithcompose.BaseScaffold
 import com.androiddev.snsappwithcompose.BuildConfig
-import com.androiddev.snsappwithcompose.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.UserViewModel
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.components.Chips
 import com.androiddev.snsappwithcompose.components.CommentInput
 import com.androiddev.snsappwithcompose.components.CommentItem
+import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.components.CustomChip
 import com.androiddev.snsappwithcompose.components.LoadingDialog
-import com.androiddev.snsappwithcompose.components.PostPrevItem
 import com.androiddev.snsappwithcompose.ui.theme.profileBorder
+import com.androiddev.snsappwithcompose.util.MenuItem
 import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.launch
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalPagerApi::class)
@@ -134,13 +124,27 @@ fun PostDetailScreen(
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-
+    var dropdownMenuExpanded by remember { mutableStateOf(false) }
     val imageLoader = remember {
         context.imageLoader.newBuilder()
             .crossfade(false)
             .logger(DebugLogger())
             .build()
     }
+    val dropdownMenuItem = if(post?.userId == userViewModel.userId.value) {
+        listOf(
+            MenuItem(getString(context,R.string.edit)){},
+            MenuItem(getString(context,R.string.delete)) {}
+        )
+
+    } else {
+        listOf(
+            MenuItem(getString(context,R.string.block_user)){},
+            MenuItem(getString(context,R.string.report)) {},
+            MenuItem(getString(context,R.string.request_chat)) {}
+        )
+    }
+
     val pagerState = rememberPagerState(
         initialPage = 0
     )
@@ -177,7 +181,9 @@ fun PostDetailScreen(
     }
     val getCommentsState = viewModel.getCommentsState.value
     LaunchedEffect(post) {
+
         post?.let {
+
             viewModel.initPost(
                 isLiked = it.isliked,
                 it.postId
@@ -202,6 +208,11 @@ fun PostDetailScreen(
     LoadingDialog {
         viewModel.isLoading.value
     }
+    CustomBottomSheetDialog(
+        { viewModel.customBottomSheetDialogState.value.showDialog },
+        { viewModel.customBottomSheetDialogState.value.items },
+        viewModel.customBottomSheetDialogState.value.onClickCancel
+    )
     BaseScaffold(
         modifier = Modifier.fillMaxWidth(),
         focusManager = focusManager,
@@ -212,11 +223,24 @@ fun PostDetailScreen(
                     title = post.nickname,
                     onBackClick = { navController.popBackStack() },
                     actions = {
-                        IconButton(onClick = { /* TODO: 메뉴 클릭 처리 */ }) {
+                        IconButton(onClick = { dropdownMenuExpanded = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "More options"
                             )
+                        }
+                        DropdownMenu(
+                            expanded = dropdownMenuExpanded,
+                            onDismissRequest = { dropdownMenuExpanded = false }
+                        ) {
+                            dropdownMenuItem.forEach { item ->
+                                DropdownMenuItem(
+                                    text = { Text(item.label) },
+                                    onClick = {
+                                        item.onClick() // ✅ 각 항목의 고유한 onClick 실행
+                                    }
+                                )
+                            }
                         }
                     }
                 )
@@ -385,7 +409,7 @@ fun PostDetailScreen(
                                             }
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
-                                    Text(text = "좋아요",color = Color.DarkGray.copy(0.8f))
+                                    Text(text = getString(context,R.string.like),color = Color.DarkGray.copy(0.8f))
                                 }
 
                             }
@@ -407,7 +431,7 @@ fun PostDetailScreen(
                         Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp,vertical = 10.dp), contentAlignment = Alignment.TopStart) {
                             Row {
                                 SelectableDotText(
-                                    text = CommentSortType.OLDEST.text,
+                                    text = getString(context,CommentSortType.OLDEST.labelResId),
                                     selected = viewModel.commentSortType.value == CommentSortType.OLDEST,
                                     onClick = {//onEvent
                                         viewModel.onEvent(PostDetailEvent.SetCommentSortType(CommentSortType.OLDEST))
@@ -415,7 +439,7 @@ fun PostDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.width(9.dp))
                                 SelectableDotText(
-                                    text = CommentSortType.POPULAR.text,
+                                    text = getString(context,CommentSortType.POPULAR.labelResId),
                                     selected = viewModel.commentSortType.value == CommentSortType.POPULAR,
                                     onClick = {//onEvent
                                         viewModel.onEvent(PostDetailEvent.SetCommentSortType(CommentSortType.POPULAR))
@@ -461,6 +485,12 @@ fun PostDetailScreen(
                             comment.commentId?.let {
                                 viewModel.onEvent(PostDetailEvent.ToggleLikeComment(it))
                             }
+                        },
+                        onOptionClick = {
+                            viewModel.onEvent(PostDetailEvent.ShowCommentOptions(
+                                myUserId = userViewModel.userId.value,
+                                commentUserId = comment.userId
+                            ))
                         }
                     )
                     Divider(

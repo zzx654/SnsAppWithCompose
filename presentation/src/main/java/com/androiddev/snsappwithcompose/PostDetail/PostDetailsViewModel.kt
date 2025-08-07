@@ -1,11 +1,14 @@
 package com.androiddev.snsappwithcompose.PostDetail
 
 import android.content.Context
+import androidx.annotation.StringRes
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -19,6 +22,8 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.home.GetPostsState
 import com.androiddev.snsappwithcompose.home.nearposts.GetNearPostsEvent
 import com.androiddev.snsappwithcompose.util.BaseViewModel
+import com.androiddev.snsappwithcompose.util.BottomSheetItem
+import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.util.Paginator
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.generateAnonymousNickname
@@ -34,6 +39,11 @@ class PostDetailsViewModel @Inject constructor(
     private val postDetailUseCases: PostDetailUseCases, private val context: Context
 ) : BaseViewModel() {
     //로딩처리. 댓글 상단 고정
+    private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
+        CustomBottomSheetDialogState()
+    )
+    val customBottomSheetDialogState: State<CustomBottomSheetDialogState>
+        get() = _customBottomSheetDialogState
     private val _uiEvent = MutableSharedFlow<KeyBoardEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
     private val _chatList = mutableStateListOf<String>()
@@ -149,6 +159,12 @@ class PostDetailsViewModel @Inject constructor(
     }
     fun onEvent(event: PostDetailEvent) {
         when (event) {
+            is PostDetailEvent.ShowCommentOptions -> {
+                showBottomSheetDialog(
+                    myUserId = event.myUserId,
+                    commentUserId = event.commentUserId
+                )
+            }
             is PostDetailEvent.TypeComment -> {
                 _commentText.value = event.comment
             }
@@ -291,11 +307,48 @@ class PostDetailsViewModel @Inject constructor(
             }
         }
     }
+    private fun showBottomSheetDialog(myUserId:Int,commentUserId:Int) {
+        val items: MutableList<BottomSheetItem> = if(myUserId == commentUserId) {
+            mutableListOf(
+                BottomSheetItem(R.drawable.outline_edit,getString(context,R.string.edit)) {
+                    resetBottomSheetDialogState()
+                },
+                BottomSheetItem(R.drawable.outline_delete,getString(context,R.string.delete)) {
+                    resetBottomSheetDialogState()
+                },
+            )
+        } else {
+            mutableListOf(
+                BottomSheetItem(R.drawable.outline_report,getString(context,R.string.report)) {
+                    resetBottomSheetDialogState()
+                },
+                BottomSheetItem(R.drawable.outline_block,getString(context,R.string.block_user)) {
+                    resetBottomSheetDialogState()
+                },
+                BottomSheetItem(R.drawable.outline_chat,getString(context,R.string.request_chat)) {
+                    resetBottomSheetDialogState()
+                }
+            )
+        }
+
+
+
+
+
+
+        _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
+            showDialog = true,
+            items,
+        ) { resetBottomSheetDialogState() }
+    }
+    private fun resetBottomSheetDialogState() {
+        _customBottomSheetDialogState.value = CustomBottomSheetDialogState()
+    }
 
 }
 
-enum class CommentSortType(val text:String) {
-    OLDEST("등록순"), POPULAR("인기순")
+enum class CommentSortType(@StringRes val labelResId: Int) {
+    OLDEST(R.string.sort_by_popularity), POPULAR(R.string.sort_by_date)
 }
 
 sealed class KeyBoardEvent {
