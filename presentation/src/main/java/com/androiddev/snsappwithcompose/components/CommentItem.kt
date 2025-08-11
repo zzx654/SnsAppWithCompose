@@ -40,11 +40,12 @@ fun CommentItem(
     likeCount: Int,
     imageLoader: ImageLoader,
     onLikeClick: ()->Unit,
-    onOptionClick: ()->Unit
+    onOptionClick: ()->Unit,
+    onCommentClick: ()->Unit
 ) {
     val context = LocalContext.current
     Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).clickable { onCommentClick() }
     ) {
         Column(
             modifier = Modifier.weight(1f)

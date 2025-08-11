@@ -7,6 +7,10 @@ import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {
+    suspend fun getSelectedComment(
+        postId:Int,
+        commentId:Int
+    ): Flow<Resource<GetCommentsResponse>>
     suspend fun getComments(
         postId: Int,
         commentId: Int?,

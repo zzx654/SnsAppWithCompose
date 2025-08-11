@@ -21,6 +21,7 @@ import com.androiddev.domain.use_case.GetComments
 import com.androiddev.domain.use_case.GetNearPosts
 import com.androiddev.domain.use_case.GetPopularComments
 import com.androiddev.domain.use_case.GetPostsUseCases
+import com.androiddev.domain.use_case.GetSelectedComment
 import com.androiddev.domain.use_case.GetSelectedPost
 import com.androiddev.domain.use_case.PostComment
 import com.androiddev.domain.use_case.PostDetailUseCases
@@ -107,6 +108,7 @@ object UseCaseModule {
     ): PostDetailUseCases {
         return PostDetailUseCases(
             ToggleLikePost = ToggleLikePost(toggleLikePostRepository),
+            GetSelectedComment = GetSelectedComment(commentRepository),
             GetComments = GetComments(commentRepository),
             GetPopularComments = GetPopularComments(commentRepository),
             PostComment = PostComment(commentRepository),

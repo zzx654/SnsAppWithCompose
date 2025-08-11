@@ -491,6 +491,11 @@ fun PostDetailScreen(
                                 myUserId = userViewModel.userId.value,
                                 commentUserId = comment.userId
                             ))
+                        },
+                        onCommentClick = {
+                            viewModel.onEvent(PostDetailEvent.GotoReplyScreen(
+                                commentId = comment.commentId?:0
+                            ))
                         }
                     )
                     Divider(

@@ -9,6 +9,12 @@ import retrofit2.http.POST
 
 interface CommentApi {
     @FormUrlEncoded
+    @POST("/getSelectedComment")
+    suspend fun getSelectedComment(
+        @Field("postid")postid: Int,
+        @Field("commentid")commentid: Int?,
+    ): Response<GetCommentsResponseDto>
+    @FormUrlEncoded
     @POST("/getComments")
     suspend fun getComments(
         @Field("postid")postid: Int,

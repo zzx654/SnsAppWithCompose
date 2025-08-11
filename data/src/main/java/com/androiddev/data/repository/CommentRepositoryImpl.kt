@@ -47,6 +47,34 @@ class CommentRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun getSelectedComment(
+        postId: Int,
+        commentId: Int
+    ): Flow<Resource<GetCommentsResponse>> {
+        return flow {
+            try {
+                emit(Resource.Loading())
+                api.getSelectedComment(postId,commentId).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        val getCommentresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
+                        emit(Resource.Success(getCommentresult))
+                    } else {
+                        emit(Resource.Error(getString(context, R.string.server_error)))
+                    }
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,
+                    R.string.unexpected_error)
+                ))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context, R.string.connection_error)))
+            }
+        }
+
+    }
+
     override suspend fun getComments(
         postId: Int,
         commentId: Int?,

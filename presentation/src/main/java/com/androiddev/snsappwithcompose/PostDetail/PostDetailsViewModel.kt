@@ -1,6 +1,7 @@
 package com.androiddev.snsappwithcompose.PostDetail
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -288,6 +289,46 @@ class PostDetailsViewModel @Inject constructor(
                                     )
                                 )
                             }
+                        }
+
+                    }
+                }
+
+
+            }
+            is PostDetailEvent.GotoReplyScreen -> {
+                event.commentId
+                postId.value
+                viewModelScope.launch {
+                    postDetailUseCases.GetSelectedComment(
+                        postId = postId.value,
+                        commentId = event.commentId
+                    ).collect { result ->
+                        when(result) {
+
+                            is Resource.Success -> {
+                                setLoading(false)
+                                result.data?.let {
+                                    Log.d("comment","${it.comments[0]}")
+                                }
+                            }
+
+                            is Resource.Loading -> {
+                                setLoading(true)
+
+                            }
+
+                            is Resource.Error -> {
+                                setLoading(false)
+                                setEvent(
+                                    UiEvent.ShowToast(
+                                        message = result.message ?: getString(
+                                            context, R.string.error
+                                        )
+                                    )
+                                )
+                            }
+
                         }
 
                     }
