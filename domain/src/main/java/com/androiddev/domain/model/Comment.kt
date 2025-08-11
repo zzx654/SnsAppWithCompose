@@ -1,5 +1,8 @@
 package com.androiddev.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Comment(
     val commentId: Int?,
     val userId: Int,

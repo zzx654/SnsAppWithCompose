@@ -8,6 +8,4 @@ data class GetPostsState(
     val posts: List<PostPreview> = emptyList(),
     val error: String? = null,
     val endReached: Boolean = false,
-    //val lastPostDate: String? = null,
-    //val lastPostId: Int? = null
 )

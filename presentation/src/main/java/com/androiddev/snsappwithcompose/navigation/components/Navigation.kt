@@ -14,6 +14,7 @@ import androidx.navigation.toRoute
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.MainScaffold
 import com.androiddev.snsappwithcompose.PostDetail.PostDetailScreen
+import com.androiddev.snsappwithcompose.Reply.ReplyScreen
 import com.androiddev.snsappwithcompose.UserViewModel
 import com.androiddev.snsappwithcompose.components.CropScreen
 import com.androiddev.snsappwithcompose.auth.signin.InitScreen
@@ -88,7 +89,7 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
         composable<Screen.PostDetailScreen>(
             typeMap = postTypeMap
         ) {
-            //여기
+
             val post = it.toRoute<Screen.PostDetailScreen>().post
            BackHandler(true) {
             }
@@ -97,6 +98,19 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
                 userViewModel = userViewModel,
                 navController = navController,
                 navBackStackEntry = it,
+            )
+        }
+        composable<Screen.ReplyScreen>(
+            typeMap = commentTypeMap
+        ) {
+            val comment = it.toRoute<Screen.ReplyScreen>().comment
+            BackHandler(true) {
+            }
+            ReplyScreen(
+                comment = comment,
+                navController = navController,
+                navBackStackEntry = it,
+                userViewModel = userViewModel
             )
         }
 

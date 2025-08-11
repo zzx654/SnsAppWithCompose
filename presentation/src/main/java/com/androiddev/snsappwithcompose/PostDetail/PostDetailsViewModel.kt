@@ -16,12 +16,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.GetCommentsResponse
 import com.androiddev.domain.model.TagInfo
+import com.androiddev.domain.use_case.CommentUseCases
 import com.androiddev.domain.use_case.PostDetailUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.home.GetPostsState
 import com.androiddev.snsappwithcompose.home.nearposts.GetNearPostsEvent
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.BottomSheetItem
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
@@ -37,7 +39,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
-    private val postDetailUseCases: PostDetailUseCases, private val context: Context
+    private val postDetailUseCases: PostDetailUseCases,
+    private val commentUseCases: CommentUseCases,
+    private val context: Context
 ) : BaseViewModel() {
     //로딩처리. 댓글 상단 고정
     private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
@@ -101,12 +105,12 @@ class PostDetailsViewModel @Inject constructor(
                 }
                 //postid를 얻을방법
                 if(commentSortType.value == CommentSortType.OLDEST) {
-                    postDetailUseCases.GetComments(postId.value, lastCommentId, lastCommentDate)
+                    commentUseCases.GetComments(postId.value, lastCommentId, lastCommentDate)
                         .collect {
                             handleResult(it)
                         }
                 } else {
-                    postDetailUseCases.GetPopularComments(postId.value, lastCommentId, lastCommentScore)
+                    commentUseCases.GetPopularComments(postId.value, lastCommentId, lastCommentScore)
                         .collect {
                             handleResult(it)
                         }
@@ -158,30 +162,30 @@ class PostDetailsViewModel @Inject constructor(
     fun addChat(message:String) {
         _chatList.add(message)
     }
-    fun onEvent(event: PostDetailEvent) {
-        when (event) {
-            is PostDetailEvent.ShowCommentOptions -> {
+    fun onCommentEvent(event: CommentEvent) {
+        when(event) {
+            is CommentEvent.ShowCommentOptions -> {
                 showBottomSheetDialog(
                     myUserId = event.myUserId,
                     commentUserId = event.commentUserId
                 )
             }
-            is PostDetailEvent.TypeComment -> {
+            is CommentEvent.TypeComment -> {
                 _commentText.value = event.comment
             }
 
-            is PostDetailEvent.ToggleAnonymous -> {
+            is CommentEvent.ToggleAnonymous -> {
                 _anonymousChecked.value = event.checked
             }
 
-            is PostDetailEvent.LoadNextComments -> {
+            is CommentEvent.LoadNextComments -> {
                 viewModelScope.launch {
                     commentPaginator.loadNextItems(refresh = false)
                 }
             }
-            is PostDetailEvent.ToggleLikeComment -> {
+            is CommentEvent.ToggleLikeComment -> {
                 viewModelScope.launch {
-                    postDetailUseCases.ToggleLikeComment(event.commentId).collect { result ->
+                    commentUseCases.ToggleLikeComment(event.commentId).collect { result ->
                         when(result) {
                             is Resource.Success -> {
                                 setLoading(false)
@@ -211,41 +215,7 @@ class PostDetailsViewModel @Inject constructor(
                 }
 
             }
-
-            is PostDetailEvent.ToggleLikePost -> {
-                viewModelScope.launch {
-                    postDetailUseCases.ToggleLikePost(event.postId).collect { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let {
-                                        _isLiked.value = it.isLiked
-                                    }
-                                }
-
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(
-                                                context, R.string.error
-                                            )
-                                        )
-                                    )
-                                }
-
-                                else -> null
-                            }
-
-                        }
-                }
-            }
-
-            is PostDetailEvent.SetCommentSortType -> {
+            is CommentEvent.SetCommentSortType -> {
                 _commentSortType.value = event.commentSortType
                 viewModelScope.launch {
                     _getCommentsState.value = GetCommentsState(comments = listOf())
@@ -254,9 +224,9 @@ class PostDetailsViewModel @Inject constructor(
 
             }
 
-            is PostDetailEvent.PostComment -> {
+            is CommentEvent.PostComment -> {
                 viewModelScope.launch {
-                    postDetailUseCases.PostComment(
+                    commentUseCases.PostComment(
                         postId = postId.value,
                         text = commentText.value,
                         anonymousNick = if(anonymousChecked.value) generateAnonymousNickname() else null
@@ -296,11 +266,11 @@ class PostDetailsViewModel @Inject constructor(
 
 
             }
-            is PostDetailEvent.GotoReplyScreen -> {
+            is CommentEvent.GotoReplyScreen -> {
                 event.commentId
                 postId.value
                 viewModelScope.launch {
-                    postDetailUseCases.GetSelectedComment(
+                    commentUseCases.GetSelectedComment(
                         postId = postId.value,
                         commentId = event.commentId
                     ).collect { result ->
@@ -309,6 +279,11 @@ class PostDetailsViewModel @Inject constructor(
                             is Resource.Success -> {
                                 setLoading(false)
                                 result.data?.let {
+                                    setEvent(
+                                        UiEvent.navigate(
+                                            Screen.ReplyScreen(it.comments[0])
+                                        )
+                                    )
                                     Log.d("comment","${it.comments[0]}")
                                 }
                             }
@@ -336,6 +311,50 @@ class PostDetailsViewModel @Inject constructor(
 
 
             }
+
+            is CommentEvent.PostReply -> {
+
+            }
+        }
+
+    }
+    fun onPostDetailEvent(event: PostDetailEvent) {
+        when (event) {
+
+
+            is PostDetailEvent.ToggleLikePost -> {
+                viewModelScope.launch {
+                    postDetailUseCases.ToggleLikePost(event.postId).collect { result ->
+                            when (result) {
+                                is Resource.Success -> {
+                                    setLoading(false)
+                                    result.data?.let {
+                                        _isLiked.value = it.isLiked
+                                    }
+                                }
+
+                                is Resource.Loading -> {
+                                    setLoading(true)
+                                }
+
+                                is Resource.Error -> {
+                                    setLoading(false)
+                                    setEvent(
+                                        UiEvent.ShowToast(
+                                            message = result.message ?: getString(
+                                                context, R.string.error
+                                            )
+                                        )
+                                    )
+                                }
+
+                                else -> null
+                            }
+
+                        }
+                }
+            }
+
         }
     }
     fun updateStatesForNewComments(newComments: List<Comment>) {

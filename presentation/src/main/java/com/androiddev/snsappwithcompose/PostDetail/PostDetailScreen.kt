@@ -175,7 +175,7 @@ fun PostDetailScreen(
                 val totalItemsCount = listState.layoutInfo.totalItemsCount
                 if (lastVisibleItemIndex != null && lastVisibleItemIndex >= totalItemsCount - 1&&imeHeigh.value == 0&&totalItemsCount>=10) {
 
-                    viewModel.onEvent(PostDetailEvent.LoadNextComments)
+                    viewModel.onCommentEvent(CommentEvent.LoadNextComments)
                 }
             }
     }
@@ -200,6 +200,9 @@ fun PostDetailScreen(
                         it.setGravity(Gravity.BOTTOM, 0, 130)
                         it.show()
                     }
+                }
+                is UiEvent.navigate -> {
+                    navController.navigate(event.screen)
                 }
                 else -> null
             }
@@ -403,7 +406,7 @@ fun PostDetailScreen(
                                         tint = Color.DarkGray.copy(0.8f),
                                         modifier = Modifier
                                             .clickable {
-                                                viewModel.onEvent(
+                                                viewModel.onPostDetailEvent(
                                                     PostDetailEvent.ToggleLikePost(post.postId)
                                                 )
                                             }
@@ -434,7 +437,7 @@ fun PostDetailScreen(
                                     text = getString(context,CommentSortType.OLDEST.labelResId),
                                     selected = viewModel.commentSortType.value == CommentSortType.OLDEST,
                                     onClick = {//onEvent
-                                        viewModel.onEvent(PostDetailEvent.SetCommentSortType(CommentSortType.OLDEST))
+                                        viewModel.onCommentEvent(CommentEvent.SetCommentSortType(CommentSortType.OLDEST))
                                     },
                                 )
                                 Spacer(modifier = Modifier.width(9.dp))
@@ -442,7 +445,7 @@ fun PostDetailScreen(
                                     text = getString(context,CommentSortType.POPULAR.labelResId),
                                     selected = viewModel.commentSortType.value == CommentSortType.POPULAR,
                                     onClick = {//onEvent
-                                        viewModel.onEvent(PostDetailEvent.SetCommentSortType(CommentSortType.POPULAR))
+                                        viewModel.onCommentEvent(CommentEvent.SetCommentSortType(CommentSortType.POPULAR))
                                     },
                                 )
                             }
@@ -483,17 +486,17 @@ fun PostDetailScreen(
                         imageLoader = imageLoader,
                         onLikeClick = {
                             comment.commentId?.let {
-                                viewModel.onEvent(PostDetailEvent.ToggleLikeComment(it))
+                                viewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
                             }
                         },
                         onOptionClick = {
-                            viewModel.onEvent(PostDetailEvent.ShowCommentOptions(
+                            viewModel.onCommentEvent(CommentEvent.ShowCommentOptions(
                                 myUserId = userViewModel.userId.value,
                                 commentUserId = comment.userId
                             ))
                         },
                         onCommentClick = {
-                            viewModel.onEvent(PostDetailEvent.GotoReplyScreen(
+                            viewModel.onCommentEvent(CommentEvent.GotoReplyScreen(
                                 commentId = comment.commentId?:0
                             ))
                         }
@@ -539,13 +542,13 @@ fun PostDetailScreen(
         bottomBar = {
             CommentInput(
                 comment = viewModel.commentText.value,
-                onCommentChange = { viewModel.onEvent(PostDetailEvent.TypeComment(it)) },
+                onCommentChange = { viewModel.onCommentEvent(CommentEvent.TypeComment(it)) },
                 onPostClick = {
                     if(viewModel.commentText.value.isNotEmpty())
-                        viewModel.onEvent(PostDetailEvent.PostComment)
+                        viewModel.onCommentEvent(CommentEvent.PostComment)
                 },
                 isAnonymous = viewModel.anonymousChecked.value,
-                onAnonymousChange = { viewModel.onEvent(PostDetailEvent.ToggleAnonymous(it)) }
+                onAnonymousChange = { viewModel.onCommentEvent(CommentEvent.ToggleAnonymous(it)) }
             )
         },
         lazyColumnExist = true

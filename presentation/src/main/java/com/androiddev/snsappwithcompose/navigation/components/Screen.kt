@@ -7,6 +7,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import kotlin.reflect.typeOf
 import android.net.Uri
+import com.androiddev.domain.model.Comment
+
 sealed interface Screen {
 
     @Serializable
@@ -31,6 +33,8 @@ sealed interface Screen {
     data class CropScreen(val encodedUri:String): Screen
     @Serializable
     data class PostDetailScreen(val post:PostPreview?): Screen
+    @Serializable
+    data class ReplyScreen(val comment: Comment?): Screen
 
 }
 inline fun <reified T : Any?> serializableType(
@@ -66,3 +70,4 @@ inline fun <reified T : Any?> serializableType(
     override fun serializeAsValue(value: T): String = json.encodeToString(value)
 }**/
 val postTypeMap = mapOf(typeOf<PostPreview?>() to serializableType<PostPreview?>(isNullableAllowed = true))
+val commentTypeMap = mapOf(typeOf<Comment?>() to serializableType<Comment?>(isNullableAllowed = true))

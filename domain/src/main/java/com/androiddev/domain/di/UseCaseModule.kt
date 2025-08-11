@@ -12,6 +12,7 @@ import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.AuthenticateCode
 import com.androiddev.domain.use_case.CheckNickname
+import com.androiddev.domain.use_case.CommentUseCases
 import com.androiddev.domain.use_case.CreateProfile
 import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.use_case.EmailSignIn
@@ -103,11 +104,18 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun providePostDetailUseCases(
-        toggleLikePostRepository: ToggleLikePostRepository,
-        commentRepository: CommentRepository
+        toggleLikePostRepository: ToggleLikePostRepository
     ): PostDetailUseCases {
         return PostDetailUseCases(
             ToggleLikePost = ToggleLikePost(toggleLikePostRepository),
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideCommentUseCases(
+        commentRepository: CommentRepository
+    ): CommentUseCases {
+        return CommentUseCases(
             GetSelectedComment = GetSelectedComment(commentRepository),
             GetComments = GetComments(commentRepository),
             GetPopularComments = GetPopularComments(commentRepository),
