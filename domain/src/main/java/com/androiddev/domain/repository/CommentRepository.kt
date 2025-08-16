@@ -7,6 +7,11 @@ import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {
+    suspend fun getReplies(
+        ref: Int,
+        commentId: Int?,
+        commentDate: String?
+    ): Flow<Resource<GetCommentsResponse>>
     suspend fun getSelectedComment(
         postId:Int,
         commentId:Int
@@ -26,6 +31,12 @@ interface CommentRepository {
         postId:Int,
         text: String,
         anonymousNick:String?
+    ): Flow<Resource<GetCommentsResponse>>
+    suspend fun postReply(
+        postId: Int,
+        ref: Int,
+        text: String,
+        anonymousNick: String?
     ): Flow<Resource<GetCommentsResponse>>
 
     suspend fun toggleLikeComment(commentId:Int) : Flow<Resource<ToggleLikeResponse>>

@@ -146,22 +146,6 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun initData(){
-        viewModelScope.launch {
-            _isLoad.value = true
-            delay(1000)
-
-            _chatList.addAll(listOf("1","2","3","4")
-                //"7","8","9","10")
-
-            )
-            _isLoad.value = false
-        }
-
-    }
-    fun addChat(message:String) {
-        _chatList.add(message)
-    }
     fun onCommentEvent(event: CommentEvent) {
         when(event) {
             is CommentEvent.ShowCommentOptions -> {
@@ -312,9 +296,7 @@ class PostDetailsViewModel @Inject constructor(
 
             }
 
-            is CommentEvent.PostReply -> {
-
-            }
+            else-> null
         }
 
     }

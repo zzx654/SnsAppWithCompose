@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Comment(
+    val postId:Int,
     val commentId: Int?,
     val userId: Int,
     val text: String,
@@ -15,7 +16,7 @@ data class Comment(
     val anonymous: Boolean,
     val nickname: String,
     val profileImage: String?,
-    val replyCount: Int,
+    val replyCount: Int=0,
     val likeCount: Int,
     val score:Int=0,
     val commentLiked: Int

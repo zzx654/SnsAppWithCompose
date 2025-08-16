@@ -13,6 +13,7 @@ fun GetCommentsResponseDto.toGetCommentsResponse(
     return GetCommentsResponse(
         comments = comments.map{
             it.toComment(
+                postid = it.postid,
                 commentid = it.commentid,
                 userid = it.userid,
                 text = it.text,

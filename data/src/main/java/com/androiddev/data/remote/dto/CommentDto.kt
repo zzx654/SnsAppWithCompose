@@ -4,6 +4,7 @@ import com.androiddev.domain.model.Comment
 import com.androiddev.domain.util.elapsedTime
 
 data class CommentDto (
+    val postid: Int,
     val commentid: Int,
     val userid: Int,
     val text: String,
@@ -20,6 +21,7 @@ data class CommentDto (
     val commentliked: Int
 )
 fun CommentDto.toComment(
+    postid: Int,
     commentid: Int,
     userid: Int,
     text: String,
@@ -48,6 +50,7 @@ fun CommentDto.toComment(
 
     }
     return Comment(
+        postId = postid,
         commentId = commentid,
         userId = userid,
         text = text,

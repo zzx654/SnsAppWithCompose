@@ -22,10 +22,13 @@ import com.androiddev.domain.use_case.GetComments
 import com.androiddev.domain.use_case.GetNearPosts
 import com.androiddev.domain.use_case.GetPopularComments
 import com.androiddev.domain.use_case.GetPostsUseCases
+import com.androiddev.domain.use_case.GetReplies
 import com.androiddev.domain.use_case.GetSelectedComment
 import com.androiddev.domain.use_case.GetSelectedPost
 import com.androiddev.domain.use_case.PostComment
 import com.androiddev.domain.use_case.PostDetailUseCases
+import com.androiddev.domain.use_case.PostReply
+import com.androiddev.domain.use_case.ReplyUseCases
 import com.androiddev.domain.use_case.RequestEmailAuthCode
 import com.androiddev.domain.use_case.RequestPhoneAuthCode
 import com.androiddev.domain.use_case.SearchTag
@@ -121,6 +124,16 @@ object UseCaseModule {
             GetPopularComments = GetPopularComments(commentRepository),
             PostComment = PostComment(commentRepository),
             ToggleLikeComment = ToggleLikeComment(commentRepository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideReplyUseCases(
+        commentRepository: CommentRepository
+    ): ReplyUseCases {
+        return ReplyUseCases(
+            GetReplies = GetReplies(commentRepository),
+            PostReply = PostReply(commentRepository)
         )
     }
 }

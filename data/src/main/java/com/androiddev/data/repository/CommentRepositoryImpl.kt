@@ -48,6 +48,33 @@ class CommentRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getReplies(
+        ref: Int,
+        commentId: Int?,
+        commentDate: String?
+    ): Flow<Resource<GetCommentsResponse>> {
+        return flow {
+            try{
+                emit(Resource.Loading())
+                api.getReplies(ref,commentId,commentDate).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        val getCommentsresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
+                        emit(Resource.Success(getCommentsresult))
+                    } else {
+                        emit(Resource.Error(getString(context, R.string.server_error)))
+                    }
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,
+                    R.string.unexpected_error)
+                ))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context, R.string.connection_error)))
+            }
+        }
+    }
+
     override suspend fun getSelectedComment(
         postId: Int,
         commentId: Int
@@ -128,6 +155,35 @@ class CommentRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun postReply(
+        postId: Int,
+        ref: Int,
+        text: String,
+        anonymousNick: String?
+    ): Flow<Resource<GetCommentsResponse>> {
+        return flow {
+            try{
+                emit(Resource.Loading())
+                api.postReply(postId,ref,text,anonymousNick).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        val getCommentsresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
+                        emit(Resource.Success(getCommentsresult))
+                    } else {
+                        emit(Resource.Error(getString(context, R.string.server_error)))
+                    }
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,
+                    R.string.unexpected_error)
+                ))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context, R.string.connection_error)))
+            }
+        }
+    }
+
     override suspend fun toggleLikeComment(commentId: Int): Flow<Resource<ToggleLikeResponse>> {
         return flow {
             try {
