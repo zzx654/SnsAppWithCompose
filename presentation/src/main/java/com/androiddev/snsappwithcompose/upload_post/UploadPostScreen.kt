@@ -9,13 +9,16 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HowToVote
@@ -54,13 +57,21 @@ import com.androiddev.snsappwithcompose.util.fetchLocation
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.ui.Alignment
+import com.androiddev.snsappwithcompose.components.BottomRecorder
+import com.androiddev.snsappwithcompose.components.UploadRecordIcon
+import com.androiddev.snsappwithcompose.components.UploadVoteIcon
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "RestrictedApi", "SuspiciousIndentation")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "RestrictedApi", "SuspiciousIndentation",
+    "NewApi"
+)
 @Composable
 fun UploadPostScreen(
     navController: NavController,
-    viewModel: UploadPostViewModel = hiltViewModel()
+    viewModel: UploadPostViewModel = hiltViewModel(),
+    recordViewModel: RecordViewModel = hiltViewModel()
+
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -68,6 +79,10 @@ fun UploadPostScreen(
 
     val contentTextFieldState = rememberTextFieldState()
 
+    val elapsed by recordViewModel.elapsedTime.collectAsState()
+    val progress by recordViewModel.progress.collectAsState()
+    val isRecording by recordViewModel.isRecording.collectAsState()
+    val formattedTime = "%02d:%02d".format(elapsed / 60, elapsed % 60)
     val fusedLocationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
@@ -105,6 +120,11 @@ fun UploadPostScreen(
     LaunchedEffect(contentTextFieldState.text) {
         viewModel.onEvent(UploadPostEvent.TypeContent(contentTextFieldState.text.toString()))
     }
+    BottomRecorder(
+      showDialog = { viewModel.bottomRecordDialogState.value.showDialog },
+      onClickCancel = viewModel.bottomRecordDialogState.value.onClickCancel,
+      viewModel = recordViewModel
+    )
     BaseScaffold(
         focusManager = focusManager,
         topBar = {
@@ -152,7 +172,7 @@ fun UploadPostScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.DarkGray.copy(0.2f)),
+                        .background(Color.DarkGray.copy(0.35f)),
                 ) {
                     Spacer(modifier = Modifier.width(5.dp))
                     IconButton(
@@ -170,23 +190,37 @@ fun UploadPostScreen(
                             contentDescription = null,
                         )
                     }
+
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = { /* do something */ }
+                        onClick = {
+                            checkPermissions(
+                                context = context,
+                                permissions = arrayOf(
+                                    Manifest.permission.RECORD_AUDIO
+                                ),
+                                onGranted = {
+                                    viewModel.showDialog()
+                                },
+                                onUnGranted = {
+                                    launcherMultiplePermissions.launch(
+                                        arrayOf(
+                                            Manifest.permission.RECORD_AUDIO
+                                        )
+                                    )
+                                }
+                            )
+                        },
+
                     ) {
-                        Icon(
-                            Icons.Default.Mic,
-                            contentDescription = null,
-                        )
+                        UploadRecordIcon(false) { }
                     }
+
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = { /* do something */ }
+                        onClick = {}
                     ) {
-                        Icon(
-                            Icons.Default.HowToVote,
-                            contentDescription = null,
-                        )
+                        UploadVoteIcon(false) { }
                     }
                     IconButton(
                         modifier = Modifier.size(58.dp),

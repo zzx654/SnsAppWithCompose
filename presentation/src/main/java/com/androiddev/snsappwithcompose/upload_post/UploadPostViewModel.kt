@@ -3,6 +3,7 @@ package com.androiddev.snsappwithcompose.upload_post
 import android.Manifest
 import android.content.Context
 import android.net.Uri
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -14,8 +15,11 @@ import com.androiddev.domain.use_case.UploadPostUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.BaseViewModel
+import com.androiddev.snsappwithcompose.util.BottomRecordState
+import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.checkPermissions
+import com.androiddev.snsappwithcompose.util.generateAnonymousNickname
 import com.androiddev.snsappwithcompose.util.getMultipartBody
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -31,6 +35,11 @@ class UploadPostViewModel @Inject constructor(
     private val uploadPostUseCases: UploadPostUseCases,
     private val context: Context
 ): BaseViewModel() {
+    private val _bottomRecordDialogState: MutableState<BottomRecordState> = mutableStateOf(
+        BottomRecordState()
+    )
+    val bottomRecordDialogState: State<BottomRecordState>
+        get() = _bottomRecordDialogState
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
         get() = _tagTextField
@@ -56,7 +65,7 @@ class UploadPostViewModel @Inject constructor(
         checkPermissions(
             context = context,
             permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION),
+                Manifest.permission.ACCESS_FINE_LOCATION),
             onGranted = { _locationOnOff.value = true },
             onUnGranted = { _locationOnOff.value = false }
         )
@@ -153,15 +162,6 @@ class UploadPostViewModel @Inject constructor(
                     val requestText = contentTextField.value.toRequestBody("text/plain".toMediaTypeOrNull())
                     var requestLat: MultipartBody.Part? = null
                     var requestLong: MultipartBody.Part? =  null
-                    val charlist = listOf("a", "b", "c", "d", "e","f","g","h","i","j","1","2","3","4","0","5","6","7","8","9")
-                    var anonymousNick: RequestBody?= null
-                    var tempNick = ""
-                    if(anonymous.value) {
-                        repeat(6) {
-                            tempNick+=charlist.random()
-                        }
-                        anonymousNick = tempNick.toRequestBody("text/plain".toMediaTypeOrNull())
-                    }
 
                     if(selectedImages.isNotEmpty()) {
                         requestImages = selectedImages.map{ getMultipartBody(it,context)}
@@ -171,37 +171,49 @@ class UploadPostViewModel @Inject constructor(
                         requestLong = MultipartBody.Part.createFormData("longitude",event.long.toString())
                     }
                     uploadPostUseCases.uploadPost(
-                        anonymousNick = anonymousNick,
+                        anonymousNick = if(anonymous.value) generateAnonymousNickname().toRequestBody("text/plain".toMediaTypeOrNull()) else null,
                         tags = requestTags,
                         images = requestImages,
                         text = requestText,
                         latitude = requestLat,
                         longitude = requestLong
                     ).collect { result ->
-                            when(result) {
-                                is Resource.Success -> {
+                        when(result) {
+                            is Resource.Success -> {
 
-                                }
-                                is Resource.Error -> {
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-
-                                }
-                                else -> null
                             }
+                            is Resource.Error -> {
+                                setEvent(
+                                    UiEvent.ShowToast(
+                                        message = result.message ?: getString(context,R.string.error)
+                                    )
+                                )
+                            }
+                            is Resource.Loading -> {
+                                setLoading(true)
 
-
+                            }
+                            else -> null
                         }
+
+
+                    }
                 }
 
             }
             else -> null
         }
+    }
+    fun showDialog() {
+        showBottomRecordDialog()
+    }
+    private fun showBottomRecordDialog() {
+        _bottomRecordDialogState.value = BottomRecordState(
+            showDialog = true,
+            onClickCancel = { resetBottomRecordDialog() }
+        )
+    }
+    private fun resetBottomRecordDialog() {
+        _bottomRecordDialogState.value = BottomRecordState()
     }
 }
