@@ -1,20 +1,28 @@
 package com.androiddev.snsappwithcompose.upload_post
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androiddev.data.service.RecordService
+import com.androiddev.snsappwithcompose.util.BottomRecordState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -22,55 +30,152 @@ import javax.inject.Inject
 class RecordViewModel @Inject constructor(
     private val context: Context
 ): ViewModel() {
-    private val _elapsedTime = MutableStateFlow(0)
-    val elapsedTime: StateFlow<Int> = _elapsedTime
+    private val _bottomRecordDialogState: MutableState<BottomRecordState> = mutableStateOf(
+        BottomRecordState()
+    )
+    val bottomRecordDialogState: State<BottomRecordState>
+        get() = _bottomRecordDialogState
+    private val _uiState = MutableStateFlow(RecordUIState())
+    val uiState: StateFlow<RecordUIState> = _uiState.asStateFlow()
 
-    private val _isRecording = MutableStateFlow(false)
-    val isRecording: StateFlow<Boolean> = _isRecording
+    private var receiverRegistered = false
 
-    val progress: StateFlow<Float> = elapsedTime.map { it / 60f }
+
+    val progress: StateFlow<Float> = uiState.map { it.elapsedMillis / 60f }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0f)
 
 
 
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val elapsed = intent?.getIntExtra("elapsed", 0) ?: return
-            _elapsedTime.value = elapsed
-            if (elapsed >= 60) stopRecording(context!!)
+    private val updateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctx: Context?, intent: Intent?) {
+            intent ?: return
+            when (intent.action) {
+                RecordService.ACTION_UPDATE -> {
+                    val stateStr = intent.getStringExtra("state") ?: return
+                    val elapsed = intent.getLongExtra("elapsed", 0L)
+                    val progress = intent.getFloatExtra("progress", 0f)
+                    val formattedTime = intent.getStringExtra("formattedTime")
+                    val state = RecordState.valueOf(stateStr)
+
+
+                    _uiState.update {
+                        it.copy(
+                            state = state,
+                            elapsedMillis = elapsed,
+                            formattedTime = formattedTime?:"0:00",
+                            progress = progress
+                        )
+                    }
+                }
+            }
         }
     }
 
     init {
-        context.registerReceiver(receiver, IntentFilter("RECORDING_ELAPSED"),
-            Context.RECEIVER_NOT_EXPORTED)
+        registerReceiver()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun startRecording(context: Context) {
-        if (_isRecording.value) return
+    fun onEvent(event: RecordEvent) {
+        when(event) {
+            is RecordEvent.OnAddRecordClick -> {
+                showDialog()
+            }
+            is RecordEvent.RecordPlayBack -> {
+                when (_uiState.value.buttonAction) {
+                    RecordButtonAction.START_RECORDING -> startRecording()
+                    RecordButtonAction.STOP_RECORDING -> stopRecording()
+                    RecordButtonAction.START_PLAYBACK -> startPlayback()
+                    RecordButtonAction.STOP_PLAYBACK -> stopPlayback()
+                }
+            }
+            else -> null
+        }
 
 
-
-        println("startㄹㅋㄷ")
-        _isRecording.value = true
-        _elapsedTime.value = 0
-
-        context.startForegroundService(Intent(context, RecordService::class.java).apply {
-            action = "START"
-        })
     }
+    @SuppressLint("InlinedApi")
+    private fun registerReceiver() {
+        if (receiverRegistered) return
 
-    fun stopRecording(context: Context) {
-        println("stopㄹㅋㄷ")
-        _isRecording.value = false
-        context.startService(Intent(context, RecordService::class.java).apply {
-            action = "STOP"
-        })
+        val filter = IntentFilter(RecordService.ACTION_UPDATE)
+        context.registerReceiver(updateReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        receiverRegistered = true
     }
-
     override fun onCleared() {
         super.onCleared()
-        context.unregisterReceiver(receiver)
+        if (receiverRegistered) {
+            context.unregisterReceiver(updateReceiver)
+            receiverRegistered = false
+        }
     }
+
+    fun startRecording() {
+        sendCommand(RecordService.ACTION_START_RECORD)
+    }
+
+    fun stopRecording() {
+        sendCommand(RecordService.ACTION_FINISH_RECORD)
+    }
+
+    fun startPlayback() {
+        sendCommand(RecordService.ACTION_START_PLAY)
+    }
+
+    fun stopPlayback() {
+        sendCommand(RecordService.ACTION_STOP_PLAY)
+    }
+
+    fun uploadRecording() {
+        val file = RecordService.currentOutputFile
+        if (file != null && file.exists()) {
+            //viewModelScope.launch(Dispatchers.IO) {
+             //   val success = FileUploader.uploadToServer(file)
+                // 업로드 성공 처리 등
+            //}
+        }
+    }
+
+    private fun sendCommand(action: String) {
+        val intent = Intent(context, RecordService::class.java).apply {
+            this.action = action
+        }
+        ContextCompat.startForegroundService(context, intent)
+    }
+    fun showDialog() {
+        showBottomRecordDialog()
+    }
+    private fun showBottomRecordDialog() {
+        _bottomRecordDialogState.value = BottomRecordState(
+            showDialog = true,
+            onClickCancel = { resetBottomRecordDialog() }
+        )
+    }
+    private fun resetBottomRecordDialog() {
+        _bottomRecordDialogState.value = BottomRecordState()
+    }
+
+
+
+}
+enum class RecordState { IDLE, RECORDING, RECORDED, PLAYING }
+enum class RecordButtonAction {
+    START_RECORDING,
+    STOP_RECORDING,
+    START_PLAYBACK,
+    STOP_PLAYBACK
+}
+data class RecordUIState(
+    val state: RecordState = RecordState.IDLE,
+    val progress: Float = 0f,
+    val elapsedMillis: Long = 0L,
+    val formattedTime: String = "0:00",
+    val maxDurationMillis: Long = 5 * 60 * 1000L
+) {
+    val buttonAction: RecordButtonAction
+        get() = when (state) {
+            RecordState.IDLE -> RecordButtonAction.START_RECORDING
+            RecordState.RECORDING -> RecordButtonAction.STOP_RECORDING
+            RecordState.RECORDED -> RecordButtonAction.START_PLAYBACK
+            RecordState.PLAYING -> RecordButtonAction.STOP_PLAYBACK
+        }
 }

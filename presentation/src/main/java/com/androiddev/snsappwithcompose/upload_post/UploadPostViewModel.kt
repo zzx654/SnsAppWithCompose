@@ -35,11 +35,7 @@ class UploadPostViewModel @Inject constructor(
     private val uploadPostUseCases: UploadPostUseCases,
     private val context: Context
 ): BaseViewModel() {
-    private val _bottomRecordDialogState: MutableState<BottomRecordState> = mutableStateOf(
-        BottomRecordState()
-    )
-    val bottomRecordDialogState: State<BottomRecordState>
-        get() = _bottomRecordDialogState
+
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
         get() = _tagTextField
@@ -185,7 +181,7 @@ class UploadPostViewModel @Inject constructor(
                             is Resource.Error -> {
                                 setEvent(
                                     UiEvent.ShowToast(
-                                        message = result.message ?: getString(context,R.string.error)
+                                        message = result.message ?: getString(context, R.string.error)
                                     )
                                 )
                             }
@@ -204,16 +200,5 @@ class UploadPostViewModel @Inject constructor(
             else -> null
         }
     }
-    fun showDialog() {
-        showBottomRecordDialog()
-    }
-    private fun showBottomRecordDialog() {
-        _bottomRecordDialogState.value = BottomRecordState(
-            showDialog = true,
-            onClickCancel = { resetBottomRecordDialog() }
-        )
-    }
-    private fun resetBottomRecordDialog() {
-        _bottomRecordDialogState.value = BottomRecordState()
-    }
+
 }

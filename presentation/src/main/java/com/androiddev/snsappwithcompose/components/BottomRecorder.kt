@@ -3,6 +3,7 @@ package com.androiddev.snsappwithcompose.components
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,12 +20,15 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Square
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +36,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.androiddev.snsappwithcompose.upload_post.RecordEvent
+import com.androiddev.snsappwithcompose.upload_post.RecordState
 import com.androiddev.snsappwithcompose.upload_post.RecordViewModel
 import kotlinx.coroutines.launch
 
@@ -45,10 +52,9 @@ fun BottomRecorder(
 
 ) {
     val context = LocalContext.current
-    val elapsed by viewModel.elapsedTime.collectAsState()
+    val recordState by viewModel.uiState.collectAsState()
     val progress by viewModel.progress.collectAsState()
-    val isRecording by viewModel.isRecording.collectAsState()
-    val formattedTime = "%02d:%02d".format(elapsed / 60, elapsed % 60)
+    //val formattedTime = "%02d:%02d".format(recordState.elapsedMillis / 60, recordState.elapsedMillis % 60)
     if(showDialog()) {
         val modalBottomSheetState = rememberModalBottomSheetState()
         val scope = rememberCoroutineScope()
@@ -69,7 +75,7 @@ fun BottomRecorder(
                     )
                     .clickable {
                         scope.launch {
-                            viewModel.stopRecording(context)
+
                             modalBottomSheetState.hide()
                         }.invokeOnCompletion { onClickCancel()  }
 
@@ -81,27 +87,31 @@ fun BottomRecorder(
                 ) {
 
                     Box(contentAlignment = Alignment.Center) {
-                        androidx.compose.material3.CircularProgressIndicator(progress = {progress},modifier = Modifier.size(130.dp),color = Color.Black)
-
+                        androidx.compose.material3.CircularProgressIndicator(progress = {0f},modifier = Modifier.size(130.dp),color = Color.Black)
+                        Icons.Default.PlayArrow
                         Icon(
-                            imageVector = if (isRecording) Icons.Default.Pause else Icons.Default.Mic,
-                            //if (isRecording) Icons.Default.Pause else Icons.Default.Mic,
+                            imageVector =
+                            if (recordState.state == RecordState.IDLE) Icons.Default.Mic
+                            else if(recordState.state == RecordState.RECORDED) Icons.Default.PlayArrow
+                            else Icons.Default.Square,
                             contentDescription = "Record",
                             tint = Color.Black,
-                            modifier = Modifier.size(120.dp).clickable{
-                                if (isRecording) viewModel.stopRecording(context)
-                                else viewModel.startRecording(context)
+                            modifier = Modifier.size(100.dp).clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null // ← 리플 제거
+                            ){
+                                viewModel.onEvent(RecordEvent.RecordPlayBack)
                             }
-                            .background(if (isRecording) Color.Red else Color.Gray, CircleShape)
+
                         )
 
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(text = formattedTime, fontWeight = FontWeight.Bold,color = Color.Black)
+                    Text(text = recordState.formattedTime, fontWeight = FontWeight.Bold,fontSize = 20.sp,color = Color.Black)
                 }
-                Icon(Icons.Default.Check, contentDescription = "Save", tint = Color.Green,    modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .size(48.dp).clickable { viewModel.stopRecording(context)  })
+                Icon(Icons.Default.Check, contentDescription = "Save", tint = Color.Black,    modifier = Modifier
+                    .align(Alignment.CenterEnd).padding(horizontal = 30.dp)
+                    .size(34.dp).clickable {  })
 
             }
         }

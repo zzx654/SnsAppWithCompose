@@ -79,10 +79,8 @@ fun UploadPostScreen(
 
     val contentTextFieldState = rememberTextFieldState()
 
-    val elapsed by recordViewModel.elapsedTime.collectAsState()
-    val progress by recordViewModel.progress.collectAsState()
-    val isRecording by recordViewModel.isRecording.collectAsState()
-    val formattedTime = "%02d:%02d".format(elapsed / 60, elapsed % 60)
+
+    //val formattedTime = "%02d:%02d".format(elapsed / 60, elapsed % 60)
     val fusedLocationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
@@ -121,8 +119,8 @@ fun UploadPostScreen(
         viewModel.onEvent(UploadPostEvent.TypeContent(contentTextFieldState.text.toString()))
     }
     BottomRecorder(
-      showDialog = { viewModel.bottomRecordDialogState.value.showDialog },
-      onClickCancel = viewModel.bottomRecordDialogState.value.onClickCancel,
+      showDialog = { recordViewModel.bottomRecordDialogState.value.showDialog },
+      onClickCancel = recordViewModel.bottomRecordDialogState.value.onClickCancel,
       viewModel = recordViewModel
     )
     BaseScaffold(
@@ -200,7 +198,7 @@ fun UploadPostScreen(
                                     Manifest.permission.RECORD_AUDIO
                                 ),
                                 onGranted = {
-                                    viewModel.showDialog()
+                                    recordViewModel.onEvent(RecordEvent.OnAddRecordClick)
                                 },
                                 onUnGranted = {
                                     launcherMultiplePermissions.launch(
