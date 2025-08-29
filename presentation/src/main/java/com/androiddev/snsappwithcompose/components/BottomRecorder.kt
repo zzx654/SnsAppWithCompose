@@ -53,7 +53,7 @@ fun BottomRecorder(
 ) {
     val context = LocalContext.current
     val recordState by viewModel.uiState.collectAsState()
-    val progress by viewModel.progress.collectAsState()
+    val progress = recordState.progress
     //val formattedTime = "%02d:%02d".format(recordState.elapsedMillis / 60, recordState.elapsedMillis % 60)
     if(showDialog()) {
         val modalBottomSheetState = rememberModalBottomSheetState()
@@ -91,7 +91,7 @@ fun BottomRecorder(
                 ) {
 
                     Box(contentAlignment = Alignment.Center) {
-                        androidx.compose.material3.CircularProgressIndicator(progress = {0f},modifier = Modifier.size(130.dp),color = Color.Black)
+                        androidx.compose.material3.CircularProgressIndicator(progress = {progress},modifier = Modifier.size(130.dp),color = Color.Black)
                         Icons.Default.PlayArrow
                         Icon(
                             imageVector =

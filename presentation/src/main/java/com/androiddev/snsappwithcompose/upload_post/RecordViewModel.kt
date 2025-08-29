@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -69,7 +70,7 @@ class RecordViewModel @Inject constructor(
                         it.copy(
                             state = state,
                             elapsedMillis = elapsed,
-                            formattedTime = formattedTime?:"0:00",
+                            formattedTime = formattedTime?:_uiState.value.formattedTime,
                             progress = progress
                         )
                     }
@@ -91,7 +92,13 @@ class RecordViewModel @Inject constructor(
                 when (_uiState.value.buttonAction) {
                     RecordButtonAction.START_RECORDING -> startRecording()
                     RecordButtonAction.STOP_RECORDING -> stopRecording()
-                    RecordButtonAction.START_PLAYBACK -> startPlayback()
+                    RecordButtonAction.START_PLAYBACK -> {
+                        if (_uiState.value.state == RecordState.RECORDED) {
+                            startPlayback()
+                        } else {
+                            Log.d("RecordViewModel", " 재생 요청 무시됨: 아직 RECORDED 상태 아님")
+                        }
+                    }
                     RecordButtonAction.STOP_PLAYBACK -> stopPlayback()
                 }
             }
@@ -99,14 +106,14 @@ class RecordViewModel @Inject constructor(
                 //Recording,playback 상태일때는 주의 (끄면안된다고 토스트 띄우기)
                 //IDLE일땐 그냥끄면됨
                 //Recorded일때는 업데이트 해주고 끄면됨
-                _uiState.update {
+                /**_uiState.update {
                     it.copy(
                         state = RecordState.IDLE,
                         elapsedMillis = 0L,
                         formattedTime = "0:00",
                         progress = 0f
                     )
-                }
+                }**/
                 cancelRecording()
 
             }

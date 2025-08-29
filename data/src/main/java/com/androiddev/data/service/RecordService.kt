@@ -44,7 +44,7 @@ class RecordService: Service() {
     private var timerJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var startTime: Long = 0L
-    private val maxDurationMillis = 5 * 60 * 1000L
+    private var maxDurationMillis = 5 * 60 * 1000L
 
     private fun startForegroundNotification(content: String) {
         val channelId = "audio_channel"
@@ -109,26 +109,35 @@ class RecordService: Service() {
     @SuppressLint("DefaultLocale")
     private fun startTimerLoop(stateStr: String) {
         timerJob = scope.launch {
+            var lastUpdateSecond = -1L
             while (isActive) {
                 val elapsed = System.currentTimeMillis() - startTime
+                val currentSecond = elapsed / 1000
                 val progress = (elapsed.toFloat() / maxDurationMillis).coerceIn(0f, 1f)
 
-                // 포맷된 시간
-                val seconds = (elapsed / 1000).toInt()
-                val minutes = seconds / 60
-                val secs = seconds % 60
-                val formattedTime = String.format("%02d:%02d", minutes, secs)
+                if (currentSecond != lastUpdateSecond) {
+                    // 포맷된 시간
+                    val seconds = (elapsed / 1000).toInt()
+                    val minutes = seconds / 60
+                    val secs = seconds % 60
+                    val formattedTime = String.format("%02d:%02d", minutes, secs)
 
-                // 알림 텍스트 업데이트
-                val content = when (stateStr) {
-                    "RECORDING" -> "녹음 중... $formattedTime"
-                    "PLAYING" -> "재생 중... $formattedTime"
-                    else -> ""
+                    // 알림 텍스트 업데이트
+                    val content = when (stateStr) {
+                        "RECORDING" -> "녹음 중... $formattedTime"
+                        "PLAYING" -> "재생 중... $formattedTime"
+                        else -> ""
+                    }
+                    updateNotification(content)
+                    sendProgressUpdate(stateStr, elapsed, formattedTime, progress)
+                    lastUpdateSecond = currentSecond
+                } else {
+                    // progress만 갱신 (formattedTime은 이전 값을 사용)
+                    sendProgressUpdate(stateStr, elapsed, null, progress)
                 }
-                updateNotification(content)
 
-                // 상태 업데이트 브로드캐스트
-                sendProgressUpdate(stateStr, elapsed, formattedTime, progress)
+
+
 
                 if (stateStr == "RECORDING" && elapsed >= maxDurationMillis) {
                     stopEverything()
@@ -136,7 +145,7 @@ class RecordService: Service() {
                     stopSelf()
                 }
 
-                delay(1000L) // 매 1초마다 업데이트
+                delay(50L) // 매 1초마다 업데이트
             }
         }
     }
@@ -146,6 +155,8 @@ class RecordService: Service() {
                 setDataSource(file.absolutePath)
                 prepare()
                 start()
+                val duration = duration.toLong() // 녹음 파일의 총 길이 (ms)
+                maxDurationMillis = duration // 🔧 여기서 maxDurationMillis를 덮어씌움
                 setOnCompletionListener {
                     stopPlayback()
                 }
@@ -197,7 +208,7 @@ class RecordService: Service() {
 
         stopForeground(Service.STOP_FOREGROUND_REMOVE);
     }
-    private fun sendProgressUpdate(state: String, elapsed: Long,formattedTime:String, progress: Float = 0f,filePath:String? = null) {
+    private fun sendProgressUpdate(state: String, elapsed: Long,formattedTime:String?, progress: Float = 0f,filePath:String? = null) {
         val intent = Intent(ACTION_UPDATE).apply {
             putExtra("state", state)
             putExtra("elapsed", elapsed)
