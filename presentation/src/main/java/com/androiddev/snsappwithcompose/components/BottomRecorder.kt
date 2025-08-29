@@ -59,7 +59,9 @@ fun BottomRecorder(
         val modalBottomSheetState = rememberModalBottomSheetState()
         val scope = rememberCoroutineScope()
         ModalBottomSheet(
-            onDismissRequest = { onClickCancel() },
+            onDismissRequest = {
+                //onClickCancel()
+                               },
             sheetState = modalBottomSheetState,
             dragHandle = null,
         ) {
@@ -75,6 +77,8 @@ fun BottomRecorder(
                     )
                     .clickable {
                         scope.launch {
+                            viewModel.onEvent(RecordEvent.OnCancelClick)
+
 
                             modalBottomSheetState.hide()
                         }.invokeOnCompletion { onClickCancel()  }

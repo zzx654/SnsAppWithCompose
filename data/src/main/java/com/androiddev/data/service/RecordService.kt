@@ -6,11 +6,16 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
+import android.media.MediaRecorder
 import android.os.Build
+import android.os.FileUtils
 import android.os.IBinder
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.androiddev.data.R
+import com.androiddev.data.util.FileUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,9 +32,12 @@ class RecordService: Service() {
         const val ACTION_STOP_PLAY = "ACTION_STOP_PLAY"
         const val ACTION_UPDATE = "ACTION_UPDATE"
         const val ACTION_FINISH_RECORD = "ACTION_FINISH_RECORD"
+        const val ACTION_CANCEL_RECORD = "ACTION_CANCEL_RECORD"
 
         var currentOutputFile: File? = null
     }
+    private var mediaRecorder: MediaRecorder? = null
+    private var mediaPlayer: MediaPlayer? = null
     private lateinit var notificationManager: NotificationManager
     private lateinit var notificationBuilder: NotificationCompat.Builder
     private val notificationId = 1
@@ -61,24 +69,44 @@ class RecordService: Service() {
         notificationBuilder.setContentText(content)
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
+    @SuppressLint("NewApi")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("RecordService", "📥 onStartCommand: ${intent?.action}")
         when (intent?.action) {
             ACTION_START_RECORD -> startRecording()
             ACTION_FINISH_RECORD -> finishRecording()
             ACTION_START_PLAY -> startPlayback()
             ACTION_STOP_PLAY -> stopPlayback()
+            ACTION_CANCEL_RECORD -> cancelRecording()
         }
         return START_STICKY
     }
+    @RequiresApi(Build.VERSION_CODES.S)
     private fun startRecording() {
         //stopEverything()//리소스 해제
-
+        val file = FileUtil.generateFile(this)
+        currentOutputFile = file
+        mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {  // API 34
+            MediaRecorder(this)  // API 34 이상에서 사용 가능한 생성자
+        } else {
+            @Suppress("DEPRECATION")
+            MediaRecorder()      // API 33 이하에서 사용하는 기본 생성자
+        }.apply {
+            setAudioSource(MediaRecorder.AudioSource.MIC)
+            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            setOutputFile(file.absolutePath)
+            prepare()
+            start()
+        }
         startForegroundNotification("녹음 중...")
 
         startTime = System.currentTimeMillis()
         startTimerLoop("RECORDING")
     }
 
+
+    @SuppressLint("DefaultLocale")
     private fun startTimerLoop(stateStr: String) {
         timerJob = scope.launch {
             while (isActive) {
@@ -103,7 +131,7 @@ class RecordService: Service() {
                 sendProgressUpdate(stateStr, elapsed, formattedTime, progress)
 
                 if (stateStr == "RECORDING" && elapsed >= maxDurationMillis) {
-                    //stopEverything()
+                    stopEverything()
                     sendProgressUpdate("RECORDED", 0L,"0:00")
                     stopSelf()
                 }
@@ -113,64 +141,82 @@ class RecordService: Service() {
         }
     }
     private fun startPlayback() {
-        startForegroundNotification("재생 중...")
-
-        startTime = System.currentTimeMillis()
-        startTimerLoop("PLAYING")
+        currentOutputFile?.takeIf { it.exists() }?.let { file ->
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(file.absolutePath)
+                prepare()
+                start()
+                setOnCompletionListener {
+                    stopPlayback()
+                }
+            }
+            startForegroundNotification("재생 중...")
+            startTime = System.currentTimeMillis()
+            startTimerLoop("PLAYING")
+        }
     }
     private fun stopPlayback() {
         stopEverything()
         sendProgressUpdate("RECORDED", 0L,"0:00")
+    }
+    private fun finishRecording() {
+
+        stopEverything()
+        sendProgressUpdate(
+            state = "RECORDED",
+            elapsed = 0L,
+            formattedTime = "0:00",
+            filePath = currentOutputFile?.absolutePath)
+    }
+    private fun cancelRecording() {
+
+        sendProgressUpdate("IDLE", 0L,"0:00")
         stopSelf()
     }
     @SuppressLint("NewApi")
     private fun stopEverything() {
         timerJob?.cancel()
+        mediaRecorder?.apply {
+            try {
+                stop()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            release()
+        }
+        mediaRecorder = null
+
+        mediaPlayer?.apply {
+            try {
+                stop()
+            } catch (e: Exception) {}
+            release()
+        }
+        mediaPlayer = null
 
         stopForeground(Service.STOP_FOREGROUND_REMOVE);
     }
-    private fun sendProgressUpdate(state: String, elapsed: Long,formattedTime:String, progress: Float = 0f) {
+    private fun sendProgressUpdate(state: String, elapsed: Long,formattedTime:String, progress: Float = 0f,filePath:String? = null) {
         val intent = Intent(ACTION_UPDATE).apply {
             putExtra("state", state)
             putExtra("elapsed", elapsed)
             putExtra("progress", progress)
             putExtra("formattedTime",formattedTime)
+            putExtra("file_path", filePath)
         }
         sendBroadcast(intent)
     }
     override fun onBind(intent: Intent?): IBinder? = null
 
-
-
-
-    private fun finishRecording() {
-        stopEverything()
-        sendProgressUpdate("RECORDED", 0L,"0:00")
-        stopSelf()
-    }
-    private fun resetAll() {
-        // 1) 진행 중인 녹음, 재생 모두 중지 및 리소스 해제
-        stopEverything()
-
-        // 2) 녹음 파일 삭제 (파일 존재하면)
-        currentOutputFile?.let { file ->
-            if (file.exists()) {
-                file.delete()
-            }
-        }
-        currentOutputFile = null
-
-        // 3) 상태 초기화 및 UI 등으로 상태 전송
-        sendProgressUpdate("IDLE", 0L, "0:00",0f)  // 상태 'IDLE' 등 원하는 초기 상태로
-
-        // 4) 서비스 종료
-        stopSelf()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        //timer?.cancel()
     }
+    override fun onCreate() {
+        super.onCreate()
+        Log.d("RecordService", "🟢 onCreate 호출됨")
+    }
+
+
 
 
 }

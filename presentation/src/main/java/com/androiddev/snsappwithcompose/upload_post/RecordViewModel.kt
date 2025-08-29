@@ -45,6 +45,9 @@ class RecordViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0f)
 
 
+    private val _recordedFilePath: MutableState<String?> = mutableStateOf(null)
+    val recordedFilePath: State<String?>
+        get() = _recordedFilePath
 
     private val updateReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -55,9 +58,13 @@ class RecordViewModel @Inject constructor(
                     val elapsed = intent.getLongExtra("elapsed", 0L)
                     val progress = intent.getFloatExtra("progress", 0f)
                     val formattedTime = intent.getStringExtra("formattedTime")
+                    val filePath = intent.getStringExtra("file_path")
                     val state = RecordState.valueOf(stateStr)
 
 
+                    filePath?.let {
+                        _recordedFilePath.value = it
+                    }
                     _uiState.update {
                         it.copy(
                             state = state,
@@ -87,6 +94,21 @@ class RecordViewModel @Inject constructor(
                     RecordButtonAction.START_PLAYBACK -> startPlayback()
                     RecordButtonAction.STOP_PLAYBACK -> stopPlayback()
                 }
+            }
+            is RecordEvent.OnCancelClick -> {
+                //Recording,playback 상태일때는 주의 (끄면안된다고 토스트 띄우기)
+                //IDLE일땐 그냥끄면됨
+                //Recorded일때는 업데이트 해주고 끄면됨
+                _uiState.update {
+                    it.copy(
+                        state = RecordState.IDLE,
+                        elapsedMillis = 0L,
+                        formattedTime = "0:00",
+                        progress = 0f
+                    )
+                }
+                cancelRecording()
+
             }
             else -> null
         }
@@ -124,6 +146,9 @@ class RecordViewModel @Inject constructor(
     fun stopPlayback() {
         sendCommand(RecordService.ACTION_STOP_PLAY)
     }
+    fun cancelRecording() {
+        sendCommand(RecordService.ACTION_CANCEL_RECORD)
+    }
 
     fun uploadRecording() {
         val file = RecordService.currentOutputFile
@@ -139,7 +164,10 @@ class RecordViewModel @Inject constructor(
         val intent = Intent(context, RecordService::class.java).apply {
             this.action = action
         }
-        ContextCompat.startForegroundService(context, intent)
+        if(action == RecordService.ACTION_START_RECORD)
+            ContextCompat.startForegroundService(context, intent)
+        else
+            context.startService(intent)
     }
     fun showDialog() {
         showBottomRecordDialog()
