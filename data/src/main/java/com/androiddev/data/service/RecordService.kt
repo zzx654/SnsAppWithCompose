@@ -170,6 +170,7 @@ class RecordService: Service() {
     }
     private fun cancelRecording() {
 
+        stopEverything()
         sendProgressUpdate("IDLE", 0L,"0:00")
         stopSelf()
     }
