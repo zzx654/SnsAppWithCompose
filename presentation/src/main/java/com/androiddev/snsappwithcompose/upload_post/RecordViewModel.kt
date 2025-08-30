@@ -12,9 +12,19 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androiddev.data.R
 import com.androiddev.data.service.RecordService
+import com.androiddev.data.util.Constants.DEFAULT_ELAPSED_TIME
+import com.androiddev.data.util.Constants.DEFAULT_PROGRESS
+import com.androiddev.data.util.Constants.MAX_DURATION_MILLIS
+import com.androiddev.data.util.IntentKeys.ELAPSED
+import com.androiddev.data.util.IntentKeys.FILE_PATH
+import com.androiddev.data.util.IntentKeys.FORMATTED_TIME
+import com.androiddev.data.util.IntentKeys.PROGRESS
+import com.androiddev.data.util.IntentKeys.STATE
 import com.androiddev.snsappwithcompose.util.BottomRecordState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +46,7 @@ class RecordViewModel @Inject constructor(
     )
     val bottomRecordDialogState: State<BottomRecordState>
         get() = _bottomRecordDialogState
-    private val _uiState = MutableStateFlow(RecordUIState())
+    private val _uiState = MutableStateFlow(RecordUIState(formattedTime = getString(context,R.string.default_formatted_time)))
     val uiState: StateFlow<RecordUIState> = _uiState.asStateFlow()
 
     private var receiverRegistered = false
@@ -55,11 +65,11 @@ class RecordViewModel @Inject constructor(
             intent ?: return
             when (intent.action) {
                 RecordService.ACTION_UPDATE -> {
-                    val stateStr = intent.getStringExtra("state") ?: return
-                    val elapsed = intent.getLongExtra("elapsed", 0L)
-                    val progress = intent.getFloatExtra("progress", 0f)
-                    val formattedTime = intent.getStringExtra("formattedTime")
-                    val filePath = intent.getStringExtra("file_path")
+                    val stateStr = intent.getStringExtra(STATE) ?: return
+                    val elapsed = intent.getLongExtra(ELAPSED, DEFAULT_ELAPSED_TIME)
+                    val progress = intent.getFloatExtra(PROGRESS, DEFAULT_PROGRESS)
+                    val formattedTime = intent.getStringExtra(FORMATTED_TIME)
+                    val filePath = intent.getStringExtra(FILE_PATH)
                     val state = RecordState.valueOf(stateStr)
 
 
@@ -103,19 +113,7 @@ class RecordViewModel @Inject constructor(
                 }
             }
             is RecordEvent.OnCancelClick -> {
-                //Recording,playback 상태일때는 주의 (끄면안된다고 토스트 띄우기)
-                //IDLE일땐 그냥끄면됨
-                //Recorded일때는 업데이트 해주고 끄면됨
-                /**_uiState.update {
-                    it.copy(
-                        state = RecordState.IDLE,
-                        elapsedMillis = 0L,
-                        formattedTime = "0:00",
-                        progress = 0f
-                    )
-                }**/
                 cancelRecording()
-
             }
             else -> null
         }
@@ -203,8 +201,8 @@ data class RecordUIState(
     val state: RecordState = RecordState.IDLE,
     val progress: Float = 0f,
     val elapsedMillis: Long = 0L,
-    val formattedTime: String = "0:00",
-    val maxDurationMillis: Long = 5 * 60 * 1000L
+    val formattedTime: String,
+    val maxDurationMillis: Long = MAX_DURATION_MILLIS
 ) {
     val buttonAction: RecordButtonAction
         get() = when (state) {

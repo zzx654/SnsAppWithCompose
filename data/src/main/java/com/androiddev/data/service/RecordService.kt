@@ -15,7 +15,20 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.androiddev.data.R
+import com.androiddev.data.util.Constants
+import com.androiddev.data.util.Constants.DEFAULT_ELAPSED_TIME
+import com.androiddev.data.util.Constants.DEFAULT_PROGRESS
 import com.androiddev.data.util.FileUtil
+import com.androiddev.data.util.IntentKeys.ELAPSED
+import com.androiddev.data.util.IntentKeys.FILE_PATH
+import com.androiddev.data.util.IntentKeys.FORMATTED_TIME
+import com.androiddev.data.util.IntentKeys.PROGRESS
+import com.androiddev.data.util.IntentKeys.STATE
+import com.androiddev.data.util.RecordServiceActions
+import com.androiddev.data.util.RecordStateConstants.STATE_IDLE
+import com.androiddev.data.util.RecordStateConstants.STATE_PLAYING
+import com.androiddev.data.util.RecordStateConstants.STATE_RECORDED
+import com.androiddev.data.util.RecordStateConstants.STATE_RECORDING
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,12 +40,12 @@ import java.io.File
 
 class RecordService: Service() {
     companion object {
-        const val ACTION_START_RECORD = "ACTION_START_RECORD"
-        const val ACTION_START_PLAY = "ACTION_START_PLAY"
-        const val ACTION_STOP_PLAY = "ACTION_STOP_PLAY"
-        const val ACTION_UPDATE = "ACTION_UPDATE"
-        const val ACTION_FINISH_RECORD = "ACTION_FINISH_RECORD"
-        const val ACTION_CANCEL_RECORD = "ACTION_CANCEL_RECORD"
+        const val ACTION_START_RECORD = RecordServiceActions.ACTION_START_RECORD
+        const val ACTION_START_PLAY =  RecordServiceActions.ACTION_START_PLAY
+        const val ACTION_STOP_PLAY = RecordServiceActions.ACTION_STOP_PLAY
+        const val ACTION_UPDATE = RecordServiceActions.ACTION_UPDATE
+        const val ACTION_FINISH_RECORD = RecordServiceActions.ACTION_FINISH_RECORD
+        const val ACTION_CANCEL_RECORD = RecordServiceActions.ACTION_CANCEL_RECORD
 
         var currentOutputFile: File? = null
     }
@@ -44,11 +57,11 @@ class RecordService: Service() {
     private var timerJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var startTime: Long = 0L
-    private var maxDurationMillis = 5 * 60 * 1000L
+    private var maxDurationMillis = Constants.MAX_DURATION_MILLIS
 
     private fun startForegroundNotification(content: String) {
         val channelId = "audio_channel"
-        val channelName = "오디오 서비스"
+        val channelName = getString(R.string.audio_service_channel_name) // 리소스 사용
 
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -58,7 +71,7 @@ class RecordService: Service() {
         }
 
         notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("오디오 앱")
+            .setContentTitle(getString(R.string.app_name))
             .setContentText(content)
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setOnlyAlertOnce(true)
@@ -99,10 +112,10 @@ class RecordService: Service() {
             prepare()
             start()
         }
-        startForegroundNotification("녹음 중...")
+        startForegroundNotification(getString(R.string.recording_content))
 
         startTime = System.currentTimeMillis()
-        startTimerLoop("RECORDING")
+        startTimerLoop(STATE_RECORDING)
     }
 
 
@@ -124,8 +137,8 @@ class RecordService: Service() {
 
                     // 알림 텍스트 업데이트
                     val content = when (stateStr) {
-                        "RECORDING" -> "녹음 중... $formattedTime"
-                        "PLAYING" -> "재생 중... $formattedTime"
+                        STATE_RECORDING -> getString(R.string.recording_content) + " $formattedTime"
+                        STATE_PLAYING -> getString(R.string.playing_content) + " $formattedTime"
                         else -> ""
                     }
                     updateNotification(content)
@@ -139,13 +152,13 @@ class RecordService: Service() {
 
 
 
-                if (stateStr == "RECORDING" && elapsed >= maxDurationMillis) {
+                if (stateStr == STATE_RECORDING && elapsed >= maxDurationMillis) {
                     stopEverything()
-                    sendProgressUpdate("RECORDED", 0L,"0:00")
+                    sendProgressUpdate(STATE_RECORDED, DEFAULT_ELAPSED_TIME,getString(R.string.default_formatted_time))
                     stopSelf()
                 }
 
-                delay(50L) // 매 1초마다 업데이트
+                delay(50L)
             }
         }
     }
@@ -156,33 +169,33 @@ class RecordService: Service() {
                 prepare()
                 start()
                 val duration = duration.toLong() // 녹음 파일의 총 길이 (ms)
-                maxDurationMillis = duration // 🔧 여기서 maxDurationMillis를 덮어씌움
+                maxDurationMillis = duration //  여기서 maxDurationMillis를 덮어씌움
                 setOnCompletionListener {
                     stopPlayback()
                 }
             }
-            startForegroundNotification("재생 중...")
+            startForegroundNotification(getString(R.string.playing_content))
             startTime = System.currentTimeMillis()
-            startTimerLoop("PLAYING")
+            startTimerLoop(STATE_PLAYING)
         }
     }
     private fun stopPlayback() {
         stopEverything()
-        sendProgressUpdate("RECORDED", 0L,"0:00")
+        sendProgressUpdate(STATE_RECORDED, DEFAULT_ELAPSED_TIME,getString(R.string.default_formatted_time))
     }
     private fun finishRecording() {
 
         stopEverything()
         sendProgressUpdate(
-            state = "RECORDED",
+            state = STATE_RECORDED,
             elapsed = 0L,
-            formattedTime = "0:00",
+            formattedTime = getString(R.string.default_formatted_time),
             filePath = currentOutputFile?.absolutePath)
     }
     private fun cancelRecording() {
 
         stopEverything()
-        sendProgressUpdate("IDLE", 0L,"0:00")
+        sendProgressUpdate(STATE_IDLE, DEFAULT_ELAPSED_TIME,getString(R.string.default_formatted_time))
         stopSelf()
     }
     @SuppressLint("NewApi")
@@ -208,13 +221,13 @@ class RecordService: Service() {
 
         stopForeground(Service.STOP_FOREGROUND_REMOVE);
     }
-    private fun sendProgressUpdate(state: String, elapsed: Long,formattedTime:String?, progress: Float = 0f,filePath:String? = null) {
+    private fun sendProgressUpdate(state: String, elapsed: Long,formattedTime:String?, progress: Float = DEFAULT_PROGRESS,filePath:String? = null) {
         val intent = Intent(ACTION_UPDATE).apply {
-            putExtra("state", state)
-            putExtra("elapsed", elapsed)
-            putExtra("progress", progress)
-            putExtra("formattedTime",formattedTime)
-            putExtra("file_path", filePath)
+            putExtra(STATE, state)
+            putExtra(ELAPSED, elapsed)
+            putExtra(PROGRESS, progress)
+            putExtra(FORMATTED_TIME,formattedTime)
+            putExtra(FILE_PATH, filePath)
         }
         sendBroadcast(intent)
     }
@@ -225,7 +238,7 @@ class RecordService: Service() {
     }
     override fun onCreate() {
         super.onCreate()
-        Log.d("RecordService", "🟢 onCreate 호출됨")
+        Log.d("RecordService", " onCreate 호출됨")
     }
 
 

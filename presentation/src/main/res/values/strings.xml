@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">개</string>
+    <string name="app_name">고민앱</string>
     <string name="email">email</string>
     <string name="signin">로그인</string>
     <string name="signup">회원가입</string>
