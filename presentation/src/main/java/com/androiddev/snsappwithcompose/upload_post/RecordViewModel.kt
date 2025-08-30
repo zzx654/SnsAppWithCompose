@@ -114,6 +114,10 @@ class RecordViewModel @Inject constructor(
             }
             is RecordEvent.OnCancelClick -> {
                 cancelRecording()
+                _recordedFilePath.value = null
+            }
+            is RecordEvent.SaveRecording -> {
+                saveRecording()
             }
             else -> null
         }
@@ -153,6 +157,9 @@ class RecordViewModel @Inject constructor(
     }
     fun cancelRecording() {
         sendCommand(RecordService.ACTION_CANCEL_RECORD)
+    }
+    fun saveRecording() {
+        sendCommand(RecordService.ACTION_SAVE_RECORDING)
     }
 
     fun uploadRecording() {

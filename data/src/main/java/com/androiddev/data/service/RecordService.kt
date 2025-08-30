@@ -43,6 +43,7 @@ class RecordService: Service() {
         const val ACTION_START_RECORD = RecordServiceActions.ACTION_START_RECORD
         const val ACTION_START_PLAY =  RecordServiceActions.ACTION_START_PLAY
         const val ACTION_STOP_PLAY = RecordServiceActions.ACTION_STOP_PLAY
+        const val ACTION_SAVE_RECORDING = RecordServiceActions.ACTION_SAVE_RECORDING
         const val ACTION_UPDATE = RecordServiceActions.ACTION_UPDATE
         const val ACTION_FINISH_RECORD = RecordServiceActions.ACTION_FINISH_RECORD
         const val ACTION_CANCEL_RECORD = RecordServiceActions.ACTION_CANCEL_RECORD
@@ -90,7 +91,8 @@ class RecordService: Service() {
             ACTION_FINISH_RECORD -> finishRecording()
             ACTION_START_PLAY -> startPlayback()
             ACTION_STOP_PLAY -> stopPlayback()
-            ACTION_CANCEL_RECORD -> cancelRecording()
+            ACTION_CANCEL_RECORD -> resetRecording()
+            ACTION_SAVE_RECORDING -> resetRecording()
         }
         return START_STICKY
     }
@@ -192,7 +194,7 @@ class RecordService: Service() {
             formattedTime = getString(R.string.default_formatted_time),
             filePath = currentOutputFile?.absolutePath)
     }
-    private fun cancelRecording() {
+    private fun resetRecording() {
 
         stopEverything()
         sendProgressUpdate(STATE_IDLE, DEFAULT_ELAPSED_TIME,getString(R.string.default_formatted_time))

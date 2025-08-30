@@ -121,6 +121,10 @@ fun UploadPostScreen(
     BottomRecorder(
       showDialog = { recordViewModel.bottomRecordDialogState.value.showDialog },
       onClickCancel = recordViewModel.bottomRecordDialogState.value.onClickCancel,
+      onClickSave = {
+          recordViewModel.saveRecording()
+
+                    }  ,
       viewModel = recordViewModel
     )
     BaseScaffold(
@@ -211,7 +215,7 @@ fun UploadPostScreen(
                         },
 
                     ) {
-                        UploadRecordIcon(false) { }
+                        UploadRecordIcon(recordViewModel.recordedFilePath.value != null) { }
                     }
 
                     IconButton(

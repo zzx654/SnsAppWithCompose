@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 fun BottomRecorder(
     showDialog:()->Boolean,
     onClickCancel:()->Unit,
+    onClickSave:()->Unit,
     viewModel: RecordViewModel
 
 ) {
@@ -115,7 +116,16 @@ fun BottomRecorder(
                 }
                 Icon(Icons.Default.Check, contentDescription = "Save", tint = Color.Black,    modifier = Modifier
                     .align(Alignment.CenterEnd).padding(horizontal = 30.dp)
-                    .size(34.dp).clickable {  })
+                    .size(34.dp).clickable {
+                        scope.launch {
+                            onClickSave()
+
+
+                            modalBottomSheetState.hide()
+                        }.invokeOnCompletion { onClickCancel()  }
+
+                    }
+                )
 
             }
         }

@@ -27,12 +27,15 @@ fun UploadRecordIcon(
         )
 
         // 뱃지는 오른쪽 위로 정렬
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .align(Alignment.TopEnd).offset(x = 3.dp, y = (-4).dp)
-                .background(Color.White, shape = CircleShape)
-        )
+        if(recorded) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .align(Alignment.TopEnd).offset(x = 3.dp, y = (-4).dp)
+                    .background(Color.White, shape = CircleShape)
+            )
+        }
+
     }
 
 }
