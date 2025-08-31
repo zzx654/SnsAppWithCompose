@@ -62,6 +62,7 @@
     <string name="location_on">위치가 함께 저장됩니다</string>
     <string name="location_off">위치가 비활성화 되었습니다</string>
     <string name="locationpermission_needed">위치권한이 필요합니다</string>
+    <string name="confirm_delete_added_voice">추가된 음성을 삭제하시겠습니까?</string>
 
 
 

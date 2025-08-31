@@ -25,7 +25,9 @@ import com.androiddev.data.util.IntentKeys.FILE_PATH
 import com.androiddev.data.util.IntentKeys.FORMATTED_TIME
 import com.androiddev.data.util.IntentKeys.PROGRESS
 import com.androiddev.data.util.IntentKeys.STATE
+import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.BottomRecordState
+import com.androiddev.snsappwithcompose.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,6 +36,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -41,6 +44,11 @@ import javax.inject.Inject
 class RecordViewModel @Inject constructor(
     private val context: Context
 ): ViewModel() {
+    private val _recordingAlertDialogState: MutableState<AlertDialogState> = mutableStateOf(
+        AlertDialogState()
+    )
+    val recordingAlertDialogState: State<AlertDialogState>
+        get() = _recordingAlertDialogState
     private val _bottomRecordDialogState: MutableState<BottomRecordState> = mutableStateOf(
         BottomRecordState()
     )
@@ -96,7 +104,10 @@ class RecordViewModel @Inject constructor(
     fun onEvent(event: RecordEvent) {
         when(event) {
             is RecordEvent.OnAddRecordClick -> {
-                showDialog()
+                if(recordedFilePath.value != null)
+                    showDeleteRecordingAlert()
+                else
+                    showDialog()
             }
             is RecordEvent.RecordPlayBack -> {
                 when (_uiState.value.buttonAction) {
@@ -193,8 +204,23 @@ class RecordViewModel @Inject constructor(
     private fun resetBottomRecordDialog() {
         _bottomRecordDialogState.value = BottomRecordState()
     }
-
-
+    private fun showDeleteRecordingAlert() {
+        _recordingAlertDialogState.value = AlertDialogState(
+            title = getString(context, com.androiddev.snsappwithcompose.R.string.confirm_delete_added_voice),
+            confirmText = getString(context, com.androiddev.snsappwithcompose.R.string.confirm),
+            cancelText = getString(context, com.androiddev.snsappwithcompose.R.string.cancel),
+            onClickConfirm = {
+                _recordedFilePath.value = null
+                resetRecordingAlert()
+            },
+            onClickCancel = {
+                resetRecordingAlert()
+            }
+        )
+    }
+    private fun resetRecordingAlert() {
+        _recordingAlertDialogState.value = AlertDialogState()
+    }
 
 }
 enum class RecordState { IDLE, RECORDING, RECORDED, PLAYING }

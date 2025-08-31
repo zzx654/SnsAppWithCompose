@@ -58,6 +58,7 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
+import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.BottomRecorder
 import com.androiddev.snsappwithcompose.components.UploadRecordIcon
 import com.androiddev.snsappwithcompose.components.UploadVoteIcon
@@ -126,6 +127,13 @@ fun UploadPostScreen(
 
                     }  ,
       viewModel = recordViewModel
+    )
+    AlertDialog(
+        title = { recordViewModel.recordingAlertDialogState.value.title },
+        cancelText = { recordViewModel.recordingAlertDialogState.value.cancelText },
+        confirmText = { recordViewModel.recordingAlertDialogState.value.confirmText },
+        onClickConfirm = recordViewModel.recordingAlertDialogState.value.onClickConfirm,
+        onClickCancel = recordViewModel.recordingAlertDialogState.value.onClickCancel
     )
     BaseScaffold(
         focusManager = focusManager,
