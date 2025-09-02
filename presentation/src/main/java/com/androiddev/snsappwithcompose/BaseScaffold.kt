@@ -22,11 +22,13 @@ import com.androiddev.snsappwithcompose.util.addFocusCleaner
 
 @Composable
 fun BaseScaffold(
+    modifier: Modifier = Modifier.fillMaxWidth(0.85f),
     focusManager: FocusManager,
     scrollState: ScrollState = rememberScrollState(),
     topBar: @Composable (() -> Unit) = {},
     content: @Composable () -> Unit,
-    bottomBar: @Composable (() -> Unit) = {}
+    bottomBar: @Composable (() -> Unit) = {},
+    lazyColumnExist: Boolean = false
 ) {
     Scaffold(
         topBar = {
@@ -59,13 +61,17 @@ fun BaseScaffold(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState),
+                modifier = Modifier.then (
+                    if(lazyColumnExist) Modifier.fillMaxSize()
+                    else Modifier.fillMaxSize().verticalScroll(scrollState)
+                ),
+                //.fillMaxSize()
+                //.verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.85f)
+                    modifier = modifier,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     content()
                 }

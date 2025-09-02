@@ -57,6 +57,12 @@ class UploadPostViewModel @Inject constructor(
     private val _locationOnOff = mutableStateOf(false)
     val locationOnOff: State<Boolean>
         get() = _locationOnOff
+
+    private val _showBottomVoteDialog: MutableState<Boolean> = mutableStateOf(false)
+    val showBottomVoteDialog: State<Boolean>
+        get() = _showBottomVoteDialog
+
+
     init {
         checkPermissions(
             context = context,
@@ -196,6 +202,9 @@ class UploadPostViewModel @Inject constructor(
                     }
                 }
 
+            }
+            is UploadPostEvent.OnAddVoteClick -> {
+                _showBottomVoteDialog.value = true
             }
             else -> null
         }

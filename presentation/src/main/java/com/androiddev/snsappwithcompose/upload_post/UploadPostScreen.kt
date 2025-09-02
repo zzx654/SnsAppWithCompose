@@ -60,6 +60,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.BottomRecorder
+import com.androiddev.snsappwithcompose.components.BottomVoteOptions
 import com.androiddev.snsappwithcompose.components.UploadRecordIcon
 import com.androiddev.snsappwithcompose.components.UploadVoteIcon
 
@@ -127,6 +128,11 @@ fun UploadPostScreen(
 
                     }  ,
       viewModel = recordViewModel
+    )
+    BottomVoteOptions(
+        showDialog = { viewModel.showBottomVoteDialog.value},
+        onClickSave = {},
+        onClickCancel = {}
     )
     AlertDialog(
         title = { recordViewModel.recordingAlertDialogState.value.title },
@@ -228,7 +234,7 @@ fun UploadPostScreen(
 
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = {}
+                        onClick = { viewModel.onEvent(UploadPostEvent.OnAddVoteClick)}
                     ) {
                         UploadVoteIcon(false) { }
                     }
@@ -311,11 +317,14 @@ fun UploadPostScreen(
 
             )
             Spacer(modifier = Modifier.height(10.dp))
-            CheckBoxWithText(
-                text = getString(context, R.string.anonymous),
-                checked = { viewModel.anonymous.value },
-                onCheckedChange = { viewModel.onEvent(UploadPostEvent.ToggleCheckBox(it)) }
-            )
+            Box(modifier = Modifier.fillMaxWidth(),contentAlignment = Alignment.TopStart){
+                CheckBoxWithText(
+                    text = getString(context, R.string.anonymous),
+                    checked = { viewModel.anonymous.value },
+                    onCheckedChange = { viewModel.onEvent(UploadPostEvent.ToggleCheckBox(it)) }
+                )
+            }
+
             Spacer(modifier = Modifier.height(10.dp))
             SelectedImageCards(
                 selectedImageUris = {
