@@ -3,7 +3,6 @@ package com.androiddev.snsappwithcompose.upload_post
 import android.Manifest
 import android.content.Context
 import android.net.Uri
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -15,8 +14,6 @@ import com.androiddev.domain.use_case.UploadPostUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.BaseViewModel
-import com.androiddev.snsappwithcompose.util.BottomRecordState
-import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.checkPermissions
 import com.androiddev.snsappwithcompose.util.generateAnonymousNickname
@@ -57,10 +54,6 @@ class UploadPostViewModel @Inject constructor(
     private val _locationOnOff = mutableStateOf(false)
     val locationOnOff: State<Boolean>
         get() = _locationOnOff
-
-    private val _showBottomVoteDialog: MutableState<Boolean> = mutableStateOf(false)
-    val showBottomVoteDialog: State<Boolean>
-        get() = _showBottomVoteDialog
 
 
     init {
@@ -203,11 +196,10 @@ class UploadPostViewModel @Inject constructor(
                 }
 
             }
-            is UploadPostEvent.OnAddVoteClick -> {
-                _showBottomVoteDialog.value = true
-            }
+
             else -> null
         }
     }
+
 
 }

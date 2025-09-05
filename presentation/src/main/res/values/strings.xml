@@ -63,6 +63,9 @@
     <string name="location_off">위치가 비활성화 되었습니다</string>
     <string name="locationpermission_needed">위치권한이 필요합니다</string>
     <string name="confirm_delete_added_voice">추가된 음성을 삭제하시겠습니까?</string>
+    <string name="option_modify">수정하기</string>
+    <string name="option_delete">삭제하기</string>
+    <string name="error_minimum_poll_options">2개 이상의 보기 항목을 입력해주세요</string>
 
 
 

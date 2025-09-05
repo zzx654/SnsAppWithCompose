@@ -57,18 +57,20 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.androiddev.snsappwithcompose.BaseScaffold
+import com.androiddev.snsappwithcompose.upload_post.CreateVoteEvent
+import com.androiddev.snsappwithcompose.upload_post.CreateVoteViewModel
 import com.androiddev.snsappwithcompose.util.addFocusCleaner
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomVoteOptions(
-    showDialog:()->Boolean,
-    onClickCancel:()->Unit,
-    onClickSave:()->Unit
+    createVoteViewModel: CreateVoteViewModel
+
 ) {
 
-    if(showDialog()) {
+    val voteOptions = createVoteViewModel.voteOptions
+    if(createVoteViewModel.showBottomVoteDialog.value) {
 
         var allowHide by remember { mutableStateOf(false) }
         val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true,
@@ -100,9 +102,10 @@ fun BottomVoteOptions(
                     ) {
                         CenterAlignedTopBar(
                             title = "투표",
-                            onBackClick = {  },
+                            onBackClick = { createVoteViewModel.onEvent(CreateVoteEvent.onCancelClick) },
                             actions = {
                                 IconButton(onClick = {
+                                    createVoteViewModel.onEvent(CreateVoteEvent.SaveVoteOptions)
 
 
                                 }) {
@@ -124,7 +127,7 @@ fun BottomVoteOptions(
             ) {  contentPadding ->
 
                 val coroutineScope = rememberCoroutineScope()
-                var voteOptions by remember { mutableStateOf(List(3) { "" }) }
+  
                 val listState = rememberLazyListState()
                 Box(
                     modifier = Modifier
@@ -144,13 +147,14 @@ fun BottomVoteOptions(
                         }
 
                         itemsIndexed(voteOptions) { index, text ->
-                            val bringIntoViewRequester = remember(index) { BringIntoViewRequester() }
                             Spacer(modifier = Modifier.height(10.dp))
                             ThinBorderTextField(
                                 value = text,
                                 onValueChange = { newValue ->
-                                    voteOptions =
-                                        voteOptions.toMutableList().also { it[index] = newValue }
+                                    createVoteViewModel.onEvent(CreateVoteEvent.TypeVoteOption(index,newValue))
+
+                                   // voteOptions =
+                                    //    voteOptions.toMutableList().also { it[index] = newValue }
 
                                 },
                                 hint = "보기 ${index + 1}",
@@ -167,7 +171,8 @@ fun BottomVoteOptions(
                                 modifier = Modifier.fillMaxWidth() .height(56.dp),  // 높이 맞추기,
                                 onClick = {
                                     //focusManager.clearFocus() // 키보드 내림
-                                    voteOptions = voteOptions + ""
+                                   // voteOptions = voteOptions + ""
+                                    createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteOptionClick)
                                     coroutineScope.launch {
                                         listState.animateScrollToItem(voteOptions.size)
                                     }

@@ -14,17 +14,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.HowToVote
 import androidx.compose.material.icons.filled.LocationOff
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,6 +57,7 @@ import androidx.compose.ui.Alignment
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.BottomRecorder
 import com.androiddev.snsappwithcompose.components.BottomVoteOptions
+import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.components.UploadRecordIcon
 import com.androiddev.snsappwithcompose.components.UploadVoteIcon
 
@@ -72,7 +69,8 @@ import com.androiddev.snsappwithcompose.components.UploadVoteIcon
 fun UploadPostScreen(
     navController: NavController,
     viewModel: UploadPostViewModel = hiltViewModel(),
-    recordViewModel: RecordViewModel = hiltViewModel()
+    recordViewModel: RecordViewModel = hiltViewModel(),
+    createVoteViewModel: CreateVoteViewModel = hiltViewModel()
 
 ) {
     val focusManager = LocalFocusManager.current
@@ -117,9 +115,27 @@ fun UploadPostScreen(
             }
         }
     }
+    LaunchedEffect(true) {
+        createVoteViewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                else -> null
+            }
+        }
+    }
     LaunchedEffect(contentTextFieldState.text) {
         viewModel.onEvent(UploadPostEvent.TypeContent(contentTextFieldState.text.toString()))
     }
+    CustomBottomSheetDialog(
+        { createVoteViewModel.manageVoteDialogState.value.showDialog },
+        { createVoteViewModel.manageVoteDialogState.value.items },
+        createVoteViewModel.manageVoteDialogState.value.onClickCancel
+    )
     BottomRecorder(
       showDialog = { recordViewModel.bottomRecordDialogState.value.showDialog },
       onClickCancel = recordViewModel.bottomRecordDialogState.value.onClickCancel,
@@ -130,9 +146,7 @@ fun UploadPostScreen(
       viewModel = recordViewModel
     )
     BottomVoteOptions(
-        showDialog = { viewModel.showBottomVoteDialog.value},
-        onClickSave = {},
-        onClickCancel = {}
+        createVoteViewModel
     )
     AlertDialog(
         title = { recordViewModel.recordingAlertDialogState.value.title },
@@ -234,9 +248,9 @@ fun UploadPostScreen(
 
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = { viewModel.onEvent(UploadPostEvent.OnAddVoteClick)}
+                        onClick = { createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteClick)}
                     ) {
-                        UploadVoteIcon(false) { }
+                        UploadVoteIcon(createVoteViewModel.savedVoteOptions.isNotEmpty()) { }
                     }
                     IconButton(
                         modifier = Modifier.size(58.dp),

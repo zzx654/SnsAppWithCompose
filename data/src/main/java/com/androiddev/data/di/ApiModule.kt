@@ -26,7 +26,8 @@ import javax.inject.Singleton
 object ApiModule {
 
     @Provides
-    fun provideBaseUrl(): String = BuildConfig.BASE_URL
+    fun provideBaseUrl(): String = "http://192.168.0.7:3000"
+        //BuildConfig.BASE_URL
 
     @Provides
     @Singleton

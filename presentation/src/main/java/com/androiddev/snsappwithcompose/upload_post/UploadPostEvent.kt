@@ -13,5 +13,4 @@ sealed class UploadPostEvent {
     data class SetLocationOnOff(val onOff: Boolean): UploadPostEvent()
     data class ToggleLocationOnOff(val onOff: Boolean): UploadPostEvent()
     data class UploadPost(val lat:Double? = null, val long:Double? = null): UploadPostEvent()
-    data object OnAddVoteClick: UploadPostEvent()
 }
