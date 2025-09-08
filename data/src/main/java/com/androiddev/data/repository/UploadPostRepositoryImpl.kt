@@ -44,6 +44,8 @@ class UploadPostRepositoryImpl @Inject constructor(
         anonymousNick: RequestBody?,
         tags: RequestBody?,
         images: List<MultipartBody.Part>?,
+        audio:MultipartBody.Part?,
+        voteOptions:RequestBody?,
         text: RequestBody,
         latitude: MultipartBody.Part?,
         longitude: MultipartBody.Part?
@@ -51,7 +53,7 @@ class UploadPostRepositoryImpl @Inject constructor(
         return flow {
             try {
                 emit(Resource.Loading())
-                api.uploadPost(anonymousNick,tags,images,text,latitude,longitude).body()?.let{ result ->
+                api.uploadPost(anonymousNick,tags,images,audio,voteOptions,text,latitude,longitude).body()?.let{ result ->
                     if(result.resultCode == 200) {
                         emit(Resource.Success(Unit))
                     }

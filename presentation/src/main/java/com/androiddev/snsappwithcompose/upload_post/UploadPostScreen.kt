@@ -175,7 +175,9 @@ fun UploadPostScreen(
                                         viewModel.onEvent(
                                             UploadPostEvent.UploadPost(
                                                 lat = latitude,
-                                                long = longitude
+                                                long = longitude,
+                                                audioFilePath = recordViewModel.recordedFilePath.value,
+                                                voteOptions = createVoteViewModel.savedVoteOptions
                                             )
                                         )
                                     }
@@ -185,7 +187,10 @@ fun UploadPostScreen(
                                 }
                             )
                         } else {
-                            viewModel.onEvent(UploadPostEvent.UploadPost())
+                            viewModel.onEvent(UploadPostEvent.UploadPost(
+                                audioFilePath = recordViewModel.recordedFilePath.value,
+                                voteOptions = createVoteViewModel.savedVoteOptions
+                            ))
                         }
 
                     }) {

@@ -14,9 +14,11 @@ class UploadPost @Inject constructor(
         anonymousNick: RequestBody?,
         tags: RequestBody?,
         images:List<MultipartBody.Part>?,
+        audio:MultipartBody.Part?,
+        voteOptions:RequestBody?,
         text: RequestBody,
         latitude: MultipartBody.Part? = null,
         longitude: MultipartBody.Part? = null
-    ): Flow<Resource<Unit>> = repository.uploadPost(anonymousNick,tags,images,text,latitude,longitude)
+    ): Flow<Resource<Unit>> = repository.uploadPost(anonymousNick,tags,images,audio,voteOptions,text,latitude,longitude)
 
 }

@@ -60,8 +60,6 @@ class RecordViewModel @Inject constructor(
     private var receiverRegistered = false
 
 
-    val progress: StateFlow<Float> = uiState.map { it.elapsedMillis / 60f }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0f)
 
 
     private val _recordedFilePath: MutableState<String?> = mutableStateOf(null)
@@ -173,15 +171,7 @@ class RecordViewModel @Inject constructor(
         sendCommand(RecordService.ACTION_SAVE_RECORDING)
     }
 
-    fun uploadRecording() {
-        val file = RecordService.currentOutputFile
-        if (file != null && file.exists()) {
-            //viewModelScope.launch(Dispatchers.IO) {
-             //   val success = FileUploader.uploadToServer(file)
-                // 업로드 성공 처리 등
-            //}
-        }
-    }
+
 
     private fun sendCommand(action: String) {
         val intent = Intent(context, RecordService::class.java).apply {

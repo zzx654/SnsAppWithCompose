@@ -14,6 +14,8 @@ interface UploadPostRepository {
         anonymousNick: RequestBody?,
         tags: RequestBody?,
         image:List<MultipartBody.Part>?,
+        audio:MultipartBody.Part?,
+        voteOptions:RequestBody?,
         text: RequestBody,
         latitude: MultipartBody.Part?,
         longitude: MultipartBody.Part?
