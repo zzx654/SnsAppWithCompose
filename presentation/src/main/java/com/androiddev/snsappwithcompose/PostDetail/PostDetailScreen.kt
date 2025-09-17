@@ -98,6 +98,7 @@ import com.androiddev.snsappwithcompose.components.CommentItem
 import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.components.CustomChip
 import com.androiddev.snsappwithcompose.components.LoadingDialog
+import com.androiddev.snsappwithcompose.components.PollCard
 import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 import com.androiddev.snsappwithcompose.util.MenuItem
 import com.androiddev.snsappwithcompose.util.UiEvent
@@ -121,6 +122,8 @@ fun PostDetailScreen(
     viewModel: PostDetailsViewModel = hiltViewModel(),
     keyboardviewModel: KeyboardViewModel = hiltViewModel()
 ) {
+    //글작성자면 투표 결과만 표시 버튼x(userid를 통해 확인)
+    //다른 사용자면 투표여부메따라(userid활용 조회) 표시(했으면 라디오버튼 안했으면 투표결과와 다시투표하기버튼)
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -240,7 +243,7 @@ fun PostDetailScreen(
                                 DropdownMenuItem(
                                     text = { Text(item.label) },
                                     onClick = {
-                                        item.onClick() // ✅ 각 항목의 고유한 onClick 실행
+                                        item.onClick() //  각 항목의 고유한 onClick 실행
                                     }
                                 )
                             }
@@ -369,7 +372,13 @@ fun PostDetailScreen(
 
 
                             }
+
                             Spacer(modifier = Modifier.height(if (post.images == null) 0.dp else 15.dp))
+                            PollCard(
+                              voteState = viewModel.voteState.value,
+                              onOptionSelected = { optionId -> viewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
+                              onVoteClick = {}
+                            ) 
                             Divider(
                                 color = Color.LightGray,
                                 thickness = 1.dp, // 또는 0.5.dp 등

@@ -9,6 +9,7 @@ import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.repository.ToggleLikePostRepository
 import com.androiddev.domain.repository.UploadPostRepository
+import com.androiddev.domain.repository.VoteRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.AuthenticateCode
 import com.androiddev.domain.use_case.CheckNickname
@@ -25,6 +26,7 @@ import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.use_case.GetReplies
 import com.androiddev.domain.use_case.GetSelectedComment
 import com.androiddev.domain.use_case.GetSelectedPost
+import com.androiddev.domain.use_case.GetVoteInfo
 import com.androiddev.domain.use_case.PostComment
 import com.androiddev.domain.use_case.PostDetailUseCases
 import com.androiddev.domain.use_case.PostReply
@@ -40,6 +42,7 @@ import com.androiddev.domain.use_case.ToggleLikeComment
 import com.androiddev.domain.use_case.ToggleLikePost
 import com.androiddev.domain.use_case.UploadPost
 import com.androiddev.domain.use_case.UploadPostUseCases
+import com.androiddev.domain.use_case.VoteUseCases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -134,6 +137,15 @@ object UseCaseModule {
         return ReplyUseCases(
             GetReplies = GetReplies(commentRepository),
             PostReply = PostReply(commentRepository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideVoteUseCases(
+        voteRepository: VoteRepository
+    ): VoteUseCases {
+        return VoteUseCases(
+            getVoteInfo = GetVoteInfo(voteRepository)
         )
     }
 }

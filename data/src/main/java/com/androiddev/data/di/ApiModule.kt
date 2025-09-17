@@ -9,6 +9,7 @@ import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.remote.api.ToggleLikePostApi
 import com.androiddev.data.remote.api.UploadPostApi
+import com.androiddev.data.remote.api.VoteApi
 import com.androiddev.data.util.UserPreferences
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -86,4 +87,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideCommentApi(retrofit: Retrofit): CommentApi = retrofit.create(CommentApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideVoteApi(retrofit: Retrofit): VoteApi = retrofit.create(VoteApi::class.java)
 }

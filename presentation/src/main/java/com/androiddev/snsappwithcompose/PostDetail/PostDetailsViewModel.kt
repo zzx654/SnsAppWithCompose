@@ -18,6 +18,7 @@ import com.androiddev.domain.model.GetCommentsResponse
 import com.androiddev.domain.model.TagInfo
 import com.androiddev.domain.use_case.CommentUseCases
 import com.androiddev.domain.use_case.PostDetailUseCases
+import com.androiddev.domain.use_case.VoteUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.R
@@ -29,6 +30,7 @@ import com.androiddev.snsappwithcompose.util.BottomSheetItem
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.util.Paginator
 import com.androiddev.snsappwithcompose.util.UiEvent
+import com.androiddev.snsappwithcompose.util.VoteState
 import com.androiddev.snsappwithcompose.util.generateAnonymousNickname
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -41,6 +43,7 @@ import javax.inject.Inject
 class PostDetailsViewModel @Inject constructor(
     private val postDetailUseCases: PostDetailUseCases,
     private val commentUseCases: CommentUseCases,
+    private val voteUseCases: VoteUseCases,
     private val context: Context
 ) : BaseViewModel() {
     //로딩처리. 댓글 상단 고정
@@ -49,6 +52,9 @@ class PostDetailsViewModel @Inject constructor(
     )
     val customBottomSheetDialogState: State<CustomBottomSheetDialogState>
         get() = _customBottomSheetDialogState
+    private val _voteState: MutableState<VoteState> = mutableStateOf( VoteState())
+    val voteState: State<VoteState>
+        get() = _voteState
     private val _uiEvent = MutableSharedFlow<KeyBoardEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
     private val _chatList = mutableStateListOf<String>()
@@ -144,8 +150,49 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             commentPaginator.loadNextItems(refresh = true)
         }
+        viewModelScope.launch {
+            voteUseCases.getVoteInfo(postId).collect { result ->
+                when(result) {
+                    is Resource.Success -> {
+                        //투표 fetch
+                        result.data?.let {
+                            if(it.isTokenValid) {
+                                if(it.voteInfo.isNotEmpty()) {
+                                    _voteState.value = voteState.value.copy(
+                                        isMyPost = it.isMyPost,
+                                        hasVoted = it.hasVoted,
+                                        selectedChoiceId = it.selectedChoiceId,
+                                        voteInfo = it.voteInfo
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                    is Resource.Error -> {
+
+                    }
+                }
+
+            }
+        }
     }
 
+    fun onVoteEvent(event: VoteEvent) {
+        when(event) {
+            is VoteEvent.Vote -> {
+
+            }
+            is VoteEvent.SelectOption -> {
+                _voteState.value = voteState.value.copy(
+                    selectedChoiceId = event.optionId
+                )
+            }
+        }
+
+    }
     fun onCommentEvent(event: CommentEvent) {
         when(event) {
             is CommentEvent.ShowCommentOptions -> {

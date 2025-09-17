@@ -73,6 +73,9 @@
     <string name="edit">수정하기</string>
     <string name="sort_by_popularity">인기순</string>
     <string name="sort_by_date">등록순</string>
+    <string name="anonymous_voting">무기명 투표 중</string>
+    <string name="vote">투표하기</string>
+    <string name="vote_again">다시 투표하기</string>
 
 
 
