@@ -12,6 +12,7 @@ import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.repository.VoteRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.AuthenticateCode
+import com.androiddev.domain.use_case.CancelVote
 import com.androiddev.domain.use_case.CheckNickname
 import com.androiddev.domain.use_case.CommentUseCases
 import com.androiddev.domain.use_case.CreateProfile
@@ -42,6 +43,7 @@ import com.androiddev.domain.use_case.ToggleLikeComment
 import com.androiddev.domain.use_case.ToggleLikePost
 import com.androiddev.domain.use_case.UploadPost
 import com.androiddev.domain.use_case.UploadPostUseCases
+import com.androiddev.domain.use_case.Vote
 import com.androiddev.domain.use_case.VoteUseCases
 import dagger.Module
 import dagger.Provides
@@ -145,7 +147,9 @@ object UseCaseModule {
         voteRepository: VoteRepository
     ): VoteUseCases {
         return VoteUseCases(
-            getVoteInfo = GetVoteInfo(voteRepository)
+            getVoteInfo = GetVoteInfo(voteRepository),
+            vote = Vote(voteRepository),
+            cancelVote = CancelVote(voteRepository)
         )
     }
 }

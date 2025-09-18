@@ -178,12 +178,58 @@ class PostDetailsViewModel @Inject constructor(
 
             }
         }
+
     }
 
     fun onVoteEvent(event: VoteEvent) {
         when(event) {
-            is VoteEvent.Vote -> {
+            is VoteEvent.OnVoteClick -> {
+                viewModelScope.launch {
+                    if(!voteState.value.hasVoted) {
+                        voteState.value.selectedChoiceId?.let { optionId ->
+                            voteUseCases.vote(postId.value,optionId).collect { result ->
+                                when(result) {
+                                    is Resource.Success -> {
+                                        //투표 fetch
+                                        setLoading(false)
+                                        result.data?.let {
+                                            if(it.isTokenValid) {
+                                                if(it.voteInfo.isNotEmpty()) {
+                                                    _voteState.value = voteState.value.copy(
+                                                        isMyPost = it.isMyPost,
+                                                        hasVoted = it.hasVoted,
+                                                        selectedChoiceId = it.selectedChoiceId,
+                                                        voteInfo = it.voteInfo
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    is Resource.Loading -> {
+                                        setLoading(true)
+                                    }
+                                    is Resource.Error -> {
+                                        setLoading(false)
+                                        setEvent(
+                                            UiEvent.ShowToast(
+                                                message = result.message ?: getString(
+                                                    context, R.string.error
+                                                )
+                                            )
+                                        )
 
+                                    }
+                                }
+
+                            }
+                        }
+                    } else {
+                        voteUseCases.cancelVote(postId.value).collect { result ->
+                            _voteState.value = voteState.value.copy(hasVoted = false, selectedChoiceId = null)
+
+                        }
+                    }
+                }
             }
             is VoteEvent.SelectOption -> {
                 _voteState.value = voteState.value.copy(

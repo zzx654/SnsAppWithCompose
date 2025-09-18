@@ -28,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -94,7 +95,11 @@ fun PollCard(
                             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
                                 RadioButton(
                                     selected = voteState.selectedChoiceId == option.optionId,
-                                    onClick = { onOptionSelected(option.optionId) }
+                                    onClick = { onOptionSelected(option.optionId) },
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = Color.Black,
+                                        unselectedColor = Color.Gray
+                                    )
                                 )
                             }
 
@@ -114,13 +119,13 @@ fun PollCard(
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             RoundedLinearProgressIndicator(
-                                progress = (20.0 / 100).toFloat(),
+                                progress = (result.percentage / 100).toFloat(),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(8.dp)
                                     .clip(RoundedCornerShape(4.dp)),
                                 color = Color.Black,
-                                backgroundColor = Color.White
+                                backgroundColor = Color.LightGray.copy(alpha = 0.3f)
                             )
                         }
                     }

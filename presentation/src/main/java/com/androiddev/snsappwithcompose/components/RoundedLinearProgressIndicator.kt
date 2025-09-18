@@ -16,7 +16,7 @@ fun RoundedLinearProgressIndicator(
     progress: Float,
     modifier: Modifier = Modifier,
     color: Color = Color.Black,
-    backgroundColor: Color = Color.White
+    backgroundColor: Color = Color.LightGray
 ) {
     Box(
         modifier = modifier

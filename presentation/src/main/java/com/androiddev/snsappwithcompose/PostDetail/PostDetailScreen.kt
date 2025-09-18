@@ -3,7 +3,6 @@ package com.androiddev.snsappwithcompose.PostDetail
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -22,16 +21,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -43,9 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,7 +49,6 @@ import com.androiddev.snsappwithcompose.util.KeyboardViewModel
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -120,10 +112,8 @@ fun PostDetailScreen(
     navBackStackEntry: NavBackStackEntry,
     userViewModel: UserViewModel,
     viewModel: PostDetailsViewModel = hiltViewModel(),
-    keyboardviewModel: KeyboardViewModel = hiltViewModel()
 ) {
-    //글작성자면 투표 결과만 표시 버튼x(userid를 통해 확인)
-    //다른 사용자면 투표여부메따라(userid활용 조회) 표시(했으면 라디오버튼 안했으면 투표결과와 다시투표하기버튼)
+
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -377,7 +367,9 @@ fun PostDetailScreen(
                             PollCard(
                               voteState = viewModel.voteState.value,
                               onOptionSelected = { optionId -> viewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
-                              onVoteClick = {}
+                              onVoteClick = {
+                                  viewModel.onVoteEvent(VoteEvent.OnVoteClick)
+                              }
                             ) 
                             Divider(
                                 color = Color.LightGray,
@@ -480,13 +472,6 @@ fun PostDetailScreen(
                     getCommentsState.comments
                 ) { comment ->
 
-                    //PostPrevItem(post = posts()[index],modifier = Modifier.clickable{ onPostClick(posts()[index].postId) })
-                    /**Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(150.dp)
-                            .background(Color.White)
-                    )**/
                     val commentLikeStatus = viewModel.commentLikeStatusMap[comment.commentId]?:CommentLikeState(isLiked = false,likeCount = 0)
                     CommentItem(
                         comment = comment,
@@ -691,72 +676,10 @@ fun ChatMessages(
     }
 }
 
-@Composable
-fun ChatInput(
-    text: String,
-    onTextChange: (String) -> Unit,
-    onSendClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        BasicTextField(
-            value = text,
-            onValueChange = onTextChange,
-            modifier = Modifier
-                .weight(1f)
-                .height(48.dp)
-                .background(Color(0xFFF0F0F0), shape = MaterialTheme.shapes.small)
-                .padding(horizontal = 12.dp, vertical = 12.dp),
-            singleLine = true,
-            textStyle = TextStyle(fontSize = 16.sp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(onClick = onSendClick) {
-            Text("전송")
-        }
-    }
-}
 
-@Composable
-fun KeyboardHeightWithInsets(
-    onKeyboardHeightChanged: (Int, Int) -> Unit
-) {
-    val imeInsets = androidx.compose.foundation.layout.WindowInsets.ime
-    val imeBottom = imeInsets.getBottom(LocalDensity.current)
-    val navHeight =
-        androidx.compose.foundation.layout.WindowInsets.navigationBars.getBottom(LocalDensity.current)
-    val systemBarsHeight =
-        androidx.compose.foundation.layout.WindowInsets.systemBars.getBottom(LocalDensity.current)
 
-    Log.d("Insets", "IME: $imeBottom, NavBar: $navHeight, SysBars: $systemBarsHeight")
-    LaunchedEffect(imeBottom) {
-        onKeyboardHeightChanged(imeBottom, navHeight)
-    }
-}
 
-@Composable
-fun isKeyboardVisible(): Boolean {
-    val ime = androidx.compose.foundation.layout.WindowInsets.ime
-    val density = LocalDensity.current
-    val imeBottom = ime.getBottom(density)
-    return imeBottom > 0
-}
 
-fun Modifier.conditionalImePadding(apply: Boolean): Modifier {
-    return if (apply) this.imePadding() else this
-}
 
-@Composable
-fun ScreenHeightPercentToPx(percent: Float): Int {
-    val configuration = LocalConfiguration.current
-    val screenHeightDp = configuration.screenHeightDp.dp
-    val density = LocalDensity.current
 
-    return with(density) {
-        (screenHeightDp * percent).roundToPx()
-    }
-}
 
