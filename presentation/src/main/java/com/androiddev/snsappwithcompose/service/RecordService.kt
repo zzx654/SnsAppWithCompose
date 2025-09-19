@@ -1,4 +1,4 @@
-package com.androiddev.data.service
+package com.androiddev.snsappwithcompose.service
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -79,6 +79,7 @@ class RecordService: Service() {
 
         startForeground(notificationId, notificationBuilder.build())
     }
+    @SuppressLint("NotificationPermission")
     private fun updateNotification(content: String) {
         notificationBuilder.setContentText(content)
         notificationManager.notify(notificationId, notificationBuilder.build())

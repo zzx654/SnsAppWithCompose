@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androiddev.data.R
-import com.androiddev.data.service.RecordService
+import com.androiddev.snsappwithcompose.service.RecordService
 import com.androiddev.data.util.Constants.DEFAULT_ELAPSED_TIME
 import com.androiddev.data.util.Constants.DEFAULT_PROGRESS
 import com.androiddev.data.util.Constants.MAX_DURATION_MILLIS
