@@ -34,9 +34,12 @@ ksp = "2.0.0-1.0.22"
 snapper = "0.2.2"
 serviceslocation = "21.3.0"
 accompanistpager="0.28.0"
+exoplayer = "1.8.0"
 
 [libraries]
-
+media3-ui = {module = "androidx.media3:media3-ui",version.ref = "exoplayer"}
+#exoplayer
+exoplayer = {module="androidx.media3:media3-exoplayer",version.ref = "exoplayer"}
 #retrofit
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
