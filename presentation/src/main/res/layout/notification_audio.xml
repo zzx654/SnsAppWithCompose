@@ -23,16 +23,18 @@
         android:layout_width="48dp"
         android:layout_height="48dp">
 
-        <!-- 원형 Progress -->
+        <!-- 원형 진행률 표시 -->
         <ProgressBar
             android:id="@+id/notification_progress"
-            style="?android:attr/progressBarStyleSmall"
+            style="@android:style/Widget.ProgressBar.Small"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:indeterminate="true"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="0"
             android:visibility="visible" />
 
-        <!-- 중앙 아이콘 버튼 -->
+        <!-- 중앙 재생/일시정지 버튼 -->
         <ImageButton
             android:id="@+id/notification_icon"
             android:layout_width="32dp"

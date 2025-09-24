@@ -67,11 +67,12 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
 
+
     implementation(libs.exoplayer)
     implementation(libs.coil3.compose)
     implementation(libs.coil3.okhttp)
     implementation ("androidx.compose.foundation:foundation:1.8.3")
-    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.17.0")
+    implementation (libs.accompanist.systemuicontroller)
     //tabrow
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
@@ -83,6 +84,7 @@ dependencies {
 
     // Dagger - Hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.media3.datasource.okhttp)
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
 

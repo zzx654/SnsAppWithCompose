@@ -1,6 +1,8 @@
 [versions]
+accompanistSystemuicontroller = "0.17.0"
 agp = "8.7.3"
 datastorePreferences = "1.1.7"
+extensionOkhttp = "2.19.1"
 kotlin = "2.0.0"
 coreKtx = "1.16.0"
 hilt = "2.50"
@@ -35,8 +37,11 @@ snapper = "0.2.2"
 serviceslocation = "21.3.0"
 accompanistpager="0.28.0"
 exoplayer = "1.8.0"
+media3DatasourceOkhttp = "1.8.0"
 
 [libraries]
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
+extension-okhttp = { module = "com.google.android.exoplayer:extension-okhttp", version.ref = "extensionOkhttp" }
 media3-ui = {module = "androidx.media3:media3-ui",version.ref = "exoplayer"}
 #exoplayer
 exoplayer = {module="androidx.media3:media3-exoplayer",version.ref = "exoplayer"}
@@ -107,6 +112,7 @@ ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-media3-datasource-okhttp = { group = "androidx.media3", name = "media3-datasource-okhttp", version.ref = "media3DatasourceOkhttp" }
 [plugins]
 #parcelize
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }

@@ -3,8 +3,10 @@ package com.androiddev.snsappwithcompose.PostDetail
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.view.Gravity
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -83,6 +85,7 @@ import com.androiddev.snsappwithcompose.BaseScaffold
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.UserViewModel
+import com.androiddev.snsappwithcompose.components.AudioPlayer
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.components.Chips
 import com.androiddev.snsappwithcompose.components.CommentInput
@@ -103,6 +106,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalLayoutApi::class, ExperimentalPagerApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ContextCastToActivity")
 @Composable
@@ -111,6 +115,7 @@ fun PostDetailScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
     userViewModel: UserViewModel,
+    audioViewModel:AudioViewModel = hiltViewModel(),
     viewModel: PostDetailsViewModel = hiltViewModel(),
 ) {
 
@@ -147,6 +152,7 @@ fun PostDetailScreen(
     var imeHeigh = remember { mutableStateOf(0) }
     val ime = androidx.compose.foundation.layout.WindowInsets.ime
     val localDensity = LocalDensity.current
+
     LaunchedEffect(key1 = Unit) {
         val keyboardFlow = snapshotFlow {
             ime.getBottom(localDensity)
@@ -181,6 +187,7 @@ fun PostDetailScreen(
                 isLiked = it.isliked,
                 it.postId
             )
+            audioViewModel.setAudioAvailable(!it.audio.isNullOrEmpty())
         }
     }
 
@@ -370,7 +377,20 @@ fun PostDetailScreen(
                               onVoteClick = {
                                   viewModel.onVoteEvent(VoteEvent.OnVoteClick)
                               }
-                            ) 
+                            )
+                            Box(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                AudioPlayer(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd) // 오른쪽 끝
+                                        .padding(end = 8.dp,top = 10.dp),
+                                    viewModel = audioViewModel,
+                                    url = post.audio
+                                )
+                            }
+
+
                             Divider(
                                 color = Color.LightGray,
                                 thickness = 1.dp, // 또는 0.5.dp 등
