@@ -14,7 +14,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
-
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getString
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class AudioViewModel @Inject constructor(
@@ -34,15 +35,15 @@ class AudioViewModel @Inject constructor(
             val isPlaying = intent?.getBooleanExtra("isPlaying", false) ?: false
             val progress = intent?.getIntExtra("progress", 0) ?: 0
 
-            println("이건 프로그레스 $progress")
+            println("이건 프로그레스 $progress 이건 isPlaying ${isPlaying}")
             _isPlaying.value = isPlaying
             _progress.value = progress / 100f
         }
     }
 
-    init {
-        registerReceiver()
-    }
+   // init {
+   //     registerReceiver()
+   // }
     fun registerReceiver() {
         if (receiverRegistered) return
 
@@ -50,9 +51,12 @@ class AudioViewModel @Inject constructor(
         context.registerReceiver(playbackReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         receiverRegistered = true
     }
-    fun setAudioAvailable(isAvailable: Boolean) {
+    fun setAudioAvailable(isAvailable: Boolean,url:String?,nickname:String?) {
         if (isAvailable) {
-            registerReceiver()
+            if (url != null && nickname != null) {
+                registerReceiver()
+                prepare(url, nickname)
+            }
         } else {
             if (receiverRegistered) {
                 context.unregisterReceiver(playbackReceiver)
@@ -60,12 +64,22 @@ class AudioViewModel @Inject constructor(
             }
         }
     }
-    fun play(url: String) {
-        AudioService.start(context, BuildConfig.BASE_URL+url)
+    fun toggle() {
+        sendCommand(AudioService.ACTION_TOGGLEPLAYBACK)
     }
-
-    fun pause() {
-        AudioService.pause(context)
+    fun prepare(url:String,nickname:String) {
+        sendCommand(AudioService.ACTION_PREPARE,url,nickname)
+    }
+    private fun sendCommand(action: String, url: String? = null, nickname: String? = null) {
+        val intent = Intent(context, AudioService::class.java).apply {
+            url?.let{ putExtra("url",it)}
+            nickname?.let{ putExtra("nickname",it)}
+            this.action = action
+        }
+        if(action == AudioService.ACTION_PREPARE)
+            ContextCompat.startForegroundService(context, intent)
+        else
+            context.startService(intent)
     }
 
     override fun onCleared() {
@@ -73,6 +87,7 @@ class AudioViewModel @Inject constructor(
         if (receiverRegistered) {
             context.unregisterReceiver(playbackReceiver)
             receiverRegistered = false
+            context.stopService(Intent(context, AudioService::class.java))
         }
     }
 }

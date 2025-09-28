@@ -1,47 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:padding="12dp"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#FF222222">
+    android:layout_height="84dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
 
-    <!-- 왼쪽 텍스트 -->
+
+
     <TextView
-        android:id="@+id/notification_text"
+        android:id="@+id/txt_title"
         android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="20dp"
         android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:text="재생 중입니다"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp" />
+        android:gravity="center_vertical"
+        android:text="Sample Title"
+        android:textSize="20dp"
+        android:textColor="@android:color/black"/>
 
-    <!-- 오른쪽: Progress + 버튼 -->
     <FrameLayout
-        android:layout_width="48dp"
-        android:layout_height="48dp">
 
-        <!-- 원형 진행률 표시 -->
-        <ProgressBar
-            android:id="@+id/notification_progress"
-            style="@android:style/Widget.ProgressBar.Small"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:indeterminate="false"
-            android:max="100"
-            android:progress="0"
-            android:visibility="visible" />
-
-        <!-- 중앙 재생/일시정지 버튼 -->
-        <ImageButton
-            android:id="@+id/notification_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+        android:layout_marginEnd="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
             android:layout_gravity="center"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_pause"
-            app:tint="#FFFFFF" />
+            android:id="@+id/btn_play_pause"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="@null"
+            android:src="@drawable/ic_play"/>
+        <ProgressBar
+
+            android:layout_gravity="center"
+            android:id="@+id/mediaProgress"
+            android:indeterminate="false"
+            android:textAlignment="center"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:progressDrawable="@drawable/circle_progress_bar"
+
+            android:background="@drawable/circle_shape"
+            android:layout_width="70dp"
+            android:layout_height="70dp"/>
     </FrameLayout>
+
+
+
+
+
+
 </LinearLayout>

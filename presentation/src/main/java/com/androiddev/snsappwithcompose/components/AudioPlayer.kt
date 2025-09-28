@@ -49,7 +49,7 @@ fun AudioPlayer(
             )
 
             IconButton(onClick = {
-                if (isPlaying) viewModel.pause() else viewModel.play(url)
+                viewModel.toggle()
             }) {
                 Icon(
                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,

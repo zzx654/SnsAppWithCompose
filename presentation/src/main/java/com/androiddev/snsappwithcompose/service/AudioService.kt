@@ -3,273 +3,205 @@ package com.androiddev.snsappwithcompose.service
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.widget.RemoteViews
-import androidx.annotation.OptIn
 import androidx.core.app.NotificationCompat
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.okhttp.OkHttpDataSource
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import com.androiddev.snsappwithcompose.R
-import okhttp3.OkHttpClient
+import kotlinx.coroutines.*
 
 class AudioService : Service() {
 
+    private var mediaPlayer: MediaPlayer? = null
+    private var isPlaying = false
+    private lateinit var notificationManager: NotificationManager
+    private lateinit var notificationBuilder: NotificationCompat.Builder
+    private lateinit var rviews: RemoteViews
+
+    private var currentUrl: String? = null
+    private var nicknameText: String = ""
+    private val notificationId = 1
+
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var progressJob: Job? = null
+    private var lastNotificationUpdateTime = 0L
+
     companion object {
         const val CHANNEL_ID = "audio_channel"
+        const val CHANNEL_NAME = "playaudio"
         const val NOTIFICATION_ID = 1
 
-        const val ACTION_PLAY = "com.androiddev.snsappwithcompose.ACTION_PLAY"
-        const val ACTION_PAUSE = "com.androiddev.snsappwithcompose.ACTION_PAUSE"
+        const val ACTION_PREPARE = "com.androiddev.snsappwithcompose.ACTION_PREPARE"
+        const val ACTION_TOGGLEPLAYBACK = "com.androiddev.snsappwithcompose.ACTION_TOGGLEPLAYBACK"
         const val ACTION_PLAYBACK_STATUS = "com.androiddev.snsappwithcompose.PLAYBACK_STATUS"
-
-        private var player: ExoPlayer? = null
-        private var currentUrl: String? = null
-        private var wasPaused = false
-
-        fun isServiceRunning(context: Context, serviceClass: Class<out Service>): Boolean {
-            val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            return manager.getRunningServices(Int.MAX_VALUE)
-                .any { it.service.className == serviceClass.name }
-        }
-
-        @JvmStatic
-        fun start(context: Context, url: String) {
-            val intent = Intent(context, AudioService::class.java).apply {
-                action = ACTION_PLAY
-                putExtra("url", url)
-            }
-            if (isServiceRunning(context, AudioService::class.java)) {
-                context.startService(intent)
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(intent)
-                } else {
-                    context.startService(intent)
-                }
-            }
-        }
-
-        @JvmStatic
-        fun pause(context: Context) {
-            val intent = Intent(context, AudioService::class.java).apply {
-                action = ACTION_PAUSE
-            }
-            context.startService(intent)
-        }
-    }
-
-    private var isForeground = false
-    private val handler = Handler(Looper.getMainLooper())
-
-    private val progressUpdater = object : Runnable {
-        override fun run() {
-            val position = player?.currentPosition ?: 0
-            val duration = player?.duration ?: 0
-            val isPlaying = player?.isPlaying ?: false
-
-            if (duration > 0 && isPlaying) {
-                val progress = ((position * 100) / duration).toInt()
-                sendPlaybackStatusBroadcast(true, progress)
-                updateNotification(true)
-                handler.postDelayed(this, 90)
-            } else {
-                handler.removeCallbacks(this)
-            }
-        }
-    }
-
-    private val playerListener = object : Player.Listener {
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            val isPlaying = player?.isPlaying ?: false
-
-            when (playbackState) {
-                Player.STATE_READY -> {
-                    if (isPlaying) {
-                        handler.post(progressUpdater)
-                        updateNotification(true)
-                        sendPlaybackStatusBroadcast(true)
-                    } else {
-                        handler.removeCallbacks(progressUpdater)
-                        updateNotification(false)
-                        sendPlaybackStatusBroadcast(false)
-                    }
-                }
-                Player.STATE_ENDED -> {
-                    player?.pause()
-                    player?.seekTo(0)
-                    currentUrl = null
-                    wasPaused = false
-                    handler.removeCallbacks(progressUpdater)
-                    updateNotification(false)
-                    sendPlaybackStatusBroadcast(false, 100)
-                    handler.postDelayed({
-                        sendPlaybackStatusBroadcast(false, 0)
-                    }, 50)
-                }
-                Player.STATE_IDLE, Player.STATE_BUFFERING -> {
-                    updateNotification(false)
-                    sendPlaybackStatusBroadcast(false)
-                }
-            }
-        }
     }
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    @OptIn(UnstableApi::class)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            ACTION_PLAY -> {
-                val url = intent.getStringExtra("url") ?: currentUrl
-
-                if (url != null && (player == null || url != currentUrl)) {
-                    initializePlayer(url)
-                    currentUrl = url
-                } else {
-                    // ✅ STATE_ENDED 이후 재생을 위한 처리
-                    if (player?.playbackState == Player.STATE_ENDED) {
-                        player?.seekTo(0)
-                        player?.prepare()
-                    }
+        intent?.let {
+            when (it.action) {
+                ACTION_PREPARE -> {
+                    val url = it.getStringExtra("url") ?: currentUrl
+                    val nickname = it.getStringExtra("nickname") ?: ""
+                    if (url != null) setMedia(path = url, nickname = nickname)
                 }
-
-                player?.play()
-
-                // ✅ progressUpdater는 항상 실행
-                handler.post(progressUpdater)
-
-                wasPaused = false
-
-                if (!isForeground) {
-                    startForeground(NOTIFICATION_ID, createNotification(true))
-                    isForeground = true
-                } else {
-                    updateNotification(true)
-                }
-
-                sendPlaybackStatusBroadcast(true)
-            }
-
-            ACTION_PAUSE -> {
-                player?.pause()
-                wasPaused = true
-                handler.removeCallbacks(progressUpdater)
-                updateNotification(false)
-                sendPlaybackStatusBroadcast(false)
-            }
-
-            else -> {
-                if (player?.isPlaying == true && !isForeground) {
-                    startForeground(NOTIFICATION_ID, createNotification(true))
-                    isForeground = true
+                ACTION_TOGGLEPLAYBACK -> {
+                    togglePlayPause()
                 }
             }
         }
-
         return START_STICKY
     }
 
-    @UnstableApi
-    private fun initializePlayer(url: String) {
-        val okHttpClient = OkHttpClient.Builder().build()
-        val okHttpDataSourceFactory = OkHttpDataSource.Factory(okHttpClient)
-        val dataSourceFactory = DefaultDataSource.Factory(this, okHttpDataSourceFactory)
-        val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
-
-        player?.release()
-
-        player = ExoPlayer.Builder(this)
-            .setMediaSourceFactory(mediaSourceFactory)
-            .build()
-
-        player?.addListener(playerListener)
-        player?.setMediaItem(MediaItem.fromUri(url))
-        player?.prepare()
+    private fun setMedia(path: String, nickname: String) {
+        currentUrl = path
+        nicknameText = "$nickname 님의 음성"
+        mediaPlayer?.release()
+        mediaPlayer = MediaPlayer().apply {
+            setDataSource(path)
+            prepare()
+            setOnCompletionListener {
+                onPlaybackComplete()
+            }
+        }
+        isPlaying = false
+        rviews = createRemoteView()
+        startForegroundService()
+        // 바로 재생하지 않고 준비만 하거나 바로 재생 원하면 여기서 start() 호출 가능
+        // startPlayback()
     }
 
-    private fun createNotification(isPlaying: Boolean): Notification {
-        val remoteViews = RemoteViews(packageName, R.layout.notification_audio)
-        val iconRes = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-        val action = if (isPlaying) ACTION_PAUSE else ACTION_PLAY
+    private fun startForegroundService() {
+        val channelId = CHANNEL_ID
+        val channelName = CHANNEL_NAME
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            notificationManager.createNotificationChannel(channel)
+        }
 
-        val pendingIntent = PendingIntent.getService(
-            this,
-            0,
-            Intent(this, AudioService::class.java).apply { this.action = action },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        remoteViews.setImageViewResource(R.id.notification_icon, iconRes)
-        remoteViews.setOnClickPendingIntent(R.id.notification_icon, pendingIntent)
-        remoteViews.setTextViewText(
-            R.id.notification_text,
-            if (isPlaying) "재생 중입니다" else "일시정지됨"
-        )
-
-        val duration = player?.duration ?: 0
-        val position = player?.currentPosition ?: 0
-        val progress = if (duration > 0) ((position * 100) / duration).toInt() else 0
-        remoteViews.setProgressBar(R.id.notification_progress, 100, progress, false)
-
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_mic)
-            .setCustomContentView(remoteViews)
+        notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setOnlyAlertOnce(true)
-            .setOngoing(isPlaying)
-            .build()
+            .setContent(rviews)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(nicknameText)
+
+        startForeground(notificationId, notificationBuilder.build())
     }
 
-    private fun updateNotification(isPlaying: Boolean) {
-        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val notification = createNotification(isPlaying)
-        manager.notify(NOTIFICATION_ID, notification)
+    private fun createRemoteView(): RemoteViews {
+        val remoteView = RemoteViews(packageName, R.layout.notification_audio)
+        val toggleIntent = Intent(this, AudioService::class.java).apply {
+            action = ACTION_TOGGLEPLAYBACK
+        }
+        val togglePendingIntent = PendingIntent.getService(this, 0, toggleIntent, PendingIntent.FLAG_IMMUTABLE)
+        remoteView.setOnClickPendingIntent(R.id.btn_play_pause, togglePendingIntent)
+        remoteView.setTextViewText(R.id.txt_title, nicknameText)
+        remoteView.setImageViewResource(R.id.btn_play_pause, if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+        remoteView.setProgressBar(R.id.mediaProgress, mediaPlayer?.duration ?: 0, mediaPlayer?.currentPosition ?: 0, false)
+        return remoteView
     }
 
-    private fun sendPlaybackStatusBroadcast(isPlaying: Boolean, progress: Int = -1) {
+    private fun togglePlayPause() {
+        if (mediaPlayer == null) return
+        if (isPlaying) {
+            pausePlayback()
+        } else {
+            startPlayback()
+        }
+    }
+
+    private fun startPlayback() {
+        mediaPlayer?.start()
+        isPlaying = true
+        startProgressLoop()
+    }
+
+    private fun pausePlayback() {
+        mediaPlayer?.pause()
+        isPlaying = false
+        stopProgressLoop()
+        val progress = getProgressPercent()
+        updateNotificationUI(isPlaying = false, progress = progress)
+        sendPlaybackStatusBroadcast(isPlaying = false, progress = progress)
+    }
+
+    private fun onPlaybackComplete() {
+        isPlaying = false
+        stopProgressLoop()
+        updateNotificationUI(isPlaying = false, progress = 0)
+        sendPlaybackStatusBroadcast(isPlaying = false, progress = 0)
+    }
+
+    private fun startProgressLoop() {
+        progressJob?.cancel()
+        lastNotificationUpdateTime = 0L
+        progressJob = scope.launch {
+            while (isPlaying && mediaPlayer != null) {
+                delay(20L) // Compose UI 빠른 업데이트
+
+                val progress = getProgressPercent()
+                sendPlaybackStatusBroadcast(isPlaying = true, progress = progress)
+
+                // Notification UI는 300ms 간격으로 업데이트
+                val now = System.currentTimeMillis()
+                if (now - lastNotificationUpdateTime > 250) {
+                    lastNotificationUpdateTime = now
+                    updateNotificationUI(isPlaying = true, progress = progress)
+                }
+            }
+        }
+    }
+
+    private fun stopProgressLoop() {
+        progressJob?.cancel()
+        progressJob = null
+    }
+
+    private fun getProgressPercent(): Int {
+        val duration = mediaPlayer?.duration ?: 0
+        val position = mediaPlayer?.currentPosition ?: 0
+        return if (duration > 0) (position * 100 / duration) else 0
+    }
+
+    private fun updateNotificationUI(isPlaying: Boolean, progress: Int) {
+        rviews = createRemoteView().apply {
+            setImageViewResource(R.id.btn_play_pause, if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+            setProgressBar(R.id.mediaProgress, mediaPlayer?.duration ?: 0, (progress * (mediaPlayer?.duration ?: 0) / 100), false)
+            setTextViewText(R.id.txt_title, nicknameText)
+        }
+        notificationBuilder.setContent(rviews)
+        notificationManager.notify(notificationId, notificationBuilder.build())
+    }
+
+    private fun sendPlaybackStatusBroadcast(isPlaying: Boolean, progress: Int) {
         val intent = Intent(ACTION_PLAYBACK_STATUS).apply {
             putExtra("isPlaying", isPlaying)
-            if (progress >= 0) {
-                putExtra("progress", progress)
-            } else {
-                val duration = player?.duration ?: 0
-                val position = player?.currentPosition ?: 0
-                val progressPercent = if (duration > 0) ((position * 100) / duration).toInt() else 0
-                putExtra("progress", progressPercent)
-            }
+            putExtra("progress", progress)
         }
         sendBroadcast(intent)
     }
 
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Audio Playback",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
-        }
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        handler.removeCallbacks(progressUpdater)
-        player?.release()
-        player = null
-        isForeground = false
         super.onDestroy()
-    }
+        progressJob?.cancel()
+        mediaPlayer?.release()
+        mediaPlayer = null
 
-    override fun onBind(intent: Intent?): IBinder? = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            stopForeground(Service.STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
+
+        notificationManager.cancel(NOTIFICATION_ID)
+    }
 }

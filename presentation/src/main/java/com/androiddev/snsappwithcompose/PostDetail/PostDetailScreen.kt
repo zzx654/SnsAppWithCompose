@@ -187,7 +187,7 @@ fun PostDetailScreen(
                 isLiked = it.isliked,
                 it.postId
             )
-            audioViewModel.setAudioAvailable(!it.audio.isNullOrEmpty())
+            audioViewModel.setAudioAvailable(!it.audio.isNullOrEmpty(),BuildConfig.BASE_URL+it.audio,it.nickname)
         }
     }
 
