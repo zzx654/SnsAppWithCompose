@@ -72,7 +72,7 @@ class AudioService : Service() {
         isPlaying = false
         rviews = createRemoteView()
         startForegroundService()
-        // 바로 재생하지 않고 준비만 하거나 바로 재생 원하면 여기서 start() 호출 가능
+        // 필요하다면 바로 재생:
         // startPlayback()
     }
 
@@ -96,14 +96,25 @@ class AudioService : Service() {
 
     private fun createRemoteView(): RemoteViews {
         val remoteView = RemoteViews(packageName, R.layout.notification_audio)
+
+        remoteView.setTextViewText(R.id.txt_title, nicknameText)
+        remoteView.setImageViewResource(
+            R.id.btn_play_pause,
+            getPlayPauseIconRes()
+        )
+        remoteView.setProgressBar(
+            R.id.mediaProgress,
+            mediaPlayer?.duration ?: 0,
+            mediaPlayer?.currentPosition ?: 0,
+            false
+        )
+
         val toggleIntent = Intent(this, AudioService::class.java).apply {
             action = ACTION_TOGGLEPLAYBACK
         }
         val togglePendingIntent = PendingIntent.getService(this, 0, toggleIntent, PendingIntent.FLAG_IMMUTABLE)
         remoteView.setOnClickPendingIntent(R.id.btn_play_pause, togglePendingIntent)
-        remoteView.setTextViewText(R.id.txt_title, nicknameText)
-        remoteView.setImageViewResource(R.id.btn_play_pause, if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
-        remoteView.setProgressBar(R.id.mediaProgress, mediaPlayer?.duration ?: 0, mediaPlayer?.currentPosition ?: 0, false)
+
         return remoteView
     }
 
@@ -120,21 +131,34 @@ class AudioService : Service() {
         mediaPlayer?.start()
         isPlaying = true
         startProgressLoop()
+        updateNotificationUI()
     }
 
     private fun pausePlayback() {
         mediaPlayer?.pause()
         isPlaying = false
         stopProgressLoop()
-        val progress = getProgressPercent()
-        updateNotificationUI(isPlaying = false, progress = progress)
-        sendPlaybackStatusBroadcast(isPlaying = false, progress = progress)
+        updateNotificationUI()
+        sendPlaybackStatusBroadcast(isPlaying = false, progress = getProgressPercent())
     }
-
+    private fun getPlayPauseIconRes(): Int {
+        val isDarkMode = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val playIcon = if (isDarkMode) R.drawable.ic_play_white else R.drawable.ic_play
+        val pauseIcon = if (isDarkMode) R.drawable.ic_pause_white else R.drawable.ic_pause
+        return if (isPlaying) pauseIcon else playIcon
+    }
     private fun onPlaybackComplete() {
         isPlaying = false
         stopProgressLoop()
-        updateNotificationUI(isPlaying = false, progress = 0)
+
+        // 직접 위치 0으로 설정
+        rviews.setProgressBar(R.id.mediaProgress, 100, 0, false)
+        rviews.setImageViewResource(R.id.btn_play_pause, getPlayPauseIconRes())
+        rviews.setTextViewText(R.id.txt_title, nicknameText)
+        notificationBuilder.setContent(rviews)
+        notificationManager.notify(notificationId, notificationBuilder.build())
+
         sendPlaybackStatusBroadcast(isPlaying = false, progress = 0)
     }
 
@@ -143,7 +167,7 @@ class AudioService : Service() {
         lastNotificationUpdateTime = 0L
         progressJob = scope.launch {
             while (isPlaying && mediaPlayer != null) {
-                delay(20L) // Compose UI 빠른 업데이트
+                delay(20L) // UI 빠른 업데이트
 
                 val progress = getProgressPercent()
                 sendPlaybackStatusBroadcast(isPlaying = true, progress = progress)
@@ -152,7 +176,7 @@ class AudioService : Service() {
                 val now = System.currentTimeMillis()
                 if (now - lastNotificationUpdateTime > 250) {
                     lastNotificationUpdateTime = now
-                    updateNotificationUI(isPlaying = true, progress = progress)
+                    updateNotificationUI()
                 }
             }
         }
@@ -169,12 +193,8 @@ class AudioService : Service() {
         return if (duration > 0) (position * 100 / duration) else 0
     }
 
-    private fun updateNotificationUI(isPlaying: Boolean, progress: Int) {
-        rviews = createRemoteView().apply {
-            setImageViewResource(R.id.btn_play_pause, if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
-            setProgressBar(R.id.mediaProgress, mediaPlayer?.duration ?: 0, (progress * (mediaPlayer?.duration ?: 0) / 100), false)
-            setTextViewText(R.id.txt_title, nicknameText)
-        }
+    private fun updateNotificationUI() {
+        rviews = createRemoteView()
         notificationBuilder.setContent(rviews)
         notificationManager.notify(notificationId, notificationBuilder.build())
     }

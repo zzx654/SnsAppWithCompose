@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/notification_root"
     android:layout_width="match_parent"
     android:layout_height="84dp"
@@ -12,12 +13,12 @@
         android:id="@+id/txt_title"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
         android:layout_weight="1"
         android:gravity="center_vertical"
         android:text="Sample Title"
-        android:textSize="20dp"
-        android:textColor="@android:color/black"/>
+        android:textSize="20sp"
+        android:textColor="@android:color/white"/>
 
     <FrameLayout
 
@@ -29,8 +30,8 @@
             android:id="@+id/btn_play_pause"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:background="@null"
-            android:src="@drawable/ic_play"/>
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_play_white"/>
         <ProgressBar
 
             android:layout_gravity="center"
@@ -38,9 +39,9 @@
             android:indeterminate="false"
             android:textAlignment="center"
             style="?android:attr/progressBarStyleHorizontal"
-            android:progressDrawable="@drawable/circle_progress_bar"
+            android:progressDrawable="@drawable/circle_progress_bar_white"
 
-            android:background="@drawable/circle_shape"
+            android:background="@drawable/circle_shape_white"
             android:layout_width="70dp"
             android:layout_height="70dp"/>
     </FrameLayout>
