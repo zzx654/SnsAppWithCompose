@@ -1,0 +1,7 @@
+package com.androiddev.snsappwithcompose.home.events
+
+sealed class GetPostsEvent {
+    object Refresh : GetPostsEvent()
+    object LoadNext : GetPostsEvent()
+    data class SelectPost(val postId: Int): GetPostsEvent()
+}

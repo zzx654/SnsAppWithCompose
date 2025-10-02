@@ -26,6 +26,8 @@ import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.components.LoadingProgressIndicator
 import com.androiddev.snsappwithcompose.components.PostPrevItems
 import com.androiddev.snsappwithcompose.components.RadioChipButtons
+import com.androiddev.snsappwithcompose.home.events.GetNearPostsEvent
+import com.androiddev.snsappwithcompose.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
@@ -54,7 +56,7 @@ fun NearPostsScreen(
     val pullRefreshState = rememberPullRefreshState(
         refreshing = viewModel.getPostState.value.isRefreshing,
         onRefresh = {
-            viewModel.onEvent(GetNearPostsEvent.RefreshNearPosts)
+            viewModel.onEvent(GetPostsEvent.Refresh)
         })
     LoadingDialog {
         viewModel.isLoading.value
@@ -85,9 +87,9 @@ fun NearPostsScreen(
                     isLoading = {viewModel.getPostState.value.isLoading},
                     endReached = {viewModel.getPostState.value.endReached},
                     posts = { viewModel.getPostState.value.posts },
-                    loadNextPosts = { viewModel.onEvent(GetNearPostsEvent.LoadNextPosts) },
+                    loadNextPosts = { viewModel.onEvent(GetPostsEvent.LoadNext) },
                     pullRefreshState = pullRefreshState,
-                    onPostClick = { postid -> viewModel.onEvent(GetNearPostsEvent.SelectPost(postid))}
+                    onPostClick = { postid -> viewModel.onEvent(GetPostsEvent.SelectPost(postid))}
                 )
             }
         }

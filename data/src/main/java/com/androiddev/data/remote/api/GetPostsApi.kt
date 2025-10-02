@@ -18,6 +18,15 @@ interface GetPostsApi {
     ): Response<GetPostsResponseDto>
 
     @FormUrlEncoded
+    @POST("/getNewPosts")
+    suspend fun getNewPosts(
+        @Field("postid")postid: Int?,
+        @Field("postdate")postdate: String?,
+        @Field("latitude")latitude:Double,
+        @Field("longitude")longitude:Double
+    ): Response<GetPostsResponseDto>
+
+    @FormUrlEncoded
     @POST("/getSelectedPost")
     suspend fun getSelectedPost(
         @Field("postid")postid: Int,
