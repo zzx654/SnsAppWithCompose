@@ -26,82 +26,28 @@ import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.components.LoadingProgressIndicator
 import com.androiddev.snsappwithcompose.components.PostPrevItems
 import com.androiddev.snsappwithcompose.components.RadioChipButtons
+import com.androiddev.snsappwithcompose.home.BasePostsScreen
 import com.androiddev.snsappwithcompose.home.events.GetNearPostsEvent
 import com.androiddev.snsappwithcompose.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.util.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NearPostsScreen(
     navController: NavController,
     viewModel: NearPostsViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(true) {
-        viewModel.eventFlow.collectLatest { event ->
-            when(event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
+    BasePostsScreen(
+        navController = navController,
+        viewModel = viewModel,
+        additionalHeader = {
+            RadioChipButtons(
+                items = listOf(5, 10, 15, 20, 25, 50, 75, 100),
+                selectedValue = { viewModel.distance.value },
+                onSelect = {
+                    viewModel.onEvent(GetNearPostsEvent.SetDistance(it))
                 }
-                is UiEvent.navigate -> {
-                    navController.navigate(event.screen)
-                }
-            }
+            )
         }
-    }
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = viewModel.getPostState.value.isRefreshing,
-        onRefresh = {
-            viewModel.onEvent(GetPostsEvent.Refresh)
-        })
-    LoadingDialog {
-        viewModel.isLoading.value
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray.copy(alpha = 0.6f)),
-    ) {
-
-        LoadingProgressIndicator (modifier = Modifier.align(Alignment.Center)){
-            viewModel.getPostState.value.isLoading&&viewModel.getPostState.value.posts.isEmpty()
-        }
-
-
-        if(viewModel.locationPermissionGranted.value) {
-            Column(modifier = Modifier.fillMaxSize()) {
-
-                RadioChipButtons(
-                    items = listOf(5,10,15,20,25,50,75,100),
-                    selectedValue = { viewModel.distance.value },
-                    onSelect = {
-                        viewModel.onEvent(GetNearPostsEvent.SetDistance(it))
-                    }
-                )
-                Spacer(modifier = Modifier.height(1.dp))
-                PostPrevItems(
-                    isLoading = {viewModel.getPostState.value.isLoading},
-                    endReached = {viewModel.getPostState.value.endReached},
-                    posts = { viewModel.getPostState.value.posts },
-                    loadNextPosts = { viewModel.onEvent(GetPostsEvent.LoadNext) },
-                    pullRefreshState = pullRefreshState,
-                    onPostClick = { postid -> viewModel.onEvent(GetPostsEvent.SelectPost(postid))}
-                )
-            }
-        }
-        else {
-          Text(
-              text = getString(context,R.string.locationpermission_needed),
-              modifier = Modifier.align(Alignment.Center))
-        }
-        PullRefreshIndicator(
-            modifier = Modifier.align(Alignment.TopCenter),
-            refreshing = viewModel.getPostState.value.isRefreshing,
-            state = pullRefreshState
-        )
-    }
+    )
 }
