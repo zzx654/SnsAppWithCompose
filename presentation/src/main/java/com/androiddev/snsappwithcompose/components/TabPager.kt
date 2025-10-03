@@ -58,16 +58,8 @@ fun TabPager(
         }
 
         HorizontalPager(state = pagerState) { page ->
-            if(page == 0)
-                pages[page]()
-            else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "${tabIndex}")
-                }
-            }
+
+            pages[page]()
         }
     }
 }
