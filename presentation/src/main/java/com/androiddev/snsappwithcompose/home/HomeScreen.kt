@@ -11,6 +11,7 @@ import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.components.TabPager
 import com.androiddev.snsappwithcompose.home.nearposts.NearPostsScreen
 import com.androiddev.snsappwithcompose.home.newPosts.NewPostsScreen
+import com.androiddev.snsappwithcompose.home.tags.TagScreen
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -20,7 +21,7 @@ fun HomeScreen(navController: NavController) {
         {PlaceholderScreen("인기")},
         {NewPostsScreen(navController)},
         {PlaceholderScreen("팔로우")},
-        {PlaceholderScreen("태그")},
+        {TagScreen(navController)},
         {PlaceholderScreen("사람")}
     )
     Box(

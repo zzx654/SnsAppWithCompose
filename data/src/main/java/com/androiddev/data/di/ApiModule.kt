@@ -6,6 +6,7 @@ import com.androiddev.data.remote.api.CreateProfileApi
 import com.androiddev.data.remote.api.GetPostsApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
+import com.androiddev.data.remote.api.TagApi
 import com.androiddev.data.remote.api.UploadPostApi
 import com.androiddev.data.util.UserPreferences
 import com.google.gson.GsonBuilder
@@ -76,4 +77,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideGetPostsApi(retrofit: Retrofit): GetPostsApi = retrofit.create(GetPostsApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideTagApi(retrofit: Retrofit): TagApi = retrofit.create(TagApi::class.java)
 }

@@ -6,6 +6,7 @@ import com.androiddev.domain.repository.CreateProfileRepository
 import com.androiddev.domain.repository.GetPostsRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
+import com.androiddev.domain.repository.TagRepository
 import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
 import com.androiddev.domain.use_case.AuthenticateCode
@@ -19,6 +20,7 @@ import com.androiddev.domain.use_case.GetNearPosts
 import com.androiddev.domain.use_case.GetNewPosts
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.use_case.GetSelectedPost
+import com.androiddev.domain.use_case.GetTags
 import com.androiddev.domain.use_case.RequestEmailAuthCode
 import com.androiddev.domain.use_case.RequestPhoneAuthCode
 import com.androiddev.domain.use_case.SearchTag
@@ -26,6 +28,7 @@ import com.androiddev.domain.use_case.SignInUseCases
 import com.androiddev.domain.use_case.SignInWithToken
 import com.androiddev.domain.use_case.SocialSignIn
 import com.androiddev.domain.use_case.SocialSignUpUseCase
+import com.androiddev.domain.use_case.TagUseCases
 import com.androiddev.domain.use_case.UploadPost
 import com.androiddev.domain.use_case.UploadPostUseCases
 import dagger.Module
@@ -91,6 +94,13 @@ object UseCaseModule {
             getNearPosts = GetNearPosts(repository),
             getSelectedPost = GetSelectedPost(repository),
             getNewPosts = GetNewPosts(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideTagUseCases(repository: TagRepository): TagUseCases {
+        return TagUseCases(
+            getTags = GetTags(repository)
         )
     }
 }
