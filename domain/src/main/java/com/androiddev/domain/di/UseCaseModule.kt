@@ -81,10 +81,10 @@ object UseCaseModule {
     }
     @Provides
     @Singleton
-    fun provideUploadPostUseCases(repository: UploadPostRepository): UploadPostUseCases {
+    fun provideUploadPostUseCases(uploadRepository: UploadPostRepository,tagRepository: TagRepository): UploadPostUseCases {
         return UploadPostUseCases(
-            searchTag = SearchTag(repository),
-            uploadPost = UploadPost(repository)
+            searchTag = SearchTag(tagRepository),
+            uploadPost = UploadPost(uploadRepository)
         )
     }
     @Provides
@@ -100,7 +100,8 @@ object UseCaseModule {
     @Singleton
     fun provideTagUseCases(repository: TagRepository): TagUseCases {
         return TagUseCases(
-            getTags = GetTags(repository)
+            getTags = GetTags(repository),
+            searchTag = SearchTag(repository)
         )
     }
 }

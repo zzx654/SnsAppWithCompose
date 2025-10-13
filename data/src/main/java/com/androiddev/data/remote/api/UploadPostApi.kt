@@ -1,9 +1,8 @@
 package com.androiddev.data.remote.api
 
+import com.androiddev.data.remote.dto.SearchTagResponseDto
 import com.androiddev.domain.model.ResultCodeResponse
-import com.androiddev.domain.model.SearchTagResponse
 import okhttp3.MultipartBody
-import okhttp3.Request
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Field
@@ -17,7 +16,7 @@ interface UploadPostApi {
     @POST("/searchTag")
     suspend fun searchTag(
         @Field("tag")tag: String
-    ): Response<SearchTagResponse>
+    ): Response<SearchTagResponseDto>
     @Multipart
     @POST("/uploadPost")
     suspend fun uploadPost(

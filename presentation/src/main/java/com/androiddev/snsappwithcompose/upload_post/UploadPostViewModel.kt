@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
+import com.androiddev.domain.model.Tag
 import com.androiddev.domain.model.TagInfo
 import com.androiddev.domain.use_case.UploadPostUseCases
 import com.androiddev.domain.util.Resource
@@ -34,8 +35,8 @@ class UploadPostViewModel @Inject constructor(
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
         get() = _tagTextField
-    private val _searchedTags = mutableStateListOf<TagInfo>()
-    val searchedTags: SnapshotStateList<TagInfo>
+    private val _searchedTags = mutableStateListOf<Tag>()
+    val searchedTags: SnapshotStateList<Tag>
         get() = _searchedTags
     private val _addedTags = mutableStateListOf<String>()
     val addedTags: SnapshotStateList<String>
@@ -75,10 +76,15 @@ class UploadPostViewModel @Inject constructor(
                                         result.data?.let {
                                             if(tagTextField.value.isNotEmpty()) {
                                                 _searchedTags.clear()
-                                                if(it.isEmpty()) {
-                                                    _searchedTags.add(TagInfo(event.tag.replace("#",""),0))
+                                                if(it.tags.isEmpty()) {
+                                                    _searchedTags.add(Tag(
+                                                        tagname = event.tag.replace("#",""),
+                                                        tagcount = 0,
+
+                                                    )
+                                                    )
                                                 } else {
-                                                    _searchedTags.addAll(it)
+                                                    _searchedTags.addAll(it.tags)
                                                 }
                                             }
                                         }

@@ -58,10 +58,25 @@ fun TagScreen(
             )
         }
 
+
         if(!state.isLoading) {
-            item {
+            item{
                 Spacer(modifier = Modifier.height(10.dp))
+                if(state.searchedTags.isNotEmpty()) {
+                    Row(modifier = Modifier.fillMaxWidth(0.85f)) {
+                        Text(fontWeight = FontWeight.Bold,text = "검색된 태그",color = Color.Black)
+                    }
+                }
+            }
+            items(state.searchedTags) { tag ->
+                TagItem(tag)
+                HorizontalDivider(modifier = Modifier.fillMaxWidth(0.85f),thickness = 1.dp,color = Color.LightGray)
+            }
+
+            item {
+
                 if(state.searchedTags.isEmpty()) {
+                    Spacer(modifier = Modifier.height(10.dp))
                     Row(modifier = Modifier.fillMaxWidth(0.85f)) {
                         Text(fontWeight = FontWeight.Bold,text = getString(context, R.string.favorite_tag),color = Color.Black)
                     }
@@ -78,10 +93,13 @@ fun TagScreen(
                     }
                 }
             }
-            items(state.favoriteTags) { tag ->
-                TagItem(tag)
-                HorizontalDivider(modifier = Modifier.fillMaxWidth(0.85f),thickness = 1.dp,color = Color.LightGray)
+            if(state.searchedTags.isEmpty()) {
+                items(state.favoriteTags) { tag ->
+                    TagItem(tag)
+                    HorizontalDivider(modifier = Modifier.fillMaxWidth(0.85f),thickness = 1.dp,color = Color.LightGray)
+                }
             }
+
             item{
                 if(state.searchedTags.isEmpty()) {
                     Row(modifier = Modifier.fillMaxWidth(0.85f)) {
@@ -89,9 +107,15 @@ fun TagScreen(
                     }
                 }
             }
-            items(state.popularTags) { tag ->
-                TagItem(tag)
-                HorizontalDivider(modifier = Modifier.fillMaxWidth(0.85f),thickness = 1.dp,color = Color.LightGray)
+            if(state.searchedTags.isEmpty()) {
+                items(state.popularTags) { tag ->
+                    TagItem(tag)
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(0.85f),
+                        thickness = 1.dp,
+                        color = Color.LightGray
+                    )
+                }
             }
         }
     }

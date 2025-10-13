@@ -248,7 +248,7 @@ fun UploadPostScreen(
 
             Chips(
                 modifier = Modifier.fillMaxWidth(),
-                list = viewModel.searchedTags.map { "${it.tagname}(${it.count})" },
+                list = viewModel.searchedTags.map { "${it.tagname}(${it.tagcount})" },
                 chip = { data: String, index: Int ->
                     CustomChip(
                         backgroundColor = Color.Gray,
