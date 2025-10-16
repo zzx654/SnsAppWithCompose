@@ -60,62 +60,62 @@ fun TagScreen(
 
 
         if(!state.isLoading) {
-            item{
-                Spacer(modifier = Modifier.height(10.dp))
-                if(state.searchedTags.isNotEmpty()) {
-                    Row(modifier = Modifier.fillMaxWidth(0.85f)) {
-                        Text(fontWeight = FontWeight.Bold,text = "검색된 태그",color = Color.Black)
-                    }
-                }
-            }
-            items(state.searchedTags) { tag ->
-                TagItem(tag)
-                HorizontalDivider(modifier = Modifier.fillMaxWidth(0.85f),thickness = 1.dp,color = Color.LightGray)
-            }
-
-            item {
-
-                if(state.searchedTags.isEmpty()) {
+            if(state.searchedTags.isNotEmpty()) { //검색된태그 있을때
+                item{
                     Spacer(modifier = Modifier.height(10.dp))
-                    Row(modifier = Modifier.fillMaxWidth(0.85f)) {
-                        Text(fontWeight = FontWeight.Bold,text = getString(context, R.string.favorite_tag),color = Color.Black)
-                    }
 
-                }
-            }
-            item {
-                if(state.searchedTags.isEmpty()&&state.favoriteTags.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = getString(context, R.string.add_tag),
-                            color = Color.LightGray
-                        )
+                        Row(modifier = Modifier.fillMaxWidth(0.85f)) {
+                            Text(fontWeight = FontWeight.Bold,text = "검색된 태그",color = Color.Black)
+                        }
+
+                }//검색된태그
+            } else { //검색된태그 없ㅇ르때
+                item {
+                    Spacer(modifier = Modifier.height(10.dp))
+                        Row(modifier = Modifier.fillMaxWidth(0.85f)) {
+                            Text(fontWeight = FontWeight.Bold,text = getString(context, R.string.favorite_tag),color = Color.Black)
+                        }
+
+
+                }//즐겨찾기 태그
+                item {
+                    if(state.favoriteTags.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = getString(context, R.string.add_tag),
+                                color = Color.LightGray
+                            )
+                        }
                     }
-                }
-            }
-            if(state.searchedTags.isEmpty()) {
+                }//즐겨찾기 추가해라
                 items(state.favoriteTags) { tag ->
-                    TagItem(tag)
+                    TagItem(tag = tag, onFavoriteClick = {
+                        viewModel.onEvent(TagEvent.ToggleFavoriteTag(tag.tagid?:0))
+                    })
                     HorizontalDivider(modifier = Modifier.fillMaxWidth(0.85f),thickness = 1.dp,color = Color.LightGray)
                 }
-            }
-
-            item{
-                if(state.searchedTags.isEmpty()) {
+                item {
+                    if(state.favoriteTags.isNotEmpty())
+                        Spacer(modifier = Modifier.height(20.dp))
+                }
+                item {
                     Row(modifier = Modifier.fillMaxWidth(0.85f)) {
                         Text(fontWeight = FontWeight.Bold,text = getString(context,R.string.popular_tag),color = Color.Black)
                     }
-                }
-            }
-            if(state.searchedTags.isEmpty()) {
+                }//인기태그
                 items(state.popularTags) { tag ->
-                    TagItem(tag)
+                    TagItem(tag = tag, onFavoriteClick = {viewModel.onEvent(TagEvent.ToggleFavoriteTag(tag.tagid?:0))})
                     HorizontalDivider(
                         modifier = Modifier.fillMaxWidth(0.85f),
                         thickness = 1.dp,
                         color = Color.LightGray
                     )
                 }
+
+            }
+            items(state.searchedTags) { tag ->
+                TagItem(tag = tag, onFavoriteClick = {viewModel.onEvent(TagEvent.ToggleFavoriteTag(tag.tagid?:0))})
+                HorizontalDivider(modifier = Modifier.fillMaxWidth(0.85f),thickness = 1.dp,color = Color.LightGray)
             }
         }
     }

@@ -29,6 +29,7 @@ import com.androiddev.domain.use_case.SignInWithToken
 import com.androiddev.domain.use_case.SocialSignIn
 import com.androiddev.domain.use_case.SocialSignUpUseCase
 import com.androiddev.domain.use_case.TagUseCases
+import com.androiddev.domain.use_case.ToggleFavoriteTag
 import com.androiddev.domain.use_case.UploadPost
 import com.androiddev.domain.use_case.UploadPostUseCases
 import dagger.Module
@@ -101,7 +102,8 @@ object UseCaseModule {
     fun provideTagUseCases(repository: TagRepository): TagUseCases {
         return TagUseCases(
             getTags = GetTags(repository),
-            searchTag = SearchTag(repository)
+            searchTag = SearchTag(repository),
+            toggleFavoriteTag = ToggleFavoriteTag(repository)
         )
     }
 }

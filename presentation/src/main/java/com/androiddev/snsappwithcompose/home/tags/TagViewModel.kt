@@ -92,6 +92,36 @@ class TagViewModel @Inject constructor(
                     )
                 }
             }
+
+            is TagEvent.ToggleFavoriteTag -> {
+                viewModelScope.launch {
+                    tagUseCases.toggleFavoriteTag(event.tagId)
+                        .collect { result ->
+                            when(result) {
+                                is Resource.Success -> {
+                                    setLoading(false)
+                                    result.data?.let {
+                                        _getTagsState.value = getTagsState.value.copy(
+                                            isLoading = false,
+                                            favoriteTags = it.favoriteTags,
+                                            popularTags = it.popularTags
+                                        )
+
+
+                                    }
+                                }
+                                is Resource.Error -> {
+                                    setLoading(false)
+                                }
+                                is Resource.Loading -> {
+                                    setLoading(true)
+                                }
+                            }
+
+                        }
+                }
+
+            }
         }
 
     }

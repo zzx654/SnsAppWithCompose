@@ -1,6 +1,7 @@
 package com.androiddev.snsappwithcompose.home.tags
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +28,8 @@ import com.androiddev.snsappwithcompose.R
 
 @Composable
 fun TagItem(
-    tag: Tag
+    tag: Tag,
+    onFavoriteClick:()->Unit
 ) {
     val context = LocalContext.current
     Box(
@@ -59,19 +62,22 @@ fun TagItem(
                     fontSize = 15.sp
                 )
 
-                Text(
-                    text = getString(context, R.string.story)+tag.tagcount,
-                    modifier = Modifier.align(Alignment.Start),
-                    color = Color.LightGray,
-                    fontSize = 15.sp
+                if(tag.tagcount!=null){
+                    Text(
+                        text = getString(context, R.string.story)+tag.tagcount,
+                        modifier = Modifier.align(Alignment.Start),
+                        color = Color.LightGray,
+                        fontSize = 15.sp
 
-                )
+                    )
+                }
+
             }
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                imageVector = Icons.Default.Star,
+                imageVector = if(tag.isliked == 1) Icons.Default.Star else Icons.Default.StarBorder,
                 contentDescription = null,
-                modifier = Modifier.align(Alignment.CenterVertically),
+                modifier = Modifier.align(Alignment.CenterVertically).clickable { onFavoriteClick() },
                 tint = Color.Black
             )
         }

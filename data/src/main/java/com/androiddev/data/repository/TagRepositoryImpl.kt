@@ -48,6 +48,34 @@ class TagRepositoryImpl @Inject constructor(
             }
         }
     }
+    override suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<GetTagsResponse>> {
+        return flow {
+            try {
+                emit(Resource.Loading())
+                api.toggleFavoriteTag(tagId).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        val getTagsResult = result.toGetTagsResponse(
+                            isTokenValid = result.isTokenValid,
+                            favoriteTags = result.favoriteTags,
+                            popularTags = result.popularTags
+                        )
+                        emit(Resource.Success(getTagsResult))
+                    } else {
+                        emit(Resource.Error(getString(context,R.string.server_error)))
+                    }
+
+                }
+
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,
+                    R.string.unexpected_error)
+                ))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context, R.string.connection_error)))
+            }
+        }
+    }
 
     override suspend fun searchTag(tag:String): Flow<Resource<SearchTagResponse>> {
         return flow {

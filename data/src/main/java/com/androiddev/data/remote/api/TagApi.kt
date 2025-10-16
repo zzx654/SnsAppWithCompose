@@ -16,4 +16,10 @@ interface TagApi {
     suspend fun searchTag(
         @Field("tag")tag: String,
     ): Response<SearchTagResponseDto>
+
+    @FormUrlEncoded
+    @POST("/ToggleFavoriteTag")
+    suspend fun toggleFavoriteTag(
+        @Field("tagid")tagid: Int
+    ): Response<GetTagsResponseDto>
 }
