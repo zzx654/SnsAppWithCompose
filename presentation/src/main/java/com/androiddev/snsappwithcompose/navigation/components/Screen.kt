@@ -21,6 +21,8 @@ sealed interface Screen {
     data object CreateprofileScreen: Screen
     @Serializable
     data object HomeScreen: Screen
+    @Serializable
+    data object TagScreen: Screen
     //@Serializable
     //data object NearPostsScreen: Screen
     @Serializable
@@ -31,6 +33,8 @@ sealed interface Screen {
     data class CropScreen(val encodedUri:String): Screen
     @Serializable
     data class PostDetailScreen(val post:PostPreview?): Screen
+    @Serializable
+    data class TagPostsScreen(val tagId:Int): Screen
 
 }
 inline fun <reified T : Any?> serializableType(

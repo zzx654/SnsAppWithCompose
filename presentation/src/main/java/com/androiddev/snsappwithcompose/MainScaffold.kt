@@ -23,11 +23,14 @@ import com.androiddev.snsappwithcompose.home.HomeScreen
 import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.navigation.components.Screen.HomeScreen
 import androidx.activity.compose.BackHandler
+import com.androiddev.snsappwithcompose.home.tags.TagViewModel
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScaffold(
     rootNavController: NavHostController,
-    startTab: Screen = Screen.HomeScreen
+    startTab: Screen = Screen.HomeScreen,
+    tagViewModel: TagViewModel
 ) {
     val tabNavController = rememberNavController()
 
@@ -70,7 +73,7 @@ fun MainScaffold(
             composable<Screen.HomeScreen> {
                 BackHandler(true) {
                 }
-                HomeScreen(navController = rootNavController)
+                HomeScreen(navController = rootNavController, tagViewModel = tagViewModel)
             }
         }
 

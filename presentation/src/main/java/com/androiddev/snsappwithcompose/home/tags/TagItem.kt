@@ -29,11 +29,12 @@ import com.androiddev.snsappwithcompose.R
 @Composable
 fun TagItem(
     tag: Tag,
+    onTagClick:()->Unit,
     onFavoriteClick:()->Unit
 ) {
     val context = LocalContext.current
     Box(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable { onTagClick() },
         contentAlignment = Alignment.Center
     ) {
         Row(

@@ -27,102 +27,96 @@ class TagViewModel @Inject constructor(
     protected val _getTagsState = mutableStateOf(GetTagsState())
     val getTagsState: State<GetTagsState> get() = _getTagsState
     init {
-        viewModelScope.launch {
-            tagUseCases.getTags()
-                .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            setLoading(false)
-                            result.data?.let {
-                                _getTagsState.value = getTagsState.value.copy(
-                                    isLoading = false,
-                                    favoriteTags = it.favoriteTags,
-                                    popularTags = it.popularTags
-                                )
-
-
-                            }
-                        }
-                        is Resource.Error -> {
-                            setLoading(false)
-                        }
-                        is Resource.Loading -> {
-                            setLoading(true)
-                        }
-                    }
-
-                }
-        }
+        fetchTags()
     }
     fun onEvent(event: TagEvent) {
-        when(event) {
+        when (event) {
             is TagEvent.TypeTag -> {
                 _tagTextField.value = event.tag
-                if(event.tag.isNotEmpty()) {
-                    viewModelScope.launch {
-                        delay(50L)
-                        tagUseCases.searchTag(event.tag)
-                            .collect { result ->
-                                when(result) {
-                                    is Resource.Success -> {
-                                        result.data?.let {
-                                            if(tagTextField.value.isNotEmpty()) {
-                                                _getTagsState.value = getTagsState.value.copy(
-                                                    searchedTags = it.tags
-                                                )
-
-
-                                            }
-                                        }
-                                    }
-                                    is Resource.Error -> {
-                                        setEvent(
-                                            UiEvent.ShowToast(
-                                                message = result.message ?: getString(context, R.string.error)
-                                            )
-                                        )
-                                    }
-                                    else -> null
-                                }
-                            }
-                    }
-                } else {
-                    _getTagsState.value = getTagsState.value.copy(
-                        searchedTags = listOf()
-                    )
-                }
+                searchTags(event.tag)
             }
 
             is TagEvent.ToggleFavoriteTag -> {
-                viewModelScope.launch {
-                    tagUseCases.toggleFavoriteTag(event.tagId)
-                        .collect { result ->
-                            when(result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let {
-                                        _getTagsState.value = getTagsState.value.copy(
-                                            isLoading = false,
-                                            favoriteTags = it.favoriteTags,
-                                            popularTags = it.popularTags
-                                        )
-
-
-                                    }
-                                }
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-                            }
-
-                        }
-                }
-
+                toggleFavorite(event.tagId)
             }
         }
+    }
+    private fun fetchTags() {
+        viewModelScope.launch {
+            tagUseCases.getTags().collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        setLoading(false)
+                        result.data?.let {
+                            _getTagsState.value = _getTagsState.value.copy(
+                                isLoading = false,
+                                favoriteTags = it.favoriteTags,
+                                popularTags = it.popularTags
+                            )
+                        }
+                    }
+                    is Resource.Error -> setLoading(false)
+                    is Resource.Loading -> setLoading(true)
+                }
+            }
+        }
+    }
+    private fun searchTags(query: String) {
+        if (query.isBlank()) {
+            _getTagsState.value = _getTagsState.value.copy(searchedTags = emptyList())
+            return
+        }
 
+        viewModelScope.launch {
+            delay(50L)
+            tagUseCases.searchTag(query).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            if (tagTextField.value.isNotBlank()) {
+                                _getTagsState.value = _getTagsState.value.copy(
+                                    searchedTags = it.tags
+                                )
+                            }
+                        }
+                    }
+                    is Resource.Error -> {
+                        setEvent(
+                            UiEvent.ShowToast(
+                                result.message ?: getString(context, R.string.error)
+                            )
+                        )
+                    }
+                    else -> Unit
+                }
+            }
+        }
+    }
+    private fun toggleFavorite(tagId: Int) {
+        viewModelScope.launch {
+            tagUseCases.toggleFavoriteTag(tagId).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        setLoading(false)
+                        result.data?.let {
+                            _getTagsState.value = _getTagsState.value.copy(
+                                favoriteTags = it.favoriteTags,
+                                popularTags = it.popularTags,
+                                searchedTags = _getTagsState.value.searchedTags.map { tag ->
+                                    if (tag.tagid == tagId) tag.copy(isliked = if(tag.isliked==1) 0 else 1) else tag
+                                }
+                            )
+                        }
+                    }
+                    is Resource.Error -> setLoading(false)
+                    is Resource.Loading -> setLoading(true)
+                }
+            }
+        }
+    }
+    fun getTagById(tagId: Int): Tag? {
+        return _getTagsState.value.favoriteTags.find { it.tagid == tagId }
+            ?: _getTagsState.value.popularTags.find { it.tagid == tagId }
+            ?: _getTagsState.value.searchedTags.find { it.tagid == tagId }
     }
 }
