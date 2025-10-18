@@ -5,6 +5,13 @@ import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface GetPostsRepository {
+    suspend fun GetPopularTagPosts(
+        postId:Int?,
+        tagId:Int,
+        score:Double?,
+        latitude:Double?,
+        longitude:Double?,
+    ):Flow<Resource<GetPostsResponse>>
     suspend fun GetNearPosts(
         postId:Int?,
         postDate:String?,

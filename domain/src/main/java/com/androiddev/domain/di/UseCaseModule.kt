@@ -18,6 +18,7 @@ import com.androiddev.domain.use_case.EmailSignUp
 import com.androiddev.domain.use_case.EmailSignUpUseCases
 import com.androiddev.domain.use_case.GetNearPosts
 import com.androiddev.domain.use_case.GetNewPosts
+import com.androiddev.domain.use_case.GetPopularTagPosts
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.use_case.GetSelectedPost
 import com.androiddev.domain.use_case.GetTags
@@ -94,7 +95,8 @@ object UseCaseModule {
         return GetPostsUseCases(
             getNearPosts = GetNearPosts(repository),
             getSelectedPost = GetSelectedPost(repository),
-            getNewPosts = GetNewPosts(repository)
+            getNewPosts = GetNewPosts(repository),
+            getPopularTagPosts = GetPopularTagPosts(repository)
         )
     }
     @Provides

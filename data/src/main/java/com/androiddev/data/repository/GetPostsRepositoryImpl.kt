@@ -18,6 +18,33 @@ class GetPostsRepositoryImpl @Inject constructor(
     private val api: GetPostsApi,
     private val context: Context
 ): GetPostsRepository {
+    override suspend fun GetPopularTagPosts(
+        postId: Int?,
+        tagId: Int,
+        score: Double?,
+        latitude: Double?,
+        longitude: Double?
+    ): Flow<Resource<GetPostsResponse>> {
+        return flow {
+            try{
+                emit(Resource.Loading())
+                api.getPopularTagPosts(postId,tagId,score,latitude,longitude).body()?.let { result ->
+                    if(result.resultCode == 200) {
+                        val getNearPostsresult = result.toGetPostsResponse(posts = result.posts, isTokenValid = result.isTokenValid)
+                        emit(Resource.Success(getNearPostsresult))
+                    } else {
+                        emit(Resource.Error(getString(context,R.string.server_error)))
+                    }
+                }
+            } catch(e: HttpException) {
+                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
+
+            } catch(e: IOException) {
+                emit(Resource.Error(getString(context,R.string.connection_error)))
+            }
+        }
+    }
+
     override suspend fun GetNearPosts(
         postId: Int?,
         postDate: String?,

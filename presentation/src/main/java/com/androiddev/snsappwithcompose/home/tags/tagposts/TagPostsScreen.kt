@@ -1,6 +1,8 @@
 package com.androiddev.snsappwithcompose.home.tags.tagposts
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
@@ -11,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
@@ -20,8 +23,14 @@ import androidx.navigation.NavController
 import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
+import com.androiddev.snsappwithcompose.components.TabPager
+import com.androiddev.snsappwithcompose.home.PlaceholderScreen
+import com.androiddev.snsappwithcompose.home.nearposts.NearPostsScreen
+import com.androiddev.snsappwithcompose.home.newPosts.NewPostsScreen
 import com.androiddev.snsappwithcompose.home.tags.TagEvent
+import com.androiddev.snsappwithcompose.home.tags.TagScreen
 import com.androiddev.snsappwithcompose.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.home.tags.tagposts.populartagposts.PopularTagPostsScreen
 import com.androiddev.snsappwithcompose.navigation.components.Screen
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -34,6 +43,11 @@ fun TagPostScreen(
 ) {
     var args = navBackStackEntry.toRoute<Screen.TagPostsScreen>()
     val tag = viewModel.getTagById(args.tagId)
+    val tabs = listOf("새로운", "인기")
+    val pages = listOf<@Composable () -> Unit>(
+        { PlaceholderScreen("새로운") },
+        { PopularTagPostsScreen(navController,args.tagId) },
+    )
 
     Scaffold(
         topBar = {
@@ -56,5 +70,13 @@ fun TagPostScreen(
         }
     ) {
         // 게시물 리스트 등
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            TabPager(
+                tabs = tabs,
+                pages = pages
+            )
+        }
     }
 }
