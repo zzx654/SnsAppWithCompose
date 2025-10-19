@@ -9,5 +9,5 @@ import javax.inject.Inject
 class GetNewPosts @Inject constructor(
     private val repository: GetPostsRepository
 ) {
-    suspend operator fun invoke(postid:Int? = null,postdate:String? = null,latitude:Double,longitude:Double): Flow<Resource<GetPostsResponse>> = repository.GetNewPosts(postid,postdate,latitude,longitude)
+    suspend operator fun invoke(postid:Int? = null,postdate:String? = null,latitude:Double,longitude:Double): Flow<Resource<GetPostsResponse>> = repository.getNewPosts(postid,postdate,latitude,longitude)
 }

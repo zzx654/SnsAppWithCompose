@@ -8,6 +8,15 @@ import retrofit2.http.POST
 
 interface GetPostsApi {
     @FormUrlEncoded
+    @POST("/getNewTagPosts")
+    suspend fun getNewTagPosts(
+        @Field("postid")postid: Int?,
+        @Field("postdate")postdate:String?,
+        @Field("tagid")tagid: Int,
+        @Field("latitude")latitude:Double?,
+        @Field("longitude")longitude:Double?
+    ): Response<GetPostsResponseDto>
+    @FormUrlEncoded
     @POST("/getPopularTagPosts")
     suspend fun getPopularTagPosts(
         @Field("postid")postid: Int?,
