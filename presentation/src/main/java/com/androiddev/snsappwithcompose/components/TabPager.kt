@@ -57,8 +57,10 @@ fun TabPager(
             }
         }
 
-        HorizontalPager(state = pagerState) { page ->
-
+        HorizontalPager(
+            state = pagerState,
+            beyondViewportPageCount = 1 //
+        ) { page ->
             pages[page]()
         }
     }

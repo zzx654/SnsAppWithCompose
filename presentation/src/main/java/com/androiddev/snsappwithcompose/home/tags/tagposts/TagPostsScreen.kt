@@ -11,25 +11,19 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
-import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.components.TabPager
 import com.androiddev.snsappwithcompose.home.PlaceholderScreen
-import com.androiddev.snsappwithcompose.home.nearposts.NearPostsScreen
-import com.androiddev.snsappwithcompose.home.newPosts.NewPostsScreen
 import com.androiddev.snsappwithcompose.home.tags.TagEvent
-import com.androiddev.snsappwithcompose.home.tags.TagScreen
 import com.androiddev.snsappwithcompose.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.home.tags.tagposts.newtagposts.NewTagPostsScreen
 import com.androiddev.snsappwithcompose.home.tags.tagposts.populartagposts.PopularTagPostsScreen
 import com.androiddev.snsappwithcompose.navigation.components.Screen
 
@@ -43,11 +37,21 @@ fun TagPostScreen(
 ) {
     var args = navBackStackEntry.toRoute<Screen.TagPostsScreen>()
     val tag = viewModel.getTagById(args.tagId)
+    //val tabs = listOf("새로운", "인기")
+    //val pages = listOf<@Composable () -> Unit>(
+    //    { NewTagPostsScreen(navController,args.tagId) },
+     //   { PopularTagPostsScreen(navController,args.tagId) },
+    //)
+    // 3. 각 탭 Composable을 remember로 고정
+    val newTagPostsScreen: @Composable () -> Unit = remember(args.tagId) {
+        { NewTagPostsScreen(navController, args.tagId) }
+    }
+    val popularTagPostsScreen: @Composable () -> Unit = remember(args.tagId) {
+        { PopularTagPostsScreen(navController, args.tagId) }
+    }
+
     val tabs = listOf("새로운", "인기")
-    val pages = listOf<@Composable () -> Unit>(
-        { PlaceholderScreen("새로운") },
-        { PopularTagPostsScreen(navController,args.tagId) },
-    )
+    val pages = listOf(newTagPostsScreen, popularTagPostsScreen)
 
     Scaffold(
         topBar = {
