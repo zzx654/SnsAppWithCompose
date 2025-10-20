@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.upload_post
+package com.androiddev.snsappwithcompose.upload_post.vote
 
 sealed class CreateVoteEvent {
     data object OnAddVoteClick: CreateVoteEvent()

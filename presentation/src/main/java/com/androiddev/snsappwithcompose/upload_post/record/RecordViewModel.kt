@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.upload_post
+package com.androiddev.snsappwithcompose.upload_post.record
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -14,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.androiddev.data.R
 import com.androiddev.snsappwithcompose.service.RecordService
 import com.androiddev.data.util.Constants.DEFAULT_ELAPSED_TIME
@@ -27,16 +26,11 @@ import com.androiddev.data.util.IntentKeys.PROGRESS
 import com.androiddev.data.util.IntentKeys.STATE
 import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.BottomRecordState
-import com.androiddev.snsappwithcompose.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)

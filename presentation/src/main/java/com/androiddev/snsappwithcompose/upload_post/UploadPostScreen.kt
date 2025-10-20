@@ -58,8 +58,13 @@ import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.BottomRecorder
 import com.androiddev.snsappwithcompose.components.BottomVoteOptions
 import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
+import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.components.UploadRecordIcon
 import com.androiddev.snsappwithcompose.components.UploadVoteIcon
+import com.androiddev.snsappwithcompose.upload_post.record.RecordEvent
+import com.androiddev.snsappwithcompose.upload_post.record.RecordViewModel
+import com.androiddev.snsappwithcompose.upload_post.vote.CreateVoteEvent
+import com.androiddev.snsappwithcompose.upload_post.vote.CreateVoteViewModel
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "RestrictedApi", "SuspiciousIndentation",
@@ -99,6 +104,7 @@ fun UploadPostScreen(
     ) { permissionsMap ->
         //val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
     }
+    UploadPostDialog { viewModel.isLoading.value }
     LaunchedEffect(true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -111,6 +117,10 @@ fun UploadPostScreen(
 
                 is UiEvent.navigate -> {
                     navController.navigate(event.screen)
+                }
+
+                UiEvent.popBackStack -> {
+                    navController.popBackStack()
                 }
             }
         }
@@ -317,7 +327,7 @@ fun UploadPostScreen(
 
             Chips(
                 modifier = Modifier.fillMaxWidth(),
-                list = viewModel.searchedTags.map { "${it.tagname}(${it.count})" },
+                list = viewModel.searchedTags.map { "${it.tagname}(${it.tagcount})" },
                 chip = { data: String, index: Int ->
                     CustomChip(
                         backgroundColor = Color.Gray,

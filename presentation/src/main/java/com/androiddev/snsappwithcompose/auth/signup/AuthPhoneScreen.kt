@@ -75,6 +75,7 @@ fun AuthPhoneScreen(
                 is UiEvent.navigate -> {
                     navController.navigate(event.screen)
                 }
+                else  -> null
             }
         }
     }

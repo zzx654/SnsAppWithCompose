@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.UploadPostApi
+import com.androiddev.data.remote.dto.toGetTagsResponse
+import com.androiddev.domain.model.SearchTagResponse
+import com.androiddev.domain.model.Tag
 import com.androiddev.domain.model.TagInfo
 import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.util.Resource
@@ -19,13 +22,16 @@ class UploadPostRepositoryImpl @Inject constructor(
     private val api: UploadPostApi,
     private val context: Context
 ): UploadPostRepository {
-    override suspend fun searchTag(tag: String): Flow<Resource<List<TagInfo>>> {
+    override suspend fun searchTag(tag: String): Flow<Resource<SearchTagResponse>> {
         return flow {
             try {
                 emit(Resource.Loading())
                 api.searchTag(tag).body()?.let{ result ->
                     if(result.resultCode == 200) {
-                        emit(Resource.Success(result.tags))
+                        emit(Resource.Success(result.toGetTagsResponse(
+                            isTokenValid = result.isTokenValid,
+                            searchedTags = result.searchedTags
+                        )))
                     }
                     else
                         emit(Resource.Error(getString(context,R.string.server_error)))

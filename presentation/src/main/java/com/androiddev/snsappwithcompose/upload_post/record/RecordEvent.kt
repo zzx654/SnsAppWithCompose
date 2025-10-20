@@ -1,6 +1,4 @@
-package com.androiddev.snsappwithcompose.upload_post
-
-import android.net.Uri
+package com.androiddev.snsappwithcompose.upload_post.record
 
 sealed class RecordEvent {
     data object OnAddRecordClick: RecordEvent()

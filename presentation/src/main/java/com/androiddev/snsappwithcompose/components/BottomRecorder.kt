@@ -1,7 +1,6 @@
 package com.androiddev.snsappwithcompose.components
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -11,15 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Square
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,9 +33,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.androiddev.snsappwithcompose.upload_post.RecordEvent
-import com.androiddev.snsappwithcompose.upload_post.RecordState
-import com.androiddev.snsappwithcompose.upload_post.RecordViewModel
+import com.androiddev.snsappwithcompose.upload_post.record.RecordEvent
+import com.androiddev.snsappwithcompose.upload_post.record.RecordState
+import com.androiddev.snsappwithcompose.upload_post.record.RecordViewModel
 import kotlinx.coroutines.launch
 
 @SuppressLint("NewApi")

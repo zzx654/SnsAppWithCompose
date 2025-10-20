@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.upload_post
+package com.androiddev.snsappwithcompose.upload_post.vote
 
 import android.content.Context
 import androidx.compose.runtime.MutableState

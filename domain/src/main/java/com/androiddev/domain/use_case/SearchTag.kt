@@ -1,5 +1,6 @@
 package com.androiddev.domain.use_case
 
+import com.androiddev.domain.model.SearchTagResponse
 import com.androiddev.domain.model.TagInfo
 import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.util.Resource
@@ -9,5 +10,5 @@ import javax.inject.Inject
 class SearchTag @Inject constructor(
     private val repository: UploadPostRepository
 ) {
-    suspend operator fun invoke(tag:String):Flow<Resource<List<TagInfo>>> = repository.searchTag(tag)
+    suspend operator fun invoke(tag:String):Flow<Resource<SearchTagResponse>> = repository.searchTag(tag)
 }

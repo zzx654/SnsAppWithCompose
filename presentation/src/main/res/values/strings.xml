@@ -66,6 +66,7 @@
     <string name="option_modify">수정하기</string>
     <string name="option_delete">삭제하기</string>
     <string name="error_minimum_poll_options">2개 이상의 보기 항목을 입력해주세요</string>
+    <string name="uploading_alert">게시물 업로드중...</string>
 
 
 
