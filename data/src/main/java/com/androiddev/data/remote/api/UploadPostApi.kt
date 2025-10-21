@@ -12,11 +12,6 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 
 interface UploadPostApi {
-    @FormUrlEncoded
-    @POST("/searchTag")
-    suspend fun searchTag(
-        @Field("tag")tag: String
-    ): Response<SearchTagResponseDto>
     @Multipart
     @POST("/uploadPost")
     suspend fun uploadPost(

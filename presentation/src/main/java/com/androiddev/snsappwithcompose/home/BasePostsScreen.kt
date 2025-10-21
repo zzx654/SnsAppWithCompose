@@ -51,6 +51,7 @@ fun <VM : BasePostsViewModel> BasePostsScreen(
                 is UiEvent.navigate -> {
                     navController.navigate(event.screen)
                 }
+                else -> null
             }
         }
     }

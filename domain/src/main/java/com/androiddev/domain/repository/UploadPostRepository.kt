@@ -8,7 +8,6 @@ import okhttp3.RequestBody
 
 interface UploadPostRepository {
 
-    suspend fun searchTag(tag: String): Flow<Resource<SearchTagResponse>>
 
     suspend fun uploadPost(
         anonymousNick: RequestBody?,
