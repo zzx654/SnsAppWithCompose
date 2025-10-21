@@ -23,6 +23,8 @@ interface UploadPostApi {
         @Part ("anonymousNick") anonymousNick: RequestBody?,
         @Part ("tags") tags: RequestBody?,
         @Part imageFiles: List<MultipartBody.Part>?,
+        @Part audioFile: MultipartBody.Part?,
+        @Part ("voteoptions") voteOptions: RequestBody?,
         @Part ("text") text: RequestBody,
         @Part latitude: MultipartBody.Part?,
         @Part longitude: MultipartBody.Part?

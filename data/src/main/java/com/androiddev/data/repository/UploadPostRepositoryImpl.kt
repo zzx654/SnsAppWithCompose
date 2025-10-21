@@ -6,6 +6,7 @@ import com.androiddev.data.R
 import com.androiddev.data.remote.api.UploadPostApi
 import com.androiddev.data.remote.dto.toGetTagsResponse
 import com.androiddev.domain.model.SearchTagResponse
+import com.androiddev.domain.model.Tag
 import com.androiddev.domain.model.TagInfo
 import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.util.Resource
@@ -21,21 +22,19 @@ class UploadPostRepositoryImpl @Inject constructor(
     private val api: UploadPostApi,
     private val context: Context
 ): UploadPostRepository {
-    override suspend fun searchTag(tag: String):  Flow<Resource<SearchTagResponse>> {
+    override suspend fun searchTag(tag: String): Flow<Resource<SearchTagResponse>> {
         return flow {
             try {
                 emit(Resource.Loading())
-                api.searchTag(tag).body()?.let { result ->
+                api.searchTag(tag).body()?.let{ result ->
                     if(result.resultCode == 200) {
-                        val getTagsResult = result.toGetTagsResponse(
+                        emit(Resource.Success(result.toGetTagsResponse(
                             isTokenValid = result.isTokenValid,
                             searchedTags = result.searchedTags
-                        )
-                        emit(Resource.Success(getTagsResult))
-                    } else {
-                        emit(Resource.Error(getString(context,R.string.server_error)))
+                        )))
                     }
-
+                    else
+                        emit(Resource.Error(getString(context,R.string.server_error)))
                 }
             } catch(e: HttpException) {
                 emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
@@ -51,6 +50,8 @@ class UploadPostRepositoryImpl @Inject constructor(
         anonymousNick: RequestBody?,
         tags: RequestBody?,
         images: List<MultipartBody.Part>?,
+        audio:MultipartBody.Part?,
+        voteOptions:RequestBody?,
         text: RequestBody,
         latitude: MultipartBody.Part?,
         longitude: MultipartBody.Part?
@@ -58,7 +59,7 @@ class UploadPostRepositoryImpl @Inject constructor(
         return flow {
             try {
                 emit(Resource.Loading())
-                api.uploadPost(anonymousNick,tags,images,text,latitude,longitude).body()?.let{ result ->
+                api.uploadPost(anonymousNick,tags,images,audio,voteOptions,text,latitude,longitude).body()?.let{ result ->
                     if(result.resultCode == 200) {
                         emit(Resource.Success(Unit))
                     }

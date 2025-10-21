@@ -17,14 +17,19 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.UiEvent
 import com.androiddev.snsappwithcompose.util.checkPermissions
+import com.androiddev.snsappwithcompose.util.generateAnonymousNickname
 import com.androiddev.snsappwithcompose.util.getMultipartBody
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +37,7 @@ class UploadPostViewModel @Inject constructor(
     private val uploadPostUseCases: UploadPostUseCases,
     private val context: Context
 ): BaseViewModel() {
+
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
         get() = _tagTextField
@@ -53,11 +59,13 @@ class UploadPostViewModel @Inject constructor(
     private val _locationOnOff = mutableStateOf(false)
     val locationOnOff: State<Boolean>
         get() = _locationOnOff
+
+
     init {
         checkPermissions(
             context = context,
             permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION),
+                Manifest.permission.ACCESS_FINE_LOCATION),
             onGranted = { _locationOnOff.value = true },
             onUnGranted = { _locationOnOff.value = false }
         )
@@ -73,16 +81,12 @@ class UploadPostViewModel @Inject constructor(
                             .collect { result ->
                                 when(result) {
                                     is Resource.Success -> {
+
                                         result.data?.let {
                                             if(tagTextField.value.isNotEmpty()) {
                                                 _searchedTags.clear()
                                                 if(it.tags.isEmpty()) {
-                                                    _searchedTags.add(Tag(
-                                                        tagname = event.tag.replace("#",""),
-                                                        tagcount = 0,
-
-                                                    )
-                                                    )
+                                                    _searchedTags.add(Tag(tagname = event.tag.replace("#",""), tagcount = 0))
                                                 } else {
                                                     _searchedTags.addAll(it.tags)
                                                 }
@@ -152,62 +156,91 @@ class UploadPostViewModel @Inject constructor(
                 viewModelScope.launch {
 
                     var requestTags: RequestBody? = null
-                    if(addedTags.isNotEmpty())
-                        requestTags = addedTags.joinToString("#").toRequestBody("text/plain".toMediaTypeOrNull())
+                    var requestVoteOptions: RequestBody? = null
+                    if (addedTags.isNotEmpty())
+                        requestTags = addedTags.joinToString("#")
+                            .toRequestBody("text/plain".toMediaTypeOrNull())
 
                     var requestImages: List<MultipartBody.Part>? = null
+                    var requestAudio: MultipartBody.Part? = null
                     val requestText = contentTextField.value.toRequestBody("text/plain".toMediaTypeOrNull())
                     var requestLat: MultipartBody.Part? = null
-                    var requestLong: MultipartBody.Part? =  null
-                    val charlist = listOf("a", "b", "c", "d", "e","f","g","h","i","j","1","2","3","4","0","5","6","7","8","9")
-                    var anonymousNick: RequestBody?= null
-                    var tempNick = ""
-                    if(anonymous.value) {
-                        repeat(6) {
-                            tempNick+=charlist.random()
-                        }
-                        anonymousNick = tempNick.toRequestBody("text/plain".toMediaTypeOrNull())
-                    }
+                    var requestLong: MultipartBody.Part? = null
+                    event.audioFilePath?.let { filePath ->
+                        val file = File(filePath)
 
-                    if(selectedImages.isNotEmpty()) {
-                        requestImages = selectedImages.map{ getMultipartBody(it,context)}
+                        if (file.exists()) {
+                            val requestFile = file.asRequestBody("audio/mp4".toMediaTypeOrNull())
+                            requestAudio =
+                                MultipartBody.Part.createFormData("audio", file.name, requestFile)
+
+                        }
+                    }
+                    if (selectedImages.isNotEmpty()) {
+                        requestImages = selectedImages.map { getMultipartBody(it, context) }
+                    }
+                    if(event.voteOptions.isNotEmpty()) {
+                        val voteOptionDataList = event.voteOptions.map {
+                            VoteOptionData(voteoption = it)
+                        }
+                        val gson = Gson()
+                        val voteOptionsJson = gson.toJson(voteOptionDataList)
+                        requestVoteOptions = voteOptionsJson.toRequestBody("application/json".toMediaType())
                     }
                     event.lat?.let {
-                        requestLat = MultipartBody.Part.createFormData("latitude",event.lat.toString())
-                        requestLong = MultipartBody.Part.createFormData("longitude",event.long.toString())
+                        requestLat = MultipartBody.Part.createFormData("latitude", event.lat.toString())
+                        requestLong = MultipartBody.Part.createFormData("longitude", event.long.toString()
+                        )
                     }
                     uploadPostUseCases.uploadPost(
-                        anonymousNick = anonymousNick,
+                        anonymousNick = if (anonymous.value) generateAnonymousNickname().toRequestBody(
+                            "text/plain".toMediaTypeOrNull()
+                        ) else null,
                         tags = requestTags,
                         images = requestImages,
                         text = requestText,
+                        audio = requestAudio,
+                        voteOptions = requestVoteOptions,
                         latitude = requestLat,
                         longitude = requestLong
                     ).collect { result ->
-                            when(result) {
-                                is Resource.Success -> {
+                        when (result) {
+                            is Resource.Success -> {
+                                setLoading(false)
+                                setEvent( UiEvent.popBackStack)
 
-                                }
-                                is Resource.Error -> {
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-
-                                }
-                                else -> null
                             }
 
+                            is Resource.Error -> {
+                                setLoading(false)
+                                setEvent(
+                                    UiEvent.ShowToast(
+                                        message = result.message ?: getString(
+                                                context,
+                                                R.string.error
+                                            )
+                                    )
+                                )
+                            }
 
+                            is Resource.Loading -> {
+                                setLoading(true)
+                            }
+
+                            else -> null
                         }
-                }
 
+
+                    }
+                }
             }
             else -> null
         }
+
     }
+
+
 }
+data class VoteOptionData(
+    val voteoption: String
+)
