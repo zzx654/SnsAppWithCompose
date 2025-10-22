@@ -24,6 +24,7 @@ data class PostPreview(
     var commentCount:Int,
     var likecount:Int,
     var isliked:Boolean,
+    val popularityScore:Double,
     var distance:Int?,
     val vote:String?,
     val voteCount:Int?,

@@ -81,7 +81,6 @@ fun PostDto.toPostPreview(
         likecount = likecount,
         isliked = isliked != null,
         popularityScore = popularityScore?:0.toDouble(),
-        isliked = isliked,
         vote = vote,
         distance = distance?.let{ round(it).toInt()}
     )

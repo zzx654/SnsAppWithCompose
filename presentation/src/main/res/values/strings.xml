@@ -76,6 +76,15 @@
     <string name="anonymous_voting">무기명 투표 중</string>
     <string name="vote">투표하기</string>
     <string name="vote_again">다시 투표하기</string>
+    <string name="favorite_tag">즐겨찾기 태그</string>
+    <string name="popular_tag">인기 태그</string>
+    <string name="add_tag">태그를 추가해주세요</string>
+    <string name="story">스토리</string>
+    <string name="confirm_delete_added_voice">추가된 음성을 삭제하시겠습니까?</string>
+    <string name="option_modify">수정하기</string>
+    <string name="option_delete">삭제하기</string>
+    <string name="error_minimum_poll_options">2개 이상의 보기 항목을 입력해주세요</string>
+    <string name="uploading_alert">게시물 업로드중...</string>
 
 
 

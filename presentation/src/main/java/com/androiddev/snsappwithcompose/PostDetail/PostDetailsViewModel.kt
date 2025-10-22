@@ -23,7 +23,6 @@ import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.home.GetPostsState
-import com.androiddev.snsappwithcompose.home.nearposts.GetNearPostsEvent
 import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.BottomSheetItem
