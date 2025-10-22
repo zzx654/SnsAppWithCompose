@@ -106,20 +106,25 @@ fun PostPrevItem(
                         contentScale = ContentScale.Crop,
                         contentDescription = null
                     )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .size(90.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.Black.copy(alpha = 0.4f))
-                    )
-                    Text(
-                        text = "+${post.imageSize?.minus(1)}",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier.align(Alignment.TopEnd).padding(7.dp)
-                    )
+
+                    if ((post.imageSize ?: 0) > 1) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .size(90.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.Black.copy(alpha = 0.4f))
+                        )
+                        Text(
+                            text = "+${post.imageSize?.minus(1)}",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(7.dp)
+                        )
+                    }
                 }
 
 

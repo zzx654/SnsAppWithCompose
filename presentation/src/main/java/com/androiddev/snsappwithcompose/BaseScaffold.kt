@@ -70,7 +70,7 @@ fun BaseScaffold(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.85f)
+                    modifier = modifier
                 ) {
                     content()
                 }

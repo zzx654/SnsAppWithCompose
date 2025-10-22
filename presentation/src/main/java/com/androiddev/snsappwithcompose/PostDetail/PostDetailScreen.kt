@@ -372,11 +372,11 @@ fun PostDetailScreen(
 
                             Spacer(modifier = Modifier.height(if (post.images == null) 0.dp else 15.dp))
                             PollCard(
-                              voteState = viewModel.voteState.value,
-                              onOptionSelected = { optionId -> viewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
-                              onVoteClick = {
-                                  viewModel.onVoteEvent(VoteEvent.OnVoteClick)
-                              }
+                                voteState = viewModel.voteState.value,
+                                onOptionSelected = { optionId -> viewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
+                                onVoteClick = {
+                                    viewModel.onVoteEvent(VoteEvent.OnVoteClick)
+                                }
                             )
                             Box(
                                 modifier = Modifier.fillMaxWidth()
@@ -631,7 +631,7 @@ fun SelectableDotText(
                 indication = null,
                 onClick = onClick
             )
-            //.padding(8.dp)
+        //.padding(8.dp)
     ) {
         Text(
             text = "•",
@@ -695,11 +695,3 @@ fun ChatMessages(
         }
     }
 }
-
-
-
-
-
-
-
-
