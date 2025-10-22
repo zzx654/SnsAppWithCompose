@@ -35,6 +35,8 @@ sealed interface Screen {
     data class PostDetailScreen(val post:PostPreview?): Screen
     @Serializable
     data class ReplyScreen(val comment: Comment?): Screen
+    @Serializable
+    data class TagPostsScreen(val tagId:Int): Screen
 
 }
 inline fun <reified T : Any?> serializableType(

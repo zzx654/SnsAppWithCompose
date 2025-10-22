@@ -9,5 +9,5 @@ import javax.inject.Inject
 class GetSelectedPost @Inject constructor(
     private val repository: GetPostsRepository
 ) {
-    suspend operator fun invoke(postId:Int,latitude:Double? = null,longitude:Double? = null): Flow<Resource<GetPostsResponse>> = repository.GetSelectedPost(postId,latitude,longitude)
+    suspend operator fun invoke(postid:Int,latitude:Double? = null,longitude:Double? = null): Flow<Resource<GetPostsResponse>> = repository.getSelectedPost(postid,latitude,longitude)
 }

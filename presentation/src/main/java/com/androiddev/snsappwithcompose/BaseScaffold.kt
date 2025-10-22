@@ -65,13 +65,12 @@ fun BaseScaffold(
                     if(lazyColumnExist) Modifier.fillMaxSize()
                     else Modifier.fillMaxSize().verticalScroll(scrollState)
                 ),
-                    //.fillMaxSize()
-                    //.verticalScroll(scrollState),
+                //.fillMaxSize()
+                //.verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
-                    modifier = modifier,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.fillMaxWidth(0.85f)
                 ) {
                     content()
                 }

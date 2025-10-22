@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -22,6 +23,8 @@ import com.androiddev.snsappwithcompose.auth.signin.SignInScreen
 import com.androiddev.snsappwithcompose.auth.signup.AuthPhoneScreen
 import com.androiddev.snsappwithcompose.auth.signup.EmailSignUpScreen
 import com.androiddev.snsappwithcompose.createprofile.CreateProfileScreen
+import com.androiddev.snsappwithcompose.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.home.tags.tagposts.TagPostScreen
 import com.androiddev.snsappwithcompose.upload_post.UploadPostScreen
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -41,9 +44,11 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             InitScreen(navController = navController,userViewModel = userViewModel)
         }
         composable<Screen.MainScreen> {
+            val tagViewModel: TagViewModel = hiltViewModel() // 그냥 생성
+
             BackHandler(true) {
             }
-            MainScaffold(rootNavController = navController,startTab = Screen.HomeScreen)
+            MainScaffold(rootNavController = navController,startTab = Screen.HomeScreen,tagViewModel = tagViewModel)
         }
         composable<Screen.SignInScreen> {
             //여기
@@ -111,6 +116,17 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
                 navController = navController,
                 navBackStackEntry = it,
                 userViewModel = userViewModel
+            )
+        }
+        composable<Screen.TagPostsScreen> {
+            val parentEntry = remember { navController.getBackStackEntry(Screen.MainScreen) }
+            val tagViewModel: TagViewModel = hiltViewModel(parentEntry)
+            BackHandler(true) {
+            }
+            TagPostScreen(
+                navController = navController,
+                navBackStackEntry = it,
+                viewModel = tagViewModel
             )
         }
 

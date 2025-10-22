@@ -8,6 +8,7 @@ import com.androiddev.data.remote.api.GetPostsApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.remote.api.ToggleLikePostApi
+import com.androiddev.data.remote.api.TagApi
 import com.androiddev.data.remote.api.UploadPostApi
 import com.androiddev.data.remote.api.VoteApi
 import com.androiddev.data.util.UserPreferences
@@ -29,7 +30,8 @@ import javax.inject.Singleton
 object ApiModule {
 
     @Provides
-    fun provideBaseUrl(): String = BuildConfig.BASE_URL
+    fun provideBaseUrl(): String = "http://192.168.0.7:3000"
+        //BuildConfig.BASE_URL
 
     @Provides
     @Singleton
@@ -91,4 +93,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideVoteApi(retrofit: Retrofit): VoteApi = retrofit.create(VoteApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideTagApi(retrofit: Retrofit): TagApi = retrofit.create(TagApi::class.java)
 }

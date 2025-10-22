@@ -20,6 +20,8 @@ data class PostDto(
     var commentcount:Int,
     var likecount:Int,
     var isliked:Int?,
+    val score:Int?,
+    val popularityScore:Double?,
     var distance:Double?,
     val vote:String?,
     val votecount:Int?
@@ -40,6 +42,7 @@ fun PostDto.toPostPreview(
     commentcount:Int,
     likecount:Int,
     isliked:Int?,
+    popularityScore: Double?,
     distance:Double?,
     vote:String?,
     votecount:Int?,
@@ -77,6 +80,8 @@ fun PostDto.toPostPreview(
         commentCount = commentcount,
         likecount = likecount,
         isliked = isliked != null,
+        popularityScore = popularityScore?:0.toDouble(),
+        isliked = isliked,
         vote = vote,
         distance = distance?.let{ round(it).toInt()}
     )

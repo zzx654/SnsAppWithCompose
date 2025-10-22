@@ -82,6 +82,7 @@ fun EmailSignUpScreen(
                     navController.popBackStack(event.screen,false)
 
                 }
+                else -> null
             }
         }
     }

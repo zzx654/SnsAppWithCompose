@@ -5,9 +5,13 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.util.Resource
+import com.androiddev.snsappwithcompose.base.BasePostsViewModel
 import com.androiddev.snsappwithcompose.home.GetPostsState
+import com.androiddev.snsappwithcompose.home.events.GetNearPostsEvent
+import com.androiddev.snsappwithcompose.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.PostPaginator
@@ -24,10 +28,12 @@ class NearPostsViewModel @Inject constructor(
     private val getPostsUseCases: GetPostsUseCases,
     private val locationClient: FusedLocationProviderClient,
     private val context: Context
-): BaseViewModel() {
-    private val _getPostState = mutableStateOf(GetPostsState())
-    val getPostState: State<GetPostsState>
-        get() = _getPostState
+): BasePostsViewModel(
+    getPostsUseCases = getPostsUseCases,
+    locationClient = locationClient,
+    context = context
+) {
+
     private val _distance = mutableStateOf(5)
     val distance: State<Int>
         get() = _distance
@@ -98,21 +104,11 @@ class NearPostsViewModel @Inject constructor(
         viewModelScope.launch {
             postPaginator.loadNextItems(refresh = false)
         }
-
     }
-    fun onEvent(event: GetNearPostsEvent) {
-        when(event) {
-            is GetNearPostsEvent.RefreshNearPosts -> {
-                viewModelScope.launch {
-                    postPaginator.loadNextItems(refresh = true)
-                }
 
-            }
-            is GetNearPostsEvent.LoadNextPosts -> {
-                viewModelScope.launch {
-                    postPaginator.loadNextItems(refresh = false)
-                }
-            }
+    override fun onEvent(event: GetPostsEvent) {
+        super.onEvent(event)
+        when(event) {
             is GetNearPostsEvent.SetDistance -> {
                 _distance.value = event.distance
                 _getPostState.value = getPostState.value.copy(posts = emptyList())
@@ -170,7 +166,6 @@ class NearPostsViewModel @Inject constructor(
                     }
 
                 }
-
         }
     }
 }

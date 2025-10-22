@@ -40,8 +40,7 @@ fun SearchTextField(
         textStyle = AppTextStyles.textStyle,
         decorationBox = { innerTextField ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = modifier
                     .wrapContentHeight()
                     .background(color = TextFieldBackground.copy(alpha = 0.1f), shape = RoundedCornerShape(size = 16.dp))
                     .padding(all = 16.dp),

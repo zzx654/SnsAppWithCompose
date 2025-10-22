@@ -27,6 +27,7 @@ fun GetPostsResponseDto.toGetPostsResponse(
                 commentcount = it.commentcount,
                 likecount = it.likecount,
                 isliked = it.isliked,
+                popularityScore = it.popularityScore,
                 distance = it.distance,
                 vote = it.vote,
                 votecount = it.votecount

@@ -24,6 +24,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.androiddev.snsappwithcompose.util.createNotificationChannel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @AndroidEntryPoint
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        createNotificationChannel(this)
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
 

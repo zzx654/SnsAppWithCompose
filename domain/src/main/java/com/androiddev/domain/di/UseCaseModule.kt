@@ -8,6 +8,7 @@ import com.androiddev.domain.repository.GetPostsRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.repository.ToggleLikePostRepository
+import com.androiddev.domain.repository.TagRepository
 import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.repository.VoteRepository
 import com.androiddev.domain.use_case.AuthPhoneUseCases
@@ -23,6 +24,9 @@ import com.androiddev.domain.use_case.EmailSignUpUseCases
 import com.androiddev.domain.use_case.GetComments
 import com.androiddev.domain.use_case.GetNearPosts
 import com.androiddev.domain.use_case.GetPopularComments
+import com.androiddev.domain.use_case.GetNewPosts
+import com.androiddev.domain.use_case.GetNewTagPosts
+import com.androiddev.domain.use_case.GetPopularTagPosts
 import com.androiddev.domain.use_case.GetPostsUseCases
 import com.androiddev.domain.use_case.GetReplies
 import com.androiddev.domain.use_case.GetSelectedComment
@@ -32,6 +36,7 @@ import com.androiddev.domain.use_case.PostComment
 import com.androiddev.domain.use_case.PostDetailUseCases
 import com.androiddev.domain.use_case.PostReply
 import com.androiddev.domain.use_case.ReplyUseCases
+import com.androiddev.domain.use_case.GetTags
 import com.androiddev.domain.use_case.RequestEmailAuthCode
 import com.androiddev.domain.use_case.RequestPhoneAuthCode
 import com.androiddev.domain.use_case.SearchTag
@@ -41,6 +46,8 @@ import com.androiddev.domain.use_case.SocialSignIn
 import com.androiddev.domain.use_case.SocialSignUpUseCase
 import com.androiddev.domain.use_case.ToggleLikeComment
 import com.androiddev.domain.use_case.ToggleLikePost
+import com.androiddev.domain.use_case.TagUseCases
+import com.androiddev.domain.use_case.ToggleFavoriteTag
 import com.androiddev.domain.use_case.UploadPost
 import com.androiddev.domain.use_case.UploadPostUseCases
 import com.androiddev.domain.use_case.Vote
@@ -95,10 +102,10 @@ object UseCaseModule {
     }
     @Provides
     @Singleton
-    fun provideUploadPostUseCases(repository: UploadPostRepository): UploadPostUseCases {
+    fun provideUploadPostUseCases(uploadRepository: UploadPostRepository,tagRepository: TagRepository): UploadPostUseCases {
         return UploadPostUseCases(
-            searchTag = SearchTag(repository),
-            uploadPost = UploadPost(repository)
+            searchTag = SearchTag(tagRepository),
+            uploadPost = UploadPost(uploadRepository)
         )
     }
     @Provides
@@ -106,7 +113,19 @@ object UseCaseModule {
     fun provideGetPostsUseCases(repository: GetPostsRepository): GetPostsUseCases {
         return GetPostsUseCases(
             getNearPosts = GetNearPosts(repository),
-            getSelectedPost = GetSelectedPost(repository)
+            getSelectedPost = GetSelectedPost(repository),
+            getNewPosts = GetNewPosts(repository),
+            getPopularTagPosts = GetPopularTagPosts(repository),
+            getNewTagPosts = GetNewTagPosts(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideTagUseCases(repository: TagRepository): TagUseCases {
+        return TagUseCases(
+            getTags = GetTags(repository),
+            searchTag = SearchTag(repository),
+            toggleFavoriteTag = ToggleFavoriteTag(repository)
         )
     }
     @Provides

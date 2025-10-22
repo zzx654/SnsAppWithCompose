@@ -10,16 +10,19 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.components.TabPager
 import com.androiddev.snsappwithcompose.home.nearposts.NearPostsScreen
+import com.androiddev.snsappwithcompose.home.newPosts.NewPostsScreen
+import com.androiddev.snsappwithcompose.home.tags.TagScreen
+import com.androiddev.snsappwithcompose.home.tags.TagViewModel
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, tagViewModel: TagViewModel) {
     val tabs = listOf("근처", "인기", "새로운","팔로우","태그","사람")
     val pages = listOf<@Composable () -> Unit>(
         {NearPostsScreen(navController)},
         {PlaceholderScreen("인기")},
-        {PlaceholderScreen("새로운")},
+        {NewPostsScreen(navController)},
         {PlaceholderScreen("팔로우")},
-        {PlaceholderScreen("태그")},
+        {TagScreen(navController, tagViewModel)},
         {PlaceholderScreen("사람")}
     )
     Box(

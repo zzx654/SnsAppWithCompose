@@ -48,6 +48,8 @@ fun InitScreen(
                     }
                     navController.navigate(event.screen)
                 }
+
+                else -> null
             }
         }
     }

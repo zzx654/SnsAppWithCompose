@@ -10,5 +10,5 @@ import javax.inject.Inject
 class GetNearPosts @Inject constructor(
     private val repository: GetPostsRepository
 ) {
-    suspend operator fun invoke(postId:Int? = null,postDate:String? = null,latitude:Double,longitude:Double,maxDistance:Int): Flow<Resource<GetPostsResponse>> = repository.GetNearPosts(postId,postDate,maxDistance,latitude,longitude)
+    suspend operator fun invoke(postid:Int? = null,postdate:String? = null,latitude:Double,longitude:Double,maxDistance:Int): Flow<Resource<GetPostsResponse>> = repository.getNearPosts(postid,postdate,maxDistance,latitude,longitude)
 }

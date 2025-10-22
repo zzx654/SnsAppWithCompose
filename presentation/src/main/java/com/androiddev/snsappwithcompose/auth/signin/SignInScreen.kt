@@ -76,6 +76,7 @@ fun SignInScreen(
                     }
                     navController.navigate(event.screen)
                 }
+                else -> null
             }
         }
     }
