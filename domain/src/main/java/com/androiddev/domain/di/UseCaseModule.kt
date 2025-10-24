@@ -5,6 +5,7 @@ import com.androiddev.domain.repository.AuthPhoneRepository
 import com.androiddev.domain.repository.CommentRepository
 import com.androiddev.domain.repository.CreateProfileRepository
 import com.androiddev.domain.repository.GetPostsRepository
+import com.androiddev.domain.repository.PostRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.repository.ToggleLikePostRepository
@@ -18,6 +19,7 @@ import com.androiddev.domain.use_case.CheckNickname
 import com.androiddev.domain.use_case.CommentUseCases
 import com.androiddev.domain.use_case.CreateProfile
 import com.androiddev.domain.use_case.CreateProfileUseCases
+import com.androiddev.domain.use_case.DeletePost
 import com.androiddev.domain.use_case.EmailSignIn
 import com.androiddev.domain.use_case.EmailSignUp
 import com.androiddev.domain.use_case.EmailSignUpUseCases
@@ -131,10 +133,12 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun providePostDetailUseCases(
-        toggleLikePostRepository: ToggleLikePostRepository
+        toggleLikePostRepository: ToggleLikePostRepository,
+        postRepository:PostRepository
     ): PostDetailUseCases {
         return PostDetailUseCases(
             ToggleLikePost = ToggleLikePost(toggleLikePostRepository),
+            DeletePost = DeletePost(postRepository)
         )
     }
     @Provides

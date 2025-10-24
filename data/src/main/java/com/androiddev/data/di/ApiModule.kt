@@ -5,6 +5,7 @@ import com.androiddev.data.remote.api.AuthPhoneApi
 import com.androiddev.data.remote.api.CommentApi
 import com.androiddev.data.remote.api.CreateProfileApi
 import com.androiddev.data.remote.api.GetPostsApi
+import com.androiddev.data.remote.api.PostApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.remote.api.ToggleLikePostApi
@@ -97,4 +98,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideTagApi(retrofit: Retrofit): TagApi = retrofit.create(TagApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providePostApi(retrofit: Retrofit): PostApi = retrofit.create(PostApi::class.java)
 }

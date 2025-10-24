@@ -85,6 +85,7 @@ import com.androiddev.snsappwithcompose.BaseScaffold
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.UserViewModel
+import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.AudioPlayer
 import com.androiddev.snsappwithcompose.components.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.components.Chips
@@ -132,7 +133,7 @@ fun PostDetailScreen(
     val dropdownMenuItem = if(post?.userId == userViewModel.userId.value) {
         listOf(
             MenuItem(getString(context,R.string.edit)){},
-            MenuItem(getString(context,R.string.delete)) {}
+            MenuItem(getString(context,R.string.delete)) { viewModel.onPostDetailEvent(PostDetailEvent.DeletePost)}
         )
 
     } else {
@@ -204,10 +205,19 @@ fun PostDetailScreen(
                 is UiEvent.navigate -> {
                     navController.navigate(event.screen)
                 }
-                else -> null
+                is UiEvent.popBackStack -> {
+                    navController.popBackStack()
+                }
             }
         }
     }
+    AlertDialog(
+        title = { viewModel.alertDialogState.value.title },
+        cancelText = { viewModel.alertDialogState.value.cancelText },
+        confirmText = { viewModel.alertDialogState.value.confirmText },
+        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
+        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    )
     LoadingDialog {
         viewModel.isLoading.value
     }
@@ -241,6 +251,7 @@ fun PostDetailScreen(
                                     text = { Text(item.label) },
                                     onClick = {
                                         item.onClick() //  각 항목의 고유한 onClick 실행
+                                        dropdownMenuExpanded = false
                                     }
                                 )
                             }

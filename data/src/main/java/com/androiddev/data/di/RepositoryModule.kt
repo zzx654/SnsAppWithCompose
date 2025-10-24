@@ -5,6 +5,7 @@ import com.androiddev.data.remote.api.AuthPhoneApi
 import com.androiddev.data.remote.api.CommentApi
 import com.androiddev.data.remote.api.CreateProfileApi
 import com.androiddev.data.remote.api.GetPostsApi
+import com.androiddev.data.remote.api.PostApi
 import com.androiddev.data.remote.api.SignInApi
 import com.androiddev.data.remote.api.SignUpApi
 import com.androiddev.data.remote.api.ToggleLikePostApi
@@ -15,6 +16,7 @@ import com.androiddev.data.repository.AuthPhoneRepositoryImpl
 import com.androiddev.data.repository.CommentRepositoryImpl
 import com.androiddev.data.repository.CreateProfileRepositoryImpl
 import com.androiddev.data.repository.GetPostsRepositoryImpl
+import com.androiddev.data.repository.PostRepositoryImpl
 import com.androiddev.data.repository.SigninRepositoryImpl
 import com.androiddev.data.repository.SignupRepositoryImpl
 import com.androiddev.data.repository.ToggleLikePostRepositoryImpl
@@ -25,6 +27,7 @@ import com.androiddev.domain.repository.AuthPhoneRepository
 import com.androiddev.domain.repository.CreateProfileRepository
 import com.androiddev.domain.repository.CommentRepository
 import com.androiddev.domain.repository.GetPostsRepository
+import com.androiddev.domain.repository.PostRepository
 import com.androiddev.domain.repository.SigninRepository
 import com.androiddev.domain.repository.SignupRepository
 import com.androiddev.domain.repository.ToggleLikePostRepository
@@ -91,5 +94,12 @@ object RepositoryModule {
     @Singleton
     fun provideTagRepository(api: TagApi, @ApplicationContext context: Context): TagRepository{
         return TagRepositoryImpl(api,context)
+    }
+    @Provides
+    @Singleton
+    fun providePostRepository(api: PostApi, @ApplicationContext context: Context): PostRepository {
+        return PostRepositoryImpl(
+            api = api,
+            context = context)
     }
 }

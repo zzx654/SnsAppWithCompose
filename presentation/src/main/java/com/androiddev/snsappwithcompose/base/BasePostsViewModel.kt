@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.util.Resource
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.home.events.GetNearPostsEvent
 import com.androiddev.snsappwithcompose.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.navigation.components.Screen
@@ -20,6 +21,7 @@ import com.androiddev.snsappwithcompose.util.checkPermissions
 import com.androiddev.snsappwithcompose.util.fetchLocation
 import com.google.android.gms.location.FusedLocationProviderClient
 import kotlinx.coroutines.launch
+import androidx.core.content.ContextCompat.getString
 
 abstract class BasePostsViewModel(
     private val context: Context,
@@ -103,11 +105,19 @@ abstract class BasePostsViewModel(
                         is Resource.Success -> {
                             setLoading(false)
                             result.data?.let {
-                                setEvent(
-                                    UiEvent.navigate(
-                                        Screen.PostDetailScreen(it.posts[0])
+                                if(it.posts.isEmpty()) {
+                                    setEvent(
+                                        UiEvent.ShowToast(getString(context, R.string.post_not_exist_alert))
                                     )
-                                )
+                                }
+                                else {
+                                    setEvent(
+                                        UiEvent.navigate(
+                                            Screen.PostDetailScreen(it.posts[0])
+                                        )
+                                    )
+                                }
+
 
                             }
                         }

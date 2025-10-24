@@ -24,6 +24,7 @@ import com.androiddev.snsappwithcompose.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.home.GetPostsState
 import com.androiddev.snsappwithcompose.navigation.components.Screen
+import com.androiddev.snsappwithcompose.util.AlertDialogState
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.BottomSheetItem
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
@@ -143,6 +144,9 @@ class PostDetailsViewModel @Inject constructor(
     private val _commentLikeStatusMap = mutableStateMapOf<Int,CommentLikeState>()
     val commentLikeStatusMap: Map<Int,CommentLikeState> get() = _commentLikeStatusMap
 
+    private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
+    val alertDialogState: State<AlertDialogState>
+        get() = _alertDialogState
     fun initPost(isLiked: Boolean, postId: Int) {
         _isLiked.value = isLiked
         _postId.value = postId
@@ -428,8 +432,56 @@ class PostDetailsViewModel @Inject constructor(
                         }
                 }
             }
+            is PostDetailEvent.DeletePost -> {
+              showDeleteAlert()
+            }
 
         }
+    }
+    private fun showDeleteAlert() {
+        _alertDialogState.value = AlertDialogState(
+            title = getString(context,R.string.delete_post_alert),
+            confirmText = getString(context,R.string.confirm),
+            onClickConfirm = {
+                deletePost(postId.value)
+                resetDialogState()
+            },
+            cancelText = getString(context,R.string.cancel),
+            onClickCancel = { resetDialogState() }
+        )
+    }
+    private fun deletePost(postId: Int) {
+        viewModelScope.launch {
+            postDetailUseCases.DeletePost(postId).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        setLoading(false)
+                        setEvent(UiEvent.popBackStack)
+                    }
+
+                    is Resource.Loading -> {
+                        setLoading(true)
+                    }
+
+                    is Resource.Error -> {
+                        setLoading(false)
+                        setEvent(
+                            UiEvent.ShowToast(
+                                message = result.message ?: getString(
+                                    context, R.string.error
+                                )
+                            )
+                        )
+                    }
+
+                    else -> null
+                }
+
+            }
+        }
+    }
+    protected fun resetDialogState() {
+        _alertDialogState.value = AlertDialogState()
     }
     fun updateStatesForNewComments(newComments: List<Comment>) {
         newComments.forEach { comment ->

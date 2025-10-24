@@ -1,0 +1,15 @@
+package com.androiddev.data.remote.api
+
+import com.androiddev.domain.model.DeletePostResponse
+import retrofit2.Response
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.POST
+
+interface PostApi {
+    @FormUrlEncoded
+    @POST("/deletePost")
+    suspend fun deletePost(
+        @Field("postid")postid: Int
+    ): Response<DeletePostResponse>
+}
