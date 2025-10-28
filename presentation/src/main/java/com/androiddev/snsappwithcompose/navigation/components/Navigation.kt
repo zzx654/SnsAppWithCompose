@@ -28,7 +28,7 @@ import com.androiddev.snsappwithcompose.home.tags.tagposts.TagPostScreen
 import com.androiddev.snsappwithcompose.upload_post.UploadPostScreen
 
 @RequiresApi(Build.VERSION_CODES.N)
-@SuppressLint("UnrememberedGetBackStackEntry")
+@SuppressLint("UnrememberedGetBackStackEntry", "NewApi")
 @Composable
 fun Navigation(navController: NavHostController,modifier:Modifier) {
 
@@ -86,10 +86,15 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             }
             CropScreen(navController = navController,navBackStackEntry = it)
         }
-        composable<Screen.UploadPostScreen> {
+        composable<Screen.UploadPostScreen>(
+            typeMap = postTypeMap
+        ) {
+            val post = it.toRoute<Screen.PostDetailScreen>().post
             BackHandler(true) {
             }
-            UploadPostScreen(navController = navController)
+            UploadPostScreen(
+                post = post,
+                navController = navController)
         }
         composable<Screen.PostDetailScreen>(
             typeMap = postTypeMap

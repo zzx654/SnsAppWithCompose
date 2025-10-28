@@ -41,12 +41,12 @@ fun MainScaffold(
                 BottomNavigationBar(
                     items = listOf(
                         BottomNavItem("홈", HomeScreen, Icons.Default.Home),
-                        BottomNavItem("글쓰기", Screen.UploadPostScreen, Icons.Default.Create),
+                        BottomNavItem("글쓰기", Screen.UploadPostScreen(), Icons.Default.Create),
                     ),
                     initialScreen = Screen.InitScreen::class,
                     navController = tabNavController,
                     onItemClick = {
-                        if(it.route == Screen.UploadPostScreen) {
+                        if(it.route == Screen.UploadPostScreen()) {
                             rootNavController.navigate(it.route)
                         } else {
                             tabNavController.navigate(it.route) {

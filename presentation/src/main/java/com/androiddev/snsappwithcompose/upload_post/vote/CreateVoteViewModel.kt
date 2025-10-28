@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.upload_post.PostMode
 import com.androiddev.snsappwithcompose.util.BaseViewModel
 import com.androiddev.snsappwithcompose.util.BottomSheetItem
 import com.androiddev.snsappwithcompose.util.CustomBottomSheetDialogState
@@ -31,6 +32,10 @@ class CreateVoteViewModel @Inject constructor(
     val showBottomVoteDialog: State<Boolean>
         get() = _showBottomVoteDialog
 
+    private val _saved: MutableState<Boolean> = mutableStateOf(false)
+    val saved: State<Boolean>
+        get() = _saved
+
     // 사용자가 입력 중인 값
     var voteOptions by mutableStateOf(List(3) { "" })
         private set
@@ -39,13 +44,33 @@ class CreateVoteViewModel @Inject constructor(
     var savedVoteOptions by mutableStateOf<List<String>>(emptyList())
         private set
 
+    fun initVoteState() {
+        _saved.value = true
+    }
     fun onEvent(event: CreateVoteEvent) {
         when(event) {
             is CreateVoteEvent.OnAddVoteClick -> {
-                if(savedVoteOptions.isEmpty() )
-                    _showBottomVoteDialog.value = true
-                else
-                    showManageVoteDialog()
+                if(event.postMode == PostMode.CREATE) {
+                    if(_saved.value)
+                        _showBottomVoteDialog.value = true
+                    else
+                        showManageVoteDialog()
+                } else {
+                    //토스트메시지 요청
+                    viewModelScope.launch {
+                        setEvent(
+                            UiEvent.ShowToast(
+                                message = "투표는 수정할수 없습니다"
+                                //getString(
+                                  //  context,
+                                   // R.string.error
+                                //)
+                            )
+                        )
+                    }
+
+                }
+
 
 
             }
@@ -97,6 +122,7 @@ class CreateVoteViewModel @Inject constructor(
 
         return if (cleanedList.size >= 2) {
             savedVoteOptions = cleanedList
+            _saved.value = true
             true
         } else {
             false
@@ -105,6 +131,7 @@ class CreateVoteViewModel @Inject constructor(
     private fun deleteVoteOptions() {
         voteOptions = List(3) { "" }
         savedVoteOptions = emptyList()
+        _saved.value = false
     }
     private fun showManageVoteDialog() {
 

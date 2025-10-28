@@ -26,7 +26,7 @@ sealed interface Screen {
     //@Serializable
     //data object NearPostsScreen: Screen
     @Serializable
-    data object UploadPostScreen: Screen
+    data class UploadPostScreen(val post:PostPreview? = null): Screen
     @Serializable
     data object InitScreen: Screen
     @Serializable

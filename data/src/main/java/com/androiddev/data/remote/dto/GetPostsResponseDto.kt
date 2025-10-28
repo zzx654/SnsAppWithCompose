@@ -17,6 +17,7 @@ fun GetPostsResponseDto.toGetPostsResponse(
                 userid = it.userid,
                 nickname = it.nickname,
                 anonymous = it.anonymous,
+                location = it.location,
                 profileimage = it.profileimage,
                 gender = it.gender,
                 text = it.text,

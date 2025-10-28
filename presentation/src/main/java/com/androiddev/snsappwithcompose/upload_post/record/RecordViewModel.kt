@@ -59,6 +59,9 @@ class RecordViewModel @Inject constructor(
     private val _recordedFilePath: MutableState<String?> = mutableStateOf(null)
     val recordedFilePath: State<String?>
         get() = _recordedFilePath
+    private val _recorded:MutableState<Boolean> = mutableStateOf(false)
+    val recorded:State<Boolean>
+        get() = _recorded
 
     private val updateReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -75,6 +78,7 @@ class RecordViewModel @Inject constructor(
 
                     filePath?.let {
                         _recordedFilePath.value = it
+                        _recorded.value = true
                     }
                     _uiState.update {
                         it.copy(
@@ -93,10 +97,14 @@ class RecordViewModel @Inject constructor(
         registerReceiver()
     }
 
+    fun initRecordState() {
+        _recorded.value = true
+    }
     fun onEvent(event: RecordEvent) {
         when(event) {
             is RecordEvent.OnAddRecordClick -> {
-                if(recordedFilePath.value != null)
+
+                if(recorded.value)
                     showDeleteRecordingAlert()
                 else
                     showDialog()
@@ -118,6 +126,7 @@ class RecordViewModel @Inject constructor(
             is RecordEvent.OnCancelClick -> {
                 cancelRecording()
                 _recordedFilePath.value = null
+                _recorded.value = false
             }
             is RecordEvent.SaveRecording -> {
                 saveRecording()
@@ -195,6 +204,7 @@ class RecordViewModel @Inject constructor(
             cancelText = getString(context, com.androiddev.snsappwithcompose.R.string.cancel),
             onClickConfirm = {
                 _recordedFilePath.value = null
+                _recorded.value = false
                 resetRecordingAlert()
             },
             onClickCancel = {

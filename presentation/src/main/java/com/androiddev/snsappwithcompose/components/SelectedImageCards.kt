@@ -24,12 +24,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.ui.theme.Black
+import com.androiddev.snsappwithcompose.upload_post.EditableImage
 
 @Composable
 fun SelectedImageCards(
-    selectedImageUris:()-> List<Uri>,
-    onDeleteClick:(Uri) -> Unit
+    selectedImages:()-> List<EditableImage>,
+    onDeleteClick:(EditableImage) -> Unit
 
 ) {
     LazyRow(
@@ -41,7 +43,8 @@ fun SelectedImageCards(
                 bottom = 10.dp
             )
     ) {
-        items(selectedImageUris()) { uri ->
+        items(selectedImages()) { image ->
+
             Box(
                 modifier = Modifier
                     .width(IntrinsicSize.Min)
@@ -49,7 +52,7 @@ fun SelectedImageCards(
 
             ) {
                 AsyncImage(
-                    model = uri,
+                    model = image.uri ?: (BuildConfig.BASE_URL + image.remotePath),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(100.dp)
@@ -64,7 +67,7 @@ fun SelectedImageCards(
                         .padding(horizontal = 5.dp)
                         .size(12.dp)
                         .align(Alignment.TopStart)
-                        .clickable { onDeleteClick(uri)  }
+                        .clickable { onDeleteClick(image)  }
                         .drawBehind {
                             drawCircle(
                                 color = Black,

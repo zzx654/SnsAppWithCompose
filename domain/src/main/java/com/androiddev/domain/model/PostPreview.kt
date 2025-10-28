@@ -16,6 +16,7 @@ data class PostPreview(
     val gender:String,
     val date:String,
     val text:String,
+    val location:Double?,
     val tags:List<String>?,
     val images:List<String>?,
     val firstImage:String?,

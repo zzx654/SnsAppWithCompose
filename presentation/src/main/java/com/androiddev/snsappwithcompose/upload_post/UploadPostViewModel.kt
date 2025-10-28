@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
+import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.Tag
 import com.androiddev.domain.model.TagInfo
 import com.androiddev.domain.use_case.UploadPostUseCases
@@ -38,6 +39,7 @@ class UploadPostViewModel @Inject constructor(
     private val context: Context
 ): BaseViewModel() {
 
+    //이미지,거리,음성녹음,투표,
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
         get() = _tagTextField
@@ -53,26 +55,60 @@ class UploadPostViewModel @Inject constructor(
     private val _anonymous = mutableStateOf(false)
     val anonymous: State<Boolean>
         get() = _anonymous
-    private val _selectedImages = mutableStateListOf<Uri>()
-    val selectedImages: SnapshotStateList<Uri>
+    private val _selectedImages = mutableStateListOf<EditableImage>()
+    val selectedImages: SnapshotStateList<EditableImage>
         get() = _selectedImages
+    val deletedImages = mutableStateListOf<String>()
     private val _locationOnOff = mutableStateOf(false)
     val locationOnOff: State<Boolean>
         get() = _locationOnOff
-
+    var postMode: PostMode? = PostMode.CREATE
+        private set
+    var postId:Int? = null
+    var isInitialized = false
+        private set
 
     init {
-        checkPermissions(
-            context = context,
-            permissions = arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ),
-            onGranted = { _locationOnOff.value = true },
-            onUnGranted = { _locationOnOff.value = false }
-        )
+        if(postMode == PostMode.CREATE) {
+            checkPermissions(
+                context = context,
+                permissions = arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ),
+                onGranted = { _locationOnOff.value = true },
+                onUnGranted = { _locationOnOff.value = false }
+            )
+        }
+
     }
 
+    fun initPost(post:PostPreview) {
+        if(!isInitialized) {
+            postMode = PostMode.EDIT
+            postId = post.postId
+            //여기서 이제 값들 나열
+            //위치는 상관없이 그냥 누르면 토스트메시지로 못바꾼다고 알려주기
+            post.tags?.let{
+                _addedTags.addAll(it)
+            }
+            _anonymous.value = post.anonymous
+            _locationOnOff.value = post.location != null
+            //_contentTextField.value = post.text
+            post.images?.let {
+                _selectedImages.clear()
+                _selectedImages.addAll(
+                    it.map { path ->
+                        EditableImage(remotePath = path, isNew = false)
+                    }
+                )
+            }
+            isInitialized = true
+        }
+
+
+
+    }
     fun onEvent(event: UploadPostEvent) {
         when (event) {
             is UploadPostEvent.TypeTag -> {
@@ -157,10 +193,18 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is UploadPostEvent.AddImages -> {
-                _selectedImages.addAll(event.images)
+                _selectedImages.addAll(
+                    event.images.map { uri ->
+                        EditableImage(uri = uri, isNew = true)
+                    }
+                )
             }
 
             is UploadPostEvent.DeleteImage -> {
+                _selectedImages.remove(event.image)
+                if (!event.image.isNew && event.image.remotePath != null) {
+                    deletedImages.add(event.image.remotePath)
+                }
                 _selectedImages.remove(event.image)
             }
 
@@ -169,18 +213,30 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is UploadPostEvent.ToggleLocationOnOff -> {
-                val message = if (event.onOff) getString(
-                    context,
-                    R.string.location_on
-                ) else getString(context, R.string.location_off)
-                viewModelScope.launch {
-                    setEvent(
-                        UiEvent.ShowToast(
-                            message = message
+                if(postMode==PostMode.CREATE) {
+                    val message = if (event.onOff) getString(
+                        context,
+                        R.string.location_on
+                    ) else getString(context, R.string.location_off)
+                    viewModelScope.launch {
+                        setEvent(
+                            UiEvent.ShowToast(
+                                message = message
+                            )
                         )
-                    )
-                    _locationOnOff.value = event.onOff
+                        _locationOnOff.value = event.onOff
+                    }
+                } else {
+                    viewModelScope.launch {
+                        setEvent(
+                            UiEvent.ShowToast(
+                               "저장된 위치를 변경할 수 없습니다"
+                            )
+                        )
+
+                    }
                 }
+
             }
 
             is UploadPostEvent.UploadPost -> {
@@ -200,82 +256,75 @@ class UploadPostViewModel @Inject constructor(
                     var requestLong: MultipartBody.Part? = null
 
                     if (selectedImages.isNotEmpty()) {
-                        requestImages = selectedImages.map { getMultipartBody(it, context) }
-                        var requestLong: MultipartBody.Part? = null
-                        event.audioFilePath?.let { filePath ->
-                            val file = File(filePath)
+                        requestImages = selectedImages.filter { it.isNew }
+                            .mapNotNull { item ->
+                                item.uri?.let { getMultipartBody(it, context) }
+                            }
+                    }
+                    event.audioFilePath?.let { filePath ->
+                        val file = File(filePath)
 
-                            if (file.exists()) {
-                                val requestFile =
-                                    file.asRequestBody("audio/mp4".toMediaTypeOrNull())
-                                requestAudio =
-                                    MultipartBody.Part.createFormData(
-                                        "audio",
-                                        file.name,
-                                        requestFile
-                                    )
+                        if (file.exists()) {
+                            val requestFile =
+                                file.asRequestBody("audio/mp4".toMediaTypeOrNull())
+                            requestAudio =
+                                MultipartBody.Part.createFormData(
+                                    "audio",
+                                    file.name,
+                                    requestFile
+                                )
+
+                        }
+                    }
+                    if (event.voteOptions.isNotEmpty()) {
+                        val voteOptionDataList = event.voteOptions.map {
+                            VoteOptionData(voteoption = it)
+                        }
+                        val gson = Gson()
+                        val voteOptionsJson = gson.toJson(voteOptionDataList)
+                        requestVoteOptions =
+                            voteOptionsJson.toRequestBody("application/json".toMediaType())
+                    }
+                    event.lat?.let {
+                        requestLat =
+                            MultipartBody.Part.createFormData("latitude", event.lat.toString())
+                        requestLong = MultipartBody.Part.createFormData("longitude", event.long.toString())
+                    }
+                    uploadPostUseCases.uploadPost(
+                        anonymousNick = if (anonymous.value) generateAnonymousNickname().toRequestBody(
+                            "text/plain".toMediaTypeOrNull()
+                        ) else null,
+                        tags = requestTags,
+                        images = requestImages,
+                        text = requestText,
+                        audio = requestAudio,
+                        voteOptions = requestVoteOptions,
+                        latitude = requestLat,
+                        longitude = requestLong
+                    ).collect { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                setLoading(false)
+                                setEvent(UiEvent.popBackStack)
 
                             }
-                        }
-                        if (selectedImages.isNotEmpty()) {
-                            requestImages = selectedImages.map { getMultipartBody(it, context) }
-                        }
-                        if (event.voteOptions.isNotEmpty()) {
-                            val voteOptionDataList = event.voteOptions.map {
-                                VoteOptionData(voteoption = it)
-                            }
-                            val gson = Gson()
-                            val voteOptionsJson = gson.toJson(voteOptionDataList)
-                            requestVoteOptions =
-                                voteOptionsJson.toRequestBody("application/json".toMediaType())
-                        }
-                        event.lat?.let {
-                            requestLat =
-                                MultipartBody.Part.createFormData("latitude", event.lat.toString())
-                            requestLong = MultipartBody.Part.createFormData(
-                                "longitude", event.long.toString()
-                            )
-                        }
-                        uploadPostUseCases.uploadPost(
-                            anonymousNick = if (anonymous.value) generateAnonymousNickname().toRequestBody(
-                                "text/plain".toMediaTypeOrNull()
-                            ) else null,
-                            tags = requestTags,
-                            images = requestImages,
-                            text = requestText,
-                            audio = requestAudio,
-                            voteOptions = requestVoteOptions,
-                            latitude = requestLat,
-                            longitude = requestLong
-                        ).collect { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    setEvent(UiEvent.popBackStack)
-
-                                }
-
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(
-                                                context,
-                                                R.string.error
-                                            )
+                            is Resource.Error -> {
+                                setLoading(false)
+                                setEvent(
+                                    UiEvent.ShowToast(
+                                        message = result.message ?: getString(
+                                            context,
+                                            R.string.error
                                         )
                                     )
-                                }
-
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                else -> null
+                                )
                             }
-
-
+                            is Resource.Loading -> {
+                                setLoading(true)
+                            }
+                            else -> null
                         }
+
                     }
                 }
             }
@@ -288,3 +337,7 @@ class UploadPostViewModel @Inject constructor(
 data class VoteOptionData(
     val voteoption: String
 )
+enum class PostMode {
+    CREATE,
+    EDIT
+}

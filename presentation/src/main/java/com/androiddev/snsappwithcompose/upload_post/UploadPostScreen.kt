@@ -54,6 +54,8 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
+import com.androiddev.domain.model.PostPreview
+import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.components.AlertDialog
 import com.androiddev.snsappwithcompose.components.BottomRecorder
 import com.androiddev.snsappwithcompose.components.BottomVoteOptions
@@ -73,6 +75,7 @@ import com.androiddev.snsappwithcompose.upload_post.vote.CreateVoteViewModel
 @Composable
 fun UploadPostScreen(
     navController: NavController,
+    post: PostPreview?,
     viewModel: UploadPostViewModel = hiltViewModel(),
     recordViewModel: RecordViewModel = hiltViewModel(),
     createVoteViewModel: CreateVoteViewModel = hiltViewModel()
@@ -105,6 +108,27 @@ fun UploadPostScreen(
         //val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
     }
     UploadPostDialog { viewModel.isLoading.value }
+    LaunchedEffect(Unit) {
+
+        post?.let {
+
+            viewModel.initPost(
+                post = it
+            )
+            it.vote?.let {
+                createVoteViewModel.initVoteState()
+            }
+            it.audio?.let{
+                recordViewModel.initRecordState()
+            }
+
+            contentTextFieldState.edit {
+                replace(0, contentTextFieldState.text.toString().length, it.text)
+            }
+
+
+        }
+    }
     LaunchedEffect(true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -258,14 +282,14 @@ fun UploadPostScreen(
                         },
 
                     ) {
-                        UploadRecordIcon(recordViewModel.recordedFilePath.value != null) { }
+                        UploadRecordIcon(recordViewModel.recorded.value) { }
                     }
 
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = { createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteClick)}
+                        onClick = { createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteClick(postMode = viewModel.postMode?: PostMode.CREATE))}
                     ) {
-                        UploadVoteIcon(createVoteViewModel.savedVoteOptions.isNotEmpty()) { }
+                        UploadVoteIcon(createVoteViewModel.saved.value) { }
                     }
                     IconButton(
                         modifier = Modifier.size(58.dp),
@@ -356,7 +380,7 @@ fun UploadPostScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
             SelectedImageCards(
-                selectedImageUris = {
+                selectedImages = {
                     viewModel.selectedImages
                 },
                 onDeleteClick = {

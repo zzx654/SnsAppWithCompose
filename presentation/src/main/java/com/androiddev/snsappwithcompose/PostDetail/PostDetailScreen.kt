@@ -95,6 +95,7 @@ import com.androiddev.snsappwithcompose.components.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.components.CustomChip
 import com.androiddev.snsappwithcompose.components.LoadingDialog
 import com.androiddev.snsappwithcompose.components.PollCard
+import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 import com.androiddev.snsappwithcompose.util.MenuItem
 import com.androiddev.snsappwithcompose.util.UiEvent
@@ -132,7 +133,7 @@ fun PostDetailScreen(
     }
     val dropdownMenuItem = if(post?.userId == userViewModel.userId.value) {
         listOf(
-            MenuItem(getString(context,R.string.edit)){},
+            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(post))},
             MenuItem(getString(context,R.string.delete)) { viewModel.onPostDetailEvent(PostDetailEvent.DeletePost)}
         )
 
