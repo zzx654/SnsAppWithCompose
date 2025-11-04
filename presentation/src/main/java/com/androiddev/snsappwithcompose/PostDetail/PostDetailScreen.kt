@@ -209,6 +209,7 @@ fun PostDetailScreen(
                 is UiEvent.popBackStack -> {
                     navController.popBackStack()
                 }
+                else -> null
             }
         }
     }
@@ -282,7 +283,7 @@ fun PostDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 24.dp),
-                                    list = tags,
+                                    list = tags.map{"#$it"},
                                     chip = { data: String, index: Int ->
                                         CustomChip(
                                             backgroundColor = Color.Gray,

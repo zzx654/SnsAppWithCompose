@@ -20,6 +20,7 @@ import com.androiddev.domain.use_case.CommentUseCases
 import com.androiddev.domain.use_case.CreateProfile
 import com.androiddev.domain.use_case.CreateProfileUseCases
 import com.androiddev.domain.use_case.DeletePost
+import com.androiddev.domain.use_case.EditPost
 import com.androiddev.domain.use_case.EmailSignIn
 import com.androiddev.domain.use_case.EmailSignUp
 import com.androiddev.domain.use_case.EmailSignUpUseCases
@@ -107,7 +108,8 @@ object UseCaseModule {
     fun provideUploadPostUseCases(uploadRepository: UploadPostRepository,tagRepository: TagRepository): UploadPostUseCases {
         return UploadPostUseCases(
             searchTag = SearchTag(tagRepository),
-            uploadPost = UploadPost(uploadRepository)
+            uploadPost = UploadPost(uploadRepository),
+            editPost = EditPost(uploadRepository)
         )
     }
     @Provides

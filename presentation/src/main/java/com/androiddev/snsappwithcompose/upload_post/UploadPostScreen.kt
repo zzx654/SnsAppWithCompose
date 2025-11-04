@@ -118,8 +118,8 @@ fun UploadPostScreen(
             it.vote?.let {
                 createVoteViewModel.initVoteState()
             }
-            it.audio?.let{
-                recordViewModel.initRecordState()
+            it.audio?.let{ remotePath ->
+                recordViewModel.initRecordState(remotePath = remotePath)
             }
 
             contentTextFieldState.edit {
@@ -144,6 +144,12 @@ fun UploadPostScreen(
                 }
 
                 UiEvent.popBackStack -> {
+                    navController.popBackStack()
+                }
+                is UiEvent.PopBackStackWithResult<*> -> {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(event.key, event.value)
                     navController.popBackStack()
                 }
             }
@@ -211,6 +217,7 @@ fun UploadPostScreen(
                                                 lat = latitude,
                                                 long = longitude,
                                                 audioFilePath = recordViewModel.recordedFilePath.value,
+                                                deleteAudio = recordViewModel.deletedAudio,
                                                 voteOptions = createVoteViewModel.savedVoteOptions
                                             )
                                         )
@@ -332,7 +339,7 @@ fun UploadPostScreen(
             Spacer(modifier = Modifier.height(30.dp))
             Chips(
                 modifier = Modifier.fillMaxWidth(),
-                list = viewModel.addedTags,
+                list = viewModel.addedTags.map{ "#"+it },
                 chip = { data: String, index: Int ->
                     CustomChip(
                         backgroundColor = Color.Gray,

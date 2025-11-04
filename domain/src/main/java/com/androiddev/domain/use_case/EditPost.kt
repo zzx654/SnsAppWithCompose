@@ -1,26 +1,17 @@
-package com.androiddev.domain.repository
+package com.androiddev.domain.use_case
 
 import com.androiddev.domain.model.GetPostsResponse
-import com.androiddev.domain.model.SearchTagResponse
+import com.androiddev.domain.repository.UploadPostRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import javax.inject.Inject
 
-interface UploadPostRepository {
-
-
-    suspend fun uploadPost(
-        anonymousNick: RequestBody?,
-        tags: RequestBody?,
-        image:List<MultipartBody.Part>?,
-        audio:MultipartBody.Part?,
-        voteOptions:RequestBody?,
-        text: RequestBody,
-        latitude: MultipartBody.Part?,
-        longitude: MultipartBody.Part?
-    ): Flow<Resource<Unit>>
-    suspend fun editPost(
+class EditPost @Inject constructor(
+    private val repository: UploadPostRepository
+) {
+    suspend operator fun invoke(
         postid: MultipartBody.Part,
         latitude: MultipartBody.Part?,
         longitude: MultipartBody.Part?,
@@ -31,6 +22,6 @@ interface UploadPostRepository {
         audio:MultipartBody.Part?,
         deleteAudio:RequestBody?,
         text: RequestBody
-    ): Flow<Resource<GetPostsResponse>>
+    ): Flow<Resource<GetPostsResponse>> = repository.editPost(postid,latitude,longitude,anonymousNick,deleteImages,tags,images,audio,deleteAudio,text)
 
 }

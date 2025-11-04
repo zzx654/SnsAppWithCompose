@@ -35,7 +35,6 @@ class AudioViewModel @Inject constructor(
             val isPlaying = intent?.getBooleanExtra("isPlaying", false) ?: false
             val progress = intent?.getIntExtra("progress", 0) ?: 0
 
-            println("이건 프로그레스 $progress 이건 isPlaying ${isPlaying}")
             _isPlaying.value = isPlaying
             _progress.value = progress / 100f
         }

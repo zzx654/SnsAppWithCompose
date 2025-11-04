@@ -76,7 +76,7 @@ fun PostDto.toPostPreview(
         images = imageList,
         firstImage = imageList?.get(0),
         imageSize = imageList?.size,
-        tags = tags?.split('#')?.map{"#${it}"},
+        tags = tags?.split('#'),
         date = date,
         elapsedTime = elapsedTime(date),
         voteCount = votecount,

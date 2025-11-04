@@ -53,8 +53,10 @@ class RecordViewModel @Inject constructor(
 
     private var receiverRegistered = false
 
-
-
+    var prevRemotePath: String? = null
+        private set
+    var deletedAudio: String? = null
+        private set
 
     private val _recordedFilePath: MutableState<String?> = mutableStateOf(null)
     val recordedFilePath: State<String?>
@@ -97,8 +99,9 @@ class RecordViewModel @Inject constructor(
         registerReceiver()
     }
 
-    fun initRecordState() {
+    fun initRecordState(remotePath:String) {
         _recorded.value = true
+        prevRemotePath = remotePath
     }
     fun onEvent(event: RecordEvent) {
         when(event) {
@@ -205,6 +208,7 @@ class RecordViewModel @Inject constructor(
             onClickConfirm = {
                 _recordedFilePath.value = null
                 _recorded.value = false
+                deletedAudio = prevRemotePath
                 resetRecordingAlert()
             },
             onClickCancel = {

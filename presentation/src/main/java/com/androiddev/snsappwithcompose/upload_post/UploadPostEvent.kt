@@ -12,5 +12,5 @@ sealed class UploadPostEvent {
     data class DeleteImage(val image: EditableImage) : UploadPostEvent()
     data class SetLocationOnOff(val onOff: Boolean): UploadPostEvent()
     data class ToggleLocationOnOff(val onOff: Boolean): UploadPostEvent()
-    data class UploadPost(val lat:Double? = null, val long:Double? = null, val audioFilePath:String? = null,val voteOptions:List<String>): UploadPostEvent()
+    data class UploadPost(val lat:Double? = null, val long:Double? = null, val audioFilePath:String? = null,val deleteAudio:String? = null, val voteOptions:List<String>): UploadPostEvent()
 }

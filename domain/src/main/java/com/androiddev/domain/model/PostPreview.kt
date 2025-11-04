@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
+@Parcelize
 data class PostPreview(
     val postId:Int,
     val userId:Int,
@@ -30,4 +31,4 @@ data class PostPreview(
     val vote:String?,
     val voteCount:Int?,
     val elapsedTime:String,
-)
+): Parcelable

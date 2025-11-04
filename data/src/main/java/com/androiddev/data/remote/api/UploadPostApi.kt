@@ -1,5 +1,6 @@
 package com.androiddev.data.remote.api
 
+import com.androiddev.data.remote.dto.GetPostsResponseDto
 import com.androiddev.data.remote.dto.SearchTagResponseDto
 import com.androiddev.domain.model.ResultCodeResponse
 import okhttp3.MultipartBody
@@ -24,5 +25,20 @@ interface UploadPostApi {
         @Part latitude: MultipartBody.Part?,
         @Part longitude: MultipartBody.Part?
     ): Response<ResultCodeResponse>
+
+    @Multipart
+    @POST("/editPost")
+    suspend fun editPost(
+        @Part postid: MultipartBody.Part,
+        @Part latitude: MultipartBody.Part?,
+        @Part longitude: MultipartBody.Part?,
+        @Part ("anonymousNick") anonymousNick: RequestBody?,
+        @Part ("deleteImages") deleteImages: RequestBody?,
+        @Part ("tags") tags: RequestBody?,
+        @Part imageFiles: List<MultipartBody.Part>?,
+        @Part audioFile: MultipartBody.Part?,
+        @Part ("deleteAudio") deleteAudio: RequestBody?,
+        @Part ("text") text: RequestBody
+    ): Response<GetPostsResponseDto>
 
 }

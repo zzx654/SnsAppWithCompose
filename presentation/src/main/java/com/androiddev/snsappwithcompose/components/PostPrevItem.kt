@@ -60,7 +60,7 @@ fun PostPrevItem(
         post.tags?.let { tags ->
             Chips(
                 modifier = Modifier.fillMaxWidth(0.9f).padding(top = 10.dp),
-                list = tags,
+                list = tags.map{"#$it"},
                 chip = { data: String, index: Int ->
                     CustomChip(
                         backgroundColor = Color.Gray,
