@@ -15,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.GetCommentsResponse
+import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.TagInfo
 import com.androiddev.domain.use_case.CommentUseCases
 import com.androiddev.domain.use_case.PostDetailUseCases
@@ -88,6 +89,9 @@ class PostDetailsViewModel @Inject constructor(
     val _anonymousChecked = mutableStateOf(false)
     val anonymousChecked: State<Boolean>
         get() = _anonymousChecked
+    val _post = mutableStateOf<PostPreview?>(null)
+    val post: State<PostPreview?>
+        get() = _post
     val _commentText = mutableStateOf("")
     val commentText: State<String>
         get() = _commentText
@@ -111,12 +115,12 @@ class PostDetailsViewModel @Inject constructor(
                 }
                 //postid를 얻을방법
                 if(commentSortType.value == CommentSortType.OLDEST) {
-                    commentUseCases.GetComments(postId.value, lastCommentId, lastCommentDate)
+                    commentUseCases.GetComments(post.value?.postId?:0, lastCommentId, lastCommentDate)
                         .collect {
                             handleResult(it)
                         }
                 } else {
-                    commentUseCases.GetPopularComments(postId.value, lastCommentId, lastCommentScore)
+                    commentUseCases.GetPopularComments(post.value?.postId?:0, lastCommentId, lastCommentScore)
                         .collect {
                             handleResult(it)
                         }
@@ -147,14 +151,14 @@ class PostDetailsViewModel @Inject constructor(
     private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
     val alertDialogState: State<AlertDialogState>
         get() = _alertDialogState
-    fun initPost(isLiked: Boolean, postId: Int) {
+    fun initPost(isLiked: Boolean, post: PostPreview) {
         _isLiked.value = isLiked
-        _postId.value = postId
+        _post.value = post
         viewModelScope.launch {
             commentPaginator.loadNextItems(refresh = true)
         }
         viewModelScope.launch {
-            voteUseCases.getVoteInfo(postId).collect { result ->
+            voteUseCases.getVoteInfo(post.postId).collect { result ->
                 when(result) {
                     is Resource.Success -> {
                         //투표 fetch
@@ -190,7 +194,7 @@ class PostDetailsViewModel @Inject constructor(
                 viewModelScope.launch {
                     if(!voteState.value.hasVoted) {
                         voteState.value.selectedChoiceId?.let { optionId ->
-                            voteUseCases.vote(postId.value,optionId).collect { result ->
+                            voteUseCases.vote(post.value?.postId?:0,optionId).collect { result ->
                                 when(result) {
                                     is Resource.Success -> {
                                         //투표 fetch
@@ -227,7 +231,7 @@ class PostDetailsViewModel @Inject constructor(
                             }
                         }
                     } else {
-                        voteUseCases.cancelVote(postId.value).collect { result ->
+                        voteUseCases.cancelVote(post.value?.postId?:0).collect { result ->
                             _voteState.value = voteState.value.copy(hasVoted = false, selectedChoiceId = null)
 
                         }
@@ -307,7 +311,7 @@ class PostDetailsViewModel @Inject constructor(
             is CommentEvent.PostComment -> {
                 viewModelScope.launch {
                     commentUseCases.PostComment(
-                        postId = postId.value,
+                        postId = post.value?.postId?:0,
                         text = commentText.value,
                         anonymousNick = if(anonymousChecked.value) generateAnonymousNickname() else null
                     ).collect { result ->
@@ -351,7 +355,7 @@ class PostDetailsViewModel @Inject constructor(
                 postId.value
                 viewModelScope.launch {
                     commentUseCases.GetSelectedComment(
-                        postId = postId.value,
+                        postId = post.value?.postId?:0,
                         commentId = event.commentId
                     ).collect { result ->
                         when(result) {
@@ -443,7 +447,7 @@ class PostDetailsViewModel @Inject constructor(
             title = getString(context,R.string.delete_post_alert),
             confirmText = getString(context,R.string.confirm),
             onClickConfirm = {
-                deletePost(postId.value)
+                deletePost(post.value?.postId?:0)
                 resetDialogState()
             },
             cancelText = getString(context,R.string.cancel),

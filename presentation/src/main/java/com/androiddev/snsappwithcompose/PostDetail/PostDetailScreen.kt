@@ -99,6 +99,7 @@ import com.androiddev.snsappwithcompose.navigation.components.Screen
 import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 import com.androiddev.snsappwithcompose.util.MenuItem
 import com.androiddev.snsappwithcompose.util.UiEvent
+import com.androiddev.snsappwithcompose.util.decodeBase64
 import kotlinx.coroutines.launch
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -121,6 +122,7 @@ fun PostDetailScreen(
     viewModel: PostDetailsViewModel = hiltViewModel(),
 ) {
 
+    val currentPost = viewModel.post.value
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -182,15 +184,18 @@ fun PostDetailScreen(
     }
     val getCommentsState = viewModel.getCommentsState.value
     LaunchedEffect(post) {
+        if(viewModel.post.value==null) {
+            post?.let {
 
-        post?.let {
-
-            viewModel.initPost(
-                isLiked = it.isliked,
-                it.postId
-            )
-            audioViewModel.setAudioAvailable(!it.audio.isNullOrEmpty(),BuildConfig.BASE_URL+it.audio,it.nickname)
+                viewModel.initPost(
+                    isLiked = it.isliked,
+                    post = it
+                )
+                audioViewModel.setAudioAvailable(!it.audio.isNullOrEmpty(),BuildConfig.BASE_URL+it.audio,it.nickname)
+            }
         }
+
+
     }
 
     LaunchedEffect(Unit) {
@@ -212,6 +217,15 @@ fun PostDetailScreen(
                 else -> null
             }
         }
+    }
+    val editedPost = navBackStackEntry.savedStateHandle.get<PostPreview>(getString(context,R.string.editedPost))
+    editedPost?.let { post ->
+        viewModel.initPost(
+            isLiked = post.isliked,
+            post = post
+        )
+        audioViewModel.setAudioAvailable(!post.audio.isNullOrEmpty(),BuildConfig.BASE_URL+post.audio,post.nickname)
+        navBackStackEntry.savedStateHandle.set<PostPreview>(getString(context,R.string.editedPost),null)
     }
     AlertDialog(
         title = { viewModel.alertDialogState.value.title },
@@ -235,7 +249,7 @@ fun PostDetailScreen(
         topBar = {
             if (post != null) {
                 CenterAlignedTopBar(
-                    title = post.nickname,
+                    title = currentPost?.nickname?:"",
                     onBackClick = { navController.popBackStack() },
                     actions = {
                         IconButton(onClick = { dropdownMenuExpanded = true }) {
@@ -274,10 +288,9 @@ fun PostDetailScreen(
 
 
                 item {
-                    if (post != null) {
-
                         Column {
-                            post.tags?.let { tags ->
+
+                            currentPost?.tags?.let { tags ->
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Chips(
                                     modifier = Modifier
@@ -292,7 +305,7 @@ fun PostDetailScreen(
                                     }
                                 )
                             }
-                            Spacer(modifier = Modifier.height(if (post.tags == null) 15.dp else 5.dp))
+                            Spacer(modifier = Modifier.height(if (currentPost?.tags == null) 15.dp else 5.dp))
 
                             Row(
                                 modifier = Modifier
@@ -301,9 +314,9 @@ fun PostDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 ProfileImage(
-                                    profileImage = post.profileImage,
-                                    gender = post.gender,
-                                    anonymous = post.anonymous,
+                                    profileImage = currentPost?.profileImage?:"",
+                                    gender = currentPost?.gender?:"",
+                                    anonymous = post?.anonymous?:false,
                                     context = context,
                                     imageLoader = imageLoader
                                 )
@@ -312,13 +325,13 @@ fun PostDetailScreen(
 
                                 Column {
                                     Text(
-                                        post.nickname,
+                                        currentPost?.nickname?:"",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "${post.elapsedTime} · ${post.distance}km ",
+                                        text = "${currentPost?.elapsedTime} · ${currentPost?.distance?:0}km ",
                                         fontSize = 13.sp,
                                         color = Color.Gray
                                     )
@@ -340,13 +353,13 @@ fun PostDetailScreen(
                                     .padding(horizontal = 24.dp),
                             )
                             Spacer(modifier = Modifier.height(15.dp))
-                            post.images?.let { images ->
+                            currentPost?.images?.let { images ->
                                 HorizontalPager(
                                     state = pagerState,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(270.dp),
-                                    count = post.imageSize ?: 0
+                                    count = currentPost?.imageSize ?: 0
                                 ) { page ->
                                     // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
                                     // 예시:
@@ -383,7 +396,7 @@ fun PostDetailScreen(
 
                             }
 
-                            Spacer(modifier = Modifier.height(if (post.images == null) 0.dp else 15.dp))
+                            Spacer(modifier = Modifier.height(if (currentPost?.images == null) 0.dp else 15.dp))
                             PollCard(
                                 voteState = viewModel.voteState.value,
                                 onOptionSelected = { optionId -> viewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
@@ -399,7 +412,7 @@ fun PostDetailScreen(
                                         .align(Alignment.CenterEnd) // 오른쪽 끝
                                         .padding(end = 8.dp,top = 10.dp),
                                     viewModel = audioViewModel,
-                                    url = post.audio
+                                    url = currentPost?.audio
                                 )
                             }
 
@@ -441,7 +454,7 @@ fun PostDetailScreen(
                                         modifier = Modifier
                                             .clickable {
                                                 viewModel.onPostDetailEvent(
-                                                    PostDetailEvent.ToggleLikePost(post.postId)
+                                                    PostDetailEvent.ToggleLikePost(currentPost?.postId?:0)
                                                 )
                                             }
                                     )
@@ -459,7 +472,7 @@ fun PostDetailScreen(
 
 
                         }
-                    }
+
 
 
                 }

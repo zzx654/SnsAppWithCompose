@@ -68,10 +68,6 @@ class UploadPostViewModel @Inject constructor(
     var isInitialized = false
         private set
 
-    var deleteAudio:String? = null
-        private set
-
-
     init {
         if(postMode == PostMode.CREATE) {
             checkPermissions(
@@ -91,14 +87,11 @@ class UploadPostViewModel @Inject constructor(
         if(!isInitialized) {
             postMode = PostMode.EDIT
             postId = post.postId
-            //여기서 이제 값들 나열
-            //위치는 상관없이 그냥 누르면 토스트메시지로 못바꾼다고 알려주기
             post.tags?.let{
                 _addedTags.addAll(it)
             }
             _anonymous.value = post.anonymous
             _locationOnOff.value = post.location != null
-            //_contentTextField.value = post.text
             post.images?.let {
                 _selectedImages.clear()
                 _selectedImages.addAll(
@@ -169,7 +162,7 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is UploadPostEvent.DeleteTag -> {
-                _addedTags.remove(event.tag)
+                _addedTags.remove(event.tag.replace("#",""))
             }
 
             is UploadPostEvent.TypeContent -> {
@@ -231,7 +224,7 @@ class UploadPostViewModel @Inject constructor(
                     viewModelScope.launch {
                         setEvent(
                             UiEvent.ShowToast(
-                               "저장된 위치를 변경할 수 없습니다"
+                               getString(context,R.string.unable_to_change_location)
                             )
                         )
 
@@ -349,10 +342,8 @@ class UploadPostViewModel @Inject constructor(
                             when (result) {
                                 is Resource.Success -> {
                                     setLoading(false)
-                                    //setEvent(UiEvent.popBackStack)
-
                                     result.data?.let {
-                                        setEvent(UiEvent.PopBackStackWithResult("updated_post", it.posts[0]))
+                                        setEvent(UiEvent.PopBackStackWithResult(getString(context,R.string.editedPost), it.posts[0]))
                                     }
                                 }
                                 is Resource.Error -> {

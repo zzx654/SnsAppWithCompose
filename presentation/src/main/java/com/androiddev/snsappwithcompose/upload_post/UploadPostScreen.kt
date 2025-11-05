@@ -344,7 +344,9 @@ fun UploadPostScreen(
                     CustomChip(
                         backgroundColor = Color.Gray,
                         text = data,
-                        onDeleteClick = { viewModel.onEvent(UploadPostEvent.DeleteTag(data)) },
+                        onDeleteClick = {
+                            viewModel.onEvent(UploadPostEvent.DeleteTag(data))
+                                        },
                         border = true
                     )
                 }
