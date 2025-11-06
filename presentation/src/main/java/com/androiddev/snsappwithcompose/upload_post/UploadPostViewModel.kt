@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
+import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.Tag
 import com.androiddev.domain.model.TagInfo
@@ -64,12 +65,12 @@ class UploadPostViewModel @Inject constructor(
         get() = _locationOnOff
     var postMode: PostMode? = PostMode.CREATE
         private set
-    var postId:Int? = null
+    var postId: Int? = null
     var isInitialized = false
         private set
 
     init {
-        if(postMode == PostMode.CREATE) {
+        if (postMode == PostMode.CREATE) {
             checkPermissions(
                 context = context,
                 permissions = arrayOf(
@@ -83,11 +84,11 @@ class UploadPostViewModel @Inject constructor(
 
     }
 
-    fun initPost(post:PostPreview) {
-        if(!isInitialized) {
+    fun initPost(post: PostPreview) {
+        if (!isInitialized) {
             postMode = PostMode.EDIT
             postId = post.postId
-            post.tags?.let{
+            post.tags?.let {
                 _addedTags.addAll(it)
             }
             _anonymous.value = post.anonymous
@@ -104,8 +105,8 @@ class UploadPostViewModel @Inject constructor(
         }
 
 
-
     }
+
     fun onEvent(event: UploadPostEvent) {
         when (event) {
             is UploadPostEvent.TypeTag -> {
@@ -162,7 +163,7 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is UploadPostEvent.DeleteTag -> {
-                _addedTags.remove(event.tag.replace("#",""))
+                _addedTags.remove(event.tag.replace("#", ""))
             }
 
             is UploadPostEvent.TypeContent -> {
@@ -207,7 +208,7 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is UploadPostEvent.ToggleLocationOnOff -> {
-                if(postMode==PostMode.CREATE) {
+                if (postMode == PostMode.CREATE) {
                     val message = if (event.onOff) getString(
                         context,
                         R.string.location_on
@@ -224,7 +225,7 @@ class UploadPostViewModel @Inject constructor(
                     viewModelScope.launch {
                         setEvent(
                             UiEvent.ShowToast(
-                               getString(context,R.string.unable_to_change_location)
+                                getString(context, R.string.unable_to_change_location)
                             )
                         )
 
@@ -234,7 +235,8 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is UploadPostEvent.UploadPost -> {
-                viewModelScope.launch {
+                handleUploadPost(event)
+                /**viewModelScope.launch {
                     var requestTags: RequestBody? = null
                     var requestImages: List<MultipartBody.Part>? = null
                     if (addedTags.isNotEmpty())
@@ -248,7 +250,8 @@ class UploadPostViewModel @Inject constructor(
                     event.lat?.let {
                         requestLat =
                             MultipartBody.Part.createFormData("latitude", event.lat.toString())
-                        requestLong = MultipartBody.Part.createFormData("longitude", event.long.toString())
+                        requestLong =
+                            MultipartBody.Part.createFormData("longitude", event.long.toString())
                     }
                     if (selectedImages.isNotEmpty()) {
                         requestImages = selectedImages.filter { it.isNew }
@@ -271,7 +274,7 @@ class UploadPostViewModel @Inject constructor(
 
                         }
                     }
-                    if(postMode == PostMode.CREATE) {
+                    if (postMode == PostMode.CREATE) {
                         var requestVoteOptions: RequestBody? = null
 
                         if (event.voteOptions.isNotEmpty()) {
@@ -302,6 +305,7 @@ class UploadPostViewModel @Inject constructor(
                                     setEvent(UiEvent.popBackStack)
 
                                 }
+
                                 is Resource.Error -> {
                                     setLoading(false)
                                     setEvent(
@@ -313,15 +317,18 @@ class UploadPostViewModel @Inject constructor(
                                         )
                                     )
                                 }
+
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
                                 else -> null
                             }
                         }
                     } else {
                         val deleteImagesJson = Gson().toJson(deletedImages)
-                        val deleteImagesBody = deleteImagesJson.toRequestBody("application/json".toMediaTypeOrNull())
+                        val deleteImagesBody =
+                            deleteImagesJson.toRequestBody("application/json".toMediaTypeOrNull())
                         uploadPostUseCases.editPost(
                             postid = MultipartBody.Part.createFormData("postid", postId.toString()),
                             latitude = requestLat,
@@ -338,14 +345,22 @@ class UploadPostViewModel @Inject constructor(
                             text = requestText,
 
 
-                        ).collect { result ->
+                            ).collect { result ->
                             when (result) {
                                 is Resource.Success -> {
                                     setLoading(false)
                                     result.data?.let {
-                                        setEvent(UiEvent.PopBackStackWithResult(getString(context,R.string.editedPost), it.posts[0]))
+                                        setEvent(
+                                            UiEvent.PopBackStackWithResult(
+                                                getString(
+                                                    context,
+                                                    R.string.editedPost
+                                                ), it.posts[0]
+                                            )
+                                        )
                                     }
                                 }
+
                                 is Resource.Error -> {
                                     setLoading(false)
                                     setEvent(
@@ -357,22 +372,159 @@ class UploadPostViewModel @Inject constructor(
                                         )
                                     )
                                 }
+
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
                                 else -> null
                             }
 
                         }
                     }
-                }
+                }**/
             }
 
         }
 
 
     }
+
+    private fun handleUploadPost(event: UploadPostEvent.UploadPost) {
+        viewModelScope.launch {
+            val requestBodies = buildRequestBodies(event)
+            when (postMode) {
+                PostMode.CREATE -> uploadNewPost(requestBodies, event)
+                PostMode.EDIT -> editExistingPost(requestBodies, event)
+                else -> null
+            }
+
+        }
+    }
+
+    private fun buildRequestBodies(event: UploadPostEvent.UploadPost): UploadRequestData {
+        val requestTags = if (addedTags.isNotEmpty()) {
+            addedTags.joinToString("#").toRequestBody("text/plain".toMediaTypeOrNull())
+        } else null
+
+        val requestText = contentTextField.value.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        val requestImages = selectedImages.filter { it.isNew }
+            .mapNotNull { it.uri?.let { uri -> getMultipartBody(uri, context) } }
+
+        val requestAudio = event.audioFilePath?.let { path ->
+            val file = File(path)
+            if (file.exists()) MultipartBody.Part.createFormData(
+                "audio", file.name, file.asRequestBody("audio/mp4".toMediaTypeOrNull())
+            ) else null
+        }
+
+        val requestLat =
+            event.lat?.let { MultipartBody.Part.createFormData("latitude", it.toString()) }
+        val requestLong =
+            event.long?.let { MultipartBody.Part.createFormData("longitude", it.toString()) }
+
+        return UploadRequestData(
+            tags = requestTags,
+            text = requestText,
+            images = requestImages,
+            audio = requestAudio,
+            latitude = requestLat,
+            longitude = requestLong
+        )
+    }
+
+    private suspend fun uploadNewPost(data: UploadRequestData,event: UploadPostEvent.UploadPost) {
+        val voteOptionsJson = event.voteOptions.takeIf { it.isNotEmpty() }?.let {
+            val json = Gson().toJson(it.map { VoteOptionData(voteoption = it) })
+            json.toRequestBody("application/json".toMediaType())
+        }
+
+        uploadPostUseCases.uploadPost(
+            anonymousNick = if (anonymous.value)
+                generateAnonymousNickname().toRequestBody("text/plain".toMediaTypeOrNull())
+            else null,
+            tags = data.tags,
+            images = data.images,
+            text = data.text,
+            audio = data.audio,
+            voteOptions = voteOptionsJson,
+            latitude = data.latitude,
+            longitude = data.longitude
+        ).collect { handleResult(it,PostMode.CREATE) }
+    }
+
+    private suspend fun editExistingPost(
+        data: UploadRequestData,
+        event: UploadPostEvent.UploadPost
+    ) {
+        val deleteImagesJson = Gson().toJson(deletedImages)
+        val deleteImagesBody =
+            deleteImagesJson.toRequestBody("application/json".toMediaTypeOrNull())
+
+        uploadPostUseCases.editPost(
+            postid = MultipartBody.Part.createFormData("postid", postId.toString()),
+            latitude = data.latitude,
+            longitude = data.longitude,
+            anonymousNick = if (anonymous.value)
+                generateAnonymousNickname().toRequestBody("text/plain".toMediaTypeOrNull())
+            else null,
+            deleteImages = deleteImagesBody,
+            tags = data.tags,
+            images = data.images,
+            audio = data.audio,
+            deleteAudio = event.deleteAudio?.toRequestBody("text/plain".toMediaTypeOrNull()),
+            text = data.text
+        ).collect { handleResult(it, PostMode.EDIT) }
+    }
+
+    private suspend fun <T> handleResult(
+        result: Resource<T>,
+        mode: PostMode
+    ) {
+        when (result) {
+            is Resource.Success -> {
+                setLoading(false)
+                when (mode) {
+                    PostMode.CREATE -> {
+                        setEvent(UiEvent.popBackStack)
+                    }
+                    PostMode.EDIT -> {
+                        // T가 어떤 타입이든 런타임에 확인 가능
+                        if (result.data is GetPostsResponse) {
+                            val data = result.data as GetPostsResponse
+                            setEvent(
+                                UiEvent.PopBackStackWithResult(
+                                    getString(context, R.string.editedPost),
+                                    data.posts.first()
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+            is Resource.Error -> {
+                setLoading(false)
+                setEvent(
+                    UiEvent.ShowToast(
+                        result.message ?: getString(context, R.string.error)
+                    )
+                )
+            }
+
+            is Resource.Loading -> setLoading(true)
+        }
+    }
 }
+data class UploadRequestData(
+    val tags: RequestBody?,
+    val text: RequestBody,
+    val images: List<MultipartBody.Part>?,
+    val audio: MultipartBody.Part?,
+    val latitude: MultipartBody.Part?,
+    val longitude: MultipartBody.Part?
+)
 data class VoteOptionData(
     val voteoption: String
 )

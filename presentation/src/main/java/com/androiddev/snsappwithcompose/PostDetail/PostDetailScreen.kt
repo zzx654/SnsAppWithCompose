@@ -19,9 +19,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -135,7 +137,7 @@ fun PostDetailScreen(
     }
     val dropdownMenuItem = if(post?.userId == userViewModel.userId.value) {
         listOf(
-            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(post))},
+            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(viewModel.post.value))},
             MenuItem(getString(context,R.string.delete)) { viewModel.onPostDetailEvent(PostDetailEvent.DeletePost)}
         )
 
@@ -347,7 +349,7 @@ fun PostDetailScreen(
                             )
                             Spacer(modifier = Modifier.height(15.dp))
                             Text(
-                                text = "이건 정말정말정말정말정말정말정말정말정말정말정말정말정말정말정말정말 긴 문장입니다. 자동으로 개행이 잘 될까요?",
+                                text = currentPost?.text?:"",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 24.dp),
@@ -357,8 +359,8 @@ fun PostDetailScreen(
                                 HorizontalPager(
                                     state = pagerState,
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(270.dp),
+                                        .fillMaxWidth(),
+                                        //.height(270.dp),
                                     count = currentPost?.imageSize ?: 0
                                 ) { page ->
                                     // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
@@ -371,9 +373,11 @@ fun PostDetailScreen(
                                         imageLoader = imageLoader,
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .aspectRatio(1f)
+                                            //.heightIn(min = 200.dp, max = 400.dp)
                                             .padding(horizontal = 24.dp),
 
-                                        contentScale = ContentScale.Crop,
+                                        contentScale = ContentScale.Fit,
                                         contentDescription = null
                                     )
 
@@ -384,13 +388,16 @@ fun PostDetailScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     contentAlignment = Alignment.TopCenter
                                 ) {
-                                    HorizontalPagerIndicator(
-                                        //  modifier = Modifier.align(Alignment.TopCenter),
-                                        pagerState = pagerState,
-                                        //modifier = Modifier.padding(16.dp), // align 대신 padding 등으로 조절
-                                        activeColor = Color.Black,
-                                        inactiveColor = Color.LightGray
-                                    )
+                                    if(pagerState.pageCount > 1){
+                                        HorizontalPagerIndicator(
+                                            //  modifier = Modifier.align(Alignment.TopCenter),
+                                            pagerState = pagerState,
+                                            //modifier = Modifier.padding(16.dp), // align 대신 padding 등으로 조절
+                                            activeColor = Color.Black,
+                                            inactiveColor = Color.LightGray
+                                        )
+                                    }
+
                                 }
 
 
@@ -491,7 +498,7 @@ fun PostDetailScreen(
                                 SelectableDotText(
                                     text = getString(context,CommentSortType.POPULAR.labelResId),
                                     selected = viewModel.commentSortType.value == CommentSortType.POPULAR,
-                                    onClick = {//onEvent
+                                    onClick = {
                                         viewModel.onCommentEvent(CommentEvent.SetCommentSortType(CommentSortType.POPULAR))
                                     },
                                 )

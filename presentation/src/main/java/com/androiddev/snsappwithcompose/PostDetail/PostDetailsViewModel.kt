@@ -403,7 +403,6 @@ class PostDetailsViewModel @Inject constructor(
     fun onPostDetailEvent(event: PostDetailEvent) {
         when (event) {
 
-
             is PostDetailEvent.ToggleLikePost -> {
                 viewModelScope.launch {
                     postDetailUseCases.ToggleLikePost(event.postId).collect { result ->

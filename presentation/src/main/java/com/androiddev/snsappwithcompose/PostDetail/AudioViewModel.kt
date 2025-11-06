@@ -40,9 +40,6 @@ class AudioViewModel @Inject constructor(
         }
     }
 
-   // init {
-   //     registerReceiver()
-   // }
     fun registerReceiver() {
         if (receiverRegistered) return
 
