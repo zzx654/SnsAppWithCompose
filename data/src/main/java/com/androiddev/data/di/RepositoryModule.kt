@@ -1,39 +1,39 @@
 package com.androiddev.data.di
 
 import android.content.Context
-import com.androiddev.data.remote.api.AuthPhoneApi
-import com.androiddev.data.remote.api.CommentApi
-import com.androiddev.data.remote.api.CreateProfileApi
-import com.androiddev.data.remote.api.GetPostsApi
-import com.androiddev.data.remote.api.PostApi
-import com.androiddev.data.remote.api.SignInApi
-import com.androiddev.data.remote.api.SignUpApi
-import com.androiddev.data.remote.api.ToggleLikePostApi
-import com.androiddev.data.remote.api.TagApi
-import com.androiddev.data.remote.api.UploadPostApi
-import com.androiddev.data.remote.api.VoteApi
-import com.androiddev.data.repository.AuthPhoneRepositoryImpl
-import com.androiddev.data.repository.CommentRepositoryImpl
-import com.androiddev.data.repository.CreateProfileRepositoryImpl
-import com.androiddev.data.repository.GetPostsRepositoryImpl
-import com.androiddev.data.repository.PostRepositoryImpl
-import com.androiddev.data.repository.SigninRepositoryImpl
-import com.androiddev.data.repository.SignupRepositoryImpl
-import com.androiddev.data.repository.ToggleLikePostRepositoryImpl
-import com.androiddev.data.repository.TagRepositoryImpl
-import com.androiddev.data.repository.UploadPostRepositoryImpl
-import com.androiddev.data.repository.VoteRepositoryImpl
-import com.androiddev.domain.repository.AuthPhoneRepository
-import com.androiddev.domain.repository.CreateProfileRepository
-import com.androiddev.domain.repository.CommentRepository
-import com.androiddev.domain.repository.GetPostsRepository
-import com.androiddev.domain.repository.PostRepository
-import com.androiddev.domain.repository.SigninRepository
-import com.androiddev.domain.repository.SignupRepository
-import com.androiddev.domain.repository.ToggleLikePostRepository
-import com.androiddev.domain.repository.TagRepository
-import com.androiddev.domain.repository.UploadPostRepository
-import com.androiddev.domain.repository.VoteRepository
+import com.androiddev.data.remote.api.signup.AuthPhoneApi
+import com.androiddev.data.remote.api.postdetail.CommentApi
+import com.androiddev.data.remote.api.createprofile.CreateProfileApi
+import com.androiddev.data.remote.api.postlist.GetPostsApi
+import com.androiddev.data.remote.api.postdetail.PostApi
+import com.androiddev.data.remote.api.signin.SignInApi
+import com.androiddev.data.remote.api.signup.SignUpApi
+import com.androiddev.data.remote.api.postdetail.ToggleLikePostApi
+import com.androiddev.data.remote.api.tag.TagApi
+import com.androiddev.data.remote.api.uploadpost.UploadPostApi
+import com.androiddev.data.remote.api.postdetail.VoteApi
+import com.androiddev.data.repository.signup.AuthPhoneRepositoryImpl
+import com.androiddev.data.repository.postdetail.CommentRepositoryImpl
+import com.androiddev.data.repository.createprofile.CreateProfileRepositoryImpl
+import com.androiddev.data.repository.postlist.GetPostsRepositoryImpl
+import com.androiddev.data.repository.postdetail.PostRepositoryImpl
+import com.androiddev.data.repository.signin.SigninRepositoryImpl
+import com.androiddev.data.repository.signup.SignupRepositoryImpl
+import com.androiddev.data.repository.postdetail.ToggleLikePostRepositoryImpl
+import com.androiddev.data.repository.tag.TagRepositoryImpl
+import com.androiddev.data.repository.uploadpost.UploadPostRepositoryImpl
+import com.androiddev.data.repository.postdetail.VoteRepositoryImpl
+import com.androiddev.domain.repository.signup.AuthPhoneRepository
+import com.androiddev.domain.repository.createprofile.CreateProfileRepository
+import com.androiddev.domain.repository.postdetail.CommentRepository
+import com.androiddev.domain.repository.postlist.GetPostsRepository
+import com.androiddev.domain.repository.postdetail.PostRepository
+import com.androiddev.domain.repository.signin.SigninRepository
+import com.androiddev.domain.repository.signup.SignupRepository
+import com.androiddev.domain.repository.postdetail.ToggleLikePostRepository
+import com.androiddev.domain.repository.tag.TagRepository
+import com.androiddev.domain.repository.uploadpost.UploadPostRepository
+import com.androiddev.domain.repository.postdetail.VoteRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,37 +46,37 @@ import javax.inject.Singleton
 object RepositoryModule {
     @Provides
     @Singleton
-    fun provideSignInRepository(api: SignInApi,@ApplicationContext context: Context): SigninRepository {
+    fun provideSignInRepository(api: SignInApi, @ApplicationContext context: Context): SigninRepository {
         return SigninRepositoryImpl(api,context)
     }
     @Provides
     @Singleton
-    fun provideSignUpRepository(api: SignUpApi,@ApplicationContext context: Context): SignupRepository {
+    fun provideSignUpRepository(api: SignUpApi, @ApplicationContext context: Context): SignupRepository {
         return SignupRepositoryImpl(api,context)
     }
     @Provides
     @Singleton
-    fun provideAuthPhoneRepository(api: AuthPhoneApi,@ApplicationContext context: Context): AuthPhoneRepository {
+    fun provideAuthPhoneRepository(api: AuthPhoneApi, @ApplicationContext context: Context): AuthPhoneRepository {
         return AuthPhoneRepositoryImpl(api,context)
     }
     @Provides
     @Singleton
-    fun provideCreateProfileRepository(api: CreateProfileApi,@ApplicationContext context: Context): CreateProfileRepository {
+    fun provideCreateProfileRepository(api: CreateProfileApi, @ApplicationContext context: Context): CreateProfileRepository {
         return CreateProfileRepositoryImpl(api,context)
     }
     @Provides
     @Singleton
-    fun provideUploadPostRepository(api: UploadPostApi,@ApplicationContext context: Context): UploadPostRepository {
+    fun provideUploadPostRepository(api: UploadPostApi, @ApplicationContext context: Context): UploadPostRepository {
         return UploadPostRepositoryImpl(api,context)
     }
     @Provides
     @Singleton
-    fun provideGetPostsRepository(api: GetPostsApi,@ApplicationContext context: Context): GetPostsRepository {
+    fun provideGetPostsRepository(api: GetPostsApi, @ApplicationContext context: Context): GetPostsRepository {
         return GetPostsRepositoryImpl(api,context)
     }
     @Provides
     @Singleton
-    fun provideToggleLikePostRepository(api: ToggleLikePostApi,@ApplicationContext context: Context): ToggleLikePostRepository {
+    fun provideToggleLikePostRepository(api: ToggleLikePostApi, @ApplicationContext context: Context): ToggleLikePostRepository {
         return ToggleLikePostRepositoryImpl(api,context)
     }
 
@@ -87,12 +87,12 @@ object RepositoryModule {
     }
     @Provides
     @Singleton
-    fun provideVoteRepository(api: VoteApi,@ApplicationContext context: Context): VoteRepository {
+    fun provideVoteRepository(api: VoteApi, @ApplicationContext context: Context): VoteRepository {
         return VoteRepositoryImpl(api,context)
     }
     @Provides
     @Singleton
-    fun provideTagRepository(api: TagApi, @ApplicationContext context: Context): TagRepository{
+    fun provideTagRepository(api: TagApi, @ApplicationContext context: Context): TagRepository {
         return TagRepositoryImpl(api,context)
     }
     @Provides

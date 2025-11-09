@@ -17,14 +17,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
-import com.androiddev.snsappwithcompose.navigation.components.Navigation
+import com.androiddev.snsappwithcompose.common.navigation.component.Navigation
 import com.androiddev.snsappwithcompose.ui.theme.SnsAppWithComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.androiddev.snsappwithcompose.util.createNotificationChannel
+import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
+import com.androiddev.snsappwithcompose.common.util.createNotificationChannel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @AndroidEntryPoint

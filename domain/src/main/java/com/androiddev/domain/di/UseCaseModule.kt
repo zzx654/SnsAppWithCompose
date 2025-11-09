@@ -1,60 +1,60 @@
 package com.androiddev.domain.di
 
 import android.content.Context
-import com.androiddev.domain.repository.AuthPhoneRepository
-import com.androiddev.domain.repository.CommentRepository
-import com.androiddev.domain.repository.CreateProfileRepository
-import com.androiddev.domain.repository.GetPostsRepository
-import com.androiddev.domain.repository.PostRepository
-import com.androiddev.domain.repository.SigninRepository
-import com.androiddev.domain.repository.SignupRepository
-import com.androiddev.domain.repository.ToggleLikePostRepository
-import com.androiddev.domain.repository.TagRepository
-import com.androiddev.domain.repository.UploadPostRepository
-import com.androiddev.domain.repository.VoteRepository
-import com.androiddev.domain.use_case.AuthPhoneUseCases
-import com.androiddev.domain.use_case.AuthenticateCode
-import com.androiddev.domain.use_case.CancelVote
-import com.androiddev.domain.use_case.CheckNickname
-import com.androiddev.domain.use_case.CommentUseCases
-import com.androiddev.domain.use_case.CreateProfile
-import com.androiddev.domain.use_case.CreateProfileUseCases
-import com.androiddev.domain.use_case.DeletePost
-import com.androiddev.domain.use_case.EditPost
-import com.androiddev.domain.use_case.EmailSignIn
-import com.androiddev.domain.use_case.EmailSignUp
-import com.androiddev.domain.use_case.EmailSignUpUseCases
-import com.androiddev.domain.use_case.GetComments
-import com.androiddev.domain.use_case.GetNearPosts
-import com.androiddev.domain.use_case.GetPopularComments
-import com.androiddev.domain.use_case.GetNewPosts
-import com.androiddev.domain.use_case.GetNewTagPosts
-import com.androiddev.domain.use_case.GetPopularTagPosts
-import com.androiddev.domain.use_case.GetPostsUseCases
-import com.androiddev.domain.use_case.GetReplies
-import com.androiddev.domain.use_case.GetSelectedComment
-import com.androiddev.domain.use_case.GetSelectedPost
-import com.androiddev.domain.use_case.GetVoteInfo
-import com.androiddev.domain.use_case.PostComment
-import com.androiddev.domain.use_case.PostDetailUseCases
-import com.androiddev.domain.use_case.PostReply
-import com.androiddev.domain.use_case.ReplyUseCases
-import com.androiddev.domain.use_case.GetTags
-import com.androiddev.domain.use_case.RequestEmailAuthCode
-import com.androiddev.domain.use_case.RequestPhoneAuthCode
-import com.androiddev.domain.use_case.SearchTag
-import com.androiddev.domain.use_case.SignInUseCases
-import com.androiddev.domain.use_case.SignInWithToken
-import com.androiddev.domain.use_case.SocialSignIn
-import com.androiddev.domain.use_case.SocialSignUpUseCase
-import com.androiddev.domain.use_case.ToggleLikeComment
-import com.androiddev.domain.use_case.ToggleLikePost
-import com.androiddev.domain.use_case.TagUseCases
-import com.androiddev.domain.use_case.ToggleFavoriteTag
-import com.androiddev.domain.use_case.UploadPost
-import com.androiddev.domain.use_case.UploadPostUseCases
-import com.androiddev.domain.use_case.Vote
-import com.androiddev.domain.use_case.VoteUseCases
+import com.androiddev.domain.repository.signup.AuthPhoneRepository
+import com.androiddev.domain.repository.postdetail.CommentRepository
+import com.androiddev.domain.repository.createprofile.CreateProfileRepository
+import com.androiddev.domain.repository.postlist.GetPostsRepository
+import com.androiddev.domain.repository.postdetail.PostRepository
+import com.androiddev.domain.repository.signin.SigninRepository
+import com.androiddev.domain.repository.signup.SignupRepository
+import com.androiddev.domain.repository.postdetail.ToggleLikePostRepository
+import com.androiddev.domain.repository.tag.TagRepository
+import com.androiddev.domain.repository.uploadpost.UploadPostRepository
+import com.androiddev.domain.repository.postdetail.VoteRepository
+import com.androiddev.domain.use_case.signup.authphone.AuthPhoneUseCases
+import com.androiddev.domain.use_case.signup.authphone.AuthenticateCode
+import com.androiddev.domain.use_case.postdetail.CancelVote
+import com.androiddev.domain.use_case.createprofile.CheckNickname
+import com.androiddev.domain.use_case.postdetail.CommentUseCases
+import com.androiddev.domain.use_case.createprofile.CreateProfile
+import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
+import com.androiddev.domain.use_case.postdetail.DeletePost
+import com.androiddev.domain.use_case.uploadpost.EditPost
+import com.androiddev.domain.use_case.signin.EmailSignIn
+import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUp
+import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUpUseCases
+import com.androiddev.domain.use_case.postdetail.GetComments
+import com.androiddev.domain.use_case.postlist.GetNearPosts
+import com.androiddev.domain.use_case.postdetail.GetPopularComments
+import com.androiddev.domain.use_case.postlist.GetNewPosts
+import com.androiddev.domain.use_case.postlist.GetNewTagPosts
+import com.androiddev.domain.use_case.postlist.GetPopularTagPosts
+import com.androiddev.domain.use_case.postlist.GetPostsUseCases
+import com.androiddev.domain.use_case.reply.GetReplies
+import com.androiddev.domain.use_case.postdetail.GetSelectedComment
+import com.androiddev.domain.use_case.postlist.GetSelectedPost
+import com.androiddev.domain.use_case.postdetail.GetVoteInfo
+import com.androiddev.domain.use_case.postdetail.PostComment
+import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
+import com.androiddev.domain.use_case.reply.PostReply
+import com.androiddev.domain.use_case.reply.ReplyUseCases
+import com.androiddev.domain.use_case.tag.GetTags
+import com.androiddev.domain.use_case.signup.emailsignup.RequestEmailAuthCode
+import com.androiddev.domain.use_case.signup.authphone.RequestPhoneAuthCode
+import com.androiddev.domain.use_case.tag.SearchTag
+import com.androiddev.domain.use_case.signin.SignInUseCases
+import com.androiddev.domain.use_case.signin.SignInWithToken
+import com.androiddev.domain.use_case.signin.SocialSignIn
+import com.androiddev.domain.use_case.signup.socialsignup.SocialSignUpUseCase
+import com.androiddev.domain.use_case.postdetail.ToggleLikeComment
+import com.androiddev.domain.use_case.postdetail.ToggleLikePost
+import com.androiddev.domain.use_case.tag.TagUseCases
+import com.androiddev.domain.use_case.tag.ToggleFavoriteTag
+import com.androiddev.domain.use_case.uploadpost.UploadPost
+import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
+import com.androiddev.domain.use_case.postdetail.Vote
+import com.androiddev.domain.use_case.postdetail.VoteUseCases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -76,7 +76,7 @@ object UseCaseModule {
     }
     @Provides
     @Singleton
-    fun provideAuthPhoneUseCases(repository: AuthPhoneRepository,@ApplicationContext context: Context): AuthPhoneUseCases {
+    fun provideAuthPhoneUseCases(repository: AuthPhoneRepository, @ApplicationContext context: Context): AuthPhoneUseCases {
         return AuthPhoneUseCases(
             requestAuthCode = RequestPhoneAuthCode(repository,context),
             authenticateCode = AuthenticateCode(repository)
@@ -89,7 +89,7 @@ object UseCaseModule {
     }
     @Provides
     @Singleton
-    fun provideEmailSignUpUseCase(repository: SignupRepository,@ApplicationContext context: Context): EmailSignUpUseCases {
+    fun provideEmailSignUpUseCase(repository: SignupRepository, @ApplicationContext context: Context): EmailSignUpUseCases {
         return EmailSignUpUseCases(
             requestAuthCode = RequestEmailAuthCode(repository,context),
             emailSignUp = EmailSignUp(repository)
@@ -105,7 +105,7 @@ object UseCaseModule {
     }
     @Provides
     @Singleton
-    fun provideUploadPostUseCases(uploadRepository: UploadPostRepository,tagRepository: TagRepository): UploadPostUseCases {
+    fun provideUploadPostUseCases(uploadRepository: UploadPostRepository, tagRepository: TagRepository): UploadPostUseCases {
         return UploadPostUseCases(
             searchTag = SearchTag(tagRepository),
             uploadPost = UploadPost(uploadRepository),
@@ -136,7 +136,7 @@ object UseCaseModule {
     @Singleton
     fun providePostDetailUseCases(
         toggleLikePostRepository: ToggleLikePostRepository,
-        postRepository:PostRepository
+        postRepository: PostRepository
     ): PostDetailUseCases {
         return PostDetailUseCases(
             ToggleLikePost = ToggleLikePost(toggleLikePostRepository),

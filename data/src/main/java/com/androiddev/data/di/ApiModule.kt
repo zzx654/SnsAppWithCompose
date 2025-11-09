@@ -1,18 +1,18 @@
 package com.androiddev.data.di
 
 import com.androiddev.data.BuildConfig
-import com.androiddev.data.remote.api.AuthPhoneApi
-import com.androiddev.data.remote.api.CommentApi
-import com.androiddev.data.remote.api.CreateProfileApi
-import com.androiddev.data.remote.api.GetPostsApi
-import com.androiddev.data.remote.api.PostApi
-import com.androiddev.data.remote.api.SignInApi
-import com.androiddev.data.remote.api.SignUpApi
-import com.androiddev.data.remote.api.ToggleLikePostApi
-import com.androiddev.data.remote.api.TagApi
-import com.androiddev.data.remote.api.UploadPostApi
-import com.androiddev.data.remote.api.VoteApi
-import com.androiddev.data.util.UserPreferences
+import com.androiddev.data.remote.api.signup.AuthPhoneApi
+import com.androiddev.data.remote.api.postdetail.CommentApi
+import com.androiddev.data.remote.api.createprofile.CreateProfileApi
+import com.androiddev.data.remote.api.postlist.GetPostsApi
+import com.androiddev.data.remote.api.postdetail.PostApi
+import com.androiddev.data.remote.api.signin.SignInApi
+import com.androiddev.data.remote.api.signup.SignUpApi
+import com.androiddev.data.remote.api.postdetail.ToggleLikePostApi
+import com.androiddev.data.remote.api.tag.TagApi
+import com.androiddev.data.remote.api.uploadpost.UploadPostApi
+import com.androiddev.data.remote.api.postdetail.VoteApi
+import com.androiddev.data.local.UserPreferences
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
@@ -72,7 +72,8 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideCreateProfileApi(retrofit: Retrofit): CreateProfileApi = retrofit.create(CreateProfileApi::class.java)
+    fun provideCreateProfileApi(retrofit: Retrofit): CreateProfileApi = retrofit.create(
+        CreateProfileApi::class.java)
 
     @Provides
     @Singleton
@@ -84,7 +85,8 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideToggleLikePostApi(retrofit: Retrofit): ToggleLikePostApi = retrofit.create(ToggleLikePostApi::class.java)
+    fun provideToggleLikePostApi(retrofit: Retrofit): ToggleLikePostApi = retrofit.create(
+        ToggleLikePostApi::class.java)
 
     @Provides
     @Singleton

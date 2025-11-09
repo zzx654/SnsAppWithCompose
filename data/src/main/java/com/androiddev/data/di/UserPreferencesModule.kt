@@ -1,7 +1,7 @@
 package com.androiddev.data.di
 
 import android.content.Context
-import com.androiddev.data.util.UserPreferences
+import com.androiddev.data.local.UserPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

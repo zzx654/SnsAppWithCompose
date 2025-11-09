@@ -41,9 +41,10 @@
                 android:resource="@xml/file_path" />
         </provider>
         <service
-            android:name=".service.AudioService"
+            android:name=".service.audio.AudioService"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="mediaPlayback"
+            tools:ignore="ForegroundServicePermission" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -71,10 +72,10 @@
                     android:scheme="@string/KAKAO_REDIRECT_URI" />
             </intent-filter>
         </activity>
-        <service android:name=".service.RecordService"
+        <service android:name=".service.record.RecordService"
             android:exported="false"
             android:foregroundServiceType="microphone"
-             />
+            tools:ignore="ForegroundServicePermission" />
     </application>
 
 </manifest>
