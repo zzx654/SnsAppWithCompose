@@ -121,14 +121,14 @@ class UploadPostViewModel @Inject constructor(
                                         result.data?.let {
                                             if (tagTextField.value.isNotEmpty()) {
                                                 _searchedTags.clear()
-                                                if (it.tags.isEmpty()) {
+                                                if (it.searchedTags.isEmpty()) {
                                                     _searchedTags.add(
                                                         Tag(
                                                             tagname = event.tag, tagcount = 0
                                                         )
                                                     )
                                                 } else {
-                                                    _searchedTags.addAll(it.tags)
+                                                    _searchedTags.addAll(it.searchedTags)
                                                 }
                                             }
                                         }

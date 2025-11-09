@@ -5,9 +5,11 @@ import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.tag.TagApi
 import com.androiddev.data.remote.dto.toGetTagsResponse
+import com.androiddev.data.remote.dto.toSearchTags
 import com.androiddev.data.remote.dto.toTags
 import com.androiddev.domain.model.GetTagsResponse
 import com.androiddev.domain.model.SearchTagResponse
+import com.androiddev.domain.model.SearchedTags
 import com.androiddev.domain.model.Tags
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.util.Resource
@@ -80,17 +82,18 @@ class TagRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun searchTag(tag:String): Flow<Resource<SearchTagResponse>> {
+    override suspend fun searchTag(tag:String): Flow<Resource<SearchedTags>> {
         return flow {
             try {
                 emit(Resource.Loading())
                 api.searchTag(tag).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getTagsResult = result.toGetTagsResponse(
-                            isTokenValid = result.isTokenValid,
-                            searchedTags = result.searchedTags
+                    if(!result.isTokenValid) {
+
+                    } else if(result.resultCode == 200 && result.data!= null) {
+                        val getTagsData = result.data.toSearchTags(
+                            searchedTags = result.data.searchedTags
                         )
-                        emit(Resource.Success(getTagsResult))
+                        emit(Resource.Success(getTagsData))
                     } else {
                         emit(Resource.Error(getString(context,R.string.server_error)))
                     }

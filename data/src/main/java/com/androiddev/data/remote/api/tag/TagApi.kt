@@ -3,6 +3,7 @@ package com.androiddev.data.remote.api.tag
 import com.androiddev.data.remote.BaseApiResponse
 import com.androiddev.data.remote.dto.GetTagsResponseDto
 import com.androiddev.data.remote.dto.SearchTagResponseDto
+import com.androiddev.data.remote.dto.SearchedTagsDto
 import com.androiddev.data.remote.dto.TagsDto
 import retrofit2.Response
 import retrofit2.http.Field
@@ -17,7 +18,7 @@ interface TagApi {
     @POST("/searchTag")
     suspend fun searchTag(
         @Field("tag")tag: String,
-    ): Response<SearchTagResponseDto>
+    ): Response<BaseApiResponse<SearchedTagsDto>>
 
     @FormUrlEncoded
     @POST("/ToggleFavoriteTag")

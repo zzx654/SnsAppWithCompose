@@ -75,7 +75,7 @@ class TagViewModel @Inject constructor(
                         result.data?.let {
                             if (tagTextField.value.isNotBlank()) {
                                 _getTagsState.value = _getTagsState.value.copy(
-                                    searchedTags = it.tags
+                                    searchedTags = it.searchedTags
                                 )
                             }
                         }
