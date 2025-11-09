@@ -5,8 +5,10 @@ import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.tag.TagApi
 import com.androiddev.data.remote.dto.toGetTagsResponse
+import com.androiddev.data.remote.dto.toTags
 import com.androiddev.domain.model.GetTagsResponse
 import com.androiddev.domain.model.SearchTagResponse
+import com.androiddev.domain.model.Tags
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -19,19 +21,21 @@ class TagRepositoryImpl @Inject constructor(
     private val api: TagApi,
     private val context: Context
 ) : TagRepository {
-    override suspend fun getTags(): Flow<Resource<GetTagsResponse>> {
+    override suspend fun getTags(): Flow<Resource<Tags>> {
         return flow {
             try {
                 emit(Resource.Loading())
                 api.getTags().body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getTagsResult = result.toGetTagsResponse(
-                            isTokenValid = result.isTokenValid,
-                            favoriteTags = result.favoriteTags,
-                            popularTags = result.popularTags
+                    if(!result.isTokenValid) {
+
+                    } else if(result.resultCode == 200 && result.data!= null) {
+                        val getTagsData = result.data.toTags(
+                            favoriteTags = result.data.favoriteTags,
+                            popularTags = result.data.popularTags
                         )
-                        emit(Resource.Success(getTagsResult))
-                    } else {
+                        emit(Resource.Success(getTagsData))
+                    }
+                    else {
                         emit(Resource.Error(getString(context,R.string.server_error)))
                     }
 
