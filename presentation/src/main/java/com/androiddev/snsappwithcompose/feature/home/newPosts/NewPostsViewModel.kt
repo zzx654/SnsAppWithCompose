@@ -3,7 +3,7 @@ package com.androiddev.snsappwithcompose.feature.home.newPosts
 import android.Manifest
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import com.androiddev.domain.model.GetPostsResponse
+import com.androiddev.domain.model.Posts
 import com.androiddev.domain.use_case.postlist.GetPostsUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BasePostsViewModel
@@ -26,7 +26,7 @@ class NewPostsViewModel @Inject constructor(
 ) {
     override suspend fun loadPosts(
         refresh: Boolean,
-        handleResult: suspend (Resource<GetPostsResponse>) -> Unit
+        handleResult: suspend (Resource<Posts>) -> Unit
     ) {
         checkPermissions(
             context = context,

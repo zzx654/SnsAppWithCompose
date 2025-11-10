@@ -1,5 +1,7 @@
 package com.androiddev.data.remote.api.postlist
 
+import com.androiddev.data.remote.BaseApiResponse
+import com.androiddev.data.remote.dto.GetPostsDto
 import com.androiddev.data.remote.dto.GetPostsResponseDto
 import retrofit2.Response
 import retrofit2.http.Field
@@ -15,7 +17,7 @@ interface GetPostsApi {
         @Field("tagid")tagid: Int,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
-    ): Response<GetPostsResponseDto>
+    ): Response<BaseApiResponse<GetPostsDto>>
     @FormUrlEncoded
     @POST("/getPopularTagPosts")
     suspend fun getPopularTagPosts(
@@ -24,7 +26,7 @@ interface GetPostsApi {
         @Field("score")score : Double?,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
-    ): Response<GetPostsResponseDto>
+    ): Response<BaseApiResponse<GetPostsDto>>
     @FormUrlEncoded
     @POST("/getNearPosts")
     suspend fun getNearPosts(
@@ -33,7 +35,7 @@ interface GetPostsApi {
         @Field("distancemax")distancemax : Int,
         @Field("latitude")latitude:Double,
         @Field("longitude")longitude:Double
-    ): Response<GetPostsResponseDto>
+    ): Response<BaseApiResponse<GetPostsDto>>
 
     @FormUrlEncoded
     @POST("/getNewPosts")
@@ -42,7 +44,7 @@ interface GetPostsApi {
         @Field("postdate")postdate: String?,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
-    ): Response<GetPostsResponseDto>
+    ): Response<BaseApiResponse<GetPostsDto>>
 
     @FormUrlEncoded
     @POST("/getSelectedPost")
@@ -50,7 +52,7 @@ interface GetPostsApi {
         @Field("postid")postid: Int,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
-    ):Response<GetPostsResponseDto>
+    ):Response<BaseApiResponse<GetPostsDto>>
 
 
 }

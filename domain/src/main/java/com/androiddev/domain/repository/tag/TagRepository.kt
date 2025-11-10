@@ -1,6 +1,5 @@
 package com.androiddev.domain.repository.tag
 
-import com.androiddev.domain.model.GetTagsResponse
 import com.androiddev.domain.model.SearchedTags
 import com.androiddev.domain.model.Tags
 import com.androiddev.domain.util.Resource
@@ -9,5 +8,5 @@ import kotlinx.coroutines.flow.Flow
 interface TagRepository {
     suspend fun getTags(): Flow<Resource<Tags>>
     suspend fun searchTag(tag:String): Flow<Resource<SearchedTags>>
-    suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<GetTagsResponse>>
+    suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<Tags>>
 }

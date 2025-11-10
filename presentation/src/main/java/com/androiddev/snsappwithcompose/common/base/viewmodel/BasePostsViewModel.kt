@@ -19,6 +19,7 @@ import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.google.android.gms.location.FusedLocationProviderClient
 import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat.getString
+import com.androiddev.domain.model.Posts
 import com.androiddev.snsappwithcompose.feature.home.util.PostPaginator
 
 abstract class BasePostsViewModel(
@@ -57,7 +58,7 @@ abstract class BasePostsViewModel(
         }
     )
 
-    abstract suspend fun loadPosts(refresh: Boolean, handleResult: suspend (Resource<GetPostsResponse>) -> Unit)
+    abstract suspend fun loadPosts(refresh: Boolean, handleResult: suspend (Resource<Posts>) -> Unit)
 
     open fun onEvent(event: GetPostsEvent) {
         when (event) {

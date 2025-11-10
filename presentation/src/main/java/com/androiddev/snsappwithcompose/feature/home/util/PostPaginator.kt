@@ -2,11 +2,12 @@ package com.androiddev.snsappwithcompose.feature.home.util
 
 import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.model.PostPreview
+import com.androiddev.domain.model.Posts
 import com.androiddev.domain.util.Resource
 
 
 class PostPaginator (
-    private val loadItems: ((Resource<GetPostsResponse>)->Unit,Boolean) -> Unit,
+    private val loadItems: ((Resource<Posts>)->Unit,Boolean) -> Unit,
     private val onRefreshUpdated: (Boolean) -> Unit,
     private val onLoadUpdated: (Boolean) -> Unit,
     private val onError:  (String) -> Unit,

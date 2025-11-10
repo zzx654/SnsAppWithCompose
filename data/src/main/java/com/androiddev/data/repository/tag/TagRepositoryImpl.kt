@@ -53,19 +53,21 @@ class TagRepositoryImpl @Inject constructor(
             }
         }
     }
-    override suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<GetTagsResponse>> {
+    override suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<Tags>> {
         return flow {
             try {
                 emit(Resource.Loading())
                 api.toggleFavoriteTag(tagId).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getTagsResult = result.toGetTagsResponse(
-                            isTokenValid = result.isTokenValid,
-                            favoriteTags = result.favoriteTags,
-                            popularTags = result.popularTags
+                    if(!result.isTokenValid) {
+
+                    } else if(result.resultCode == 200 && result.data!= null) {
+                        val getTagsData = result.data.toTags(
+                            favoriteTags = result.data.favoriteTags,
+                            popularTags = result.data.popularTags
                         )
-                        emit(Resource.Success(getTagsResult))
-                    } else {
+                        emit(Resource.Success(getTagsData))
+                    }
+                    else {
                         emit(Resource.Error(getString(context,R.string.server_error)))
                     }
 
