@@ -1,6 +1,7 @@
 package com.androiddev.data.remote.api.postdetail
 
-import com.androiddev.data.remote.dto.GetVoteResponseDto
+import com.androiddev.data.remote.BaseApiResponse
+import com.androiddev.data.remote.dto.VoteInfoDto
 import com.androiddev.domain.model.CancelVoteResponse
 import retrofit2.Response
 import retrofit2.http.Field
@@ -12,18 +13,18 @@ interface VoteApi {
     @POST("/getVoteInfo")
     suspend fun getVoteInfo(
         @Field("postid")postid: Int
-    ): Response<GetVoteResponseDto>
+    ): Response<BaseApiResponse<VoteInfoDto>>
 
     @FormUrlEncoded
     @POST("/vote")
     suspend fun vote(
         @Field("postid")postid: Int,
         @Field("optionid")optionid: Int
-    ): Response<GetVoteResponseDto>
+    ): Response<BaseApiResponse<VoteInfoDto>>
     @FormUrlEncoded
     @POST("/cancelVote")
     suspend fun cancelVote(
         @Field("postid")postid: Int
-    ): Response<CancelVoteResponse>
+    ): Response<BaseApiResponse<Unit>>
 
 }

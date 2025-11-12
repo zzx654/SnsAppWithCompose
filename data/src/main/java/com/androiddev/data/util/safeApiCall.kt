@@ -22,8 +22,8 @@ fun <T, R> safeApiCall(
         response.body()?.let { result ->
             if (!result.isTokenValid) {
                 // 토큰 처리
-            } else if (result.resultCode == 200 && result.data != null) {
-                emit(Resource.Success(mapToResource(result.data)))
+            } else if (result.resultCode == 200 ) {
+                    emit(Resource.Success(result.data?.let(mapToResource)))
             } else {
                 emit(Resource.Error(getString(context, com.androiddev.data.R.string.server_error)))
             }

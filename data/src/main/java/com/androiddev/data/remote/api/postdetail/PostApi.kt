@@ -1,5 +1,6 @@
 package com.androiddev.data.remote.api.postdetail
 
+import com.androiddev.data.remote.BaseApiResponse
 import com.androiddev.domain.model.DeletePostResponse
 import retrofit2.Response
 import retrofit2.http.Field
@@ -11,5 +12,5 @@ interface PostApi {
     @POST("/deletePost")
     suspend fun deletePost(
         @Field("postid")postid: Int
-    ): Response<DeletePostResponse>
+    ): Response<BaseApiResponse<Unit>>
 }

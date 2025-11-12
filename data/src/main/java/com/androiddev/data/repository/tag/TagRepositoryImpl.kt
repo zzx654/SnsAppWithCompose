@@ -7,6 +7,7 @@ import com.androiddev.data.remote.api.tag.TagApi
 import com.androiddev.data.remote.dto.toGetTagsResponse
 import com.androiddev.data.remote.dto.toSearchTags
 import com.androiddev.data.remote.dto.toTags
+import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.GetTagsResponse
 import com.androiddev.domain.model.SearchTagResponse
 import com.androiddev.domain.model.SearchedTags
@@ -23,94 +24,34 @@ class TagRepositoryImpl @Inject constructor(
     private val api: TagApi,
     private val context: Context
 ) : TagRepository {
-    override suspend fun getTags(): Flow<Resource<Tags>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.getTags().body()?.let { result ->
-                    if(!result.isTokenValid) {
-
-                    } else if(result.resultCode == 200 && result.data!= null) {
-                        val getTagsData = result.data.toTags(
-                            favoriteTags = result.data.favoriteTags,
-                            popularTags = result.data.popularTags
-                        )
-                        emit(Resource.Success(getTagsData))
-                    }
-                    else {
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                    }
-
-                }
-
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
-            }
+    override suspend fun getTags(): Flow<Resource<Tags>> = safeApiCall(
+        context = context,
+        apiCall = { api.getTags() },
+        mapToResource = { it.toTags(
+            favoriteTags = it.favoriteTags,
+            popularTags = it.popularTags)
         }
-    }
-    override suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<Tags>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.toggleFavoriteTag(tagId).body()?.let { result ->
-                    if(!result.isTokenValid) {
-
-                    } else if(result.resultCode == 200 && result.data!= null) {
-                        val getTagsData = result.data.toTags(
-                            favoriteTags = result.data.favoriteTags,
-                            popularTags = result.data.popularTags
-                        )
-                        emit(Resource.Success(getTagsData))
-                    }
-                    else {
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                    }
-
-                }
-
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
+    )
+    override suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<Tags>> =
+        safeApiCall(
+            context = context,
+            apiCall = { api.toggleFavoriteTag(tagId) },
+            mapToResource = {
+                it.toTags(
+                    favoriteTags = it.favoriteTags,
+                    popularTags = it.popularTags
+                )
             }
-        }
-    }
-
-    override suspend fun searchTag(tag:String): Flow<Resource<SearchedTags>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.searchTag(tag).body()?.let { result ->
-                    if(!result.isTokenValid) {
-
-                    } else if(result.resultCode == 200 && result.data!= null) {
-                        val getTagsData = result.data.toSearchTags(
-                            searchedTags = result.data.searchedTags
-                        )
-                        emit(Resource.Success(getTagsData))
-                    } else {
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                    }
-
-                }
-
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
+        )
+    override suspend fun searchTag(tag:String): Flow<Resource<SearchedTags>> =
+        safeApiCall(
+            context = context,
+            apiCall = { api.searchTag(tag) },
+            mapToResource = {
+                it.toSearchTags(
+                    searchedTags = it.searchedTags
+                )
             }
-        }
-    }
+        )
 
 }

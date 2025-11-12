@@ -8,6 +8,6 @@ import javax.inject.Inject
 class CancelVote @Inject constructor(
     private val repository: VoteRepository
 ) {
-    suspend operator fun invoke(postId:Int): Flow<Resource<Boolean>> = repository.cancelVote(postId)
+    suspend operator fun invoke(postId:Int): Flow<Resource<Unit>> = repository.cancelVote(postId)
 
 }

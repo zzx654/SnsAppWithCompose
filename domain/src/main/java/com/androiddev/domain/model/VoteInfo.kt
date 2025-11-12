@@ -1,8 +1,8 @@
 package com.androiddev.domain.model
 
 data class VoteInfo(
-    val optionId: Int,
-    val optionText: String,
-    val voteCount: Int,
-    val percentage: Double
+    val isMyPost: Boolean,
+    val hasVoted: Boolean,
+    val selectedChoiceId: Int?,
+    val voteOptions:List<VoteOptionInfo>
 )

@@ -1,6 +1,6 @@
 package com.androiddev.domain.repository.uploadpost
 
-import com.androiddev.domain.model.GetPostsResponse
+import com.androiddev.domain.model.Posts
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
@@ -30,6 +30,6 @@ interface UploadPostRepository {
         audio:MultipartBody.Part?,
         deleteAudio:RequestBody?,
         text: RequestBody
-    ): Flow<Resource<GetPostsResponse>>
+    ): Flow<Resource<Posts>>
 
 }

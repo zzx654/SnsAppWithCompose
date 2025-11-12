@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.Comment
-import com.androiddev.domain.model.GetCommentsResponse
+import com.androiddev.domain.model.Comments
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.reply.ReplyUseCases
 import com.androiddev.domain.util.Resource
@@ -55,7 +55,7 @@ class ReplyViewModel @Inject constructor(
     val customBottomSheetDialogState: State<CustomBottomSheetDialogState>
         get() = _customBottomSheetDialogState
     val commentPaginator =
-        Paginator<GetCommentsResponse, Comment>(loadItems = { handleResult, refresh ->
+        Paginator<Comments, Comment>(loadItems = { handleResult, refresh ->
             viewModelScope.launch {
                 //등록순인지 인기순인지에 따라 요청하면됨
                 var lastCommentId: Int? = null

@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
-import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.Tag
 import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
@@ -19,6 +18,7 @@ import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
+import com.androiddev.domain.model.Posts
 import com.androiddev.snsappwithcompose.feature.upload_post.component.EditableImage
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -490,8 +490,8 @@ class UploadPostViewModel @Inject constructor(
                     }
                     PostMode.EDIT -> {
                         // T가 어떤 타입이든 런타임에 확인 가능
-                        if (result.data is GetPostsResponse) {
-                            val data = result.data as GetPostsResponse
+                        if (result.data is Posts) {
+                            val data = result.data as Posts
                             setEvent(
                                 UiEvent.PopBackStackWithResult(
                                     getString(context, R.string.editedPost),

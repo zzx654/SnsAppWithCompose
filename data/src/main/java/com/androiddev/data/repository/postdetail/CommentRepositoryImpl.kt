@@ -1,19 +1,15 @@
 package com.androiddev.data.repository.postdetail
 
 import android.content.Context
-import androidx.core.content.ContextCompat.getString
-import com.androiddev.data.R
 import com.androiddev.data.remote.api.postdetail.CommentApi
-import com.androiddev.data.remote.dto.toGetCommentsResponse
-import com.androiddev.data.remote.dto.toToggleLikeResponse
-import com.androiddev.domain.model.GetCommentsResponse
-import com.androiddev.domain.model.ToggleLikeResponse
+import com.androiddev.data.remote.dto.toComments
+import com.androiddev.data.remote.dto.toToggleLikeResult
+import com.androiddev.data.util.safeApiCall
+import com.androiddev.domain.model.Comments
+import com.androiddev.domain.model.ToggleLikeResult
 import com.androiddev.domain.repository.postdetail.CommentRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import retrofit2.HttpException
-import java.io.IOException
 
 import javax.inject.Inject
 
@@ -25,187 +21,86 @@ class CommentRepositoryImpl @Inject constructor(
         postId: Int,
         commentId: Int?,
         score: Int
-    ): Flow<Resource<GetCommentsResponse>> {
-        return flow {
-            try{
-                emit(Resource.Loading())
-                api.getPopularComments(postId,commentId,score).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getCommentsresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
-                        emit(Resource.Success(getCommentsresult))
-                    } else {
-                        emit(Resource.Error(getString(context, R.string.server_error)))
-                    }
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
-            }
+    ): Flow<Resource<Comments>> = safeApiCall(
+        context = context,
+        apiCall = { api.getPopularComments(postId,commentId,score) },
+        mapToResource = {
+            it.toComments(comments = it.comments)
         }
-    }
+    )
 
     override suspend fun getReplies(
         ref: Int,
         commentId: Int?,
         commentDate: String?
-    ): Flow<Resource<GetCommentsResponse>> {
-        return flow {
-            try{
-                emit(Resource.Loading())
-                api.getReplies(ref,commentId,commentDate).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getCommentsresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
-                        emit(Resource.Success(getCommentsresult))
-                    } else {
-                        emit(Resource.Error(getString(context, R.string.server_error)))
-                    }
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
-            }
+    ): Flow<Resource<Comments>> = safeApiCall(
+        context = context,
+        apiCall = { api.getReplies(ref,commentId,commentDate) },
+        mapToResource = {
+            it.toComments(comments = it.comments)
         }
-    }
+
+    )
 
     override suspend fun getSelectedComment(
         postId: Int,
         commentId: Int
-    ): Flow<Resource<GetCommentsResponse>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.getSelectedComment(postId,commentId).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getCommentresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
-                        emit(Resource.Success(getCommentresult))
-                    } else {
-                        emit(Resource.Error(getString(context, R.string.server_error)))
-                    }
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
-            }
+    ): Flow<Resource<Comments>> = safeApiCall(
+        context = context,
+        apiCall = { api.getSelectedComment(postId,commentId) },
+        mapToResource = {
+            it.toComments(comments = it.comments)
         }
-
-    }
+    )
 
     override suspend fun getComments(
         postId: Int,
         commentId: Int?,
         commentDate: String?
-    ): Flow<Resource<GetCommentsResponse>> {
-        return flow {
-            try{
-                emit(Resource.Loading())
-                api.getComments(postId,commentId,commentDate).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getCommentsresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
-                        emit(Resource.Success(getCommentsresult))
-                    } else {
-                        emit(Resource.Error(getString(context, R.string.server_error)))
-                    }
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
-            }
+    ): Flow<Resource<Comments>> = safeApiCall(
+        context = context,
+        apiCall = { api.getComments(postId,commentId,commentDate) },
+        mapToResource = {
+            it.toComments(comments = it.comments)
         }
-    }
+    )
+
 
     override suspend fun postComment(
         postId: Int,
         text: String,
         anonymousNick: String?
-    ): Flow<Resource<GetCommentsResponse>> {
-        return flow {
-            try{
-                emit(Resource.Loading())
-                api.postComments(postId,text,anonymousNick).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getCommentsresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
-                        emit(Resource.Success(getCommentsresult))
-                    } else {
-                        emit(Resource.Error(getString(context, R.string.server_error)))
-                    }
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
-            }
+    ): Flow<Resource<Comments>> = safeApiCall(
+        context = context,
+        apiCall = { api.postComments(postId,text,anonymousNick) },
+        mapToResource = {
+            it.toComments(comments = it.comments)
         }
-    }
+    )
 
     override suspend fun postReply(
         postId: Int,
         ref: Int,
         text: String,
         anonymousNick: String?
-    ): Flow<Resource<GetCommentsResponse>> {
-        return flow {
-            try{
-                emit(Resource.Loading())
-                api.postReply(postId,ref,text,anonymousNick).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        val getCommentsresult = result.toGetCommentsResponse(comments = result.comments, isTokenValid = result.isTokenValid)
-                        emit(Resource.Success(getCommentsresult))
-                    } else {
-                        emit(Resource.Error(getString(context, R.string.server_error)))
-                    }
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,
-                    R.string.unexpected_error)
-                ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
-            }
+    ): Flow<Resource<Comments>> = safeApiCall(
+        context = context,
+        apiCall = { api.postReply(postId,ref,text,anonymousNick) },
+        mapToResource = {
+            it.toComments(comments = it.comments)
         }
-    }
+    )
 
-    override suspend fun toggleLikeComment(commentId: Int): Flow<Resource<ToggleLikeResponse>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.toggleLikeComment(commentId).body()?.let{ result ->
-                    if(result.resultCode == 200) {
-                        emit(Resource.Success(result.toToggleLikeResponse(result.isLiked,result.isTokenValid)))
-                    }
-                    else
-                        emit(Resource.Error(getString(context, R.string.server_error)))
-                }
-            } catch(e: HttpException) {
-                emit(
-                    Resource.Error(e.localizedMessage ?: getString(context,
-                        R.string.unexpected_error)
-                    ))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context, R.string.connection_error)))
+    override suspend fun toggleLikeComment(commentId: Int): Flow<Resource<ToggleLikeResult>> =
+        safeApiCall(
+            context = context,
+            apiCall = { api.toggleLikeComment(commentId) },
+            mapToResource = {
+                it.toToggleLikeResult( isLiked = it.isLiked)
             }
-        }
-    }
+        )
+
+
 
 
 }

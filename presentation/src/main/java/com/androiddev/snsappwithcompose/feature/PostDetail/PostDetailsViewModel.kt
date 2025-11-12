@@ -12,7 +12,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.Comment
-import com.androiddev.domain.model.GetCommentsResponse
+import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
@@ -98,7 +98,7 @@ class PostDetailsViewModel @Inject constructor(
         get() = _imepadding
 
     val commentPaginator =
-        Paginator<GetCommentsResponse, Comment>(loadItems = { handleResult, refresh ->
+        Paginator<Comments, Comment>(loadItems = { handleResult, refresh ->
             viewModelScope.launch {
                 //등록순인지 인기순인지에 따라 요청하면됨
                 var lastCommentId: Int? = null
@@ -141,6 +141,7 @@ class PostDetailsViewModel @Inject constructor(
                 comments = if (refresh) comments else getCommentsState.value.comments.filterNot{ it.commentId in newIds } + comments,
                 endReached = comments.isEmpty() && getCommentsState.value.comments.isNotEmpty()
             )
+
         }, extractItems = { response -> response.comments })
 
     private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
@@ -161,15 +162,13 @@ class PostDetailsViewModel @Inject constructor(
                     is Resource.Success -> {
                         //투표 fetch
                         result.data?.let {
-                            if(it.isTokenValid) {
-                                if(it.voteInfo.isNotEmpty()) {
-                                    _voteState.value = voteState.value.copy(
-                                        isMyPost = it.isMyPost,
-                                        hasVoted = it.hasVoted,
-                                        selectedChoiceId = it.selectedChoiceId,
-                                        voteInfo = it.voteInfo
-                                    )
-                                }
+                            if(it.voteOptions.isNotEmpty()) {
+                                _voteState.value = voteState.value.copy(
+                                    isMyPost = it.isMyPost,
+                                    hasVoted = it.hasVoted,
+                                    selectedChoiceId = it.selectedChoiceId,
+                                    voteOptions = it.voteOptions
+                                )
                             }
                         }
                     }
@@ -198,15 +197,13 @@ class PostDetailsViewModel @Inject constructor(
                                         //투표 fetch
                                         setLoading(false)
                                         result.data?.let {
-                                            if(it.isTokenValid) {
-                                                if(it.voteInfo.isNotEmpty()) {
-                                                    _voteState.value = voteState.value.copy(
-                                                        isMyPost = it.isMyPost,
-                                                        hasVoted = it.hasVoted,
-                                                        selectedChoiceId = it.selectedChoiceId,
-                                                        voteInfo = it.voteInfo
-                                                    )
-                                                }
+                                            if(it.voteOptions.isNotEmpty()) {
+                                                _voteState.value = voteState.value.copy(
+                                                    isMyPost = it.isMyPost,
+                                                    hasVoted = it.hasVoted,
+                                                    selectedChoiceId = it.selectedChoiceId,
+                                                    voteOptions = it.voteOptions
+                                                )
                                             }
                                         }
                                     }
@@ -264,6 +261,7 @@ class PostDetailsViewModel @Inject constructor(
                 viewModelScope.launch {
                     commentPaginator.loadNextItems(refresh = false)
                 }
+
             }
             is CommentEvent.ToggleLikeComment -> {
                 viewModelScope.launch {
@@ -535,7 +533,7 @@ class PostDetailsViewModel @Inject constructor(
 }
 
 enum class CommentSortType(@StringRes val labelResId: Int) {
-    OLDEST(R.string.sort_by_popularity), POPULAR(R.string.sort_by_date)
+    OLDEST(R.string.sort_by_date), POPULAR(R.string.sort_by_popularity)
 }
 
 sealed class KeyBoardEvent {

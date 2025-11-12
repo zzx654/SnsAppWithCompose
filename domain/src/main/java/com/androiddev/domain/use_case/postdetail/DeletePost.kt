@@ -8,6 +8,6 @@ import javax.inject.Inject
 class DeletePost @Inject constructor(
     private val repository: PostRepository
 ) {
-    suspend operator fun invoke(postId:Int): Flow<Resource<Boolean>> = repository.deletePost(postId)
+    suspend operator fun invoke(postId:Int): Flow<Resource<Unit>> = repository.deletePost(postId)
 
 }

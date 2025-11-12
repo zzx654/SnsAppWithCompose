@@ -1,6 +1,6 @@
 package com.androiddev.domain.use_case.uploadpost
 
-import com.androiddev.domain.model.GetPostsResponse
+import com.androiddev.domain.model.Posts
 import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +22,6 @@ class EditPost @Inject constructor(
         audio:MultipartBody.Part?,
         deleteAudio:RequestBody?,
         text: RequestBody
-    ): Flow<Resource<GetPostsResponse>> = repository.editPost(postid,latitude,longitude,anonymousNick,deleteImages,tags,images,audio,deleteAudio,text)
+    ): Flow<Resource<Posts>> = repository.editPost(postid,latitude,longitude,anonymousNick,deleteImages,tags,images,audio,deleteAudio,text)
 
 }

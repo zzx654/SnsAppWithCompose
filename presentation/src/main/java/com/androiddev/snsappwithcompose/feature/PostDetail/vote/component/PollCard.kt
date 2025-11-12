@@ -47,7 +47,7 @@ fun PollCard(
     onVoteClick:() ->Unit
 ) {
     val context = LocalContext.current
-    if(voteState.voteInfo.isNotEmpty()) {
+    if(voteState.voteOptions.isNotEmpty()) {
         Card(
             modifier = Modifier
                 .padding(16.dp)
@@ -75,8 +75,8 @@ fun PollCard(
                 Spacer(modifier = Modifier.height(25.dp))
                 if(!voteState.hasVoted&&!voteState.isMyPost) {
 
-                    voteState.voteInfo.forEachIndexed { index, option ->
-                        val isLast = index == voteState.voteInfo.lastIndex
+                    voteState.voteOptions.forEachIndexed { index, option ->
+                        val isLast = index == voteState.voteOptions.lastIndex
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -105,7 +105,7 @@ fun PollCard(
                     }
 
                 } else {
-                    voteState.voteInfo.forEach { result ->
+                    voteState.voteOptions.forEach { result ->
                         Column(modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 6.dp)) {

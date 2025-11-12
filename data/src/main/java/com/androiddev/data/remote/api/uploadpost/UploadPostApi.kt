@@ -1,7 +1,7 @@
 package com.androiddev.data.remote.api.uploadpost
 
-import com.androiddev.data.remote.dto.GetPostsResponseDto
-import com.androiddev.domain.model.ResultCodeResponse
+import com.androiddev.data.remote.BaseApiResponse
+import com.androiddev.data.remote.dto.GetPostsDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -21,7 +21,7 @@ interface UploadPostApi {
         @Part ("text") text: RequestBody,
         @Part latitude: MultipartBody.Part?,
         @Part longitude: MultipartBody.Part?
-    ): Response<ResultCodeResponse>
+    ): Response<BaseApiResponse<Unit>>
 
     @Multipart
     @POST("/editPost")
@@ -36,6 +36,6 @@ interface UploadPostApi {
         @Part audioFile: MultipartBody.Part?,
         @Part ("deleteAudio") deleteAudio: RequestBody?,
         @Part ("text") text: RequestBody
-    ): Response<GetPostsResponseDto>
+    ): Response<BaseApiResponse<GetPostsDto>>
 
 }
