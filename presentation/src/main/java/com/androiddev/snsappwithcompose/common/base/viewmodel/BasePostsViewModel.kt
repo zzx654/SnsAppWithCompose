@@ -21,12 +21,13 @@ import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.domain.model.Posts
 import com.androiddev.snsappwithcompose.feature.home.util.PostPaginator
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 abstract class BasePostsViewModel(
-    private val context: Context,
     private val locationClient: FusedLocationProviderClient,
-    private val getPostsUseCases: GetPostsUseCases
-) : BaseViewModel() {
+    private val getPostsUseCases: GetPostsUseCases,
+    @ApplicationContext context: Context
+) : BaseViewModel(context) {
 
     protected val _getPostState = mutableStateOf(GetPostsState())
     val getPostState: State<GetPostsState> get() = _getPostState
@@ -126,6 +127,8 @@ abstract class BasePostsViewModel(
                         is Resource.Loading -> {
                             setLoading(true)
                         }
+
+                        is Resource.TokenExpired -> {}
                     }
 
                 }

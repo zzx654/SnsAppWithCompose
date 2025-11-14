@@ -15,13 +15,14 @@ import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogStat
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.PostMode
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateVoteViewModel @Inject constructor(
-    val context: Context
-): BaseViewModel() {
+    @ApplicationContext context: Context,
+): BaseViewModel(context) {
 
     private val _manageVoteDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
         CustomBottomSheetDialogState()

@@ -51,6 +51,8 @@ class PostPaginator (
                         else
                             onLoadUpdated(true)
                     }
+
+                    is Resource.TokenExpired -> {}
                 }
             },
             refresh

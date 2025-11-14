@@ -12,15 +12,16 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TagViewModel @Inject constructor(
-    private val context: Context,
+    @ApplicationContext context: Context,
     private val tagUseCases: TagUseCases
-): BaseViewModel() {
+): BaseViewModel(context) {
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
         get() = _tagTextField
@@ -57,6 +58,7 @@ class TagViewModel @Inject constructor(
                     }
                     is Resource.Error -> setLoading(false)
                     is Resource.Loading -> setLoading(true)
+                    is Resource.TokenExpired -> {}
                 }
             }
         }
@@ -110,6 +112,7 @@ class TagViewModel @Inject constructor(
                     }
                     is Resource.Error -> setLoading(false)
                     is Resource.Loading -> setLoading(true)
+                    is Resource.TokenExpired -> {}
                 }
             }
         }

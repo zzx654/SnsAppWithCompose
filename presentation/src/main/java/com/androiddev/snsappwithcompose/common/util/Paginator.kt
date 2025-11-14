@@ -38,6 +38,8 @@ class Paginator<TResponse, TItem>(
                 is Resource.Loading -> {
                     if (refresh) onRefreshUpdated(true) else onLoadUpdated(true)
                 }
+
+                is Resource.TokenExpired -> {}
             }
         }, refresh)
     }

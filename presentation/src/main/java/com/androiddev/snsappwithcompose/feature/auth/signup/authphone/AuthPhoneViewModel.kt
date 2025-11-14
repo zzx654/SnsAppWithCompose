@@ -17,6 +17,7 @@ import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,8 +26,8 @@ class AuthPhoneViewModel @Inject constructor(
     private val authPhoneUseCases: AuthPhoneUseCases,
     private val signUpUseCase: SocialSignUpUseCase,
     private val userPreferences: UserPreferences,
-    private val context: Context
-) : AuthViewModel() {
+    @ApplicationContext context: Context,
+) : AuthViewModel(context) {
     private val _phoneNumber = mutableStateOf("")
     val phoneNumber: State<String>
         get() = _phoneNumber
@@ -73,6 +74,8 @@ class AuthPhoneViewModel @Inject constructor(
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
+                                is Resource.TokenExpired -> {}
                             }
                         }
                     } catch (e: InvalidPhoneNumberException) {
@@ -121,6 +124,8 @@ class AuthPhoneViewModel @Inject constructor(
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
+                                is Resource.TokenExpired -> {}
                             }
                         }
                 }
@@ -153,6 +158,8 @@ class AuthPhoneViewModel @Inject constructor(
                         is Resource.Loading -> {
                             setLoading(true)
                         }
+
+                        is Resource.TokenExpired -> {}
                     }
                 }
         }

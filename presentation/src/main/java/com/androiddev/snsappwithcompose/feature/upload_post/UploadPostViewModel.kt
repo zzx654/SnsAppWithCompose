@@ -22,6 +22,7 @@ import com.androiddev.domain.model.Posts
 import com.androiddev.snsappwithcompose.feature.upload_post.component.EditableImage
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
@@ -36,8 +37,8 @@ import javax.inject.Inject
 @HiltViewModel
 class UploadPostViewModel @Inject constructor(
     private val uploadPostUseCases: UploadPostUseCases,
-    private val context: Context
-): BaseViewModel() {
+    @ApplicationContext context: Context,
+): BaseViewModel(context) {
 
     //이미지,거리,음성녹음,투표,
     private val _tagTextField = mutableStateOf("")
@@ -513,6 +514,7 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is Resource.Loading -> setLoading(true)
+            is Resource.TokenExpired -> null
         }
     }
 }

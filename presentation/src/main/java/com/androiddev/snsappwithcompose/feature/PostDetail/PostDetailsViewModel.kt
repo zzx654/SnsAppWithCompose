@@ -33,6 +33,7 @@ import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -43,8 +44,8 @@ class PostDetailsViewModel @Inject constructor(
     private val postDetailUseCases: PostDetailUseCases,
     private val commentUseCases: CommentUseCases,
     private val voteUseCases: VoteUseCases,
-    private val context: Context
-) : BaseViewModel() {
+    @ApplicationContext context: Context,
+) : BaseViewModel(context) {
     //로딩처리. 댓글 상단 고정
     private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
         CustomBottomSheetDialogState()
@@ -158,6 +159,21 @@ class PostDetailsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             voteUseCases.getVoteInfo(post.postId).collect { result ->
+                handleResource(
+                    resource = result,
+                    onSuccess = { data ->
+                        if(data.voteOptions.isNotEmpty()) {
+                            _voteState.value = voteState.value.copy(
+                                isMyPost = data.isMyPost,
+                                hasVoted = data.hasVoted,
+                                selectedChoiceId = data.selectedChoiceId,
+                                voteOptions = data.voteOptions
+                            )
+                        }
+                    }
+                )
+            }
+            /**voteUseCases.getVoteInfo(post.postId).collect { result ->
                 when(result) {
                     is Resource.Success -> {
                         //투표 fetch
@@ -178,9 +194,11 @@ class PostDetailsViewModel @Inject constructor(
                     is Resource.Error -> {
 
                     }
+
+                    is Resource.TokenExpired -> null
                 }
 
-            }
+            }**/
         }
 
     }
@@ -221,6 +239,8 @@ class PostDetailsViewModel @Inject constructor(
                                         )
 
                                     }
+
+                                    is Resource.TokenExpired -> null
                                 }
 
                             }
@@ -289,6 +309,8 @@ class PostDetailsViewModel @Inject constructor(
                                     )
                                 )
                             }
+
+                            is Resource.TokenExpired -> null
                         }
 
                     }
@@ -339,6 +361,8 @@ class PostDetailsViewModel @Inject constructor(
                                     )
                                 )
                             }
+
+                            is Resource.TokenExpired -> null
                         }
 
                     }
@@ -384,6 +408,7 @@ class PostDetailsViewModel @Inject constructor(
                                 )
                             }
 
+                            is Resource.TokenExpired -> null
                         }
 
                     }

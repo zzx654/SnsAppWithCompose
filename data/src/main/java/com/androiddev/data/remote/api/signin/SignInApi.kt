@@ -1,7 +1,9 @@
 package com.androiddev.data.remote.api.signin
 
+import com.androiddev.data.remote.BaseApiResponse
 import com.androiddev.data.remote.dto.SigninResponseDto
-import com.androiddev.data.remote.dto.SigninWithTokenResponseDto
+import com.androiddev.data.remote.dto.SigninResultDto
+import com.androiddev.data.remote.dto.SigninWithTokenResultDto
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -13,15 +15,15 @@ interface SignInApi {
     suspend fun emailSignIn(
         @Field("account")account: String,
         @Field("password")password: String,
-    ): Response<SigninResponseDto>
+    ): Response<BaseApiResponse<SigninResultDto>>
     @FormUrlEncoded
     @POST("/socialSign")
     suspend fun socialSignIn(
         @Field("platform")platform: String,
         @Field("account")account: String
-    ): Response<SigninResponseDto>
+    ): Response<BaseApiResponse<SigninResultDto>>
 
     @POST("/signInWithToken")
-    suspend fun signInWithToken(): Response<SigninWithTokenResponseDto>
+    suspend fun signInWithToken(): Response<BaseApiResponse<SigninWithTokenResultDto>>
 
 }

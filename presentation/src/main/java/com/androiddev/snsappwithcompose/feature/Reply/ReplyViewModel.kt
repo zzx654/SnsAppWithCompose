@@ -23,6 +23,7 @@ import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,8 +31,8 @@ import javax.inject.Inject
 class ReplyViewModel @Inject constructor(
     private val commentUseCases: CommentUseCases,
     private val replyUseCases: ReplyUseCases,
-    private val context: Context
-): BaseViewModel() {
+    @ApplicationContext context: Context,
+): BaseViewModel(context) {
     val _commentText = mutableStateOf("")
     val commentText: State<String>
         get() = _commentText
@@ -154,6 +155,8 @@ class ReplyViewModel @Inject constructor(
                                     )
                                 )
                             }
+
+                            is Resource.TokenExpired -> {}
                         }
 
                     }
@@ -187,6 +190,8 @@ class ReplyViewModel @Inject constructor(
                                     )
                                 )
                             }
+
+                            is Resource.TokenExpired -> {}
                         }
 
                     }

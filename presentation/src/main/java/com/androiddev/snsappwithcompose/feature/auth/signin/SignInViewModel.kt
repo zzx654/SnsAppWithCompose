@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.data.local.UserPreferences
-import com.androiddev.domain.model.SigninResponse
+import com.androiddev.domain.model.SigninResult
 import com.androiddev.domain.use_case.signin.SignInUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
@@ -21,14 +21,15 @@ import com.navercorp.nid.NaverIdLoginSDK
 import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val signInUseCases: SignInUseCases,
     private val userPreferences: UserPreferences,
-    private val context: Context,
-) : BaseViewModel() {
+    @ApplicationContext context: Context,
+) : BaseViewModel(context) {
     private val _account = mutableStateOf("")
     val account: State<String>
         get() = _account
@@ -103,6 +104,8 @@ class SignInViewModel @Inject constructor(
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
+                                is Resource.TokenExpired -> null
                             }
                         }
                 }
@@ -129,6 +132,8 @@ class SignInViewModel @Inject constructor(
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
+                                is Resource.TokenExpired -> null
                             }
                         }
                 }
@@ -136,7 +141,7 @@ class SignInViewModel @Inject constructor(
             else -> null
         }
     }
-    private fun handleSigninResult(event:SignInEvent,signinResult:SigninResponse) {
+    private fun handleSigninResult(event:SignInEvent,signinResult: SigninResult) {
         viewModelScope.launch {
             if(signinResult.isMember) {
                 //가입된 계정일때

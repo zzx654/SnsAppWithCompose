@@ -20,6 +20,7 @@ import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -30,8 +31,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateProfileViewModel @Inject constructor(
     private val createProfileUseCases: CreateProfileUseCases,
-    private val context: Context
-): BaseViewModel() {
+    @ApplicationContext context: Context,
+): BaseViewModel(context) {
     private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
         CustomBottomSheetDialogState()
     )
@@ -123,6 +124,8 @@ class CreateProfileViewModel @Inject constructor(
                                     is Resource.Loading -> {
                                         _isNicknameChecking.value = true
                                     }
+
+                                    is Resource.TokenExpired -> {}
                                 }
                             }
                     }
@@ -221,6 +224,8 @@ class CreateProfileViewModel @Inject constructor(
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
+                                is Resource.TokenExpired -> {}
                             }
                         }
                 }

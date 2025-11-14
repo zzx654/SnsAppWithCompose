@@ -1,19 +1,15 @@
 package com.androiddev.data.repository.signin
 
 import android.content.Context
-import androidx.core.content.ContextCompat.getString
-import com.androiddev.data.R
 import com.androiddev.data.remote.api.signin.SignInApi
-import com.androiddev.data.remote.dto.toSigninResponse
-import com.androiddev.data.remote.dto.toSigninWithTokenResponse
-import com.androiddev.domain.model.SigninResponse
-import com.androiddev.domain.model.SigninWithTokenResponse
+import com.androiddev.data.remote.dto.toSigninResult
+import com.androiddev.data.remote.dto.toSigninWithTokenResult
+import com.androiddev.data.util.safeApiCall
+import com.androiddev.domain.model.SigninResult
+import com.androiddev.domain.model.SigninWithTokenResult
 import com.androiddev.domain.repository.signin.SigninRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 class SigninRepositoryImpl @Inject constructor(
@@ -23,90 +19,38 @@ class SigninRepositoryImpl @Inject constructor(
     override suspend fun socialSignIn(
         platform: String,
         account: String
-    ): Flow<Resource<SigninResponse>> {
-        return flow {
-
-                try {
-                    emit(Resource.Loading())
-                    api.socialSignIn(platform,account).body()?.let{ result ->
-                        if(result.resultCode == 200) {
-                            val signinResponse = result.toSigninResponse(
-                                isMember = result.isMember,
-                                profileWritten = result.profileWritten,
-                                userId = result.userId,
-                                token = result.token
-                            )
-                            emit(Resource.Success(signinResponse))
-                        }
-                        else
-                            emit(Resource.Error(getString(context,R.string.server_error)))
-                    }
-                } catch(e: HttpException) {
-                    emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
-
-                } catch(e: IOException) {
-                    emit(Resource.Error(getString(context,R.string.connection_error)))
-                }
-            }
-
-
-
-
-    }
+    ): Flow<Resource<SigninResult>> = safeApiCall(
+        context = context,
+        apiCall = { api.socialSignIn(platform,account) },
+        mapToResource = { it.toSigninResult(
+            isMember = it.isMember,
+            profileWritten = it.profileWritten,
+            userId = it.userId,
+            token = it.token
+        )}
+    )
     override suspend fun emailSignIn(
         account: String,
         password: String
-    ): Flow<Resource<SigninResponse>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.emailSignIn(account,password).body()?.let{ result ->
-                    if(result.resultCode == 200) {
+    ): Flow<Resource<SigninResult>> = safeApiCall(
+        context = context,
+        apiCall = { api.emailSignIn(account,password) },
+        mapToResource = { it.toSigninResult(
+            isMember = it.isMember,
+            profileWritten = it.profileWritten,
+            userId = it.userId,
+            token = it.token
+        )}
+    )
 
-                        val signinResponse = result.toSigninResponse(
-                            isMember = result.isMember,
-                            profileWritten = result.profileWritten,
-                            userId = result.userId,
-                            token = result.token
-                        )
-                        emit(Resource.Success(signinResponse))
-                    }
-                    else
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context,R.string.connection_error)))
-            }
-
-        }
-
-    }
-
-    override suspend fun signInWithToken(): Flow<Resource<SigninWithTokenResponse>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.signInWithToken().body()?.let{ result ->
-                    if(result.resultCode == 200) {
-                        val signinResponse = result.toSigninWithTokenResponse(
-                            signInResult = result.signInResult,
-                            profileWritten = result.profileWritten,
-                            userId = result.userId
-                        )
-                        emit(Resource.Success(signinResponse))
-                    }
-                    else
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                }
-            }catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context,R.string.connection_error)))
-            }
-        }
-    }
+    override suspend fun signInWithToken(): Flow<Resource<SigninWithTokenResult>> =
+        safeApiCall(
+            context = context,
+            apiCall = { api.signInWithToken() },
+            mapToResource = { it.toSigninWithTokenResult(
+                signInResult = it.signInResult,
+                profileWritten = it.profileWritten,
+                userId = it.userId
+            )}
+        )
 }

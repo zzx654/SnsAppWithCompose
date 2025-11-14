@@ -20,8 +20,10 @@ fun <T, R> safeApiCall(
         emit(Resource.Loading())
         val response = apiCall()
         response.body()?.let { result ->
-            if (!result.isTokenValid) {
+            val tokenValid = result.isTokenValid ?: true
+            if (!tokenValid) {
                 // 토큰 처리
+                emit(Resource.TokenExpired<R>()) // 타입 안전!
             } else if (result.resultCode == 200 ) {
                     emit(Resource.Success(result.data?.let(mapToResource)))
             } else {

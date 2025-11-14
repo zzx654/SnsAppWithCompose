@@ -17,12 +17,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.google.android.gms.location.FusedLocationProviderClient
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 @HiltViewModel
 class NearPostsViewModel @Inject constructor(
     private val getPostsUseCases: GetPostsUseCases,
     private val locationClient: FusedLocationProviderClient,
-    private val context: Context
+    @ApplicationContext context: Context,
 ): BasePostsViewModel(
     getPostsUseCases = getPostsUseCases,
     locationClient = locationClient,

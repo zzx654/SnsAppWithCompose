@@ -11,6 +11,7 @@ import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,7 +19,7 @@ import javax.inject.Inject
 class NewPostsViewModel @Inject constructor(
     private val getPostsUseCases: GetPostsUseCases,
     private val locationClient: FusedLocationProviderClient,
-    private val context: Context
+    @ApplicationContext context: Context,
 ): BasePostsViewModel(
     getPostsUseCases = getPostsUseCases,
     locationClient = locationClient,

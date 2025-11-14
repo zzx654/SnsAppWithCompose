@@ -15,14 +15,15 @@ import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class EmailSignUpViewModel @Inject constructor(
     private val emailSignUpUseCases: EmailSignUpUseCases,
-    private val context: Context
-) : AuthViewModel() {
+    @ApplicationContext context: Context,
+) : AuthViewModel(context) {
 
 
 
@@ -77,6 +78,8 @@ class EmailSignUpViewModel @Inject constructor(
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
+                                is Resource.TokenExpired -> {}
                             }
                         }
                     } catch (e: InvalidEmailException) {
@@ -127,6 +130,8 @@ class EmailSignUpViewModel @Inject constructor(
                                 is Resource.Loading -> {
                                     setLoading(true)
                                 }
+
+                                is Resource.TokenExpired -> {}
                             }
 
                         }
