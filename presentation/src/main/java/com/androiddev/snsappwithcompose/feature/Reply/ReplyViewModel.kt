@@ -11,7 +11,6 @@ import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.reply.ReplyUseCases
-import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.GetCommentsState
@@ -20,7 +19,6 @@ import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.Paginator
-import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -128,37 +126,13 @@ class ReplyViewModel @Inject constructor(
                         text = commentText.value,
                         anonymousNick = if(anonymousChecked.value) generateAnonymousNickname() else null
                     ).collect { result ->
-                        when(result) {
-
-                            is Resource.Success -> {
-                                setLoading(false)
+                        handleResource(
+                            resource = result,
+                            onSuccess = { data ->
                                 _commentText.value = ""
-                                result.data?.let {
-                                    _getCommentsState.value = getCommentsState.value.copy(
-                                        comments = listOf(it.comments[0])+getCommentsState.value.comments
-                                    )
-                                }
+                                _getCommentsState.value = getCommentsState.value.copy(comments = listOf(data.comments[0])+getCommentsState.value.comments)
                             }
-
-                            is Resource.Loading -> {
-                                setLoading(true)
-
-                            }
-
-                            is Resource.Error -> {
-                                setLoading(false)
-                                setEvent(
-                                    UiEvent.ShowToast(
-                                        message = result.message ?: getString(
-                                            context, R.string.error
-                                        )
-                                    )
-                                )
-                            }
-
-                            is Resource.TokenExpired -> {}
-                        }
-
+                        )
                     }
                 }
 
@@ -167,32 +141,16 @@ class ReplyViewModel @Inject constructor(
             is CommentEvent.ToggleLikeComment -> {
                 viewModelScope.launch {
                     commentUseCases.ToggleLikeComment(event.commentId).collect { result ->
-                        when(result) {
-                            is Resource.Success -> {
-                                setLoading(false)
-                                result.data?.let {
-                                    val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
-                                    _commentLikeStatusMap[event.commentId] = CommentLikeState(
-                                        isLiked = it.isLiked,
-                                        likeCount = currentLikeStatus.likeCount.plus(if(it.isLiked) 1 else -1)
-                                    )
-                                }
-                            }
-                            is Resource.Loading -> Unit
-
-                            is Resource.Error -> {
-                                setLoading(false)
-                                setEvent(
-                                    UiEvent.ShowToast(
-                                        message = result.message ?: getString(
-                                            context, R.string.error
-                                        )
-                                    )
+                        handleResource(
+                            resource = result,
+                            onSuccess = { data ->
+                                val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
+                                _commentLikeStatusMap[event.commentId] = CommentLikeState(
+                                    isLiked = data.isLiked,
+                                    likeCount = currentLikeStatus.likeCount.plus(if(data.isLiked) 1 else -1)
                                 )
                             }
-
-                            is Resource.TokenExpired -> {}
-                        }
+                        )
 
                     }
                 }

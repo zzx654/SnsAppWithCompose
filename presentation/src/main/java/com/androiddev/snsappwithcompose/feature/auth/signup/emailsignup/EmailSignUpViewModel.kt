@@ -52,35 +52,21 @@ class EmailSignUpViewModel @Inject constructor(
                 viewModelScope.launch {
                     try {
                         emailSignUpUseCases.requestAuthCode(email.value).collect { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let { emailExist ->
-                                        if(emailExist) {
-                                            //다이얼로그 추가
-                                            showEmailExistAlert()
-                                        } else {
-                                            _isCodeReceived.value = true
-                                            _limitTime.value = Constants.AUTH_LIMITEDTIME
-                                            _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
-                                            timerStart()
-                                        }
+                            handleResource(
+                                resource = result,
+                                onSuccess = { emailExist ->
+                                    if(emailExist) {
+                                        //다이얼로그 추가
+                                        showEmailExistAlert()
+                                    } else {
+                                        _isCodeReceived.value = true
+                                        _limitTime.value = Constants.AUTH_LIMITEDTIME
+                                        _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
+                                        timerStart()
                                     }
-                                }
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
 
-                                is Resource.TokenExpired -> {}
-                            }
+                                }
+                            )
                         }
                     } catch (e: InvalidEmailException) {
                         setEvent(
@@ -104,36 +90,20 @@ class EmailSignUpViewModel @Inject constructor(
                 viewModelScope.launch {
                     emailSignUpUseCases.emailSignUp(email.value,password.value,event.phonenumber,authCodeField.value.code)
                         .collect { result ->
-                            when(result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let { isCodeCorrect ->
-                                        if(isCodeCorrect) {
-                                            // 확인누르면 로그인화면으로 가는 다이얼로그추가
-                                            showSignUpCompletedAlert()
-                                        }
-                                        else {
-                                            //인증번호가 틀렸다는 다이얼로그 추가
-                                            showWrongCodeAlert()
-                                        }
-
+                            handleResource(
+                                resource = result,
+                                onSuccess = { isCodeCorrect ->
+                                    if(isCodeCorrect) {
+                                        // 확인누르면 로그인화면으로 가는 다이얼로그추가
+                                        showSignUpCompletedAlert()
                                     }
-                                }
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
+                                    else {
+                                        //인증번호가 틀렸다는 다이얼로그 추가
+                                        showWrongCodeAlert()
+                                    }
 
-                                is Resource.TokenExpired -> {}
-                            }
-
+                                }
+                            )
                         }
                 }
             }

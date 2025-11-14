@@ -45,21 +45,17 @@ class TagViewModel @Inject constructor(
     private fun fetchTags() {
         viewModelScope.launch {
             tagUseCases.getTags().collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        setLoading(false)
-                        result.data?.let {
-                            _getTagsState.value = _getTagsState.value.copy(
-                                isLoading = false,
-                                favoriteTags = it.favoriteTags,
-                                popularTags = it.popularTags
-                            )
-                        }
+                handleResource(
+                    resource = result,
+                    onSuccess = { data ->
+                        _getTagsState.value = _getTagsState.value.copy(
+                            isLoading = false,
+                            favoriteTags = data.favoriteTags,
+                            popularTags = data.popularTags
+                        )
+
                     }
-                    is Resource.Error -> setLoading(false)
-                    is Resource.Loading -> setLoading(true)
-                    is Resource.TokenExpired -> {}
-                }
+                )
             }
         }
     }
@@ -73,6 +69,7 @@ class TagViewModel @Inject constructor(
             delay(50L)
             tagUseCases.searchTag(query).collect { result ->
                 when (result) {
+
                     is Resource.Success -> {
                         result.data?.let {
                             if (tagTextField.value.isNotBlank()) {
@@ -97,23 +94,19 @@ class TagViewModel @Inject constructor(
     private fun toggleFavorite(tagId: Int) {
         viewModelScope.launch {
             tagUseCases.toggleFavoriteTag(tagId).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        setLoading(false)
-                        result.data?.let {
-                            _getTagsState.value = _getTagsState.value.copy(
-                                favoriteTags = it.favoriteTags,
-                                popularTags = it.popularTags,
-                                searchedTags = _getTagsState.value.searchedTags.map { tag ->
-                                    if (tag.tagid == tagId) tag.copy(isliked = if(tag.isliked==1) 0 else 1) else tag
-                                }
-                            )
-                        }
+                handleResource(
+                    resource = result,
+                    onSuccess = { data ->
+                        _getTagsState.value = _getTagsState.value.copy(
+                            favoriteTags = data.favoriteTags,
+                            popularTags = data.popularTags,
+                            searchedTags = _getTagsState.value.searchedTags.map { tag ->
+                                if (tag.tagid == tagId) tag.copy(isliked = if(tag.isliked==1) 0 else 1) else tag
+                            }
+                        )
+
                     }
-                    is Resource.Error -> setLoading(false)
-                    is Resource.Loading -> setLoading(true)
-                    is Resource.TokenExpired -> {}
-                }
+                )
             }
         }
     }

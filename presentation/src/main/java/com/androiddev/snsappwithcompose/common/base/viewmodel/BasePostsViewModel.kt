@@ -101,38 +101,24 @@ abstract class BasePostsViewModel(
         viewModelScope.launch {
             getPostsUseCases.getSelectedPost(postid = postid, latitude = latitude, longitude = longitude)
                 .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            setLoading(false)
-                            result.data?.let {
-                                if(it.posts.isEmpty()) {
-                                    setEvent(
-                                        UiEvent.ShowToast(getString(context, R.string.post_not_exist_alert))
+                    handleResource(
+                        resource = result,
+                        onSuccess = { data ->
+                            if(data.posts.isEmpty()) {
+                                setEvent(
+                                    UiEvent.ShowToast(getString(context, R.string.post_not_exist_alert))
+                                )
+                            }
+                            else {
+                                setEvent(
+                                    UiEvent.navigate(
+                                        Screen.PostDetailScreen(data.posts[0])
                                     )
-                                }
-                                else {
-                                    setEvent(
-                                        UiEvent.navigate(
-                                            Screen.PostDetailScreen(it.posts[0])
-                                        )
-                                    )
-                                }
-
-
+                                )
                             }
                         }
-                        is Resource.Error -> {
-                            setLoading(false)
-                        }
-                        is Resource.Loading -> {
-                            setLoading(true)
-                        }
-
-                        is Resource.TokenExpired -> {}
-                    }
-
+                    )
                 }
-
         }
     }
 }

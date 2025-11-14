@@ -86,27 +86,12 @@ class SignInViewModel @Inject constructor(
                 viewModelScope.launch {
                     signInUseCases.emailSignIn(account.value,password.value)
                         .collect { result ->
-                            when(result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let {
-                                        handleSigninResult(event,it)
-                                    }
+                            handleResource(
+                                resource = result,
+                                onSuccess = { data ->
+                                    handleSigninResult(event,data)
                                 }
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                is Resource.TokenExpired -> null
-                            }
+                            )
                         }
                 }
             }
@@ -114,27 +99,12 @@ class SignInViewModel @Inject constructor(
                 viewModelScope.launch {
                     signInUseCases.socialSignIn(event.platform,event.account)
                         .collect { result ->
-                            when(result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let {
-                                        handleSigninResult(event,it)
-                                    }
+                            handleResource(
+                                resource = result,
+                                onSuccess = { data ->
+                                    handleSigninResult(event,data)
                                 }
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                is Resource.TokenExpired -> null
-                            }
+                            )
                         }
                 }
             }

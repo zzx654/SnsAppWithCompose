@@ -47,36 +47,19 @@ class AuthPhoneViewModel @Inject constructor(
                 viewModelScope.launch {
                     try {
                         authPhoneUseCases.requestAuthCode(phoneNumber.value).collect { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let { phoneNumberExist ->
-                                        if(phoneNumberExist) {
-                                            showPhoneExistAlert()
-                                        } else {
-                                            _isCodeReceived.value = true
-                                            _limitTime.value = AUTH_LIMITEDTIME
-                                            _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
-                                            timerStart()
-                                        }
+                            handleResource(
+                                resource = result,
+                                onSuccess = { phoneNumberExist ->
+                                    if(phoneNumberExist) {
+                                        showPhoneExistAlert()
+                                    } else {
+                                        _isCodeReceived.value = true
+                                        _limitTime.value = AUTH_LIMITEDTIME
+                                        _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
+                                        timerStart()
                                     }
-
                                 }
-
-                                is Resource.Error -> {
-                                    _isLoading.value = false
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                is Resource.TokenExpired -> {}
-                            }
+                            )
                         }
                     } catch (e: InvalidPhoneNumberException) {
                         setEvent(
@@ -94,73 +77,44 @@ class AuthPhoneViewModel @Inject constructor(
                 viewModelScope.launch {
                     authPhoneUseCases.authenticateCode(phoneNumber.value, authCodeField.value.code)
                         .collect { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let { isCodeCorrect ->
-                                        if(isCodeCorrect) {
-                                            timerJob?.cancel()
-                                            if(event.platform == getString(context,R.string.email)) {
-                                                setEvent(
-                                                    UiEvent.navigate(Screen.SignUpScreen(phoneNumber.value))
-                                                )
-                                            } else {
-                                                //sns가입시도
-                                                socialSignUp(event.platform,event.account!!,phoneNumber.value)
-                                            }
+                            handleResource(
+                                resource = result,
+                                onSuccess = { isCodeCorrect ->
+                                    if(isCodeCorrect) {
+                                        timerJob?.cancel()
+                                        if(event.platform == getString(context,R.string.email)) {
+                                            setEvent(
+                                                UiEvent.navigate(Screen.SignUpScreen(phoneNumber.value))
+                                            )
+                                        } else {
+                                            //sns가입시도
+                                            socialSignUp(event.platform,event.account!!,phoneNumber.value)
                                         }
-                                        else
-                                            _authCodeField.value = authCodeField.value.copy(isError = true)
                                     }
+                                    else
+                                        _authCodeField.value = authCodeField.value.copy(isError = true)
                                 }
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                is Resource.TokenExpired -> {}
-                            }
+                            )
                         }
                 }
             }
         }
     }
-
     private fun socialSignUp(platform: String,account: String,phonenumber: String) {
         viewModelScope.launch {
             signUpUseCase(platform,account,phonenumber)
                 .collect{ result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            setLoading(false)
-                            result.data?.let { userPreferences.saveAuthToken(it) }
+                    handleResource(
+                        resource = result,
+                        onSuccess = { data ->
+                            userPreferences.saveAuthToken(data)
                             setEvent(
                                 UiEvent.navigate(
                                     Screen.CreateprofileScreen
                                 )
                             )
                         }
-                        is Resource.Error -> {
-                            setLoading(false)
-                            setEvent(
-                                UiEvent.ShowToast(
-                                    message = result.message ?: getString(context,R.string.error)
-                                )
-                            )
-                        }
-                        is Resource.Loading -> {
-                            setLoading(true)
-                        }
-
-                        is Resource.TokenExpired -> {}
-                    }
+                    )
                 }
         }
     }

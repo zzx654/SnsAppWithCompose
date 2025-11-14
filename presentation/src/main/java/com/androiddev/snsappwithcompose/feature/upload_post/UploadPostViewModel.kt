@@ -236,153 +236,6 @@ class UploadPostViewModel @Inject constructor(
 
             is UploadPostEvent.UploadPost -> {
                 handleUploadPost(event)
-                /**viewModelScope.launch {
-                    var requestTags: RequestBody? = null
-                    var requestImages: List<MultipartBody.Part>? = null
-                    if (addedTags.isNotEmpty())
-                        requestTags = addedTags.joinToString("#")
-                            .toRequestBody("text/plain".toMediaTypeOrNull())
-                    var requestAudio: MultipartBody.Part? = null
-                    val requestText =
-                        contentTextField.value.toRequestBody("text/plain".toMediaTypeOrNull())
-                    var requestLat: MultipartBody.Part? = null
-                    var requestLong: MultipartBody.Part? = null
-                    event.lat?.let {
-                        requestLat =
-                            MultipartBody.Part.createFormData("latitude", event.lat.toString())
-                        requestLong =
-                            MultipartBody.Part.createFormData("longitude", event.long.toString())
-                    }
-                    if (selectedImages.isNotEmpty()) {
-                        requestImages = selectedImages.filter { it.isNew }
-                            .mapNotNull { item ->
-                                item.uri?.let { getMultipartBody(it, context) }
-                            }
-                    }
-                    event.audioFilePath?.let { filePath ->
-                        val file = File(filePath)
-
-                        if (file.exists()) {
-                            val requestFile =
-                                file.asRequestBody("audio/mp4".toMediaTypeOrNull())
-                            requestAudio =
-                                MultipartBody.Part.createFormData(
-                                    "audio",
-                                    file.name,
-                                    requestFile
-                                )
-
-                        }
-                    }
-                    if (postMode == PostMode.CREATE) {
-                        var requestVoteOptions: RequestBody? = null
-
-                        if (event.voteOptions.isNotEmpty()) {
-                            val voteOptionDataList = event.voteOptions.map {
-                                VoteOptionData(voteoption = it)
-                            }
-                            val gson = Gson()
-                            val voteOptionsJson = gson.toJson(voteOptionDataList)
-                            requestVoteOptions =
-                                voteOptionsJson.toRequestBody("application/json".toMediaType())
-                        }
-
-                        uploadPostUseCases.uploadPost(
-                            anonymousNick = if (anonymous.value) generateAnonymousNickname().toRequestBody(
-                                "text/plain".toMediaTypeOrNull()
-                            ) else null,
-                            tags = requestTags,
-                            images = requestImages,
-                            text = requestText,
-                            audio = requestAudio,
-                            voteOptions = requestVoteOptions,
-                            latitude = requestLat,
-                            longitude = requestLong
-                        ).collect { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    setEvent(UiEvent.popBackStack)
-
-                                }
-
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(
-                                                context,
-                                                R.string.error
-                                            )
-                                        )
-                                    )
-                                }
-
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                else -> null
-                            }
-                        }
-                    } else {
-                        val deleteImagesJson = Gson().toJson(deletedImages)
-                        val deleteImagesBody =
-                            deleteImagesJson.toRequestBody("application/json".toMediaTypeOrNull())
-                        uploadPostUseCases.editPost(
-                            postid = MultipartBody.Part.createFormData("postid", postId.toString()),
-                            latitude = requestLat,
-                            longitude = requestLong,
-                            anonymousNick = if (anonymous.value) generateAnonymousNickname().toRequestBody(
-                                "text/plain".toMediaTypeOrNull()
-                            ) else null,
-                            deleteImages = deleteImagesBody,
-                            tags = requestTags,
-                            images = requestImages,
-                            audio = requestAudio,
-                            deleteAudio = event.deleteAudio
-                                ?.let { it.toRequestBody("text/plain".toMediaTypeOrNull()) },
-                            text = requestText,
-
-
-                            ).collect { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let {
-                                        setEvent(
-                                            UiEvent.PopBackStackWithResult(
-                                                getString(
-                                                    context,
-                                                    R.string.editedPost
-                                                ), it.posts[0]
-                                            )
-                                        )
-                                    }
-                                }
-
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(
-                                                context,
-                                                R.string.error
-                                            )
-                                        )
-                                    )
-                                }
-
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                else -> null
-                            }
-
-                        }
-                    }
-                }**/
             }
 
         }
@@ -482,9 +335,9 @@ class UploadPostViewModel @Inject constructor(
         result: Resource<T>,
         mode: PostMode
     ) {
-        when (result) {
-            is Resource.Success -> {
-                setLoading(false)
+        handleResource(
+            resource = result,
+            onSuccess = { data ->
                 when (mode) {
                     PostMode.CREATE -> {
                         setEvent(UiEvent.popBackStack)
@@ -502,20 +355,9 @@ class UploadPostViewModel @Inject constructor(
                         }
                     }
                 }
-            }
 
-            is Resource.Error -> {
-                setLoading(false)
-                setEvent(
-                    UiEvent.ShowToast(
-                        result.message ?: getString(context, R.string.error)
-                    )
-                )
             }
-
-            is Resource.Loading -> setLoading(true)
-            is Resource.TokenExpired -> null
-        }
+        )
     }
 }
 data class UploadRequestData(

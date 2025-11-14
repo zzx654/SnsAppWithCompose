@@ -32,10 +32,7 @@ class SignInWithTokenViewModel @Inject constructor(
         get() = _alertDialogState
 
     init {
-
-            signInWithToken()
-
-
+        signInWithToken()
     }
     fun signInWithToken() {
         viewModelScope.launch {
@@ -82,71 +79,8 @@ class SignInWithTokenViewModel @Inject constructor(
                         },
                     )
                 }
-
-
             }
-            /**signInUseCases.signInWithToken()
-                .collect{ result ->
-
-                    withContext(Dispatchers.IO) {
-                        when(result) {
-                            is Resource.Success -> {
-                                setLoading(false)
-                                result.data?.let {
-                                    if(it.signInResult) {
-
-                                        if(it.profileWritten) {
-                                            //홈화면
-                                            setEvent(
-                                                UiEvent.navigate(
-                                                    screen = Screen.MainScreen,
-                                                    userId = it.userId
-                                                )
-                                            )
-                                        } else {
-                                            //프로필화면
-                                            setEvent(
-                                                UiEvent.navigate(
-                                                    screen = Screen.CreateprofileScreen,
-                                                    userId=  it.userId
-                                                )
-                                            )
-                                        }
-                                    } else {
-                                        // 로그인시작화면으로 가기
-                                        setEvent(
-                                            UiEvent.navigate(
-                                                screen = Screen.SignInScreen
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                            is Resource.Error -> {
-                                setLoading(false)
-                                showSignInFialedAlert(result.message)
-
-                            }
-                            is Resource.Loading -> {
-                                setLoading(true)
-                            }
-                            is Resource.TokenExpired -> {
-                                setEvent(
-                                    UiEvent.navigate(
-                                        screen = Screen.SignInScreen
-                                    )
-                                )
-                            }
-                        }
-                    }
-
-
-
-                }**/
         }
-
-
-
     }
     private fun showSignInFialedAlert(message:String?) {
         _alertDialogState.value = AlertDialogState(
@@ -154,10 +88,7 @@ class SignInWithTokenViewModel @Inject constructor(
             confirmText = getString(context, R.string.retry),
             onClickConfirm = {
                 resetDialogState()
-
-                    signInWithToken()
-
-
+                signInWithToken()
             }
         )
     }

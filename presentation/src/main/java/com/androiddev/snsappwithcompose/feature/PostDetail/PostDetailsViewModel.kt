@@ -173,32 +173,6 @@ class PostDetailsViewModel @Inject constructor(
                     }
                 )
             }
-            /**voteUseCases.getVoteInfo(post.postId).collect { result ->
-                when(result) {
-                    is Resource.Success -> {
-                        //투표 fetch
-                        result.data?.let {
-                            if(it.voteOptions.isNotEmpty()) {
-                                _voteState.value = voteState.value.copy(
-                                    isMyPost = it.isMyPost,
-                                    hasVoted = it.hasVoted,
-                                    selectedChoiceId = it.selectedChoiceId,
-                                    voteOptions = it.voteOptions
-                                )
-                            }
-                        }
-                    }
-                    is Resource.Loading -> {
-
-                    }
-                    is Resource.Error -> {
-
-                    }
-
-                    is Resource.TokenExpired -> null
-                }
-
-            }**/
         }
 
     }
@@ -210,44 +184,32 @@ class PostDetailsViewModel @Inject constructor(
                     if(!voteState.value.hasVoted) {
                         voteState.value.selectedChoiceId?.let { optionId ->
                             voteUseCases.vote(post.value?.postId?:0,optionId).collect { result ->
-                                when(result) {
-                                    is Resource.Success -> {
-                                        //투표 fetch
-                                        setLoading(false)
-                                        result.data?.let {
-                                            if(it.voteOptions.isNotEmpty()) {
-                                                _voteState.value = voteState.value.copy(
-                                                    isMyPost = it.isMyPost,
-                                                    hasVoted = it.hasVoted,
-                                                    selectedChoiceId = it.selectedChoiceId,
-                                                    voteOptions = it.voteOptions
-                                                )
-                                            }
-                                        }
-                                    }
-                                    is Resource.Loading -> {
-                                        setLoading(true)
-                                    }
-                                    is Resource.Error -> {
-                                        setLoading(false)
-                                        setEvent(
-                                            UiEvent.ShowToast(
-                                                message = result.message ?: getString(
-                                                    context, R.string.error
-                                                )
+                                handleResource(
+                                    resource = result,
+                                    onSuccess = { data ->
+                                        if(data.voteOptions.isNotEmpty()) {
+                                            _voteState.value = voteState.value.copy(
+                                                isMyPost = data.isMyPost,
+                                                hasVoted = data.hasVoted,
+                                                selectedChoiceId = data.selectedChoiceId,
+                                                voteOptions = data.voteOptions
                                             )
-                                        )
+                                        }
 
                                     }
+                                )
 
-                                    is Resource.TokenExpired -> null
-                                }
 
                             }
                         }
                     } else {
                         voteUseCases.cancelVote(post.value?.postId?:0).collect { result ->
-                            _voteState.value = voteState.value.copy(hasVoted = false, selectedChoiceId = null)
+                            handleResource(
+                                resource = result,
+                                onSuccess = {
+                                    _voteState.value = voteState.value.copy(hasVoted = false, selectedChoiceId = null)
+                                }
+                            )
 
                         }
                     }
@@ -286,32 +248,16 @@ class PostDetailsViewModel @Inject constructor(
             is CommentEvent.ToggleLikeComment -> {
                 viewModelScope.launch {
                     commentUseCases.ToggleLikeComment(event.commentId).collect { result ->
-                        when(result) {
-                            is Resource.Success -> {
-                                setLoading(false)
-                                result.data?.let {
-                                    val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
-                                    _commentLikeStatusMap[event.commentId] = CommentLikeState(
-                                        isLiked = it.isLiked,
-                                        likeCount = currentLikeStatus.likeCount.plus(if(it.isLiked) 1 else -1)
-                                    )
-                                }
-                            }
-                            is Resource.Loading -> Unit
-
-                            is Resource.Error -> {
-                                setLoading(false)
-                                setEvent(
-                                    UiEvent.ShowToast(
-                                        message = result.message ?: getString(
-                                            context, R.string.error
-                                        )
-                                    )
+                        handleResource(
+                            resource = result,
+                            onSuccess = { data ->
+                                val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
+                                _commentLikeStatusMap[event.commentId] = CommentLikeState(
+                                    isLiked = data.isLiked,
+                                    likeCount = currentLikeStatus.likeCount.plus(if(data.isLiked) 1 else -1)
                                 )
                             }
-
-                            is Resource.TokenExpired -> null
-                        }
+                        )
 
                     }
                 }
@@ -333,37 +279,17 @@ class PostDetailsViewModel @Inject constructor(
                         text = commentText.value,
                         anonymousNick = if(anonymousChecked.value) generateAnonymousNickname() else null
                     ).collect { result ->
-                        when(result) {
-
-                            is Resource.Success -> {
-                                setLoading(false)
+                        handleResource(
+                            resource = result,
+                            onSuccess = { data ->
                                 _commentText.value = ""
-                                result.data?.let {
-                                    _isCommentsEmpty.value = false
-                                    _getCommentsState.value = getCommentsState.value.copy(
-                                        comments = listOf(it.comments[0])+getCommentsState.value.comments
-                                    )
-                                }
-                            }
-
-                            is Resource.Loading -> {
-                                setLoading(true)
-
-                            }
-
-                            is Resource.Error -> {
-                                setLoading(false)
-                                setEvent(
-                                    UiEvent.ShowToast(
-                                        message = result.message ?: getString(
-                                            context, R.string.error
-                                        )
-                                    )
+                                _isCommentsEmpty.value = false
+                                _getCommentsState.value = getCommentsState.value.copy(
+                                    comments = listOf(data.comments[0])+getCommentsState.value.comments
                                 )
                             }
 
-                            is Resource.TokenExpired -> null
-                        }
+                        )
 
                     }
                 }
@@ -378,48 +304,23 @@ class PostDetailsViewModel @Inject constructor(
                         postId = post.value?.postId?:0,
                         commentId = event.commentId
                     ).collect { result ->
-                        when(result) {
-
-                            is Resource.Success -> {
-                                setLoading(false)
-                                result.data?.let {
-                                    setEvent(
-                                        UiEvent.navigate(
-                                            Screen.ReplyScreen(it.comments[0])
-                                        )
-                                    )
-                                    Log.d("comment","${it.comments[0]}")
-                                }
-                            }
-
-                            is Resource.Loading -> {
-                                setLoading(true)
-
-                            }
-
-                            is Resource.Error -> {
-                                setLoading(false)
+                        handleResource(
+                            resource = result,
+                            onSuccess = { data ->
                                 setEvent(
-                                    UiEvent.ShowToast(
-                                        message = result.message ?: getString(
-                                            context, R.string.error
-                                        )
+                                    UiEvent.navigate(
+                                        Screen.ReplyScreen(data.comments[0])
                                     )
                                 )
+                                Log.d("comment","${data.comments[0]}")
+
                             }
-
-                            is Resource.TokenExpired -> null
-                        }
-
+                        )
                     }
                 }
-
-
             }
-
             else-> null
         }
-
     }
     fun onPostDetailEvent(event: PostDetailEvent) {
         when (event) {
@@ -427,39 +328,18 @@ class PostDetailsViewModel @Inject constructor(
             is PostDetailEvent.ToggleLikePost -> {
                 viewModelScope.launch {
                     postDetailUseCases.ToggleLikePost(event.postId).collect { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    setLoading(false)
-                                    result.data?.let {
-                                        _isLiked.value = it.isLiked
-                                    }
-                                }
-
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
-
-                                is Resource.Error -> {
-                                    setLoading(false)
-                                    setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(
-                                                context, R.string.error
-                                            )
-                                        )
-                                    )
-                                }
-
-                                else -> null
+                        handleResource(
+                            resource = result,
+                            onSuccess = { data ->
+                                _isLiked.value = data.isLiked
                             }
-
-                        }
+                        )
+                    }
                 }
             }
             is PostDetailEvent.DeletePost -> {
               showDeleteAlert()
             }
-
         }
     }
     private fun showDeleteAlert() {
@@ -477,29 +357,12 @@ class PostDetailsViewModel @Inject constructor(
     private fun deletePost(postId: Int) {
         viewModelScope.launch {
             postDetailUseCases.DeletePost(postId).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        setLoading(false)
+                handleResource(
+                    resource = result,
+                    onSuccess = {
                         setEvent(UiEvent.popBackStack)
                     }
-
-                    is Resource.Loading -> {
-                        setLoading(true)
-                    }
-
-                    is Resource.Error -> {
-                        setLoading(false)
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = result.message ?: getString(
-                                    context, R.string.error
-                                )
-                            )
-                        )
-                    }
-
-                    else -> null
-                }
+                )
 
             }
         }
