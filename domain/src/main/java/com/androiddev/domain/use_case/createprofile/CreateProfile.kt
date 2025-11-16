@@ -15,5 +15,5 @@ class CreateProfile @Inject constructor(
         nickname: RequestBody,
         birth: Int,
         gender: RequestBody
-    ):Flow<Resource<Boolean>> = repository.createProfile(profileImage,nickname,birth,gender)
+    ):Flow<Resource<Unit>> = repository.createProfile(profileImage,nickname,birth,gender)
 }

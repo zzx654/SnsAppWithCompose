@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -60,7 +61,11 @@ abstract class BaseViewModel (protected val context: Context): ViewModel() {
             is Resource.TokenExpired -> {
                 // 토큰 만료 시 공통 처리
                 setLoading(false)
-                onTokenExpired?.invoke()
+                onTokenExpired?.invoke()?:   setEvent(
+                    UiEvent.navigate(
+                        screen = Screen.SignInScreen
+                    )
+                )
             }
         }
     }

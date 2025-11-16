@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.createprofile.CreateProfileApi
+import com.androiddev.data.remote.dto.toValidationResult
+import com.androiddev.data.util.safeApiCall
+import com.androiddev.domain.model.ValidationResult
 import com.androiddev.domain.repository.createprofile.CreateProfileRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -23,46 +26,18 @@ class CreateProfileRepositoryImpl @Inject constructor(
         nickname: RequestBody,
         birth: Int,
         gender: RequestBody
-    ): Flow<Resource<Boolean>> {
-        return flow {
-            try{
-                emit(Resource.Loading())
-                api.createProfile(profileImage,nickname,birth,gender).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        emit(Resource.Success(result.isTokenValid))
-                    } else {
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                    }
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
+    ): Flow<Resource<Unit>> = safeApiCall(
+        context = context,
+        apiCall = { api.createProfile(profileImage,nickname,birth,gender) },
+        mapToResource = {}
+    )
 
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context,R.string.connection_error)))
-            }
+    override suspend fun checkNickname(nickname: String): Flow<Resource<ValidationResult>> =
+        safeApiCall(
+            context = context,
+            apiCall = { api.checkNickname(nickname) },
+            mapToResource = { it.toValidationResult(isValid = it.isValid)}
+        )
 
-        }
-    }
-
-    override suspend fun checkNickname(nickname: String): Flow<Resource<Boolean>> {
-        return flow {
-            try{
-                emit(Resource.Loading())
-                api.checkNickname(nickname).body()?.let { result ->
-                    if(result.resultCode == 200) {
-                        emit(Resource.Success(result.isValid))
-                    } else {
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                    }
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context,R.string.connection_error)))
-            }
-
-        }
-    }
 
 }

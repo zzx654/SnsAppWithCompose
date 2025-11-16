@@ -1,7 +1,10 @@
 package com.androiddev.data.remote.api.createprofile
 
+import com.androiddev.data.remote.BaseApiResponse
+import com.androiddev.data.remote.dto.ValidationResultDto
 import com.androiddev.domain.model.CreateProfileResponse
 import com.androiddev.domain.model.ValidationResponse
+import com.androiddev.domain.model.ValidationResult
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -19,10 +22,10 @@ interface CreateProfileApi {
         @Part("nickname")nickname: RequestBody,
         @Part("birth")birth: Int,
         @Part("gender")gender: RequestBody
-    ): Response<CreateProfileResponse>
+    ): Response<BaseApiResponse<Unit>>
     @FormUrlEncoded
     @POST("/checkNickname")
     suspend fun checkNickname(
         @Field("nickname")nickname: String
-    ): Response<ValidationResponse>
+    ): Response<BaseApiResponse<ValidationResultDto>>
 }

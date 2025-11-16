@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.domain.util.Constants.PHONE_REGEX
 import com.androiddev.domain.R
+import com.androiddev.domain.model.ValidationResult
 import com.androiddev.domain.repository.signup.AuthPhoneRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +16,7 @@ class RequestPhoneAuthCode @Inject constructor(
     private val context: Context
 ) {
     @kotlin.jvm.Throws(InvalidPhoneNumberException::class)
-    suspend operator fun invoke(PhoneNumber: String): Flow<Resource<Boolean>> {
+    suspend operator fun invoke(PhoneNumber: String): Flow<Resource<ValidationResult>> {
         if(PhoneNumber.isBlank())
             throw InvalidPhoneNumberException(getString(context,R.string.empty_phone))
         else if(!Pattern.matches(PHONE_REGEX,PhoneNumber))

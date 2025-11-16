@@ -4,6 +4,13 @@ import android.content.Context
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.signup.SignUpApi
+import com.androiddev.data.remote.dto.toAuthCodeResult
+import com.androiddev.data.remote.dto.toTokenResult
+import com.androiddev.data.remote.dto.toValidationResult
+import com.androiddev.data.util.safeApiCall
+import com.androiddev.domain.model.AuthCodeResult
+import com.androiddev.domain.model.TokenResult
+import com.androiddev.domain.model.ValidationResult
 import com.androiddev.domain.repository.signup.SignupRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -20,71 +27,28 @@ class SignupRepositoryImpl @Inject constructor(
         platform: String,
         account: String,
         phonenumber: String
-    ): Flow<Resource<String>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.socialSignUp(platform,account,phonenumber).body()?.let{ result ->
-                    if(result.resultCode == 200) {
-                        emit(Resource.Success(result.token))
-                    }
-                    else
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context,R.string.connection_error)))
-            }
-
-        }
-    }
-    override suspend fun requestAuthCode(email: String): Flow<Resource<Boolean>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.requestAuthCode(email).body()?.let{ result ->
-                    if(result.resultCode == 200) {
-                        emit(Resource.Success(result.isValid))
-                    }
-                    else
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context,R.string.connection_error)))
-            }
-        }
-    }
+    ): Flow<Resource<TokenResult>> = safeApiCall(
+        context = context,
+        apiCall = { api.socialSignUp(platform,account,phonenumber) },
+        mapToResource = { it.toTokenResult(it.token) }
+    )
+    override suspend fun requestAuthCode(email: String): Flow<Resource<ValidationResult>> =
+        safeApiCall(
+            context= context,
+            apiCall = { api.requestAuthCode(email) },
+            mapToResource = { it.toValidationResult(it.isValid)}
+        )
 
     override suspend fun emailSignUp(
         account: String,
         password: String,
         phonenumber: String,
         authCode: String
-    ): Flow<Resource<Boolean>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                api.emailSignUp(account,password, phonenumber, authCode).body()?.let{ result ->
-                    if(result.resultCode == 200) {
-                        emit(Resource.Success(result.isCorrect))
-                    }
-                    else
-                        emit(Resource.Error(getString(context,R.string.server_error)))
-                }
-            } catch(e: HttpException) {
-                emit(Resource.Error(e.localizedMessage ?: getString(context,R.string.unexpected_error)))
-
-            } catch(e: IOException) {
-                emit(Resource.Error(getString(context,R.string.connection_error)))
-            }
-
-        }
-    }
+    ): Flow<Resource<AuthCodeResult>> = safeApiCall(
+        context = context,
+        apiCall = { api.emailSignUp(account,password, phonenumber, authCode) },
+        mapToResource = { it.toAuthCodeResult(isCorrect = it.isCorrect) }
+    )
 
 }
 

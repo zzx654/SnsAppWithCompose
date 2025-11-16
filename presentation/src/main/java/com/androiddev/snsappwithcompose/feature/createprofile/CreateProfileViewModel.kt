@@ -112,10 +112,11 @@ class CreateProfileViewModel @Inject constructor(
                         createProfileUseCases.checkNickname(event.nickname)
                             .collect { result ->
                                 when(result) {
+
                                     is Resource.Success -> {
                                         _isNicknameChecking.value = false
-                                        result.data?.let { isValid ->
-                                            _isNicknameValid.value = isValid
+                                        result.data?.let {
+                                            _isNicknameValid.value = it.isValid
                                         }
                                     }
                                     is Resource.Error -> {
@@ -125,7 +126,13 @@ class CreateProfileViewModel @Inject constructor(
                                         _isNicknameChecking.value = true
                                     }
 
-                                    is Resource.TokenExpired -> {}
+                                    is Resource.TokenExpired -> {
+                                        setEvent(
+                                            UiEvent.navigate(
+                                                screen = Screen.SignInScreen
+                                            )
+                                        )
+                                    }
                                 }
                             }
                     }
@@ -192,41 +199,17 @@ class CreateProfileViewModel @Inject constructor(
                     profileBmap.value?.let { requestImage = getMultipartBody(getImageUri(context,it),context) }
                     createProfileUseCases.createProfile(requestImage,requestNickname,birthYear.value!!,requestGender)
                         .collect { result ->
-                            when(result) {
-                                is Resource.Success -> {
-                                    result.data?.let { isTokenValid ->
-                                        //토큰이 유효하지 않으면 로그인 화면으로
-                                        //유효하면 홈화면으로
-                                        if(isTokenValid) {
-                                            setEvent(
-                                                UiEvent.navigate(
-                                                    screen = Screen.HomeScreen
-                                                )
-                                            )
-                                        }
-                                        else {
-                                            setEvent(
-                                                UiEvent.navigate(
-                                                    screen = Screen.SignInScreen
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                                is Resource.Error -> {
-                                    setLoading(false)
+                            handleResource(
+                                resource = result,
+                                onSuccess = { data ->
                                     setEvent(
-                                        UiEvent.ShowToast(
-                                            message = result.message ?: getString(context,R.string.error)
+                                        UiEvent.navigate(
+                                            screen = Screen.HomeScreen
                                         )
                                     )
-                                }
-                                is Resource.Loading -> {
-                                    setLoading(true)
-                                }
 
-                                is Resource.TokenExpired -> {}
-                            }
+                                }
+                            )
                         }
                 }
                 resetDialogState()

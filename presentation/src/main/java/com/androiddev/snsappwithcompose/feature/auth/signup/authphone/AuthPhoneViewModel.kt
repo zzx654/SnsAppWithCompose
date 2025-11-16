@@ -49,14 +49,14 @@ class AuthPhoneViewModel @Inject constructor(
                         authPhoneUseCases.requestAuthCode(phoneNumber.value).collect { result ->
                             handleResource(
                                 resource = result,
-                                onSuccess = { phoneNumberExist ->
-                                    if(phoneNumberExist) {
-                                        showPhoneExistAlert()
-                                    } else {
+                                onSuccess = { data ->
+                                    if(data.isValid) {
                                         _isCodeReceived.value = true
                                         _limitTime.value = AUTH_LIMITEDTIME
                                         _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
                                         timerStart()
+                                    } else {
+                                        showPhoneExistAlert()
                                     }
                                 }
                             )
@@ -79,8 +79,8 @@ class AuthPhoneViewModel @Inject constructor(
                         .collect { result ->
                             handleResource(
                                 resource = result,
-                                onSuccess = { isCodeCorrect ->
-                                    if(isCodeCorrect) {
+                                onSuccess = { data ->
+                                    if(data.isCorrect) {
                                         timerJob?.cancel()
                                         if(event.platform == getString(context,R.string.email)) {
                                             setEvent(
@@ -107,7 +107,7 @@ class AuthPhoneViewModel @Inject constructor(
                     handleResource(
                         resource = result,
                         onSuccess = { data ->
-                            userPreferences.saveAuthToken(data)
+                            userPreferences.saveAuthToken(data.token)
                             setEvent(
                                 UiEvent.navigate(
                                     Screen.CreateprofileScreen

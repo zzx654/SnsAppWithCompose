@@ -54,8 +54,8 @@ class EmailSignUpViewModel @Inject constructor(
                         emailSignUpUseCases.requestAuthCode(email.value).collect { result ->
                             handleResource(
                                 resource = result,
-                                onSuccess = { emailExist ->
-                                    if(emailExist) {
+                                onSuccess = { data ->
+                                    if(!data.isValid) { // 이미 존재하는 이메일
                                         //다이얼로그 추가
                                         showEmailExistAlert()
                                     } else {
@@ -92,8 +92,8 @@ class EmailSignUpViewModel @Inject constructor(
                         .collect { result ->
                             handleResource(
                                 resource = result,
-                                onSuccess = { isCodeCorrect ->
-                                    if(isCodeCorrect) {
+                                onSuccess = { data ->
+                                    if(data.isCorrect) {
                                         // 확인누르면 로그인화면으로 가는 다이얼로그추가
                                         showSignUpCompletedAlert()
                                     }

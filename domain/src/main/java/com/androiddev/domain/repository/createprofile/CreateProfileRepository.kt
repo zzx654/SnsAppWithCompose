@@ -1,5 +1,6 @@
 package com.androiddev.domain.repository.createprofile
 
+import com.androiddev.domain.model.ValidationResult
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
@@ -11,6 +12,6 @@ interface CreateProfileRepository {
         nickname: RequestBody,
         birth: Int,
         gender: RequestBody
-    ) : Flow<Resource<Boolean>>
-    suspend fun checkNickname(nickname: String): Flow<Resource<Boolean>>
+    ) : Flow<Resource<Unit>>
+    suspend fun checkNickname(nickname: String): Flow<Resource<ValidationResult>>
 }

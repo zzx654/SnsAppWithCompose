@@ -3,6 +3,7 @@ package com.androiddev.domain.use_case.signup.emailsignup
 import android.content.Context
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.domain.R
+import com.androiddev.domain.model.ValidationResult
 import com.androiddev.domain.repository.signup.SignupRepository
 import com.androiddev.domain.use_case.signup.authphone.InvalidPhoneNumberException
 import com.androiddev.domain.util.Resource
@@ -14,7 +15,7 @@ class RequestEmailAuthCode @Inject constructor(
     private val context: Context
 ) {
     @kotlin.jvm.Throws(InvalidPhoneNumberException::class)
-    suspend operator fun invoke(email: String): Flow<Resource<Boolean>> {
+    suspend operator fun invoke(email: String): Flow<Resource<ValidationResult>> {
         if(email.isBlank())
             throw InvalidEmailException(getString(context,R.string.empty_email))
         else if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() )
