@@ -38,7 +38,8 @@ abstract class BaseViewModel (protected val context: Context): ViewModel() {
     }
     protected suspend fun <T> handleResource(
         resource: Resource<T>,
-        onSuccess: suspend (T) -> Unit,
+        onSuccess: suspend (T) -> Unit = {},
+        onSuccessUnit: suspend () -> Unit = {},
         onError: (suspend () -> Unit)? = null,
         onTokenExpired: (suspend () -> Unit)? = null
     ) {
@@ -47,6 +48,8 @@ abstract class BaseViewModel (protected val context: Context): ViewModel() {
                 setLoading(false)
                 resource.data?.let {
                     onSuccess(it)
+                } ?: run {
+                    onSuccessUnit()
                 }
             }
             is Resource.Loading -> setLoading(true)

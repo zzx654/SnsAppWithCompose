@@ -206,7 +206,7 @@ class PostDetailsViewModel @Inject constructor(
                         voteUseCases.cancelVote(post.value?.postId?:0).collect { result ->
                             handleResource(
                                 resource = result,
-                                onSuccess = {
+                                onSuccessUnit = {
                                     _voteState.value = voteState.value.copy(hasVoted = false, selectedChoiceId = null)
                                 }
                             )
@@ -359,7 +359,7 @@ class PostDetailsViewModel @Inject constructor(
             postDetailUseCases.DeletePost(postId).collect { result ->
                 handleResource(
                     resource = result,
-                    onSuccess = {
+                    onSuccessUnit = {
                         setEvent(UiEvent.popBackStack)
                     }
                 )

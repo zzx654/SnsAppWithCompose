@@ -199,12 +199,13 @@ class CreateProfileViewModel @Inject constructor(
                     profileBmap.value?.let { requestImage = getMultipartBody(getImageUri(context,it),context) }
                     createProfileUseCases.createProfile(requestImage,requestNickname,birthYear.value!!,requestGender)
                         .collect { result ->
+
                             handleResource(
                                 resource = result,
-                                onSuccess = { data ->
+                                onSuccessUnit = {
                                     setEvent(
                                         UiEvent.navigate(
-                                            screen = Screen.HomeScreen
+                                            screen = Screen.MainScreen
                                         )
                                     )
 
