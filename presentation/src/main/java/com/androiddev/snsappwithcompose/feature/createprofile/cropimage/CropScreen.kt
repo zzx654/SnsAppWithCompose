@@ -43,16 +43,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.util.encodeToBase64
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.androiddev.snsappwithcompose.feature.createprofile.cropimage.CropViewModel
 import java.io.IOException
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -61,55 +59,28 @@ enum class Corner {
     TopLeft, TopRight, BottomLeft, BottomRight
 }
 
-@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntry) {
+fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntry,viewModel: CropViewModel = viewModel()) {
     val args = navBackStackEntry.toRoute<Screen.CropScreen>()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
     var isLoading by remember { mutableStateOf(true) }
     var isCropping by remember { mutableStateOf(false) }
-    val decodedUriString = Uri.decode(args.encodedUri)  // URI 디코딩
-    val uri = Uri.parse(decodedUriString)  // 디코딩된 문자열을 Uri 객체로 파싱
-    var image by remember { mutableStateOf<ImageBitmap?>(null) }
+    val decodedUriString = Uri.decode(args.encodedUri)
+    val uri = Uri.parse(decodedUriString)
 
-
-    // 이미지 로드하는 비동기 작업
+    // 이미지 로드
     LaunchedEffect(uri) {
-        scope.launch(Dispatchers.IO) {
-            val bitmap = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
-                } else {
-                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-                null
-            }
-            bitmap?.let {
-                withContext(Dispatchers.Main) {
-                    image = processBitmap(uri, it, context)  // 처리 후 ImageBitmap으로 변환
-                    isLoading = false  // 로딩 상태 종료
-                }
-            }
-        }
+        viewModel.loadImage(uri, context)
     }
 
+    val image = viewModel.image
 
-
-    var topLeft by remember { mutableStateOf(Offset(160f, 370f)) }
-    var topRight by remember { mutableStateOf(Offset(560f, 370f)) }
-    var bottomLeft by remember { mutableStateOf(Offset(160f, 770f)) }
-    var bottomRight by remember { mutableStateOf(Offset(560f, 770f)) }
-
-    var draggingCorner by remember { mutableStateOf<Corner?>(null) }
-    var draggingCenter by remember { mutableStateOf(false) }
-
-    // 크롭 중 표시
+    // 로딩 다이얼로그
     LoadingDialogWithText(
         text = getString(context, R.string.cropping_alert),
-        isLoading = { isCropping }
+        isLoading = { viewModel.isCropping }
     )
 
     BoxWithConstraints(
@@ -118,7 +89,6 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
             .fillMaxSize()
             .background(Color.DarkGray)
     ) {
-
         image?.let { bmap ->
             Image(
                 bitmap = bmap,
@@ -127,90 +97,96 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
                 modifier = Modifier.fillMaxSize()
             )
         } ?: run {
-            Text(getString(context,R.string.loading_bitmapimage), color = Color.White)
+            Text(getString(context, R.string.loading_bitmapimage), color = Color.White)
         }
 
-        // 드래그를 통해 크롭 영역 지정
-        Canvas(modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { offset: Offset ->
-                        draggingCorner = when {
-                            offset.isNear(topLeft) -> Corner.TopLeft
-                            offset.isNear(topRight) -> Corner.TopRight
-                            offset.isNear(bottomLeft) -> Corner.BottomLeft
-                            offset.isNear(bottomRight) -> Corner.BottomRight
-                            else -> null
+        // 드래그 처리
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { offset: Offset ->
+                            // 뷰모델 상태 업데이트
+                            viewModel.updateDraggingState(
+                                corner = when {
+                                    offset.isNear(viewModel.topLeft) -> Corner.TopLeft
+                                    offset.isNear(viewModel.topRight) -> Corner.TopRight
+                                    offset.isNear(viewModel.bottomLeft) -> Corner.BottomLeft
+                                    offset.isNear(viewModel.bottomRight) -> Corner.BottomRight
+                                    else -> null
+                                },
+                                isCenterDragging = viewModel.topLeft.let { Rect(viewModel.topLeft, viewModel.bottomRight).contains(offset) }
+                            )
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            // 드래그 진행 중 뷰모델 상태 변경
+                            when (viewModel.draggingCorner) {
+                                Corner.TopLeft -> {
+                                    viewModel.topLeft += dragAmount
+                                    viewModel.topRight = viewModel.topRight.copy(y = viewModel.topLeft.y)
+                                    viewModel.bottomLeft = viewModel.bottomLeft.copy(x = viewModel.topLeft.x)
+                                }
+                                Corner.TopRight -> {
+                                    viewModel.topRight += dragAmount
+                                    viewModel.topLeft = viewModel.topLeft.copy(y = viewModel.topRight.y)
+                                    viewModel.bottomRight = viewModel.bottomRight.copy(x = viewModel.topRight.x)
+                                }
+                                Corner.BottomLeft -> {
+                                    viewModel.bottomLeft += dragAmount
+                                    viewModel.topLeft = viewModel.topLeft.copy(x = viewModel.bottomLeft.x)
+                                    viewModel.bottomRight = viewModel.bottomRight.copy(y = viewModel.bottomLeft.y)
+                                }
+                                Corner.BottomRight -> {
+                                    viewModel.bottomRight += dragAmount
+                                    viewModel.topRight = viewModel.topRight.copy(x = viewModel.bottomRight.x)
+                                    viewModel.bottomLeft = viewModel.bottomLeft.copy(y = viewModel.bottomRight.y)
+                                }
+                                null -> if (viewModel.draggingCenter) {
+                                    // 전체 드래그
+                                    viewModel.topLeft += dragAmount
+                                    viewModel.topRight += dragAmount
+                                    viewModel.bottomLeft += dragAmount
+                                    viewModel.bottomRight += dragAmount
+                                }
+                            }
+                        },
+                        onDragEnd = {
+                            viewModel.updateDraggingState(corner = null, isCenterDragging = false)
                         }
-                        draggingCenter = draggingCorner == null &&
-                                Rect(topLeft, bottomRight).contains(offset)
-                    },
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        when (draggingCorner) {
-                            Corner.TopLeft -> {
-                                topLeft += dragAmount
-                                topRight = topRight.copy(y = topLeft.y)
-                                bottomLeft = bottomLeft.copy(x = topLeft.x)
-                            }
-
-                            Corner.TopRight -> {
-                                topRight += dragAmount
-                                topLeft = topLeft.copy(y = topRight.y)
-                                bottomRight = bottomRight.copy(x = topRight.x)
-                            }
-
-                            Corner.BottomLeft -> {
-                                bottomLeft += dragAmount
-                                topLeft = topLeft.copy(x = bottomLeft.x)
-                                bottomRight = bottomRight.copy(y = bottomLeft.y)
-                            }
-
-                            Corner.BottomRight -> {
-                                bottomRight += dragAmount
-                                topRight = topRight.copy(x = bottomRight.x)
-                                bottomLeft = bottomLeft.copy(y = bottomRight.y)
-                            }
-
-                            null -> if (draggingCenter) {
-                                // Move the entire rectangle by adjusting all corners
-                                topLeft += dragAmount
-                                topRight += dragAmount
-                                bottomLeft += dragAmount
-                                bottomRight += dragAmount
-                            }
-                        }
-
-                    },
-                    onDragEnd = {
-                        draggingCorner = null
-                        draggingCenter = false
-                    }
-                )
-            }) {
+                    )
+                }
+        ) {
+            // 사각형 그리기
             with(drawContext.canvas.nativeCanvas) {
                 val checkPoint = saveLayer(null, null)
                 val rectSize = Size(
-                    width = topRight.x - topLeft.x, height = bottomLeft.y - topLeft.y
+                    width = viewModel.topRight.x - viewModel.topLeft.x,
+                    height = viewModel.bottomLeft.y - viewModel.topLeft.y
                 )
-                // Destination
                 drawRect(Color(0x77000000))
-                // Draw the crop rectangle
                 drawRect(
-                    color = Color.Transparent, topLeft = topLeft, size = rectSize, blendMode = BlendMode.Clear
+                    color = Color.Transparent,
+                    topLeft = viewModel.topLeft,
+                    size = rectSize,
+                    blendMode = BlendMode.Clear
                 )
                 drawRect(
-                    color = Color.White, topLeft = topLeft, size = rectSize, style = Stroke(width = 2f)
+                    color = Color.White,
+                    topLeft = viewModel.topLeft,
+                    size = rectSize,
+                    style = Stroke(width = 2f)
                 )
-                // Draw corner handles
-                drawHandle(topLeft)
-                drawHandle(topRight)
-                drawHandle(bottomLeft)
-                drawHandle(bottomRight)
+                drawHandle(viewModel.topLeft)
+                drawHandle(viewModel.topRight)
+                drawHandle(viewModel.bottomLeft)
+                drawHandle(viewModel.bottomRight)
                 restoreToCount(checkPoint)
             }
         }
+
+        // 확인 버튼
         Text(
             text = getString(context, R.string.confirm),
             fontSize = 20.sp,
@@ -219,36 +195,30 @@ fun CropScreen(navController: NavController, navBackStackEntry: NavBackStackEntr
                 .align(Alignment.BottomEnd)
                 .padding(17.dp)
                 .clickable {
-                    scope.launch {
-                        isCropping = true
-
-                        var croppedBitmap:Bitmap? = null
-                        withContext(Dispatchers.Default) {
-
-                                croppedBitmap = getCroppedBitmap(
-                                    image!!,
-                                    Rect(topLeft, bottomRight),
-                                    constraints.maxWidth.toFloat(),
-                                    constraints.maxHeight.toFloat()
+                    // 크롭된 이미지 처리
+                    viewModel.image?.let { img ->
+                        viewModel.cropImage(
+                            image = img,
+                            topLeft = viewModel.topLeft,
+                            bottomRight = viewModel.bottomRight,
+                            maxWidth = constraints.maxWidth.toFloat(),
+                            maxHeight = constraints.maxHeight.toFloat(),
+                            onResult = { base64String ->
+                                navController.previousBackStackEntry?.savedStateHandle?.set(
+                                    getString(context, R.string.encodedBitmap),
+                                    base64String
                                 )
-                        }
-                        withContext(Dispatchers.Main) {
-                            // 결과 처리
-                            navController.previousBackStackEntry?.savedStateHandle?.set(
-                                getString(context, R.string.encodedBitmap),
-                                croppedBitmap?.let { encodeToBase64(it, Bitmap.CompressFormat.JPEG, 100) }
-
-                            )
-                            isCropping = false
-
-                            navController.popBackStack()
-                        }
+                                viewModel.isCropping = false
+                                navController.popBackStack()
+                            }
+                        )
 
                     }
+
                 }
         )
 
-        // Cancel Button
+        // 취소 버튼
         Text(
             text = getString(context, R.string.cancel),
             fontSize = 20.sp,

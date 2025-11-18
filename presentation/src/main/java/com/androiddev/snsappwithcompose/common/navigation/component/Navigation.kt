@@ -17,11 +17,11 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailScreen
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyScreen
 import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
 import com.androiddev.snsappwithcompose.feature.auth.init.InitScreen
-import com.androiddev.snsappwithcompose.feature.createprofile.component.CropScreen
 import com.androiddev.snsappwithcompose.feature.auth.signin.SignInScreen
 import com.androiddev.snsappwithcompose.feature.auth.signup.authphone.AuthPhoneScreen
 import com.androiddev.snsappwithcompose.feature.auth.signup.emailsignup.EmailSignUpScreen
 import com.androiddev.snsappwithcompose.feature.createprofile.CreateProfileScreen
+import com.androiddev.snsappwithcompose.feature.createprofile.component.CropScreen
 import com.androiddev.snsappwithcompose.feature.home.tagposts.TagPostScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostScreen
