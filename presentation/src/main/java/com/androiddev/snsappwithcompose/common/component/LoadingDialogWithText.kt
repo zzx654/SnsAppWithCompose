@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.upload_post.component
+package com.androiddev.snsappwithcompose.common.component
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,11 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat.getString
-import com.androiddev.snsappwithcompose.R
 
 @Composable
-fun UploadPostDialog(isLoading: () -> Boolean) {
+fun LoadingDialogWithText(text:String,isLoading: () -> Boolean) {
     val context = LocalContext.current
     if (isLoading()) {
         Dialog(
@@ -49,7 +47,7 @@ fun UploadPostDialog(isLoading: () -> Boolean) {
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = getString(context,R.string.uploading_alert),
+                        text = text,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )

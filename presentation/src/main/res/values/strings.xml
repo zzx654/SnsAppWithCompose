@@ -90,6 +90,9 @@
     <string name="toast_vote_edit_not_allowed">이미 등록되 투표는 변경할 수 없어요</string>
     <string name="editedPost">editedPost</string>
     <string name="unable_to_change_location">위치를 변경할 수 없습니다</string>
+    <string name="cropping_alert">이미지를 자르는 중입니다...</string>
+    <string name="loading_bitmapimage">이미지 로드중...</string>
+
 
 
 

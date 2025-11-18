@@ -54,10 +54,10 @@ import androidx.compose.ui.Alignment
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
+import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.CheckBoxWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.ContentTextField
 import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedImageCards
-import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadPostDialog
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadRecordIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadVoteIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.record.BottomRecorder
@@ -106,7 +106,10 @@ fun UploadPostScreen(
     ) { permissionsMap ->
         //val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
     }
-    UploadPostDialog { viewModel.isLoading.value }
+    LoadingDialogWithText(
+        text = getString(context,R.string.uploading_alert),
+        isLoading = { viewModel.isLoading.value}
+    )
     LaunchedEffect(Unit) {
 
         post?.let {

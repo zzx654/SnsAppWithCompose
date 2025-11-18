@@ -45,6 +45,8 @@ import com.androiddev.snsappwithcompose.feature.createprofile.component.Nickname
 import com.androiddev.snsappwithcompose.common.util.decodeBase64
 import java.util.Calendar
 import android.Manifest
+import android.content.Intent
+import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
@@ -74,7 +76,7 @@ fun CreateProfileScreen(
 ) {
 
     val rotateMatrix = Matrix().also{
-        it.postRotate(90f)
+        it.postRotate(0f)
     }
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -83,11 +85,7 @@ fun CreateProfileScreen(
         viewModel.setProfileBmap(decodeBase64(it))
         navBackStackEntry.savedStateHandle.set<String>(getString(context,R.string.encodedBitmap),null)
     }
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()){ uri ->
-        val encoded = Uri.encode(uri.toString())
-        navController.navigate(Screen.CropScreen(encoded))
-    }
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()){ bitmapImage ->
         bitmapImage?.let {
@@ -100,11 +98,24 @@ fun CreateProfileScreen(
             cameraLauncher.launch(null)
         }
     }
-    val photoPermission = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()){ isGranted ->
-        if(isGranted){
-            galleryLauncher.launch("image/*")
+
+    val galleryPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val uri = result.data?.data
+        if (uri != null) {
+            val encoded = Uri.encode(uri.toString())
+            navController.navigate(Screen.CropScreen(encoded))
         }
+    }
+    fun openGalleryOnly() {
+        val intent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        ).apply {
+            type = "image/*"
+        }
+        galleryPicker.launch(intent)
     }
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -146,8 +157,11 @@ fun CreateProfileScreen(
     }
 
     val year = Calendar.getInstance().get(Calendar.YEAR)
-    viewModel.setLauncher({cameraPermission.launch(android.Manifest.permission.CAMERA)},{photoPermission.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)})
-    
+    viewModel.setLauncher({cameraPermission.launch(android.Manifest.permission.CAMERA)},{
+        openGalleryOnly()
+    })
+
+
     CustomBottomSheetDialog(
         { viewModel.customBottomSheetDialogState.value.showDialog },
         { viewModel.customBottomSheetDialogState.value.items },
@@ -188,7 +202,7 @@ fun CreateProfileScreen(
                         maxLines = 1,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
-                        )
+                    )
                     Text(
                         text = "성별: ${viewModel.gender.value}",
                         fontSize = 14.sp,
