@@ -2,6 +2,7 @@ package com.androiddev.snsappwithcompose.feature.createprofile.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -44,7 +45,8 @@ fun NicknameTextField(
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Black,
-            unfocusedBorderColor = Color.Gray
+            unfocusedBorderColor = Color.Gray,
+            cursorColor = Color.Black
         ),
         onValueChange = {
             onTextChange(it)
@@ -53,7 +55,7 @@ fun NicknameTextField(
         supportingText = {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        //.fillMaxWidth()
                         .height(IntrinsicSize.Max)
                         .padding(vertical = 5.dp),
                 ) {

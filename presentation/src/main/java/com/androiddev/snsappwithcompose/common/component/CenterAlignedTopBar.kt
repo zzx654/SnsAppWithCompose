@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CenterAlignedTopBar(
     title: String,
-    onBackClick:()->Unit,
+    onBackClick:(()->Unit)? = null,
     actions: @Composable (RowScope.() -> Unit) = {}
 ) {
 
@@ -28,12 +28,15 @@ fun CenterAlignedTopBar(
         title = { Text(text = title,fontWeight = FontWeight.Bold,fontSize = 16.sp) },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
         navigationIcon = {
-            IconButton( onClick =  onBackClick ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null
-                )
+            onBackClick?.let {
+                IconButton( onClick =  it ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
+                }
             }
+
         },
         actions =  actions
     )

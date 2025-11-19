@@ -37,7 +37,7 @@ fun GenderRadioButtons(
                     unselectedColor = Color.Black
                 )
             )
-            Spacer(modifier = Modifier.width(5.dp))
+            //Spacer(modifier = Modifier.width(5.dp))
             Text(text = item)
         }
     }

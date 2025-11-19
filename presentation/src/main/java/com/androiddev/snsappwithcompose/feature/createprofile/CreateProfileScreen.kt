@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
+import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.feature.createprofile.component.GenderRadioButtons
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.state.UiEvent
@@ -157,7 +157,7 @@ fun CreateProfileScreen(
     }
 
     val year = Calendar.getInstance().get(Calendar.YEAR)
-    viewModel.setLauncher({cameraPermission.launch(android.Manifest.permission.CAMERA)},{
+    viewModel.setLauncher({cameraPermission.launch(Manifest.permission.CAMERA)},{
         openGalleryOnly()
     })
 
@@ -220,13 +220,8 @@ fun CreateProfileScreen(
     BaseScaffold(
         focusManager = focusManager,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = getString(context,R.string.createProfile),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                    ) },
+            CenterAlignedTopBar(
+                title = stringResource(R.string.createProfile)
             )
         },
         bottomBar = {
