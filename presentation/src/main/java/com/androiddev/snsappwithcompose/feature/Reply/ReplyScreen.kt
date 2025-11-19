@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import coil3.imageLoader
@@ -50,7 +49,7 @@ fun ReplyScreen(
     comment: Comment?,
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
-    viewModel: ReplyViewModel = hiltViewModel(),
+    viewModel: ReplyViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     userViewModel: UserViewModel
 ) {
     val focusManager = LocalFocusManager.current

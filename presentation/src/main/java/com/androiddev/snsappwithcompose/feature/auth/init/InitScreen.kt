@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
@@ -29,7 +28,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun InitScreen(
     navController: NavController,
-    viewModel: SignInWithTokenViewModel = hiltViewModel(),
+    viewModel: SignInWithTokenViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     userViewModel: UserViewModel
 ) {
     val context = LocalContext.current

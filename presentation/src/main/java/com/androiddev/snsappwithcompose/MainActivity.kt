@@ -24,8 +24,6 @@ import com.androiddev.snsappwithcompose.ui.theme.SnsAppWithComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
 import com.androiddev.snsappwithcompose.common.util.createNotificationChannel
 
 @AndroidEntryPoint
@@ -62,8 +60,6 @@ class MainActivity : ComponentActivity() {
                         LocalTextSelectionColors provides selectionColors,
                         LocalOverscrollFactory provides null
                     ) {
-                        val userViewModel: UserViewModel = hiltViewModel()
-
                         Navigation(
                             navController = navController,
                             modifier = Modifier.fillMaxSize()

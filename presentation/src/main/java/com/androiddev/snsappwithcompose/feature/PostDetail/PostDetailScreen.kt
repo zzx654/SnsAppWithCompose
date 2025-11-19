@@ -16,7 +16,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -44,7 +43,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.androiddev.domain.model.PostPreview
@@ -113,7 +111,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalLayoutApi::class, ExperimentalPagerApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ContextCastToActivity")
 @Composable
 fun PostDetailScreen(
@@ -121,8 +118,8 @@ fun PostDetailScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
     userViewModel: UserViewModel,
-    audioViewModel: AudioViewModel = hiltViewModel(),
-    viewModel: PostDetailsViewModel = hiltViewModel(),
+    audioViewModel: AudioViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    viewModel: PostDetailsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
 
     val currentPost = viewModel.post.value

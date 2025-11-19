@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.LoadingProgressIndicator
@@ -32,7 +31,7 @@ import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 @Composable
 fun TagScreen(
     navController: NavController,
-    viewModel: TagViewModel = hiltViewModel()
+    viewModel: TagViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
 
     val context = LocalContext.current

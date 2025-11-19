@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
@@ -54,7 +53,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun AuthPhoneScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
-    viewModel: AuthPhoneViewModel = hiltViewModel()
+    viewModel: AuthPhoneViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
     var args = navBackStackEntry.toRoute<Screen.AuthPhoneScreen>()
     val context = LocalContext.current

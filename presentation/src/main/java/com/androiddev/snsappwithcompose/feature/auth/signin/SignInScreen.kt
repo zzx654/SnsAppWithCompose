@@ -36,7 +36,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
@@ -55,7 +54,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun SignInScreen(
     navController: NavController,
     userViewModel: UserViewModel,
-    signinViewModel: SignInViewModel = hiltViewModel()
+    signinViewModel: SignInViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current

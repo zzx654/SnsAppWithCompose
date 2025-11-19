@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
@@ -44,6 +43,7 @@ import com.androiddev.snsappwithcompose.feature.createprofile.component.Nickname
 import com.androiddev.snsappwithcompose.common.util.decodeBase64
 import java.util.Calendar
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.provider.MediaStore
 import android.util.Log
@@ -72,7 +72,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun CreateProfileScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
-    viewModel: CreateProfileViewModel = hiltViewModel()
+    viewModel: CreateProfileViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
 
     val rotateMatrix = Matrix().also{
@@ -108,6 +108,7 @@ fun CreateProfileScreen(
             navController.navigate(Screen.CropScreen(encoded))
         }
     }
+    @SuppressLint("IntentReset")
     fun openGalleryOnly() {
         val intent = Intent(
             Intent.ACTION_PICK,

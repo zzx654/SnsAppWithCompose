@@ -31,7 +31,7 @@ import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostScreen
 @Composable
 fun Navigation(navController: NavHostController,modifier:Modifier) {
 
-    val userViewModel: UserViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
     NavHost(
         modifier = modifier,navController = navController,
         startDestination = Screen.InitScreen

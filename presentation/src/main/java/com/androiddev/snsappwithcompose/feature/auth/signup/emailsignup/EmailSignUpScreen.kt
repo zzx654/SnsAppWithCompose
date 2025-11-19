@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
@@ -53,7 +52,7 @@ import java.util.regex.Pattern
 fun EmailSignUpScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
-    viewModel: EmailSignUpViewModel = hiltViewModel()
+    viewModel: EmailSignUpViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
     var args = navBackStackEntry.toRoute<Screen.SignUpScreen>()
     val context = LocalContext.current

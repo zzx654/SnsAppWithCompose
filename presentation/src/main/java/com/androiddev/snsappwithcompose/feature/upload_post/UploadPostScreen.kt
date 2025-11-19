@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
@@ -75,9 +74,9 @@ import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteViewM
 fun UploadPostScreen(
     navController: NavController,
     post: PostPreview?,
-    viewModel: UploadPostViewModel = hiltViewModel(),
-    recordViewModel: RecordViewModel = hiltViewModel(),
-    createVoteViewModel: CreateVoteViewModel = hiltViewModel()
+    viewModel: UploadPostViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    recordViewModel: RecordViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    createVoteViewModel: CreateVoteViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 
 ) {
     val focusManager = LocalFocusManager.current
