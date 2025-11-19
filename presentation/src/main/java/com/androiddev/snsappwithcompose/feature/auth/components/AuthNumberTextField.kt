@@ -38,6 +38,8 @@ fun AuthNumberTextField(
                 focusedBorderColor = Color.Black,
                 unfocusedBorderColor = Color.Gray,
                 errorBorderColor = Color.Red,
+                cursorColor = Color.Black,
+
             ),
             trailingIcon = { Text(modifier = Modifier.padding(horizontal = 20.dp),text = timertoString(limitTime()),color = Color.Red) },
             placeholder = { Text(hint) },

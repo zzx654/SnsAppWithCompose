@@ -1,9 +1,6 @@
 package com.androiddev.snsappwithcompose.feature.auth.components
 
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+
 import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -34,7 +31,8 @@ fun AuthTextField(
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Black,
-            unfocusedBorderColor = Color.Gray
+            unfocusedBorderColor = Color.Gray,
+            cursorColor = Color.Black,
         ),
         visualTransformation =
         if(keyboardType == KeyboardType.Password) PasswordVisualTransformation() else VisualTransformation.None,

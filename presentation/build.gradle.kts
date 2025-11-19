@@ -13,11 +13,11 @@ fun getProperties(propertyKey: String): String {
 }
 android {
     namespace = "com.androiddev.snsappwithcompose"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.androiddev.snsappwithcompose"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -66,7 +66,7 @@ dependencies {
 
     implementation(project(":domain"))
     implementation(project(":data"))
-
+    implementation("com.google.code.gson:gson:2.13.2")
 
     implementation(libs.exoplayer)
     implementation(libs.coil3.compose)

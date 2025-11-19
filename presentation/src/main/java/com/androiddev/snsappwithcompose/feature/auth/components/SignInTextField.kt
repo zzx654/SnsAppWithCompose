@@ -32,39 +32,45 @@ fun SignInTextField(
     hint: String = ""
 ) {
 
-    BasicTextField(
-        modifier = modifier,
-        value = text(),
-        onValueChange = {
-            onTextChange(it)
-        },
-        maxLines = 1,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = onDone),
-        visualTransformation =
-        if(keyboardType == KeyboardType.Password) PasswordVisualTransformation() else VisualTransformation.None,
-        decorationBox = { innerTextField ->
-            Row(
-                modifier = Modifier
-                    .background(color = TextFieldBackground.copy(alpha = 0.2f), shape = RoundedCornerShape(size = 16.dp))
-                    .padding(horizontal = 16.dp, vertical = 3.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-
-                Box( contentAlignment = Alignment.CenterStart) {
-                    if(text().isEmpty()) {
-                        Text(
-                            text = hint,
-                            //fontSize = 18.sp,
-                            color = Color.Gray,
+        BasicTextField(
+            modifier = modifier,
+            value = text(),
+            onValueChange = {
+                onTextChange(it)
+            },
+            maxLines = 1,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(onDone = onDone),
+            visualTransformation =
+                if (keyboardType == KeyboardType.Password) PasswordVisualTransformation() else VisualTransformation.None,
+            decorationBox = { innerTextField ->
+                Row(
+                    modifier = Modifier
+                        .background(
+                            color = TextFieldBackground.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(size = 16.dp)
                         )
+                        .padding(horizontal = 16.dp, vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+
+                    Box(contentAlignment = Alignment.CenterStart) {
+                        if (text().isEmpty()) {
+                            Text(
+                                text = hint,
+                                //fontSize = 18.sp,
+                                color = Color.Gray,
+                            )
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
+
+
                 }
-
-
-
             }
-        }
-    )
+        )
+
 }
