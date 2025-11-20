@@ -112,7 +112,6 @@ fun UploadPostScreen(
     LaunchedEffect(Unit) {
 
         post?.let {
-
             viewModel.initPost(
                 post = it
             )

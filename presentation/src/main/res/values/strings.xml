@@ -92,6 +92,7 @@
     <string name="unable_to_change_location">위치를 변경할 수 없습니다</string>
     <string name="cropping_alert">이미지를 자르는 중입니다...</string>
     <string name="loading_bitmapimage">이미지 로드중...</string>
+    <string name="cannot_edit_vote">투표는 수정할 수 없습니다</string>
 
 
 

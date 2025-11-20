@@ -52,20 +52,17 @@ class CreateVoteViewModel @Inject constructor(
         when(event) {
             is CreateVoteEvent.OnAddVoteClick -> {
                 if(event.postMode == PostMode.CREATE) {
-                    if(_saved.value)
-                        _showBottomVoteDialog.value = true
-                    else
+                    if(saved.value)
                         showManageVoteDialog()
+                    else
+                        _showBottomVoteDialog.value = true
+
                 } else {
                     //토스트메시지 요청
                     viewModelScope.launch {
                         setEvent(
                             UiEvent.ShowToast(
-                                message = "투표는 수정할수 없습니다"
-                                //getString(
-                                  //  context,
-                                   // R.string.error
-                                //)
+                                message = getString(context,R.string.cannot_edit_vote)
                             )
                         )
                     }
