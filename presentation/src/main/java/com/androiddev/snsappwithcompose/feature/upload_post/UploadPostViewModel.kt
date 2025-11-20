@@ -304,7 +304,7 @@ class UploadPostViewModel @Inject constructor(
             voteOptions = voteOptionsJson,
             latitude = data.latitude,
             longitude = data.longitude
-        ).collect { handleResult(it,PostMode.CREATE) }
+        ).collect { handleResult(it) }
     }
 
     private suspend fun editExistingPost(
@@ -328,34 +328,27 @@ class UploadPostViewModel @Inject constructor(
             audio = data.audio,
             deleteAudio = event.deleteAudio?.toRequestBody("text/plain".toMediaTypeOrNull()),
             text = data.text
-        ).collect { handleResult(it, PostMode.EDIT) }
+        ).collect { handleResult(it) }
     }
 
     private suspend fun <T> handleResult(
         result: Resource<T>,
-        mode: PostMode
     ) {
         handleResource(
             resource = result,
+            onSuccessUnit = {
+                setEvent(UiEvent.popBackStack)
+            },
             onSuccess = { data ->
-                when (mode) {
-                    PostMode.CREATE -> {
-                        setEvent(UiEvent.popBackStack)
-                    }
-                    PostMode.EDIT -> {
-                        // T가 어떤 타입이든 런타임에 확인 가능
-                        if (result.data is Posts) {
-                            val data = result.data as Posts
-                            setEvent(
-                                UiEvent.PopBackStackWithResult(
-                                    getString(context, R.string.editedPost),
-                                    data.posts.first()
-                                )
-                            )
-                        }
-                    }
+                if (result.data is Posts) {
+                    val data = result.data as Posts
+                    setEvent(
+                        UiEvent.PopBackStackWithResult(
+                            getString(context, R.string.editedPost),
+                            data.posts.first()
+                        )
+                    )
                 }
-
             }
         )
     }
