@@ -10,16 +10,14 @@ import androidx.lifecycle.viewModelScope
 import com.androiddev.data.local.UserPreferences
 import com.androiddev.domain.model.SigninResult
 import com.androiddev.domain.use_case.signin.SignInUseCases
-import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.kakao.sdk.user.UserApiClient
-import com.navercorp.nid.NaverIdLoginSDK
-import com.navercorp.nid.oauth.NidOAuthLogin
-import com.navercorp.nid.oauth.OAuthLoginCallback
+import com.navercorp.nid.NidOAuth
+import com.navercorp.nid.oauth.util.NidOAuthCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
@@ -55,22 +53,20 @@ class SignInViewModel @Inject constructor(
         }
     }
     fun naverLogout() {
-        NidOAuthLogin().callDeleteTokenApi(object : OAuthLoginCallback {
+        NidOAuth.logout( object : NidOAuthCallback {
             override fun onSuccess() {
-                // 서버에서 토큰 삭제에 성공한 상태
+                //클라이언트에서 토큰 삭제를 성공한 상태
                 Log.i("naver","naverLogoutSuccess")
-
             }
-            override fun onFailure(httpStatus: Int, message: String) {
-                // 서버에서 토큰 삭제에 실패했어도 클라이언트에 있는 토큰은 삭제되어 로그아웃된 상태
-                // 클라이언트에 토큰 정보가 없기 때문에 추가로 처리할 수 있는 작업은 없음
-                Log.e("naverErr", "errorCode: ${NaverIdLoginSDK.getLastErrorCode().code}")
-                Log.e("naverErr", "errorDesc: ${NaverIdLoginSDK.getLastErrorDescription()}")
-            }
-            override fun onError(errorCode: Int, message: String) {
-                // 서버에서 토큰 삭제에 실패했어도 클라이언트에 있는 토큰은 삭제되어 로그아웃된 상태
-                // 클라이언트에 토큰 정보가 없기 때문에 추가로 처리할 수 있는 작업은 없음
-                onFailure(errorCode, message)
+            override fun onFailure(
+                errorCode: String,
+                errorDesc: String,
+            ) {
+                viewModelScope.launch {
+                    setEvent(
+                        UiEvent.ShowToast("errorCode:$errorCode, errorDesc:$errorDesc")
+                    )
+                }
             }
         })
     }

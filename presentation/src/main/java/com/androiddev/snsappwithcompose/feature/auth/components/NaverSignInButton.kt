@@ -1,17 +1,16 @@
 package com.androiddev.snsappwithcompose.feature.auth.components
 
-import android.app.Activity
+import android.app.Activity.RESULT_CANCELED
+import android.app.Activity.RESULT_OK
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.androiddev.snsappwithcompose.R
-import com.navercorp.nid.NaverIdLoginSDK
-import com.navercorp.nid.oauth.NidOAuthLogin
-import com.navercorp.nid.oauth.NidOAuthLoginState
-import com.navercorp.nid.profile.NidProfileCallback
-import com.navercorp.nid.profile.data.NidProfileResponse
+import com.navercorp.nid.NidOAuth
+import com.navercorp.nid.profile.domain.vo.NidProfile
+import com.navercorp.nid.profile.util.NidProfileCallback
 
 @Composable
 fun NaverSignInButton(
@@ -20,37 +19,34 @@ fun NaverSignInButton(
 ) {
     val context = LocalContext.current
 
+
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult(), onResult = {
         when(it.resultCode) {
-            Activity.RESULT_OK -> {
-
-                NidOAuthLogin().callProfileApi( object : NidProfileCallback<NidProfileResponse> {
-                    override fun onError(errorCode: Int, message: String) {
-                        onError(message)
-                        Log.e("CallProfileErr", "message :  ${message}")
-                    }
-                    override fun onFailure(httpStatus: Int, message: String) {
-                        onError(message)
-                        Log.e("CallProfileFailure", "message: $message")
-                    }
-                    override fun onSuccess(result: NidProfileResponse) {
-                        Log.i("CallProfileSuccess", "result.profile :  ${result.profile?.id}")
-                        result.profile?.id?.let{ onNaverSignInCompleted(it) }
-                    }
-                })
+            RESULT_OK -> {
+                NidOAuth.getUserProfile(
+                    object : NidProfileCallback<NidProfile> {
+                        override fun onSuccess(result: NidProfile) {
+                            Log.i("CallProfileSuccess", "result.profile :  ${result.profile.id}")
+                            onNaverSignInCompleted(result.profile.id)
+                        }
+                        override fun onFailure(
+                            errorCode: String,
+                            errorDesc: String,
+                        ) {
+                            onError("errorCode:$errorCode, errorDesc:$errorDesc")
+                        }
+                    },
+                )
             }
-            Activity.RESULT_CANCELED -> {
-                val errorCode = NaverIdLoginSDK.getLastErrorCode().code
-                val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
-                Log.e("NaverSignErr","errorCode:$errorCode, errorDesc:$errorDescription")
-                if (errorDescription != null) {
-                    onError(errorDescription)
-                }
+            RESULT_CANCELED -> {
+                val errorCode = NidOAuth.getLastErrorCode().code
+                val errorDescription = NidOAuth.getLastErrorDescription()
+                onError("errorCode:$errorCode, errorDesc:$errorDescription")
             }
         }
     })
     SocialMediaLogIn(
         icon = R.drawable.naver_logo,
-        onClick = { NaverIdLoginSDK.authenticate(context, launcher) }
+        onClick = { NidOAuth.requestLogin(context, launcher)}
     )
 }

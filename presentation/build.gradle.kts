@@ -66,12 +66,12 @@ dependencies {
 
     implementation(project(":domain"))
     implementation(project(":data"))
-    implementation("com.google.code.gson:gson:2.13.2")
+    implementation(libs.gson)
 
     implementation(libs.exoplayer)
     implementation(libs.coil3.compose)
     implementation(libs.coil3.okhttp)
-    implementation ("androidx.compose.foundation:foundation:1.8.3")
+    implementation(libs.compose.foundation)
     implementation (libs.accompanist.systemuicontroller)
     //tabrow
     implementation(libs.accompanist.pager)
