@@ -51,8 +51,8 @@ class GetPostsRepositoryImpl @Inject constructor(
     override suspend fun getNewPosts(
         postId: Int?,
         postDate: String?,
-        latitude: Double,
-        longitude: Double
+        latitude: Double?,
+        longitude: Double?
     ): Flow<Resource<Posts>> =  safeApiCall(
         context = context,
         apiCall = { api.getNewPosts(postId,postDate,latitude,longitude) },

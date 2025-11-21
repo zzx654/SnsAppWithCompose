@@ -36,7 +36,8 @@ import kotlinx.coroutines.flow.collectLatest
 fun <VM : BasePostsViewModel> BasePostsScreen(
     navController: NavController,
     viewModel: VM,
-    additionalHeader: @Composable (() -> Unit)? = null
+    additionalHeader: @Composable (() -> Unit)? = null,
+    isNearPostsScreen:Boolean = false
 ) {
     val context = LocalContext.current
 
@@ -75,7 +76,12 @@ fun <VM : BasePostsViewModel> BasePostsScreen(
             viewModel.getPostState.value.isLoading && viewModel.getPostState.value.posts.isEmpty()
         }
 
-        if (viewModel.locationPermissionGranted.value) {
+        if (!viewModel.locationPermissionGranted.value && isNearPostsScreen) {
+            Text(
+                text = getString(context, R.string.locationpermission_needed),
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
             Column(modifier = Modifier.fillMaxSize()) {
 
                 additionalHeader?.invoke()
@@ -93,11 +99,6 @@ fun <VM : BasePostsViewModel> BasePostsScreen(
                     }
                 )
             }
-        } else {
-            Text(
-                text = getString(context, R.string.locationpermission_needed),
-                modifier = Modifier.align(Alignment.Center)
-            )
         }
 
         PullRefreshIndicator(

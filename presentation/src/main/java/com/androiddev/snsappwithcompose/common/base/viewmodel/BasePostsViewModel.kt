@@ -7,7 +7,6 @@ import com.androiddev.domain.use_case.postlist.GetPostsUseCases
 import com.androiddev.snsappwithcompose.feature.home.GetPostsState
 import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
-import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.feature.home.events.GetPostsEvent
@@ -24,10 +23,12 @@ import com.androiddev.snsappwithcompose.feature.home.util.PostPaginator
 import dagger.hilt.android.qualifiers.ApplicationContext
 
 abstract class BasePostsViewModel(
-    private val locationClient: FusedLocationProviderClient,
     private val getPostsUseCases: GetPostsUseCases,
-    @ApplicationContext context: Context
+    private val isLocationPermissionRequired: Boolean = false,
+    @ApplicationContext context: Context,
+    protected val locationClient: FusedLocationProviderClient
 ) : BaseViewModel(context) {
+
 
     protected val _getPostState = mutableStateOf(GetPostsState())
     val getPostState: State<GetPostsState> get() = _getPostState
@@ -58,8 +59,40 @@ abstract class BasePostsViewModel(
             )
         }
     )
+    private fun loadPosts(refresh: Boolean,handleResult: suspend (Resource<Posts>) -> Unit) {
+        checkPermissions(
+            context = context,
+            permissions = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION),
+            onGranted = {
+                fetchLocation(locationClient) { latitude, longitude ->
+                    if (!_locationPermissionGranted.value) _locationPermissionGranted.value = true
+                    fetchPostsWithLocation(
+                        latitude = latitude,
+                        longitude = longitude,
+                        refresh = refresh,
+                        handleResult = handleResult
+                    )
+                }
+            },
+            onUnGranted = {
+                _locationPermissionGranted.value = false
 
-    abstract suspend fun loadPosts(refresh: Boolean, handleResult: suspend (Resource<Posts>) -> Unit)
+                if(!isLocationPermissionRequired) {
+                    fetchPostsWithLocation(
+                        refresh = refresh,
+                        handleResult = handleResult
+                    )
+
+                }
+            }
+        )
+    }
+    protected abstract fun fetchPostsWithLocation(
+        latitude: Double? = null,
+        longitude: Double? = null,
+        refresh: Boolean,
+        handleResult: suspend (Resource<Posts>) -> Unit
+    )
 
     open fun onEvent(event: GetPostsEvent) {
         when (event) {
@@ -86,7 +119,7 @@ abstract class BasePostsViewModel(
                         }
                     },
                     onUnGranted = {
-                        // _locationPermissionGranted.value = false
+                        _locationPermissionGranted.value = false
                         getSelectedPost(event.postId,null,null)
                     }
                 )

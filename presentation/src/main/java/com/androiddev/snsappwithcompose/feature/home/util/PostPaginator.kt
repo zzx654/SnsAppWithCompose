@@ -1,6 +1,5 @@
 package com.androiddev.snsappwithcompose.feature.home.util
 
-import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.Posts
 import com.androiddev.domain.util.Resource

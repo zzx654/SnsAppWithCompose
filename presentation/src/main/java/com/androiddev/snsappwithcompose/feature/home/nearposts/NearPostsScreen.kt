@@ -21,6 +21,7 @@ fun NearPostsScreen(
                     viewModel.onEvent(GetNearPostsEvent.SetDistance(it))
                 }
             )
-        }
+        },
+        isNearPostsScreen = true
     )
 }

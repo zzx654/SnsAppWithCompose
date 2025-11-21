@@ -10,5 +10,5 @@ import javax.inject.Inject
 class GetPopularTagPosts @Inject constructor(
     private val repository: GetPostsRepository
 ) {
-    suspend operator fun invoke(postId:Int? = null,tagId:Int,score:Double?,latitude:Double,longitude:Double): Flow<Resource<Posts>> = repository.getPopularTagPosts(postId,tagId,score,latitude,longitude)
+    suspend operator fun invoke(postId:Int? = null,tagId:Int,score:Double?,latitude:Double?,longitude:Double?): Flow<Resource<Posts>> = repository.getPopularTagPosts(postId,tagId,score,latitude,longitude)
 }

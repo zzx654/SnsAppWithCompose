@@ -30,8 +30,8 @@ interface GetPostsRepository {
     suspend fun getNewPosts(
         postId:Int?,
         postDate:String?,
-        latitude:Double,
-        longitude:Double,
+        latitude:Double?,
+        longitude:Double?,
     ):Flow<Resource<Posts>>
     suspend fun getSelectedPost(
         postId:Int,
