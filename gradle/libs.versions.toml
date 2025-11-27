@@ -4,6 +4,7 @@ agp = "8.13.1"
 datastorePreferences = "1.1.7"
 extensionOkhttp = "2.19.1"
 coreKtx = "1.17.0"
+firebaseBom = "34.6.0"
 hilt = "2.57.2"
 composeBom = "2025.11.00"
 compose = "1.7.8"
@@ -40,10 +41,14 @@ exoplayer = "1.8.0"
 media3DatasourceOkhttp = "1.8.0"
 gson = "2.13.2"
 foundation = "1.8.3"
+fcm = "4.4.4"
+firebaseMessagingKtx = "25.0.1"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 extension-okhttp = { module = "com.google.android.exoplayer:extension-okhttp", version.ref = "extensionOkhttp" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 media3-ui = {module = "androidx.media3:media3-ui",version.ref = "exoplayer"}
 #exoplayer
 exoplayer = {module="androidx.media3:media3-exoplayer",version.ref = "exoplayer"}
@@ -86,6 +91,7 @@ androidx-browser = { group = "androidx.browser", name = "browser", version.ref =
 kakao-v2-all = { group = "com.kakao.sdk", name = "v2-all", version.ref = "kakaosdk"}
 kakao-v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaosdk"}
 
+
 #구글 위치
 service-location = {group = "com.google.android.gms", name = "play-services-location", version.ref = "serviceslocation"}
 #snapping fling behavior
@@ -119,9 +125,12 @@ ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-media3-datasource-okhttp = { group = "androidx.media3", name = "media3-datasource-okhttp", version.ref = "media3DatasourceOkhttp" }
+
 [plugins]
 #parcelize
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+#구글 fcm
+google-gms-service = { id = "com.google.gms.google-services", version.ref = "fcm"}
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

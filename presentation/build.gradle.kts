@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.dagger.hilt)
     alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
+    id("com.google.gms.google-services")
 }
 fun getProperties(propertyKey: String): String {
     return gradleLocalProperties(rootDir,providers).getProperty(propertyKey)
@@ -67,6 +68,10 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
     implementation(libs.gson)
+
+    implementation(platform(libs.firebase.bom))
+    implementation("com.google.firebase:firebase-messaging:25.0.1")
+    implementation(libs.firebase.analytics)
 
     implementation(libs.exoplayer)
     implementation(libs.coil3.compose)
