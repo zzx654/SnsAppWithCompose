@@ -10,6 +10,10 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_AUDIO
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_AUDIO
 import com.androiddev.snsappwithcompose.common.util.NotificationHelper
+import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.ISPLAYING
+import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.NICKNAME
+import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.PROGRESS
+import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.URL
 import kotlinx.coroutines.*
 
 class AudioService : Service() {
@@ -18,7 +22,6 @@ class AudioService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var isPlaying = false
     private lateinit var rviews: RemoteViews
-
     private var currentUrl: String? = null
     private var nicknameText: String = ""
 
@@ -41,13 +44,11 @@ class AudioService : Service() {
         intent?.let {
             when (it.action) {
                 ACTION_PREPARE -> {
-                    val url = it.getStringExtra("url") ?: currentUrl
-                    val nickname = it.getStringExtra("nickname") ?: ""
+                    val url = it.getStringExtra(URL) ?: currentUrl
+                    val nickname = it.getStringExtra(NICKNAME) ?: ""
                     if (url != null) setMedia(path = url, nickname = nickname)
                 }
-                ACTION_TOGGLEPLAYBACK -> {
-                    togglePlayPause()
-                }
+                ACTION_TOGGLEPLAYBACK -> togglePlayPause()
             }
         }
         return START_STICKY
@@ -60,63 +61,46 @@ class AudioService : Service() {
         mediaPlayer = MediaPlayer().apply {
             setDataSource(path)
             prepare()
-            setOnCompletionListener {
-                onPlaybackComplete()
-            }
+            setOnCompletionListener { onPlaybackComplete() }
         }
         isPlaying = false
         rviews = createRemoteView()
-        startForegroundService()
+        startForegroundServiceSafe()
     }
 
-    private fun startForegroundService() {
+    private fun startForegroundServiceSafe() {
         notificationHelper.createChannel(
             channelId = CHANNEL_ID_AUDIO,
             channelName = getString(R.string.audio_service_channel_name)
         )
 
         val notification = notificationHelper.createNotification(
-            channelId = CHANNEL_ID_AUDIO,
-            smallIcon = android.R.drawable.ic_btn_speak_now,
-            contentView = rviews,
-            contentTitle = getString(R.string.app_name),
-            contentText = nicknameText
+                channelId = CHANNEL_ID_AUDIO,
+                smallIcon = android.R.drawable.ic_btn_speak_now,
+                contentView = rviews,
+                contentTitle = getString(R.string.app_name),
+                contentText = nicknameText
+            )
 
-        )
+
         startForeground(NOTIFICATION_ID_AUDIO, notification)
     }
 
     private fun createRemoteView(): RemoteViews {
-        val remoteView = RemoteViews(packageName, R.layout.notification_audio)
+        return RemoteViews(packageName, R.layout.notification_audio).apply {
+            setTextViewText(R.id.txt_title, nicknameText)
+            setImageViewResource(R.id.btn_play_pause, getPlayPauseIconRes())
+            setProgressBar(R.id.mediaProgress, mediaPlayer?.duration ?: 0, mediaPlayer?.currentPosition ?: 0, false)
 
-        remoteView.setTextViewText(R.id.txt_title, nicknameText)
-        remoteView.setImageViewResource(
-            R.id.btn_play_pause,
-            getPlayPauseIconRes()
-        )
-        remoteView.setProgressBar(
-            R.id.mediaProgress,
-            mediaPlayer?.duration ?: 0,
-            mediaPlayer?.currentPosition ?: 0,
-            false
-        )
-
-        val toggleIntent = Intent(this, AudioService::class.java).apply {
-            action = ACTION_TOGGLEPLAYBACK
+            val toggleIntent = Intent(this@AudioService, AudioService::class.java).apply { action = ACTION_TOGGLEPLAYBACK }
+            val togglePendingIntent = PendingIntent.getService(this@AudioService, 0, toggleIntent, PendingIntent.FLAG_IMMUTABLE)
+            setOnClickPendingIntent(R.id.btn_play_pause, togglePendingIntent)
         }
-        val togglePendingIntent = PendingIntent.getService(this, 0, toggleIntent, PendingIntent.FLAG_IMMUTABLE)
-        remoteView.setOnClickPendingIntent(R.id.btn_play_pause, togglePendingIntent)
-
-        return remoteView
     }
 
     private fun togglePlayPause() {
         if (mediaPlayer == null) return
-        if (isPlaying) {
-            pausePlayback()
-        } else {
-            startPlayback()
-        }
+        if (isPlaying) pausePlayback() else startPlayback()
     }
 
     private fun startPlayback() {
@@ -133,26 +117,22 @@ class AudioService : Service() {
         updateNotificationUI()
         sendPlaybackStatusBroadcast(isPlaying = false, progress = getProgressPercent())
     }
+
     private fun getPlayPauseIconRes(): Int {
-        val isDarkMode = (resources.configuration.uiMode and
-                android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
         val playIcon = if (isDarkMode) R.drawable.ic_play_white else R.drawable.ic_play
         val pauseIcon = if (isDarkMode) R.drawable.ic_pause_white else R.drawable.ic_pause
         return if (isPlaying) pauseIcon else playIcon
     }
+
     private fun onPlaybackComplete() {
         isPlaying = false
         stopProgressLoop()
-
-        // 직접 위치 0으로 설정
-        rviews.setProgressBar(R.id.mediaProgress, 100, 0, false)
-        rviews.setImageViewResource(R.id.btn_play_pause, getPlayPauseIconRes())
-        rviews.setTextViewText(R.id.txt_title, nicknameText)
-        notificationHelper.updateNotification(
-            notiId = NOTIFICATION_ID_AUDIO,
-            contentView = rviews
-
-        )
+            rviews.setProgressBar(R.id.mediaProgress, 100, 0, false)
+            rviews.setImageViewResource(R.id.btn_play_pause, getPlayPauseIconRes())
+            rviews.setTextViewText(R.id.txt_title, nicknameText)
+            notificationHelper.updateNotification(NOTIFICATION_ID_AUDIO, contentView = rviews)
         sendPlaybackStatusBroadcast(isPlaying = false, progress = 0)
     }
 
@@ -161,12 +141,10 @@ class AudioService : Service() {
         lastNotificationUpdateTime = 0L
         progressJob = scope.launch {
             while (isPlaying && mediaPlayer != null) {
-                delay(20L) // UI 빠른 업데이트
-
+                delay(20L)
                 val progress = getProgressPercent()
                 sendPlaybackStatusBroadcast(isPlaying = true, progress = progress)
 
-                // Notification UI는 300ms 간격으로 업데이트
                 val now = System.currentTimeMillis()
                 if (now - lastNotificationUpdateTime > 250) {
                     lastNotificationUpdateTime = now
@@ -189,15 +167,13 @@ class AudioService : Service() {
 
     private fun updateNotificationUI() {
         rviews = createRemoteView()
-        notificationHelper.updateNotification(
-            contentView = rviews
-        )
+        notificationHelper.updateNotification(contentView = rviews)
     }
 
     private fun sendPlaybackStatusBroadcast(isPlaying: Boolean, progress: Int) {
         val intent = Intent(ACTION_PLAYBACK_STATUS).apply {
-            putExtra("isPlaying", isPlaying)
-            putExtra("progress", progress)
+            putExtra(ISPLAYING, isPlaying)
+            putExtra(PROGRESS, progress)
         }
         sendBroadcast(intent)
     }
