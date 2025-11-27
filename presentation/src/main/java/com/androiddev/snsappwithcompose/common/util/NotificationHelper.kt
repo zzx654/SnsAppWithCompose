@@ -5,12 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.service.audio.AudioService.Companion.NOTIFICATION_ID
 
 class NotificationHelper(private val context: Context) {
 
@@ -51,48 +49,23 @@ class NotificationHelper(private val context: Context) {
         channelId: String,
         smallIcon: Int = R.drawable.dog,
         contentView: RemoteViews? = null,
-
         contentTitle: String? = null,
         contentText: String? = null,
         contentIntent: PendingIntent? = null,
-
-        // 설정 파라미터들
-       // priority: Int = NotificationCompat.PRIORITY_DEFAULT,
-       // visibility: Int = NotificationCompat.VISIBILITY_PRIVATE,
         isForegroundNotification: Boolean = false,
-
-       // category: String? = null,
-       // defaults: Int = 0,
-        //autoCancel: Boolean = false,
-       // ongoing: Boolean = false
     ): Notification {
 
         notificationBuilder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(smallIcon)  // 벡터 아이콘
-            //.setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.ic_play_white)) // 큰 아이콘
             .setContentTitle(contentTitle)
             .setContentText(contentText)
             .setAutoCancel(!isForegroundNotification) // 간단한 설정만
             .setOnlyAlertOnce(isForegroundNotification)
             .setContentTitle(contentTitle)
             .setContentText(contentText)
-            //.setCustomContentView(contentView)
             .setContentIntent(contentIntent)
-            //.setAutoCancel(autoCancel)
             .setOngoing(isForegroundNotification)
             .setContent(contentView)
-            //.setPriority(priority)
-            //.setVisibility(visibility)
-            //.setColor(0xff000000.toInt())
-            //.setShowWhen(true)
-
-        /**if (defaults != 0) {
-            builder.setDefaults(defaults)
-        }
-
-        if (category != null) {
-            builder.setCategory(category)
-        }**/
 
         return notificationBuilder.build()
     }

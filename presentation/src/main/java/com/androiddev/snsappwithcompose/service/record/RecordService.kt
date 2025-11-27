@@ -1,10 +1,7 @@
 package com.androiddev.snsappwithcompose.service.record
 
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.media.MediaRecorder
@@ -12,12 +9,14 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
-import com.androiddev.data.R
 import com.androiddev.data.util.Constants
 import com.androiddev.data.util.Constants.DEFAULT_ELAPSED_TIME
 import com.androiddev.data.util.Constants.DEFAULT_PROGRESS
 import com.androiddev.data.util.FileUtil
+import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_RECORD
+import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_RECORD
+import com.androiddev.snsappwithcompose.common.util.NotificationHelper
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_IDLE
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_PLAYING
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_RECORDED
@@ -48,43 +47,31 @@ class RecordService: Service() {
 
         var currentOutputFile: File? = null
     }
+    private lateinit var notificationHelper:NotificationHelper
     private var mediaRecorder: MediaRecorder? = null
     private var mediaPlayer: MediaPlayer? = null
-    private lateinit var notificationManager: NotificationManager
-    private lateinit var notificationBuilder: NotificationCompat.Builder
-    private val notificationId = 1
     private var timerJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var startTime: Long = 0L
     private var maxDurationMillis = Constants.MAX_DURATION_MILLIS
 
     private fun startForegroundNotification(content: String) {
-        val channelId = "audio_channel"
-        val channelName = getString(R.string.audio_service_channel_name) // 리소스 사용
-
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(content)
-            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
-            .setOnlyAlertOnce(true)
-
-        startForeground(notificationId, notificationBuilder.build())
-    }
-    @SuppressLint("NotificationPermission")
-    private fun updateNotification(content: String) {
-        notificationBuilder.setContentText(content)
-        notificationManager.notify(notificationId, notificationBuilder.build())
+        notificationHelper.createChannel(
+            channelId = CHANNEL_ID_RECORD,
+            channelName = getString(R.string.record_service_channel_name),
+        )
+        val notification = notificationHelper.createNotification(
+            channelId = CHANNEL_ID_RECORD,
+            contentTitle = getString(R.string.app_name),
+            contentText = content,
+            smallIcon = android.R.drawable.ic_btn_speak_now,
+            isForegroundNotification = true
+        )
+        startForeground(NOTIFICATION_ID_RECORD, notification)
     }
     @SuppressLint("NewApi")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d("RecordService", "📥 onStartCommand: ${intent?.action}")
+        Log.d("RecordService", "onStartCommand: ${intent?.action}")
         when (intent?.action) {
             ACTION_START_RECORD -> startRecording()
             ACTION_FINISH_RECORD -> finishRecording()
@@ -142,17 +129,13 @@ class RecordService: Service() {
                         STATE_PLAYING -> getString(R.string.playing_content) + " $formattedTime"
                         else -> ""
                     }
-                    updateNotification(content)
+                    notificationHelper.updateNotification(NOTIFICATION_ID_RECORD,content)
                     sendProgressUpdate(stateStr, elapsed, formattedTime, progress)
                     lastUpdateSecond = currentSecond
                 } else {
                     // progress만 갱신 (formattedTime은 이전 값을 사용)
                     sendProgressUpdate(stateStr, elapsed, null, progress)
                 }
-
-
-
-
                 if (stateStr == STATE_RECORDING && elapsed >= maxDurationMillis) {
                     stopEverything()
                     sendProgressUpdate(STATE_RECORDED, DEFAULT_ELAPSED_TIME,getString(R.string.default_formatted_time))
@@ -220,7 +203,7 @@ class RecordService: Service() {
         }
         mediaPlayer = null
 
-        stopForeground(Service.STOP_FOREGROUND_REMOVE);
+        stopForeground(STOP_FOREGROUND_REMOVE);
     }
     private fun sendProgressUpdate(state: String, elapsed: Long,formattedTime:String?, progress: Float = DEFAULT_PROGRESS,filePath:String? = null) {
         val intent = Intent(ACTION_UPDATE).apply {
@@ -236,13 +219,11 @@ class RecordService: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        notificationHelper.cancelNotification(NOTIFICATION_ID_RECORD)
     }
     override fun onCreate() {
         super.onCreate()
+        notificationHelper = NotificationHelper(this)
         Log.d("RecordService", " onCreate 호출됨")
     }
-
-
-
-
 }

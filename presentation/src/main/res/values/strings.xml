@@ -87,12 +87,19 @@
     <string name="uploading_alert">게시물 업로드중...</string>
     <string name="delete_post_alert">게시물을 삭제하시겠습니까?</string>
     <string name="post_not_exist_alert">삭제된 게시물입니다</string>
-    <string name="toast_vote_edit_not_allowed">이미 등록되 투표는 변경할 수 없어요</string>
+    <string name="toast_vote_edit_not_allowed">이미 등록된 투표는 변경할 수 없어요</string>
     <string name="editedPost">editedPost</string>
     <string name="unable_to_change_location">위치를 변경할 수 없습니다</string>
     <string name="cropping_alert">이미지를 자르는 중입니다...</string>
     <string name="loading_bitmapimage">이미지 로드중...</string>
     <string name="cannot_edit_vote">투표는 수정할 수 없습니다</string>
+    <!-- 알림 메시지 -->
+    <string name="recording_content">녹음 중...</string>
+    <string name="playing_content">재생 중...</string>
+    <!-- 기본 시간 포맷 -->
+    <string name="default_formatted_time">0:00</string>
+    <string name="audio_service_channel_name">오디오 서비스</string>
+    <string name="record_service_channel_name">녹음 서비스</string>
 
 
 

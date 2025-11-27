@@ -1,37 +1,32 @@
 package com.androiddev.snsappwithcompose.service.audio
 
 import android.app.*
-import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
 import android.widget.RemoteViews
-import androidx.core.app.NotificationCompat
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_AUDIO
+import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_AUDIO
+import com.androiddev.snsappwithcompose.common.util.NotificationHelper
 import kotlinx.coroutines.*
 
 class AudioService : Service() {
 
+    private lateinit var notificationHelper: NotificationHelper
     private var mediaPlayer: MediaPlayer? = null
     private var isPlaying = false
-    private lateinit var notificationManager: NotificationManager
-    private lateinit var notificationBuilder: NotificationCompat.Builder
     private lateinit var rviews: RemoteViews
 
     private var currentUrl: String? = null
     private var nicknameText: String = ""
-    private val notificationId = 1
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var progressJob: Job? = null
     private var lastNotificationUpdateTime = 0L
 
     companion object {
-        const val CHANNEL_ID = "audio_channel"
-        const val CHANNEL_NAME = "playaudio"
-        const val NOTIFICATION_ID = 1
-
         const val ACTION_PREPARE = "com.androiddev.snsappwithcompose.ACTION_PREPARE"
         const val ACTION_TOGGLEPLAYBACK = "com.androiddev.snsappwithcompose.ACTION_TOGGLEPLAYBACK"
         const val ACTION_PLAYBACK_STATUS = "com.androiddev.snsappwithcompose.PLAYBACK_STATUS"
@@ -39,7 +34,7 @@ class AudioService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationHelper = NotificationHelper(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -72,26 +67,23 @@ class AudioService : Service() {
         isPlaying = false
         rviews = createRemoteView()
         startForegroundService()
-        // 필요하다면 바로 재생:
-        // startPlayback()
     }
 
     private fun startForegroundService() {
-        val channelId = CHANNEL_ID
-        val channelName = CHANNEL_NAME
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
-            notificationManager.createNotificationChannel(channel)
-        }
+        notificationHelper.createChannel(
+            channelId = CHANNEL_ID_AUDIO,
+            channelName = getString(R.string.audio_service_channel_name)
+        )
 
-        notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
-            .setOnlyAlertOnce(true)
-            .setContent(rviews)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(nicknameText)
+        val notification = notificationHelper.createNotification(
+            channelId = CHANNEL_ID_AUDIO,
+            smallIcon = android.R.drawable.ic_btn_speak_now,
+            contentView = rviews,
+            contentTitle = getString(R.string.app_name),
+            contentText = nicknameText
 
-        startForeground(notificationId, notificationBuilder.build())
+        )
+        startForeground(NOTIFICATION_ID_AUDIO, notification)
     }
 
     private fun createRemoteView(): RemoteViews {
@@ -156,9 +148,11 @@ class AudioService : Service() {
         rviews.setProgressBar(R.id.mediaProgress, 100, 0, false)
         rviews.setImageViewResource(R.id.btn_play_pause, getPlayPauseIconRes())
         rviews.setTextViewText(R.id.txt_title, nicknameText)
-        notificationBuilder.setContent(rviews)
-        notificationManager.notify(notificationId, notificationBuilder.build())
+        notificationHelper.updateNotification(
+            notiId = NOTIFICATION_ID_AUDIO,
+            contentView = rviews
 
+        )
         sendPlaybackStatusBroadcast(isPlaying = false, progress = 0)
     }
 
@@ -195,8 +189,9 @@ class AudioService : Service() {
 
     private fun updateNotificationUI() {
         rviews = createRemoteView()
-        notificationBuilder.setContent(rviews)
-        notificationManager.notify(notificationId, notificationBuilder.build())
+        notificationHelper.updateNotification(
+            contentView = rviews
+        )
     }
 
     private fun sendPlaybackStatusBroadcast(isPlaying: Boolean, progress: Int) {
@@ -221,7 +216,6 @@ class AudioService : Service() {
             @Suppress("DEPRECATION")
             stopForeground(true)
         }
-
-        notificationManager.cancel(NOTIFICATION_ID)
+        notificationHelper.cancelNotification(NOTIFICATION_ID_AUDIO)
     }
 }

@@ -14,11 +14,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.ViewModel
-import com.androiddev.data.R
 import com.androiddev.snsappwithcompose.service.record.RecordService
 import com.androiddev.data.util.Constants.DEFAULT_ELAPSED_TIME
 import com.androiddev.data.util.Constants.DEFAULT_PROGRESS
 import com.androiddev.data.util.Constants.MAX_DURATION_MILLIS
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.service.record.RecordIntentKeys.STATE
 import com.androiddev.snsappwithcompose.service.record.RecordIntentKeys.PROGRESS
 import com.androiddev.snsappwithcompose.service.record.RecordIntentKeys.ELAPSED
@@ -47,7 +47,7 @@ class RecordViewModel @Inject constructor(
     )
     val bottomRecordDialogState: State<BottomRecordState>
         get() = _bottomRecordDialogState
-    private val _uiState = MutableStateFlow(RecordUIState(formattedTime = getString(context,R.string.default_formatted_time)))
+    private val _uiState = MutableStateFlow(RecordUIState(formattedTime = getString(context, R.string.default_formatted_time)))
     val uiState: StateFlow<RecordUIState> = _uiState.asStateFlow()
 
     private var receiverRegistered = false
