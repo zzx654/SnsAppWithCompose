@@ -22,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -47,11 +48,20 @@ fun BottomRecorder(
 ) {
     val context = LocalContext.current
     val recordState by viewModel.uiState.collectAsState()
+    val saveResult by viewModel.saveResult.collectAsState()
     val progress = recordState.progress
     //val formattedTime = "%02d:%02d".format(recordState.elapsedMillis / 60, recordState.elapsedMillis % 60)
     if(showDialog()) {
+
         val modalBottomSheetState = rememberModalBottomSheetState()
         val scope = rememberCoroutineScope()
+        LaunchedEffect(saveResult) {
+            if (saveResult == true) {
+                modalBottomSheetState.hide()
+                onClickCancel()
+                viewModel.resetSaveResult()
+            }
+        }
         ModalBottomSheet(
             onDismissRequest = {
                 //onClickCancel()
@@ -110,13 +120,8 @@ fun BottomRecorder(
                 Icon(Icons.Default.Check, contentDescription = "Save", tint = Color.Black,    modifier = Modifier
                     .align(Alignment.CenterEnd).padding(horizontal = 30.dp)
                     .size(34.dp).clickable {
-                        scope.launch {
-                            onClickSave()
-
-
-                            modalBottomSheetState.hide()
-                        }.invokeOnCompletion { onClickCancel()  }
-
+                        onClickSave()
+                        // 저장 성공 여부는 saveResult를 통해 체크됨
                     }
                 )
 

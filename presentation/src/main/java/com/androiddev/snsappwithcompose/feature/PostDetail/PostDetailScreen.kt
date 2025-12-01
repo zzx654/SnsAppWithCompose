@@ -187,13 +187,18 @@ fun PostDetailScreen(
     val getCommentsState = viewModel.getCommentsState.value
     LaunchedEffect(post) {
         if(viewModel.post.value==null) {
-            post?.let {
+            post?.let { post ->
 
                 viewModel.initPost(
-                    isLiked = it.isliked,
-                    post = it
+                    isLiked = post.isliked,
+                    post = post
                 )
-                audioViewModel.setAudioAvailable(!it.audio.isNullOrEmpty(),BuildConfig.BASE_URL+it.audio,it.nickname)
+                post.audio?.let {
+                    audioViewModel.prepareAudio(
+                        url = BuildConfig.BASE_URL+it,
+                        nickname = post.nickname
+                    )
+                }
             }
         }
 
@@ -226,7 +231,12 @@ fun PostDetailScreen(
             isLiked = post.isliked,
             post = post
         )
-        audioViewModel.setAudioAvailable(!post.audio.isNullOrEmpty(),BuildConfig.BASE_URL+post.audio,post.nickname)
+        post.audio?.let {
+            audioViewModel.prepareAudio(
+                url = BuildConfig.BASE_URL+it,
+                nickname = post.nickname
+            )
+        }
         navBackStackEntry.savedStateHandle.set<PostPreview>(getString(context,R.string.editedPost),null)
     }
     AlertDialog(

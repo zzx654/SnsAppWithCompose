@@ -156,6 +156,19 @@ fun UploadPostScreen(
         }
     }
     LaunchedEffect(true) {
+        recordViewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                else -> null
+            }
+        }
+    }
+    LaunchedEffect(true) {
         createVoteViewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowToast -> {
@@ -180,7 +193,7 @@ fun UploadPostScreen(
       showDialog = { recordViewModel.bottomRecordDialogState.value.showDialog },
       onClickCancel = recordViewModel.bottomRecordDialogState.value.onClickCancel,
       onClickSave = {
-          recordViewModel.saveRecording()
+          recordViewModel.onEvent(RecordEvent.SaveRecording)
 
                     }  ,
       viewModel = recordViewModel
