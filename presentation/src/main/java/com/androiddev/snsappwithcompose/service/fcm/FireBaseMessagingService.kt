@@ -3,14 +3,24 @@ package com.androiddev.snsappwithcompose.service.fcm
 import android.Manifest
 import com.androiddev.snsappwithcompose.R
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.androiddev.snsappwithcompose.common.util.NotificationHelper
+import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
+import com.androiddev.snsappwithcompose.service.audio.AudioService.Companion.ACTION_TOGGLEPLAYBACK
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+    }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
 
@@ -27,13 +37,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = notifTitle ?: dataTitle ?: "새 메시지"
         val body = notifBody ?: dataBody ?: "메시지가 도착했습니다."
 
-
-
+        NotificationEventBus.emit(true)
         sendNotification(title, body)
+
+
     }
 
     private fun sendNotification(title: String, messageBody: String) {
 
+        Log.d("MyFirebaseMessagingService", "Notification received: $title,")
         // Android 13+ 알림 권한 체크
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=

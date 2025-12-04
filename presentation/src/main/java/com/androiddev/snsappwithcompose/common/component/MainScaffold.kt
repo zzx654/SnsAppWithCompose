@@ -23,17 +23,31 @@ import com.androiddev.snsappwithcompose.feature.home.HomeScreen
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen.HomeScreen
 import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
+import com.androiddev.snsappwithcompose.feature.notification.NotificationScreen
+import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScaffold(
     rootNavController: NavHostController,
     startTab: Screen = Screen.HomeScreen,
-    tagViewModel: TagViewModel
+    tagViewModel: TagViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
     val tabNavController = rememberNavController()
+    val hasNewNoti by notificationViewModel.hasNewNotification.collectAsState()
 
+    LaunchedEffect(Unit) {
+        NotificationEventBus.events.collect { item ->
+            notificationViewModel.addNotification()
+        }
+    }
     Scaffold(
         bottomBar = {
             Column {
@@ -42,6 +56,8 @@ fun MainScaffold(
                     items = listOf(
                         BottomNavItem("홈", HomeScreen, Icons.Default.Home),
                         BottomNavItem("글쓰기", Screen.UploadPostScreen(), Icons.Default.Create),
+                        BottomNavItem("알림", Screen.NotificationScreen,Icons.Default.Notifications,hasNewNoti)
+                        //여기다가 hasNew포함 알림처리
                     ),
                     initialScreen = Screen.InitScreen::class,
                     navController = tabNavController,
@@ -74,6 +90,11 @@ fun MainScaffold(
                 BackHandler(true) {
                 }
                 HomeScreen(navController = rootNavController, tagViewModel = tagViewModel)
+            }
+            composable<Screen.NotificationScreen> {
+                BackHandler(true) {
+                }
+                NotificationScreen(navController = rootNavController)
             }
         }
 

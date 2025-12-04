@@ -24,6 +24,7 @@ import com.androiddev.snsappwithcompose.feature.createprofile.CreateProfileScree
 import com.androiddev.snsappwithcompose.feature.createprofile.component.CropScreen
 import com.androiddev.snsappwithcompose.feature.home.tagposts.TagPostScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostScreen
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -32,6 +33,7 @@ import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostScreen
 fun Navigation(navController: NavHostController,modifier:Modifier) {
 
     val userViewModel: UserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+    val notificationViewModel: NotificationViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
     NavHost(
         modifier = modifier,navController = navController,
         startDestination = Screen.InitScreen
@@ -43,11 +45,16 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             InitScreen(navController = navController,userViewModel = userViewModel)
         }
         composable<Screen.MainScreen> {
-            val tagViewModel: TagViewModel = hiltViewModel() // 그냥 생성
+            val tagViewModel: TagViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()// 그냥 생성
 
             BackHandler(true) {
             }
-            MainScaffold(rootNavController = navController,startTab = Screen.HomeScreen,tagViewModel = tagViewModel)
+            MainScaffold(
+                rootNavController = navController,
+                startTab = Screen.HomeScreen,
+                tagViewModel = tagViewModel,
+                notificationViewModel = notificationViewModel
+            )
         }
         composable<Screen.SignInScreen> {
             //여기
@@ -124,7 +131,7 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
         }
         composable<Screen.TagPostsScreen> {
             val parentEntry = remember { navController.getBackStackEntry(Screen.MainScreen) }
-            val tagViewModel: TagViewModel = hiltViewModel(parentEntry)
+            val tagViewModel: TagViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(parentEntry)
             BackHandler(true) {
             }
             TagPostScreen(

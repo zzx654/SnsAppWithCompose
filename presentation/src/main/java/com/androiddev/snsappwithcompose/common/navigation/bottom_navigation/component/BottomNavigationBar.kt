@@ -1,7 +1,10 @@
 package com.androiddev.snsappwithcompose.common.navigation.bottom_navigation.component
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,20 +48,29 @@ fun BottomNavigationBar(
                 onClick = { onItemClick(item) },
                 selectedContentColor = BottomSelected,
                 unselectedContentColor = BottomUnSelected,
-                icon = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.name
-                        )
-                        if(selected) {
-                            Text(
-                                text = item.name,
-                                textAlign = TextAlign.Center,
-                                fontSize = 10.sp
+                icon ={
+                    Box {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.name
+                            )
+                            if(selected) {
+                                Text(
+                                    text = item.name,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 10.sp
+                                )
+                            }
+                        }
+
+                        if (item.badge) {
+                            Badge(
+                                modifier = Modifier.align(Alignment.TopEnd).offset(x = 4.dp, y = (-5).dp)// 아이콘과의 간격 조절
                             )
                         }
                     }
+
                 }
             )
         }
