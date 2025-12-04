@@ -1,8 +1,12 @@
 package com.androiddev.snsappwithcompose.feature.auth.signin
 
 
+import android.Manifest
+import android.content.Intent
 import android.view.Gravity
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
@@ -46,7 +51,11 @@ import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.addFocusCleaner
+import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.NICKNAME
+import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.URL
+import com.androiddev.snsappwithcompose.service.audio.AudioService
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -58,7 +67,10 @@ fun SignInScreen(
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-
+    val launcherMultiplePermissions = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissionsMap ->
+    }
     LaunchedEffect(key1 = true) {
         signinViewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -78,6 +90,19 @@ fun SignInScreen(
                 else -> null
             }
         }
+    }
+    LaunchedEffect(key1 = true) {
+        NotificationPermissionUtils.checkNotificationPermission(
+            context = context,
+            onUnGranted = {
+                launcherMultiplePermissions.launch(
+                    arrayOf(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                )
+            }
+        )
+
     }
     LoadingDialog {
         signinViewModel.isLoading.value

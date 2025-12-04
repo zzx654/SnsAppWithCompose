@@ -22,8 +22,13 @@ import kotlinx.coroutines.launch
 fun TabPager(
     tabs: List<String>,
     pages: List<@Composable () -> Unit>,
-    pagerState: PagerState = rememberPagerState { tabs.size },
+    startIndex: Int = 0
 ) {
+
+    val pagerState = rememberPagerState(
+        initialPage = startIndex,
+        pageCount = { tabs.size }
+    )
     val coroutineScope = rememberCoroutineScope()
     val tabIndex = pagerState.currentPage
 
