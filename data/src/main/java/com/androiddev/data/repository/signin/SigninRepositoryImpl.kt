@@ -18,10 +18,11 @@ class SigninRepositoryImpl @Inject constructor(
 ) : SigninRepository {
     override suspend fun socialSignIn(
         platform: String,
-        account: String
+        account: String,
+        fcmToken: String
     ): Flow<Resource<SigninResult>> = safeApiCall(
         context = context,
-        apiCall = { api.socialSignIn(platform,account) },
+        apiCall = { api.socialSignIn(platform,account,fcmToken) },
         mapToResource = { it.toSigninResult(
             isMember = it.isMember,
             profileWritten = it.profileWritten,
@@ -31,10 +32,11 @@ class SigninRepositoryImpl @Inject constructor(
     )
     override suspend fun emailSignIn(
         account: String,
-        password: String
+        password: String,
+        fcmToken: String,
     ): Flow<Resource<SigninResult>> = safeApiCall(
         context = context,
-        apiCall = { api.emailSignIn(account,password) },
+        apiCall = { api.emailSignIn(account,password,fcmToken) },
         mapToResource = { it.toSigninResult(
             isMember = it.isMember,
             profileWritten = it.profileWritten,

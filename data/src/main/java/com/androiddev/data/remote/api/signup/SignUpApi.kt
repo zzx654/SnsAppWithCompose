@@ -29,7 +29,8 @@ interface SignUpApi {
     suspend fun socialSignUp(
         @Field("platform")platform: String,
         @Field("account")account: String,
-        @Field("phonenumber")phonenumber: String
+        @Field("phonenumber")phonenumber: String,
+        @Field("fcmtoken")fcmtoken: String
     ): Response<BaseApiResponse<TokenResultDto>>
 
 }

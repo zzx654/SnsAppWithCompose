@@ -15,12 +15,14 @@ interface SignInApi {
     suspend fun emailSignIn(
         @Field("account")account: String,
         @Field("password")password: String,
+        @Field("fcmtoken")fcmtoken: String
     ): Response<BaseApiResponse<SigninResultDto>>
     @FormUrlEncoded
     @POST("/socialSign")
     suspend fun socialSignIn(
         @Field("platform")platform: String,
-        @Field("account")account: String
+        @Field("account")account: String,
+        @Field("fcmtoken")fcmtoken: String
     ): Response<BaseApiResponse<SigninResultDto>>
 
     @POST("/signInWithToken")

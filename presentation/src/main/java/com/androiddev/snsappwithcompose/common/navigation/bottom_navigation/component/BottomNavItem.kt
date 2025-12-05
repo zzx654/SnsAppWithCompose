@@ -6,5 +6,6 @@ import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 data class BottomNavItem(
     val name: String,
     val route: Screen,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val badge: Boolean = false
 )

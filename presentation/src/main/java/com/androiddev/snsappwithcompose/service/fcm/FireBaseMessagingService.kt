@@ -11,15 +11,23 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
 import com.androiddev.snsappwithcompose.common.util.NotificationHelper
 import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
 import com.androiddev.snsappwithcompose.service.audio.AudioService.Companion.ACTION_TOGGLEPLAYBACK
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MyFirebaseMessagingService : FirebaseMessagingService() {
+    @Inject
+    lateinit var sendFcmTokenUseCase: FcmTokenUseCase
+
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        sendFcmTokenUseCase.invoke(token)
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {

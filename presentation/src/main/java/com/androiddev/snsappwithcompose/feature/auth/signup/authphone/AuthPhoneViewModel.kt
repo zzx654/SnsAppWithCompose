@@ -15,6 +15,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.util.withFcmToken
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -88,7 +89,15 @@ class AuthPhoneViewModel @Inject constructor(
                                             )
                                         } else {
                                             //sns가입시도
-                                            socialSignUp(event.platform,event.account!!,phoneNumber.value)
+                                            withFcmToken { token ->
+                                                socialSignUp(
+                                                    platform = event.platform,
+                                                    account = event.account!!,
+                                                    phoneNumber = phoneNumber.value,
+                                                    fcmToken = token
+                                                )
+                                            }
+
                                         }
                                     }
                                     else
@@ -100,9 +109,9 @@ class AuthPhoneViewModel @Inject constructor(
             }
         }
     }
-    private fun socialSignUp(platform: String,account: String,phonenumber: String) {
+    private fun socialSignUp(platform: String,account: String,phoneNumber: String,fcmToken: String) {
         viewModelScope.launch {
-            signUpUseCase(platform,account,phonenumber)
+            signUpUseCase(platform,account,phoneNumber,fcmToken)
                 .collect{ result ->
                     handleResource(
                         resource = result,

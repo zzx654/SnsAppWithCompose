@@ -13,6 +13,7 @@ import com.androiddev.data.remote.api.tag.TagApi
 import com.androiddev.data.remote.api.uploadpost.UploadPostApi
 import com.androiddev.data.remote.api.postdetail.VoteApi
 import com.androiddev.data.local.UserPreferences
+import com.androiddev.data.remote.api.fcm.FcmApi
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
@@ -103,4 +104,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun providePostApi(retrofit: Retrofit): PostApi = retrofit.create(PostApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideFcmApi(retrofit: Retrofit): FcmApi = retrofit.create(FcmApi::class.java)
 }

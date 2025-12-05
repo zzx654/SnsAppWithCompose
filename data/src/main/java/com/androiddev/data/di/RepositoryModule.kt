@@ -1,9 +1,11 @@
 package com.androiddev.data.di
 
 import android.content.Context
+import com.androiddev.data.local.UserPreferences
 import com.androiddev.data.remote.api.signup.AuthPhoneApi
 import com.androiddev.data.remote.api.postdetail.CommentApi
 import com.androiddev.data.remote.api.createprofile.CreateProfileApi
+import com.androiddev.data.remote.api.fcm.FcmApi
 import com.androiddev.data.remote.api.postlist.GetPostsApi
 import com.androiddev.data.remote.api.postdetail.PostApi
 import com.androiddev.data.remote.api.signin.SignInApi
@@ -15,6 +17,7 @@ import com.androiddev.data.remote.api.postdetail.VoteApi
 import com.androiddev.data.repository.signup.AuthPhoneRepositoryImpl
 import com.androiddev.data.repository.postdetail.CommentRepositoryImpl
 import com.androiddev.data.repository.createprofile.CreateProfileRepositoryImpl
+import com.androiddev.data.repository.fcm.FcmRepositoryImpl
 import com.androiddev.data.repository.postlist.GetPostsRepositoryImpl
 import com.androiddev.data.repository.postdetail.PostRepositoryImpl
 import com.androiddev.data.repository.signin.SigninRepositoryImpl
@@ -25,6 +28,7 @@ import com.androiddev.data.repository.uploadpost.UploadPostRepositoryImpl
 import com.androiddev.data.repository.postdetail.VoteRepositoryImpl
 import com.androiddev.domain.repository.signup.AuthPhoneRepository
 import com.androiddev.domain.repository.createprofile.CreateProfileRepository
+import com.androiddev.domain.repository.fcm.FcmRepository
 import com.androiddev.domain.repository.postdetail.CommentRepository
 import com.androiddev.domain.repository.postlist.GetPostsRepository
 import com.androiddev.domain.repository.postdetail.PostRepository
@@ -101,5 +105,13 @@ object RepositoryModule {
         return PostRepositoryImpl(
             api = api,
             context = context)
+    }
+    @Provides
+    @Singleton
+    fun provideFcmRepository(api: FcmApi, userPreferences: UserPreferences): FcmRepository {
+        return FcmRepositoryImpl(
+            api = api,
+            userPreferences = userPreferences
+        )
     }
 }

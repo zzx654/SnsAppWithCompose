@@ -15,6 +15,8 @@ import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.util.withFcmToken
+import com.google.firebase.messaging.FirebaseMessaging
 import com.kakao.sdk.user.UserApiClient
 import com.navercorp.nid.NidOAuth
 import com.navercorp.nid.oauth.util.NidOAuthCallback
@@ -79,9 +81,13 @@ class SignInViewModel @Inject constructor(
                 _password.value = event.password
             }
             is SignInEvent.EmailSignIn -> {
-                viewModelScope.launch {
-                    signInUseCases.emailSignIn(account.value,password.value)
-                        .collect { result ->
+                withFcmToken { token ->
+                    viewModelScope.launch {
+                        signInUseCases.emailSignIn(
+                            account = account.value,
+                            password = password.value,
+                            fcmToken = token
+                        ).collect { result ->
                             handleResource(
                                 resource = result,
                                 onSuccess = { data ->
@@ -89,12 +95,18 @@ class SignInViewModel @Inject constructor(
                                 }
                             )
                         }
+                    }
                 }
             }
             is SignInEvent.SocialSignIn -> {
-                viewModelScope.launch {
-                    signInUseCases.socialSignIn(event.platform,event.account)
-                        .collect { result ->
+
+                withFcmToken { token ->
+                    viewModelScope.launch {
+                        signInUseCases.socialSignIn(
+                            platform = event.platform,
+                            account = event.account,
+                            fcmToken = token
+                        ).collect { result ->
                             handleResource(
                                 resource = result,
                                 onSuccess = { data ->
@@ -102,6 +114,7 @@ class SignInViewModel @Inject constructor(
                                 }
                             )
                         }
+                    }
                 }
             }
             else -> null

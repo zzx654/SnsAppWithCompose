@@ -4,6 +4,7 @@ import android.content.Context
 import com.androiddev.domain.repository.signup.AuthPhoneRepository
 import com.androiddev.domain.repository.postdetail.CommentRepository
 import com.androiddev.domain.repository.createprofile.CreateProfileRepository
+import com.androiddev.domain.repository.fcm.FcmRepository
 import com.androiddev.domain.repository.postlist.GetPostsRepository
 import com.androiddev.domain.repository.postdetail.PostRepository
 import com.androiddev.domain.repository.signin.SigninRepository
@@ -19,6 +20,7 @@ import com.androiddev.domain.use_case.createprofile.CheckNickname
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.createprofile.CreateProfile
 import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
+import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
 import com.androiddev.domain.use_case.postdetail.DeletePost
 import com.androiddev.domain.use_case.uploadpost.EditPost
 import com.androiddev.domain.use_case.signin.EmailSignIn
@@ -176,5 +178,12 @@ object UseCaseModule {
             vote = Vote(voteRepository),
             cancelVote = CancelVote(voteRepository)
         )
+    }
+    @Provides
+    @Singleton
+    fun provideFcmUseCases(
+        fcmRepository: FcmRepository
+    ): FcmTokenUseCase {
+        return FcmTokenUseCase(fcmRepository)
     }
 }

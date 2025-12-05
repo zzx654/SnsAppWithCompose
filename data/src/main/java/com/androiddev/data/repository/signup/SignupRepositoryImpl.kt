@@ -26,10 +26,11 @@ class SignupRepositoryImpl @Inject constructor(
     override suspend fun socialSignUp(
         platform: String,
         account: String,
-        phonenumber: String
+        phonenumber: String,
+        fcmToken: String
     ): Flow<Resource<TokenResult>> = safeApiCall(
         context = context,
-        apiCall = { api.socialSignUp(platform,account,phonenumber) },
+        apiCall = { api.socialSignUp(platform,account,phonenumber,fcmToken) },
         mapToResource = { it.toTokenResult(it.token) }
     )
     override suspend fun requestAuthCode(email: String): Flow<Resource<ValidationResult>> =

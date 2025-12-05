@@ -9,5 +9,5 @@ import javax.inject.Inject
 class EmailSignIn @Inject constructor(
     private val repository: SigninRepository
 ) {
-    suspend operator fun invoke(account: String,password: String): Flow<Resource<SigninResult>> = repository.emailSignIn(account,password)
+    suspend operator fun invoke(account: String,password: String,fcmToken: String): Flow<Resource<SigninResult>> = repository.emailSignIn(account,password,fcmToken)
 }
