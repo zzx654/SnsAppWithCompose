@@ -86,7 +86,7 @@ fun BottomVoteOptions(
                         CenterAlignedTopBar(
                             title = "투표",
                             onBackClick = { createVoteViewModel.onEvent(CreateVoteEvent.onCancelClick) },
-                            actions = {
+                            rightAction = {
                                 IconButton(onClick = {
                                     createVoteViewModel.onEvent(CreateVoteEvent.SaveVoteOptions)
 

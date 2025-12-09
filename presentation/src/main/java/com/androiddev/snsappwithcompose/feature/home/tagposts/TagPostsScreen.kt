@@ -55,7 +55,7 @@ fun TagPostScreen(
             CenterAlignedTopBar(
                 title  = tag?.tagname ?: "",
                 onBackClick = { navController.popBackStack() },
-                actions = {
+                rightAction = {
                     IconButton(onClick = {
                         tag?.tagid?.let { viewModel.onEvent(TagEvent.ToggleFavoriteTag(it)) }
                     }) {

@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.common.component
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -21,23 +22,27 @@ import androidx.compose.ui.unit.sp
 fun CenterAlignedTopBar(
     title: String,
     onBackClick:(()->Unit)? = null,
-    actions: @Composable (RowScope.() -> Unit) = {}
+    leftAction: @Composable (RowScope.() -> Unit) = {},
+    rightAction: @Composable (RowScope.() -> Unit) = {}
 ) {
 
     CenterAlignedTopAppBar(
         title = { Text(text = title,fontWeight = FontWeight.Bold,fontSize = 16.sp) },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
         navigationIcon = {
-            onBackClick?.let {
-                IconButton( onClick =  it ) {
+            if (onBackClick != null) {
+                // 뒤로가기 아이콘
+                IconButton(onClick = onBackClick) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = null
                     )
                 }
+            } else {
+                // back 기능이 없을 때 leftAction 실행
+                Row(content = leftAction)
             }
-
         },
-        actions =  actions
+        actions =  rightAction
     )
 }

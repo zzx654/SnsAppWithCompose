@@ -263,7 +263,7 @@ fun PostDetailScreen(
                 CenterAlignedTopBar(
                     title = currentPost?.nickname?:"",
                     onBackClick = { navController.popBackStack() },
-                    actions = {
+                    rightAction = {
                         IconButton(onClick = { dropdownMenuExpanded = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,

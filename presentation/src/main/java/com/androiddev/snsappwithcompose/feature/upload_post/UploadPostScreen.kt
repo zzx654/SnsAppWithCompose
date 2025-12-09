@@ -214,7 +214,7 @@ fun UploadPostScreen(
             CenterAlignedTopBar(
                 title = stringResource(R.string.upload_post),
                 onBackClick = { navController.popBackStack() },
-                actions = {
+                rightAction = {
                     IconButton(onClick = {
                         if (viewModel.locationOnOff.value) {
                             checkPermissions(
