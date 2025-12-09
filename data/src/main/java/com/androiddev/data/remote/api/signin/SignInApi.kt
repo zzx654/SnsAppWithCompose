@@ -1,7 +1,6 @@
 package com.androiddev.data.remote.api.signin
 
 import com.androiddev.data.remote.BaseApiResponse
-import com.androiddev.data.remote.dto.SigninResponseDto
 import com.androiddev.data.remote.dto.SigninResultDto
 import com.androiddev.data.remote.dto.SigninWithTokenResultDto
 import retrofit2.Response

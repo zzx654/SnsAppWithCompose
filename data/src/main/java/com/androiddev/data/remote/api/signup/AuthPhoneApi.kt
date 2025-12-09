@@ -3,8 +3,6 @@ package com.androiddev.data.remote.api.signup
 import com.androiddev.data.remote.BaseApiResponse
 import com.androiddev.data.remote.dto.AuthCodeResultDto
 import com.androiddev.data.remote.dto.ValidationResultDto
-import com.androiddev.domain.model.AuthCodeResponse
-import com.androiddev.domain.model.ValidationResponse
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded

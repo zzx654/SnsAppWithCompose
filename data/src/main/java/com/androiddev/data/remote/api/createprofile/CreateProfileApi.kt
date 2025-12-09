@@ -2,9 +2,6 @@ package com.androiddev.data.remote.api.createprofile
 
 import com.androiddev.data.remote.BaseApiResponse
 import com.androiddev.data.remote.dto.ValidationResultDto
-import com.androiddev.domain.model.CreateProfileResponse
-import com.androiddev.domain.model.ValidationResponse
-import com.androiddev.domain.model.ValidationResult
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response

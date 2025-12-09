@@ -1,6 +1,5 @@
 package com.androiddev.domain.repository.postlist
 
-import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.model.Posts
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow

@@ -1,6 +1,5 @@
 package com.androiddev.data.remote.dto
 
-import com.androiddev.domain.model.GetPostsResponse
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.util.elapsedTime
 import kotlin.math.round

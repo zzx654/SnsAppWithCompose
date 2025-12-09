@@ -1,6 +1,5 @@
 package com.androiddev.domain.use_case.tag
 
-import com.androiddev.domain.model.SearchTagResponse
 import com.androiddev.domain.model.SearchedTags
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.util.Resource

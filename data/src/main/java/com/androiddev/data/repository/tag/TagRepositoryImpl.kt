@@ -1,23 +1,15 @@
 package com.androiddev.data.repository.tag
 
 import android.content.Context
-import androidx.core.content.ContextCompat.getString
-import com.androiddev.data.R
 import com.androiddev.data.remote.api.tag.TagApi
-import com.androiddev.data.remote.dto.toGetTagsResponse
 import com.androiddev.data.remote.dto.toSearchTags
 import com.androiddev.data.remote.dto.toTags
 import com.androiddev.data.util.safeApiCall
-import com.androiddev.domain.model.GetTagsResponse
-import com.androiddev.domain.model.SearchTagResponse
 import com.androiddev.domain.model.SearchedTags
 import com.androiddev.domain.model.Tags
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 class TagRepositoryImpl @Inject constructor(

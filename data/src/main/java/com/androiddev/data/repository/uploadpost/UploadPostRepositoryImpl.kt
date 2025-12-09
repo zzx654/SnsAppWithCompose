@@ -1,21 +1,15 @@
 package com.androiddev.data.repository.uploadpost
 
 import android.content.Context
-import androidx.core.content.ContextCompat.getString
-import com.androiddev.data.R
 import com.androiddev.data.remote.api.uploadpost.UploadPostApi
-import com.androiddev.data.remote.dto.toGetPostsResponse
 import com.androiddev.data.remote.dto.toPosts
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.Posts
 import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 class UploadPostRepositoryImpl @Inject constructor(

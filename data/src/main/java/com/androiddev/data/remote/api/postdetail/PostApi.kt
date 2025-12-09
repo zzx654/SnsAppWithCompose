@@ -1,7 +1,6 @@
 package com.androiddev.data.remote.api.postdetail
 
 import com.androiddev.data.remote.BaseApiResponse
-import com.androiddev.domain.model.DeletePostResponse
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
