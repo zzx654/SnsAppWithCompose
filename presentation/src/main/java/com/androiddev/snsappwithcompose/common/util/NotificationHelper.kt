@@ -59,13 +59,17 @@ class NotificationHelper(private val context: Context) {
             .setSmallIcon(smallIcon)  // 벡터 아이콘
             .setContentTitle(contentTitle)
             .setContentText(contentText)
-            .setAutoCancel(!isForegroundNotification) // 간단한 설정만
+            .setAutoCancel(!isForegroundNotification)
             .setOnlyAlertOnce(isForegroundNotification)
             .setContentTitle(contentTitle)
-            .setContentText(contentText)
             .setContentIntent(contentIntent)
             .setOngoing(isForegroundNotification)
             .setContent(contentView)
+        if (contentText.isNullOrBlank()) {
+            notificationBuilder.setContentText(null)
+        } else {
+            notificationBuilder.setContentText(contentText)
+        }
 
         return notificationBuilder.build()
     }

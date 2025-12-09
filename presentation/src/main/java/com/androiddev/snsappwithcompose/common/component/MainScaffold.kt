@@ -41,13 +41,8 @@ fun MainScaffold(
     notificationViewModel: NotificationViewModel
 ) {
     val tabNavController = rememberNavController()
-    val hasNewNoti by notificationViewModel.hasNewNotification.collectAsState()
+    val hasNewNoti by notificationViewModel.hasNewNotification
 
-    LaunchedEffect(Unit) {
-        NotificationEventBus.events.collect { item ->
-            notificationViewModel.addNotification()
-        }
-    }
     Scaffold(
         bottomBar = {
             Column {
@@ -94,7 +89,7 @@ fun MainScaffold(
             composable<Screen.NotificationScreen> {
                 BackHandler(true) {
                 }
-                NotificationScreen(navController = rootNavController)
+                NotificationScreen(navController = rootNavController,viewModel = notificationViewModel)
             }
         }
 
