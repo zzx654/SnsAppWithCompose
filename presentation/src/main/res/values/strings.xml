@@ -101,6 +101,7 @@
     <string name="default_formatted_time">0:00</string>
     <string name="audio_service_channel_name">오디오 서비스</string>
     <string name="record_service_channel_name">녹음 서비스</string>
+    <string name="notification">알림</string>
 
 
 

@@ -67,6 +67,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 content = content,
                 extrajson = extra,
                 isRead = false,
+                date = date,
                 elapsedTime = elapsedTime(date)
             )
 
