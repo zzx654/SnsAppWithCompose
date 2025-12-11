@@ -12,5 +12,6 @@ data class NotificationItem(
     val content: String,
     val extrajson: NotificationExtra,
     val isRead: Boolean,
+    val date: String,
     val elapsedTime: String
 )
