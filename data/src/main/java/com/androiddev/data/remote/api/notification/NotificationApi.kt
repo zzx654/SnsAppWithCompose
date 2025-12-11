@@ -11,7 +11,7 @@ interface NotificationApi {
     @FormUrlEncoded
     @POST("/getNotifications")
     suspend fun getNotifications(
-        @Field("notificationid")notificationid: Int?,
+        @Field("notificationid")notificationid: Long?,
         @Field("notificationdate")notificationdate : String?
     ):Response<BaseApiResponse<NotificationsDto>>
 }

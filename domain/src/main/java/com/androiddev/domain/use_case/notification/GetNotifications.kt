@@ -12,5 +12,5 @@ import javax.inject.Inject
 class GetNotifications @Inject constructor(
     private val repository: NotificationRepository
 ) {
-    suspend operator fun invoke(notificationId:Int? = null,notificationDate:String? = null): Flow<Resource<List<NotificationItem>>> = repository.getNotifications(notificationId,notificationDate)
+    suspend operator fun invoke(notificationId:Long? = null,notificationDate:String? = null): Flow<Resource<List<NotificationItem>>> = repository.getNotifications(notificationId,notificationDate)
 }

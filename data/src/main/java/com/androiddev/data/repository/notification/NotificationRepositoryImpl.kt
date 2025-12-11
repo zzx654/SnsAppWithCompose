@@ -15,7 +15,7 @@ class NotificationRepositoryImpl @Inject constructor(
     private val api:NotificationApi
 ):NotificationRepository {
     override suspend fun getNotifications(
-        notificationId: Int?,
+        notificationId: Long?,
         notificationDate: String?
     ): Flow<Resource<List<NotificationItem>>> = safeApiCall(
         context = context,
