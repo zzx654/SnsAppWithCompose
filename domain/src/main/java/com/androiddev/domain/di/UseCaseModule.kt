@@ -22,8 +22,10 @@ import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.createprofile.CreateProfile
 import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
+import com.androiddev.domain.use_case.notification.DeleteNotifications
 import com.androiddev.domain.use_case.notification.GetNotifications
 import com.androiddev.domain.use_case.notification.NotificationUseCases
+import com.androiddev.domain.use_case.notification.ReadAllNotifications
 import com.androiddev.domain.use_case.postdetail.DeletePost
 import com.androiddev.domain.use_case.uploadpost.EditPost
 import com.androiddev.domain.use_case.signin.EmailSignIn
@@ -195,7 +197,9 @@ object UseCaseModule {
         notificationRepository: NotificationRepository
     ): NotificationUseCases {
         return NotificationUseCases(
-            getNotifications = GetNotifications(notificationRepository)
+            getNotifications = GetNotifications(notificationRepository),
+            readAllNotifications = ReadAllNotifications(notificationRepository),
+            deleteNotifications = DeleteNotifications(notificationRepository)
         )
     }
 }

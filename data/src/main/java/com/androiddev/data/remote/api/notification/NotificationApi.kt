@@ -14,4 +14,12 @@ interface NotificationApi {
         @Field("notificationid")notificationid: Long?,
         @Field("notificationdate")notificationdate : String?
     ):Response<BaseApiResponse<NotificationsDto>>
+
+    @FormUrlEncoded
+    @POST("/readAllNotifications")
+    suspend fun readAllNotifications():Response<BaseApiResponse<NotificationsDto>>
+
+    @FormUrlEncoded
+    @POST("/deleteNotifications")
+    suspend fun deleteNotifications():Response<BaseApiResponse<NotificationsDto>>
 }

@@ -23,4 +23,18 @@ class NotificationRepositoryImpl @Inject constructor(
         mapToResource = { it.toNotifications(notifications = it.notifications) }
     )
 
+    override suspend fun readAllNotifications(): Flow<Resource<List<NotificationItem>>>
+    = safeApiCall(
+        context = context,
+        apiCall = { api.readAllNotifications() },
+        mapToResource = { it.toNotifications(notifications = it.notifications)}
+    )
+
+    override suspend fun deleteNotifications(): Flow<Resource<List<NotificationItem>>>
+    = safeApiCall(
+        context = context,
+        apiCall = { api.deleteNotifications() },
+        mapToResource = { it.toNotifications(notifications = it.notifications)}
+    )
+
 }
