@@ -14,6 +14,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -30,7 +31,9 @@ import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
+import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
+import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.util.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.feature.notification.component.NotificationItem
 
@@ -50,6 +53,16 @@ fun NotificationScreen(
             viewModel.onEvent(NotificationEvent.RefreshNotifictions)
         }
     )
+    LoadingDialog {
+        viewModel.isLoading.value
+    }
+    AlertDialog(
+        title = { viewModel.alertDialogState.value.title },
+        cancelText = { viewModel.alertDialogState.value.cancelText },
+        confirmText = { viewModel.alertDialogState.value.confirmText },
+        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
+        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    )
     BaseScaffold(
         modifier = Modifier.fillMaxWidth(),
         focusManager = focusManager,
@@ -59,8 +72,7 @@ fun NotificationScreen(
                 title = getString(context, R.string.notification),
                 leftAction = {
                     IconButton(onClick = {
-
-
+                        viewModel.onEvent(NotificationEvent.ReadAllNotifications)
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Check,
@@ -71,11 +83,10 @@ fun NotificationScreen(
                 },
                 rightAction = {
                     IconButton(onClick = {
-
-
+                        viewModel.onEvent(NotificationEvent.DeleteNotifications)
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.Check,
+                            imageVector = Icons.Outlined.DeleteOutline,
                             contentDescription = null
                         )
                     }

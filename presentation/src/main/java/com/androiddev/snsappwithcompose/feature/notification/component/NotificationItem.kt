@@ -46,11 +46,13 @@ fun NotificationItem(
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
-                    .padding(end = 10.dp)
+                    .padding(end = 10.dp),
+                tint = if(notification.isRead) Color.LightGray else Color.Black
             )
 
             Text(
                 text = notification.content,
+                color = if(notification.isRead) Color.LightGray else Color.Black
             )
         }
 
@@ -59,7 +61,8 @@ fun NotificationItem(
             text = notification.elapsedTime,
             modifier = Modifier
                 .align(Alignment.End)
-                .padding(top = 4.dp)
+                .padding(top = 4.dp),
+            color = if(notification.isRead) Color.LightGray else Color.Black
         )
     }
     /**Row(

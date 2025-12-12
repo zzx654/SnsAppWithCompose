@@ -2,12 +2,16 @@ package com.androiddev.snsappwithcompose.feature.notification
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.NotificationItem
+import com.androiddev.domain.model.Notifications
 import com.androiddev.domain.use_case.notification.NotificationUseCases
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
+import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.util.Paginator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -35,7 +39,7 @@ object NotificationEventBus {
 }
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
-    notificationUseCases: NotificationUseCases,
+    private val notificationUseCases: NotificationUseCases,
     @ApplicationContext context: Context,
 ) : BaseViewModel(context) {
     private val _getNotificationsState = mutableStateOf(GetNotificationsState())
@@ -44,8 +48,11 @@ class NotificationViewModel @Inject constructor(
     private val _hasNewNotification = mutableStateOf(false)
     val hasNewNotification:State<Boolean>
         get() = _hasNewNotification
+    private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
+    val alertDialogState: State<AlertDialogState>
+        get() = _alertDialogState
     val notificationPaginator =
-        Paginator<List<NotificationItem>,NotificationItem>(
+        Paginator<Notifications,NotificationItem>(
             loadItems = { handleResult, refresh ->
                 viewModelScope.launch {
                     var lastNotificationId: Long? = null
@@ -58,6 +65,11 @@ class NotificationViewModel @Inject constructor(
                     }
                     notificationUseCases.getNotifications(lastNotificationId,lastNotificationDate)
                         .collect {
+
+                            it.data?.let { notificationsInfo ->
+                                if(notificationsInfo.notifications.isNotEmpty())
+                                    _hasNewNotification.value = notificationsInfo.unreadCount>0
+                            }
                             handleResult(it)
                         }
                 }
@@ -83,7 +95,7 @@ class NotificationViewModel @Inject constructor(
                 )
 
             },
-            extractItems = { response -> response }
+            extractItems = { response -> response.notifications }
         )
 
     init {
@@ -118,10 +130,68 @@ class NotificationViewModel @Inject constructor(
                     notificationPaginator.loadNextItems(refresh = true)
                 }
             }
+            is NotificationEvent.ReadAllNotifications -> {
+                showReadAllNotificationAlert()
+            }
+            is NotificationEvent.DeleteNotifications -> {
+                showDeleteNotificationAlert()
+            }
         }
     }
+    private fun showReadAllNotificationAlert() {
+        _alertDialogState.value = AlertDialogState(
+            title = getString(R.string.read_all_notification),
+            cancelText = getString(R.string.cancel),
+            confirmText = getString(R.string.confirm),
+            onClickCancel = {
+                resetDialogState()
+            },
+            onClickConfirm = {
+                resetDialogState()
+                viewModelScope.launch {
+                    notificationUseCases.readAllNotifications().collect { result ->
+                        handleResource(
+                            resource = result,
+                            onSuccess = { data ->
+                                _hasNewNotification.value = data.unreadCount>0
+                                _getNotificationsState.value = getNotificationsState.value.copy(
+                                    notifications = getNotificationsState.value.notifications.map{ it.copy(isRead = true)}
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        )
+    }
+    private fun showDeleteNotificationAlert() {
+        _alertDialogState.value = AlertDialogState(
+            title = getString(R.string.delete_notifications),
+            cancelText = getString(R.string.cancel),
+            confirmText = getString(R.string.confirm),
+            onClickCancel = {
+                resetDialogState()
+            },
+            onClickConfirm = {
+                resetDialogState()
+                viewModelScope.launch {
+                    notificationUseCases.deleteNotifications().collect { result ->
+                        handleResource(
+                            resource = result,
+                            onSuccess = { data ->
+                                _hasNewNotification.value = data.unreadCount>0
+                                _getNotificationsState.value = getNotificationsState.value.copy(
+                                    notifications = data.notifications
+                                )
+                            }
+                        )
+                    }
 
-   // fun clearBadge() {
-   //     _hasNewNotification.value = false
-  //  }
+                }
+            }
+        )
+    }
+    private fun resetDialogState() {
+        _alertDialogState.value = AlertDialogState()
+    }
 }
