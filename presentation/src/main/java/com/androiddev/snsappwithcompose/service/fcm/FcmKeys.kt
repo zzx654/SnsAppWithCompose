@@ -6,5 +6,7 @@ object FcmKeys {
     const val CONTENT = "content"
     const val EXTRA_JSON = "extraJson"
     const val DATE = "date"
+    const val TITLE = "title"
+    const val BODY = "body"
 
 }

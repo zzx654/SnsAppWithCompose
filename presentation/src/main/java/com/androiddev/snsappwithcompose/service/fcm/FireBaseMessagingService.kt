@@ -41,8 +41,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
 
         // Notification 메시지 제목/본문
-        val notifTitle = remoteMessage.notification?.title
-        val notifBody = remoteMessage.notification?.body
+
         remoteMessage.data.isNotEmpty().let {
             val data = remoteMessage.data
             val id = data[FcmKeys.NOTIFICATION_ID]?.toLong() ?: return
@@ -50,14 +49,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             val content = data[FcmKeys.CONTENT] ?: ""
             val extraJson = data[FcmKeys.EXTRA_JSON] ?: "{}"
             val date = data[FcmKeys.DATE] ?: ""
+            val title = data[FcmKeys.TITLE] ?: ""
+            val body = data[FcmKeys.BODY] ?: ""
 
             val extra = Gson().fromJson(extraJson, NotificationExtra::class.java)
-            // data 메시지
-            val dataTitle = remoteMessage.notification?.title
-            val dataBody = remoteMessage.notification?.body
-
-            val title = notifTitle ?: dataTitle ?: ""
-            val body = notifBody ?: dataBody ?: ""
 
 
             sendNotification(title, body, type)
