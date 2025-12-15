@@ -5,4 +5,5 @@ sealed class NotificationEvent {
     data object RefreshNotifictions: NotificationEvent()
     data object DeleteNotifications: NotificationEvent()
     data object ReadAllNotifications: NotificationEvent()
+    data class ReadNotification(val notificationId:Long): NotificationEvent()
 }

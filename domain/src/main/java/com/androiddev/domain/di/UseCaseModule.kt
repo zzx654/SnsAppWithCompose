@@ -26,6 +26,7 @@ import com.androiddev.domain.use_case.notification.DeleteNotifications
 import com.androiddev.domain.use_case.notification.GetNotifications
 import com.androiddev.domain.use_case.notification.NotificationUseCases
 import com.androiddev.domain.use_case.notification.ReadAllNotifications
+import com.androiddev.domain.use_case.notification.ReadNotification
 import com.androiddev.domain.use_case.postdetail.DeletePost
 import com.androiddev.domain.use_case.uploadpost.EditPost
 import com.androiddev.domain.use_case.signin.EmailSignIn
@@ -199,7 +200,8 @@ object UseCaseModule {
         return NotificationUseCases(
             getNotifications = GetNotifications(notificationRepository),
             readAllNotifications = ReadAllNotifications(notificationRepository),
-            deleteNotifications = DeleteNotifications(notificationRepository)
+            deleteNotifications = DeleteNotifications(notificationRepository),
+            readNotification = ReadNotification(notificationRepository)
         )
     }
 }

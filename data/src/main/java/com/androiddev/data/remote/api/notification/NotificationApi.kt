@@ -18,6 +18,12 @@ interface NotificationApi {
     @POST("/readAllNotifications")
     suspend fun readAllNotifications():Response<BaseApiResponse<NotificationsDto>>
 
+    @FormUrlEncoded
+    @POST("/readNotification")
+    suspend fun readNotification(
+        @Field("notificationid")notificationid: Long?,
+    ):Response<BaseApiResponse<Unit>>
+
     @POST("/deleteNotifications")
     suspend fun deleteNotifications():Response<BaseApiResponse<NotificationsDto>>
 }

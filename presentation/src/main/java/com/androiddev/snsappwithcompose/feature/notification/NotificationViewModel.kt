@@ -136,6 +136,20 @@ class NotificationViewModel @Inject constructor(
             is NotificationEvent.DeleteNotifications -> {
                 showDeleteNotificationAlert()
             }
+            is NotificationEvent.ReadNotification -> {
+                viewModelScope.launch {
+                    notificationUseCases.readNotification(event.notificationId).collect { result ->
+                        handleResource(
+                            resource = result,
+                            onSuccessUnit = {
+                               //navigate(post(게시물,댓글),reply,profile)
+                            }
+                        )
+
+                    }
+                }
+
+            }
         }
     }
     private fun showReadAllNotificationAlert() {

@@ -37,4 +37,10 @@ class NotificationRepositoryImpl @Inject constructor(
         mapToResource = { it.toNotifications(notifications = it.notifications, unreadCount = it.unreadCount)}
     )
 
+    override suspend fun readNotification(notificationId:Long): Flow<Resource<Unit>> = safeApiCall(
+        context = context,
+        apiCall = { api.readNotification(notificationId) },
+        mapToResource = {}
+    )
+
 }
