@@ -5,6 +5,7 @@ datastorePreferences = "1.1.7"
 extensionOkhttp = "2.19.1"
 coreKtx = "1.17.0"
 firebaseBom = "34.6.0"
+firebaseMessaging = "25.0.1"
 hilt = "2.57.2"
 composeBom = "2025.11.00"
 compose = "1.7.8"
@@ -36,7 +37,6 @@ ksp = "2.1.10-1.0.31"
 kotlin = "2.1.10"
 snapper = "0.3.0"
 serviceslocation = "21.3.0"
-accompanistpager="0.36.0"
 exoplayer = "1.8.0"
 media3DatasourceOkhttp = "1.8.0"
 gson = "2.13.2"
@@ -49,6 +49,7 @@ accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-
 extension-okhttp = { module = "com.google.android.exoplayer:extension-okhttp", version.ref = "extensionOkhttp" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
 media3-ui = {module = "androidx.media3:media3-ui",version.ref = "exoplayer"}
 #exoplayer
 exoplayer = {module="androidx.media3:media3-exoplayer",version.ref = "exoplayer"}
@@ -96,9 +97,6 @@ kakao-v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kaka
 service-location = {group = "com.google.android.gms", name = "play-services-location", version.ref = "serviceslocation"}
 #snapping fling behavior
 dev-chrisbanes-snapper = { group = "dev.chrisbanes.snapper", name = "snapper", version.ref = "snapper" }
-#tabrow
-accompanist-pager = { group = "com.google.accompanist",name="accompanist-pager",version.ref="accompanistpager"}
-accompanist-pager-indicators ={ group = "com.google.accompanist",name="accompanist-pager-indicators",version.ref="accompanistpager"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }

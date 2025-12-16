@@ -102,10 +102,9 @@ import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 import com.androiddev.snsappwithcompose.common.model.MenuItem
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import kotlinx.coroutines.launch
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.google.accompanist.pager.rememberPagerState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import com.androiddev.snsappwithcompose.common.component.PagerDotsIndicator
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -150,7 +149,8 @@ fun PostDetailScreen(
     }
 
     val pagerState = rememberPagerState(
-        initialPage = 0
+        initialPage = 0,
+        pageCount = { currentPost?.imageSize ?: 0 }
     )
     var pendingScrollByCount by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
@@ -371,7 +371,7 @@ fun PostDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth(),
                                         //.height(270.dp),
-                                    count = currentPost?.imageSize ?: 0
+                                   // count = currentPost?.imageSize ?: 0
                                 ) { page ->
                                     // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
                                     // 예시:
@@ -399,12 +399,9 @@ fun PostDetailScreen(
                                     contentAlignment = Alignment.TopCenter
                                 ) {
                                     if(pagerState.pageCount > 1){
-                                        HorizontalPagerIndicator(
-                                            //  modifier = Modifier.align(Alignment.TopCenter),
+                                        PagerDotsIndicator(
                                             pagerState = pagerState,
-                                            //modifier = Modifier.padding(16.dp), // align 대신 padding 등으로 조절
-                                            activeColor = Color.Black,
-                                            inactiveColor = Color.LightGray
+                                            modifier = Modifier.padding(top = 8.dp)
                                         )
                                     }
 

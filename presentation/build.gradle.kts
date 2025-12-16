@@ -70,7 +70,7 @@ dependencies {
     implementation(libs.gson)
 
     implementation(platform(libs.firebase.bom))
-    implementation("com.google.firebase:firebase-messaging:25.0.1")
+    implementation(libs.firebase.messaging)
     implementation(libs.firebase.analytics)
 
     implementation(libs.exoplayer)
@@ -78,9 +78,6 @@ dependencies {
     implementation(libs.coil3.okhttp)
     implementation(libs.compose.foundation)
     implementation (libs.accompanist.systemuicontroller)
-    //tabrow
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.pager.indicators)
     //location service
     implementation(libs.service.location)
     // Coroutines
