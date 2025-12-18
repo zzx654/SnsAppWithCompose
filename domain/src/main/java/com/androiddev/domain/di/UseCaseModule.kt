@@ -35,13 +35,13 @@ import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUpUseCases
 import com.androiddev.domain.use_case.postdetail.GetComments
 import com.androiddev.domain.use_case.postlist.GetNearPosts
 import com.androiddev.domain.use_case.postdetail.GetPopularComments
+import com.androiddev.domain.use_case.postdetail.GetPost
 import com.androiddev.domain.use_case.postlist.GetNewPosts
 import com.androiddev.domain.use_case.postlist.GetNewTagPosts
 import com.androiddev.domain.use_case.postlist.GetPopularTagPosts
 import com.androiddev.domain.use_case.postlist.GetPostsUseCases
 import com.androiddev.domain.use_case.reply.GetReplies
 import com.androiddev.domain.use_case.postdetail.GetSelectedComment
-import com.androiddev.domain.use_case.postlist.GetSelectedPost
 import com.androiddev.domain.use_case.postdetail.GetVoteInfo
 import com.androiddev.domain.use_case.postdetail.PostComment
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
@@ -125,7 +125,6 @@ object UseCaseModule {
     fun provideGetPostsUseCases(repository: GetPostsRepository): GetPostsUseCases {
         return GetPostsUseCases(
             getNearPosts = GetNearPosts(repository),
-            getSelectedPost = GetSelectedPost(repository),
             getNewPosts = GetNewPosts(repository),
             getPopularTagPosts = GetPopularTagPosts(repository),
             getNewTagPosts = GetNewTagPosts(repository)
@@ -148,7 +147,8 @@ object UseCaseModule {
     ): PostDetailUseCases {
         return PostDetailUseCases(
             ToggleLikePost = ToggleLikePost(toggleLikePostRepository),
-            DeletePost = DeletePost(postRepository)
+            DeletePost = DeletePost(postRepository),
+            GetPost = GetPost(postRepository)
         )
     }
     @Provides

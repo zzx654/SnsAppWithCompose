@@ -138,7 +138,7 @@ class NotificationViewModel @Inject constructor(
             }
             is NotificationEvent.ReadNotification -> {
                 viewModelScope.launch {
-                    notificationUseCases.readNotification(event.notificationId).collect { result ->
+                    notificationUseCases.readNotification(event.notification.id).collect { result ->
                         handleResource(
                             resource = result,
                             onSuccessUnit = {

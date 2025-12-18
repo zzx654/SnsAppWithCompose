@@ -32,9 +32,5 @@ interface GetPostsRepository {
         latitude:Double?,
         longitude:Double?,
     ):Flow<Resource<Posts>>
-    suspend fun getSelectedPost(
-        postId:Int,
-        latitude:Double?,
-        longitude:Double?,
-    ):Flow<Resource<Posts>>
+
 }

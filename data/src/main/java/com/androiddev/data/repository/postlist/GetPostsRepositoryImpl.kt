@@ -60,14 +60,6 @@ class GetPostsRepositoryImpl @Inject constructor(
     )
 
 
-    override suspend fun getSelectedPost(
-        postId: Int,
-        latitude: Double?,
-        longitude: Double?
-    ): Flow<Resource<Posts>> =  safeApiCall(
-        context = context,
-        apiCall = { api.getSelectedPost(postId,latitude,longitude) },
-        mapToResource = { it.toPosts(posts = it.posts) }
-    )
+
 
 }

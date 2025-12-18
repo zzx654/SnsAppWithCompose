@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.feature.PostDetail
 
+import android.Manifest
 import android.content.Context
 import android.util.Log
 import androidx.annotation.StringRes
@@ -10,7 +11,9 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.PostPreview
@@ -31,7 +34,10 @@ import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.util.checkPermissions
+import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
+import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -45,8 +51,11 @@ class PostDetailsViewModel @Inject constructor(
     private val commentUseCases: CommentUseCases,
     private val voteUseCases: VoteUseCases,
     @ApplicationContext context: Context,
+    locationClient: FusedLocationProviderClient,
+    savedStateHandle: SavedStateHandle
 ) : BaseViewModel(context) {
     //로딩처리. 댓글 상단 고정
+    val args:Screen.PostDetailScreen = savedStateHandle.toRoute<Screen.PostDetailScreen>()
     private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
         CustomBottomSheetDialogState()
     )
@@ -63,9 +72,9 @@ class PostDetailsViewModel @Inject constructor(
     val _isLoad = mutableStateOf(false)
     val isLoad: State<Boolean>
         get() = _isLoad
-    val _postId = mutableStateOf(0)
-    val postId: State<Int>
-        get() = _postId
+   // val _postId = mutableStateOf(0)
+   // val postId: State<Int>
+     //   get() = _postId
 
 
 
@@ -94,10 +103,27 @@ class PostDetailsViewModel @Inject constructor(
     val _commentText = mutableStateOf("")
     val commentText: State<String>
         get() = _commentText
-    val _imepadding = mutableStateOf(false)
-    val imepadding: State<Boolean>
-        get() = _imepadding
+    //val _imepadding = mutableStateOf(false)
+    //val imepadding: State<Boolean>
+     //   get() = _imepadding
 
+    init {
+        viewModelScope.launch {
+            checkPermissions(
+                context = context,
+                permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION),
+                onGranted = {
+                    fetchLocation(locationClient) { latitude, longitude ->
+                        getPost(args.postId,latitude,longitude)
+                    }
+                            },
+                onUnGranted = {
+                     getPost(args.postId)
+                }
+            )
+        }
+    }
     val commentPaginator =
         Paginator<Comments, Comment>(loadItems = { handleResult, refresh ->
             viewModelScope.launch {
@@ -112,7 +138,6 @@ class PostDetailsViewModel @Inject constructor(
                         lastCommentScore = last().score
                     }
                 }
-                //postid를 얻을방법
                 if(commentSortType.value == CommentSortType.OLDEST) {
                     commentUseCases.GetComments(post.value?.postId?:0, lastCommentId, lastCommentDate)
                         .collect {
@@ -151,27 +176,61 @@ class PostDetailsViewModel @Inject constructor(
     private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
     val alertDialogState: State<AlertDialogState>
         get() = _alertDialogState
-    fun initPost(isLiked: Boolean, post: PostPreview) {
-        _isLiked.value = isLiked
+    private fun getPost(postId:Int, latitude:Double? = null,longitude:Double? = null) {
+        viewModelScope.launch {
+            postDetailUseCases.GetPost(postid = postId, latitude = latitude, longitude = longitude)
+                .collect { result ->
+                    handleResource(
+                        resource = result,
+                        onSuccess = { data ->
+                            if(data.posts.isEmpty()) {
+                                setEvent(UiEvent.ShowToast(getString(context,R.string.post_not_exist_alert)))
+                                setEvent(UiEvent.popBackStack)
+                            }
+                            else {
+                                loadPostDetails(data.posts[0])
+                            }
+
+                        }
+                    )
+                }
+        }
+    }
+    private fun loadPostDetails(post: PostPreview) {
+        _isLiked.value = post.isliked
         _post.value = post
         viewModelScope.launch {
             commentPaginator.loadNextItems(refresh = true)
         }
         viewModelScope.launch {
             voteUseCases.getVoteInfo(post.postId).collect { result ->
-                handleResource(
-                    resource = result,
-                    onSuccess = { data ->
-                        if(data.voteOptions.isNotEmpty()) {
-                            _voteState.value = voteState.value.copy(
-                                isMyPost = data.isMyPost,
-                                hasVoted = data.hasVoted,
-                                selectedChoiceId = data.selectedChoiceId,
-                                voteOptions = data.voteOptions
-                            )
+                when(result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            if(it.voteOptions.isNotEmpty()) {
+                                _voteState.value = voteState.value.copy(
+                                    isMyPost = it.isMyPost,
+                                    hasVoted = it.hasVoted,
+                                    selectedChoiceId = it.selectedChoiceId,
+                                    voteOptions = it.voteOptions,
+                                    isLoading = false
+                                )
+                            }
                         }
                     }
-                )
+                    is Resource.Error -> {
+                        _voteState.value = voteState.value.copy(isLoading = false)
+                        setEvent(UiEvent.ShowToast(result.message ?: getString(
+                            R.string.error)))
+                    }
+                    is Resource.Loading -> {
+                        _voteState.value = voteState.value.copy(isLoading = true)
+
+                    }
+
+                    else -> {}
+                }
+
             }
         }
 
@@ -297,8 +356,7 @@ class PostDetailsViewModel @Inject constructor(
 
             }
             is CommentEvent.GotoReplyScreen -> {
-                event.commentId
-                postId.value
+
                 viewModelScope.launch {
                     commentUseCases.GetSelectedComment(
                         postId = post.value?.postId?:0,
@@ -324,6 +382,9 @@ class PostDetailsViewModel @Inject constructor(
     }
     fun onPostDetailEvent(event: PostDetailEvent) {
         when (event) {
+            is PostDetailEvent.LoadEditedPostDetails -> {
+                loadPostDetails(event.post)
+            }
 
             is PostDetailEvent.ToggleLikePost -> {
                 viewModelScope.launch {
@@ -403,12 +464,6 @@ class PostDetailsViewModel @Inject constructor(
                 }
             )
         }
-
-
-
-
-
-
         _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
             showDialog = true,
             items,

@@ -113,15 +113,14 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ContextCastToActivity")
 @Composable
 fun PostDetailScreen(
-    post: PostPreview?,
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
     userViewModel: UserViewModel,
     audioViewModel: AudioViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
-    viewModel: PostDetailsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    postViewModel: PostDetailsViewModel
 ) {
 
-    val currentPost = viewModel.post.value
+    val post = postViewModel.post.value
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -134,8 +133,8 @@ fun PostDetailScreen(
     }
     val dropdownMenuItem = if(post?.userId == userViewModel.userId.value) {
         listOf(
-            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(viewModel.post.value))},
-            MenuItem(getString(context,R.string.delete)) { viewModel.onPostDetailEvent(
+            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(postViewModel.post.value))},
+            MenuItem(getString(context,R.string.delete)) { postViewModel.onPostDetailEvent(
                 PostDetailEvent.DeletePost
             )}
         )
@@ -150,7 +149,7 @@ fun PostDetailScreen(
 
     val pagerState = rememberPagerState(
         initialPage = 0,
-        pageCount = { currentPost?.imageSize ?: 0 }
+        pageCount = { post?.imageSize ?: 0 }
     )
     var pendingScrollByCount by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
@@ -180,34 +179,26 @@ fun PostDetailScreen(
                 val totalItemsCount = listState.layoutInfo.totalItemsCount
                 if (lastVisibleItemIndex != null && lastVisibleItemIndex >= totalItemsCount - 1&&imeHeigh.value == 0&&totalItemsCount>=10) {
 
-                    viewModel.onCommentEvent(CommentEvent.LoadNextComments)
+                    postViewModel.onCommentEvent(CommentEvent.LoadNextComments)
                 }
             }
     }
-    val getCommentsState = viewModel.getCommentsState.value
-    LaunchedEffect(post) {
-        if(viewModel.post.value==null) {
-            post?.let { post ->
+    val getCommentsState = postViewModel.getCommentsState.value
 
-                viewModel.initPost(
-                    isLiked = post.isliked,
-                    post = post
-                )
+    LaunchedEffect(post) {
+            post?.let { post ->
                 post.audio?.let {
                     audioViewModel.prepareAudio(
-                        url = BuildConfig.BASE_URL+it,
+                        url = BuildConfig.BASE_URL + it,
                         nickname = post.nickname
                     )
                 }
             }
-        }
-
-
     }
 
     LaunchedEffect(Unit) {
 
-        viewModel.eventFlow.collectLatest { event ->
+        postViewModel.eventFlow.collectLatest { event ->
             when(event){
                 is UiEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
@@ -227,41 +218,44 @@ fun PostDetailScreen(
     }
     val editedPost = navBackStackEntry.savedStateHandle.get<PostPreview>(getString(context,R.string.editedPost))
     editedPost?.let { post ->
-        viewModel.initPost(
-            isLiked = post.isliked,
-            post = post
-        )
-        post.audio?.let {
-            audioViewModel.prepareAudio(
-                url = BuildConfig.BASE_URL+it,
-                nickname = post.nickname
-            )
-        }
+        postViewModel.onPostDetailEvent(PostDetailEvent.LoadEditedPostDetails(post))
+        //post.audio?.let {
+         //   audioViewModel.prepareAudio(
+          //      url = BuildConfig.BASE_URL+it,
+           //     nickname = post.nickname
+            //)
+       // }
         navBackStackEntry.savedStateHandle.set<PostPreview>(getString(context,R.string.editedPost),null)
     }
     AlertDialog(
-        title = { viewModel.alertDialogState.value.title },
-        cancelText = { viewModel.alertDialogState.value.cancelText },
-        confirmText = { viewModel.alertDialogState.value.confirmText },
-        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+        title = { postViewModel.alertDialogState.value.title },
+        cancelText = { postViewModel.alertDialogState.value.cancelText },
+        confirmText = { postViewModel.alertDialogState.value.confirmText },
+        onClickConfirm = postViewModel.alertDialogState.value.onClickConfirm,
+        onClickCancel = postViewModel.alertDialogState.value.onClickCancel
     )
     LoadingDialog {
-        viewModel.isLoading.value
+        postViewModel.isLoading.value && post!=null
     }
     CustomBottomSheetDialog(
-        { viewModel.customBottomSheetDialogState.value.showDialog },
-        { viewModel.customBottomSheetDialogState.value.items },
-        viewModel.customBottomSheetDialogState.value.onClickCancel
+        { postViewModel.customBottomSheetDialogState.value.showDialog },
+        { postViewModel.customBottomSheetDialogState.value.items },
+        postViewModel.customBottomSheetDialogState.value.onClickCancel
     )
-    BaseScaffold(
-        modifier = Modifier.fillMaxWidth(),
-        focusManager = focusManager,
-        scrollState = scrollState,
-        topBar = {
-            if (post != null) {
+    if(post == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            androidx.compose.material3.CircularProgressIndicator(color = Color.Gray)
+        }
+    }
+    else {
+        BaseScaffold(
+            modifier = Modifier.fillMaxWidth(),
+            focusManager = focusManager,
+            scrollState = scrollState,
+            topBar = {
+                //if (post != null) {
                 CenterAlignedTopBar(
-                    title = currentPost?.nickname?:"",
+                    title = post?.nickname ?:"",
                     onBackClick = { navController.popBackStack() },
                     rightAction = {
                         IconButton(onClick = { dropdownMenuExpanded = true }) {
@@ -286,23 +280,23 @@ fun PostDetailScreen(
                         }
                     }
                 )
-            }
+                //}
 
-        },
-        content = {
-            LazyColumn(
-                state = listState,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-
-
+            },
+            content = {
+                LazyColumn(
+                    state = listState,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
 
 
-                item {
+
+
+                    item {
                         Column {
 
-                            currentPost?.tags?.let { tags ->
+                            post?.tags?.let { tags ->
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Chips(
                                     modifier = Modifier
@@ -317,7 +311,7 @@ fun PostDetailScreen(
                                     }
                                 )
                             }
-                            Spacer(modifier = Modifier.height(if (currentPost?.tags == null) 15.dp else 5.dp))
+                            Spacer(modifier = Modifier.height(if (post?.tags == null) 15.dp else 5.dp))
 
                             Row(
                                 modifier = Modifier
@@ -326,8 +320,8 @@ fun PostDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 ProfileImage(
-                                    profileImage = currentPost?.profileImage?:"",
-                                    gender = currentPost?.gender?:"",
+                                    profileImage = post?.profileImage?:"",
+                                    gender = post?.gender?:"",
                                     anonymous = post?.anonymous?:false,
                                     context = context,
                                     imageLoader = imageLoader
@@ -337,13 +331,13 @@ fun PostDetailScreen(
 
                                 Column {
                                     Text(
-                                        currentPost?.nickname?:"",
+                                        post?.nickname?:"",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "${currentPost?.elapsedTime} · ${currentPost?.distance?:0}km ",
+                                        text = "${post?.elapsedTime} · ${post?.distance?:0}km ",
                                         fontSize = 13.sp,
                                         color = Color.Gray
                                     )
@@ -359,19 +353,19 @@ fun PostDetailScreen(
                             )
                             Spacer(modifier = Modifier.height(15.dp))
                             Text(
-                                text = currentPost?.text?:"",
+                                text = post?.text?:"",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 24.dp),
                             )
                             Spacer(modifier = Modifier.height(15.dp))
-                            currentPost?.images?.let { images ->
+                            post?.images?.let { images ->
                                 HorizontalPager(
                                     state = pagerState,
                                     modifier = Modifier
                                         .fillMaxWidth(),
-                                        //.height(270.dp),
-                                   // count = currentPost?.imageSize ?: 0
+                                    //.height(270.dp),
+                                    // count = currentPost?.imageSize ?: 0
                                 ) { page ->
                                     // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
                                     // 예시:
@@ -410,12 +404,12 @@ fun PostDetailScreen(
 
                             }
 
-                            Spacer(modifier = Modifier.height(if (currentPost?.images == null) 0.dp else 15.dp))
+                            Spacer(modifier = Modifier.height(if (post?.images == null) 0.dp else 15.dp))
                             PollCard(
-                                voteState = viewModel.voteState.value,
-                                onOptionSelected = { optionId -> viewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
+                                voteState = postViewModel.voteState.value,
+                                onOptionSelected = { optionId -> postViewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
                                 onVoteClick = {
-                                    viewModel.onVoteEvent(VoteEvent.OnVoteClick)
+                                    postViewModel.onVoteEvent(VoteEvent.OnVoteClick)
                                 }
                             )
                             Box(
@@ -426,7 +420,7 @@ fun PostDetailScreen(
                                         .align(Alignment.CenterEnd) // 오른쪽 끝
                                         .padding(end = 8.dp,top = 10.dp),
                                     viewModel = audioViewModel,
-                                    url = currentPost?.audio
+                                    url = post?.audio
                                 )
                             }
 
@@ -444,7 +438,7 @@ fun PostDetailScreen(
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier.padding(vertical = 13.dp)) {
                                     androidx.compose.material3.Icon(
-                                        imageVector = if (viewModel.isLiked.value) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
+                                        imageVector = if (postViewModel.isLiked.value) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
                                         contentDescription = null,
                                         tint = Color.DarkGray.copy(0.8f),
                                         modifier = Modifier
@@ -462,14 +456,14 @@ fun PostDetailScreen(
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier.padding(vertical = 13.dp)) {
                                     androidx.compose.material3.Icon(
-                                        imageVector = if (viewModel.isLiked.value) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
+                                        imageVector = if (postViewModel.isLiked.value) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
                                         contentDescription = null,
                                         tint = Color.DarkGray.copy(0.8f),
                                         modifier = Modifier
                                             .clickable {
-                                                viewModel.onPostDetailEvent(
+                                                postViewModel.onPostDetailEvent(
                                                     PostDetailEvent.ToggleLikePost(
-                                                        currentPost?.postId ?: 0
+                                                        post?.postId ?: 0
                                                     )
                                                 )
                                             }
@@ -491,130 +485,133 @@ fun PostDetailScreen(
 
 
 
-                }
-                item {
-                    if(!viewModel.isCommentsEmpty.value) {
-                        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp,vertical = 10.dp), contentAlignment = Alignment.TopStart) {
-                            Row {
-                                SelectableDotText(
-                                    text = getString(context, CommentSortType.OLDEST.labelResId),
-                                    selected = viewModel.commentSortType.value == CommentSortType.OLDEST,
-                                    onClick = {//onEvent
-                                        viewModel.onCommentEvent(CommentEvent.SetCommentSortType(
-                                            CommentSortType.OLDEST
-                                        ))
-                                    },
-                                )
-                                Spacer(modifier = Modifier.width(9.dp))
-                                SelectableDotText(
-                                    text = getString(context, CommentSortType.POPULAR.labelResId),
-                                    selected = viewModel.commentSortType.value == CommentSortType.POPULAR,
-                                    onClick = {
-                                        viewModel.onCommentEvent(CommentEvent.SetCommentSortType(
-                                            CommentSortType.POPULAR
-                                        ))
-                                    },
+                    }
+                    item {
+                        if(!postViewModel.isCommentsEmpty.value) {
+                            Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp,vertical = 10.dp), contentAlignment = Alignment.TopStart) {
+                                Row {
+                                    SelectableDotText(
+                                        text = getString(context, CommentSortType.OLDEST.labelResId),
+                                        selected = postViewModel.commentSortType.value == CommentSortType.OLDEST,
+                                        onClick = {//onEvent
+                                            postViewModel.onCommentEvent(CommentEvent.SetCommentSortType(
+                                                CommentSortType.OLDEST
+                                            ))
+                                        },
+                                    )
+                                    Spacer(modifier = Modifier.width(9.dp))
+                                    SelectableDotText(
+                                        text = getString(context, CommentSortType.POPULAR.labelResId),
+                                        selected = postViewModel.commentSortType.value == CommentSortType.POPULAR,
+                                        onClick = {
+                                            postViewModel.onCommentEvent(CommentEvent.SetCommentSortType(
+                                                CommentSortType.POPULAR
+                                            ))
+                                        },
+                                    )
+                                }
+                            }
+
+
+                        }
+                    }
+                    item {
+                        if(getCommentsState.isRefreshing) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(150.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+
+                    items(
+                        getCommentsState.comments
+                    ) { comment ->
+
+                        val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+                        CommentItem(
+                            comment = comment,
+                            isLiked = commentLikeStatus.isLiked,
+                            likeCount = commentLikeStatus.likeCount,
+                            imageLoader = imageLoader,
+                            onLikeClick = {
+                                comment.commentId?.let {
+                                    postViewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
+                                }
+                            },
+                            onOptionClick = {
+                                postViewModel.onCommentEvent(
+                                    CommentEvent.ShowCommentOptions(
+                                        myUserId = userViewModel.userId.value,
+                                        commentUserId = comment.userId
+                                    ))
+                            },
+                            onCommentClick = {
+                                postViewModel.onCommentEvent(
+                                    CommentEvent.GotoReplyScreen(
+                                        commentId = comment.commentId?:0
+                                    ))
+                            }
+                        )
+                        Divider(
+                            color = Color.LightGray,
+                            thickness = 1.dp
+                        )
+                    }
+                    item {
+                        if(getCommentsState.isLoading && getCommentsState.comments.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                    //로딩중이 아닐때, comment가 없는상태에서 불러온결과 없을때
+                    item {
+                        if(!getCommentsState.isLoading&&postViewModel.isCommentsEmpty.value) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(150.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = getString(context,R.string.comment_empty),
+                                    color = Color.Gray,
+                                    textAlign = TextAlign.Center
                                 )
                             }
                         }
-
-
                     }
-                }
-                item {
-                    if(getCommentsState.isRefreshing) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
+
                 }
 
-                items(
-                    getCommentsState.comments
-                ) { comment ->
+            },
+            bottomBar = {
+                CommentInput(
+                    comment = postViewModel.commentText.value,
+                    onCommentChange = { postViewModel.onCommentEvent(CommentEvent.TypeComment(it)) },
+                    onPostClick = {
+                        if(postViewModel.commentText.value.isNotEmpty())
+                            postViewModel.onCommentEvent(CommentEvent.PostComment)
+                    },
+                    isAnonymous = postViewModel.anonymousChecked.value,
+                    onAnonymousChange = { postViewModel.onCommentEvent(CommentEvent.ToggleAnonymous(it)) }
+                )
+            },
+            lazyColumnExist = true
+        )
 
-                    val commentLikeStatus = viewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
-                    CommentItem(
-                        comment = comment,
-                        isLiked = commentLikeStatus.isLiked,
-                        likeCount = commentLikeStatus.likeCount,
-                        imageLoader = imageLoader,
-                        onLikeClick = {
-                            comment.commentId?.let {
-                                viewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
-                            }
-                        },
-                        onOptionClick = {
-                            viewModel.onCommentEvent(
-                                CommentEvent.ShowCommentOptions(
-                                myUserId = userViewModel.userId.value,
-                                commentUserId = comment.userId
-                            ))
-                        },
-                        onCommentClick = {
-                            viewModel.onCommentEvent(
-                                CommentEvent.GotoReplyScreen(
-                                commentId = comment.commentId?:0
-                            ))
-                        }
-                    )
-                    Divider(
-                        color = Color.LightGray,
-                        thickness = 1.dp
-                    )
-                }
-                item {
-                    if(getCommentsState.isLoading && getCommentsState.comments.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                }
-                //로딩중이 아닐때, comment가 없는상태에서 불러온결과 없을때
-                item {
-                    if(!getCommentsState.isLoading&&viewModel.isCommentsEmpty.value) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = getString(context,R.string.comment_empty),
-                                color = Color.Gray,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
+    }
 
-            }
-
-        },
-        bottomBar = {
-            CommentInput(
-                comment = viewModel.commentText.value,
-                onCommentChange = { viewModel.onCommentEvent(CommentEvent.TypeComment(it)) },
-                onPostClick = {
-                    if(viewModel.commentText.value.isNotEmpty())
-                        viewModel.onCommentEvent(CommentEvent.PostComment)
-                },
-                isAnonymous = viewModel.anonymousChecked.value,
-                onAnonymousChange = { viewModel.onCommentEvent(CommentEvent.ToggleAnonymous(it)) }
-            )
-        },
-        lazyColumnExist = true
-    )
 
 
 }

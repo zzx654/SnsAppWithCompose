@@ -20,7 +20,6 @@ class PopularTagPostsViewModel @Inject constructor(
     locationClient: FusedLocationProviderClient,
     @ApplicationContext context: Context,
 ): BasePostsViewModel(
-    getPostsUseCases = getPostsUseCases,
     context = context,
     locationClient = locationClient
 ) {

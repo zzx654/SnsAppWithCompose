@@ -16,6 +16,7 @@ import com.androiddev.snsappwithcompose.common.component.MainScaffold
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailScreen
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyScreen
 import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
+import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailsViewModel
 import com.androiddev.snsappwithcompose.feature.auth.init.InitScreen
 import com.androiddev.snsappwithcompose.feature.auth.signin.SignInScreen
 import com.androiddev.snsappwithcompose.feature.auth.signup.authphone.AuthPhoneScreen
@@ -95,22 +96,20 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
         composable<Screen.UploadPostScreen>(
             typeMap = postTypeMap
         ) {
-            val post = it.toRoute<Screen.PostDetailScreen>().post
+            val post = it.toRoute<Screen.UploadPostScreen>().post
             BackHandler(true) {
             }
             UploadPostScreen(
                 post = post,
                 navController = navController)
         }
-        composable<Screen.PostDetailScreen>(
-            typeMap = postTypeMap
-        ) {
+        composable<Screen.PostDetailScreen>{
+            val postViewModel: PostDetailsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 
-            val post = it.toRoute<Screen.PostDetailScreen>().post
            BackHandler(true) {
             }
             PostDetailScreen(
-                post = post,
+                postViewModel = postViewModel,
                 userViewModel = userViewModel,
                 navController = navController,
                 navBackStackEntry = it,

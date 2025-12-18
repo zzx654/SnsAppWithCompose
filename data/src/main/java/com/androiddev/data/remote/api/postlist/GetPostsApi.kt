@@ -45,13 +45,5 @@ interface GetPostsApi {
         @Field("longitude")longitude:Double?
     ): Response<BaseApiResponse<GetPostsDto>>
 
-    @FormUrlEncoded
-    @POST("/getSelectedPost")
-    suspend fun getSelectedPost(
-        @Field("postid")postid: Int,
-        @Field("latitude")latitude:Double?,
-        @Field("longitude")longitude:Double?
-    ):Response<BaseApiResponse<GetPostsDto>>
-
 
 }

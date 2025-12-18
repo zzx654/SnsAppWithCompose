@@ -32,7 +32,7 @@ sealed interface Screen {
     @Serializable
     data class CropScreen(val encodedUri:String): Screen
     @Serializable
-    data class PostDetailScreen(val post:PostPreview?): Screen
+    data class PostDetailScreen(val postId:Int): Screen
     @Serializable
     data class ReplyScreen(val comment: Comment?): Screen
     @Serializable

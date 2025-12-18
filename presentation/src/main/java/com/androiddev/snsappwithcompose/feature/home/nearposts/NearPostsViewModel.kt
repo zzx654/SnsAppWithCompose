@@ -22,7 +22,6 @@ class NearPostsViewModel @Inject constructor(
     locationClient: FusedLocationProviderClient,
     @ApplicationContext context: Context
 ): BasePostsViewModel(
-    getPostsUseCases = getPostsUseCases,
     context = context,
     locationClient = locationClient,
     isLocationPermissionRequired = true

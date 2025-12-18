@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.data.R
 import com.androiddev.data.remote.api.postdetail.PostApi
+import com.androiddev.data.remote.dto.toPosts
 import com.androiddev.data.util.safeApiCall
+import com.androiddev.domain.model.Posts
 import com.androiddev.domain.repository.postdetail.PostRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +25,15 @@ class PostRepositoryImpl @Inject constructor(
             apiCall = { api.deletePost(postId) },
             mapToResource = {}
         )
+    override suspend fun getPost(
+        postId: Int,
+        latitude: Double?,
+        longitude: Double?
+    ): Flow<Resource<Posts>> =  safeApiCall(
+        context = context,
+        apiCall = { api.getPost(postId,latitude,longitude) },
+        mapToResource = { it.toPosts(posts = it.posts) }
+    )
 
 
 }
