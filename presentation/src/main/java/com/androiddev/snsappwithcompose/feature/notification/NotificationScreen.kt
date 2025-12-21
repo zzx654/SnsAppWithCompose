@@ -1,6 +1,8 @@
 package com.androiddev.snsappwithcompose.feature.notification
 
 
+import android.view.Gravity
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -21,6 +23,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,8 +37,10 @@ import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
+import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.feature.notification.component.NotificationItem
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -53,6 +58,25 @@ fun NotificationScreen(
             viewModel.onEvent(NotificationEvent.RefreshNotifictions)
         }
     )
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collectLatest { event ->
+            when(event){
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                is UiEvent.navigate -> {
+                    navController.navigate(event.screen)
+                }
+                is UiEvent.popBackStack -> {
+                    navController.popBackStack()
+                }
+                else -> null
+            }
+        }
+    }
     LoadingDialog {
         viewModel.isLoading.value
     }
@@ -106,7 +130,8 @@ fun NotificationScreen(
                             viewModel.onEvent(NotificationEvent.LoadNextNotifications)
                         }
                         NotificationItem(
-                            notification = getNotificationsState.notifications[index]
+                            notification = getNotificationsState.notifications[index],
+                            onNotificationClick = { viewModel.onEvent(NotificationEvent.ReadNotification(getNotificationsState.notifications[index]))}
                         )
                         Divider(
                             color = Color.LightGray,

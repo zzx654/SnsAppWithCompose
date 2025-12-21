@@ -2,6 +2,7 @@ package com.androiddev.data.remote.api.notification
 
 import com.androiddev.data.remote.BaseApiResponse
 import com.androiddev.data.remote.dto.NotificationsDto
+import com.androiddev.data.remote.dto.ReadNotificationDto
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 import retrofit2.Response
@@ -22,7 +23,7 @@ interface NotificationApi {
     @POST("/readNotification")
     suspend fun readNotification(
         @Field("notificationid")notificationid: Long?,
-    ):Response<BaseApiResponse<Unit>>
+    ):Response<BaseApiResponse<ReadNotificationDto>>
 
     @POST("/deleteNotifications")
     suspend fun deleteNotifications():Response<BaseApiResponse<NotificationsDto>>

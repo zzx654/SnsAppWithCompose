@@ -233,9 +233,7 @@ class PostDetailsViewModel @Inject constructor(
 
             }
         }
-
     }
-
     fun onVoteEvent(event: VoteEvent) {
         when(event) {
             is VoteEvent.OnVoteClick -> {

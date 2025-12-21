@@ -9,7 +9,7 @@ data class NotificationDto (
     val type: String,
     val content: String,
     val extrajson: NotificationExtra,
-    val isRead: Int,
+    val isread: Int,
     val date: String
 )
 fun NotificationDto.toNotificationItem(

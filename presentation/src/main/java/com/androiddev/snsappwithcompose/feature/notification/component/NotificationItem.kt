@@ -1,5 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.notification.component
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +17,7 @@ import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,12 +31,17 @@ fun NotificationItem(
  //   message: String,
  //   time: String,
     modifier: Modifier = Modifier,
-    notification: NotificationItem
+    notification: NotificationItem,
+    onNotificationClick:() -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(12.dp)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onNotificationClick()  }
     ) {
 
         Row(

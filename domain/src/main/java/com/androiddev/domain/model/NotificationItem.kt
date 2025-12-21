@@ -1,9 +1,9 @@
 package com.androiddev.domain.model
 
 data class NotificationExtra(
-    val postId: Long? = null,
-    val commentId: Long? = null,
-    val followerId: Long? = null
+    val postId: Int? = null,
+    val commentId: Int? = null,
+    val followerId: Int? = null
 )
 
 data class NotificationItem(

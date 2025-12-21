@@ -1,6 +1,5 @@
 package com.androiddev.data.remote.dto
 
-import com.androiddev.domain.model.NotificationItem
 import com.androiddev.domain.model.Notifications
 
 data class NotificationsDto(
@@ -18,7 +17,7 @@ fun NotificationsDto.toNotifications(
                 type = it.type,
                 content = it.content,
                 extrajson = it.extrajson,
-                isRead = it.isRead,
+                isRead = it.isread,
                 date = it.date
             )
         },
