@@ -55,6 +55,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             val extra = Gson().fromJson(extraJson, NotificationExtra::class.java)
 
 
+
             sendNotification(title, body, type)
             val notificationItem = NotificationItem(
                 id = id,
@@ -106,14 +107,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         notificationHelper.createChannel(
             channelId = channelId,
             channelName = channelName,
-            importance =
-                if(type == NotificationType.LIKEPOST||type == NotificationType.LIKECOMMENT) NotificationManager.IMPORTANCE_LOW
-                else NotificationManager.IMPORTANCE_HIGH
+            importance = NotificationManager.IMPORTANCE_LOW
+
         )
         val notification = notificationHelper.createNotification(
             channelId = channelId,
             contentTitle = title,
-            contentText = messageBody,
+            contentText = messageBody
         )
         NotificationManagerCompat.from(this).notify(notificationChannelId,notification)
 

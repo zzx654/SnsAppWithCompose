@@ -4,5 +4,6 @@
     <string name="unexpected_error">예상하지 못한 오류가 발생했습니다</string>
     <string name="connection_error">인터넷 연결상태를 확인해주세요</string>
     <string name="app_name">고민 앱</string>
+    <string name="anonymous">익명</string>
 
 </resources>

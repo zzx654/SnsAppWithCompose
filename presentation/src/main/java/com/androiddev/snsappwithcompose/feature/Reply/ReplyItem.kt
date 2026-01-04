@@ -58,7 +58,7 @@ fun ReplyItem(
                 ProfileImage(
                     profileImage = comment.profileImage,
                     gender = comment.gender,
-                    anonymous = comment.anonymous,
+                    anonymous = comment.anonymousNickname!=null,
                     context = context,
                     imageLoader = imageLoader
                 )
@@ -85,13 +85,15 @@ fun ReplyItem(
             Spacer(modifier = Modifier.height(15.dp))
             Row(modifier = Modifier.padding(horizontal = 97.dp)) {
                 Text(
-                    text = getString(context, R.string.like) +if(isLiked)" $likeCount" else "",
+                    text = getString(context, R.string.like),
                     fontWeight = if(isLiked) FontWeight.Bold else FontWeight.Normal,
                     color = if(isLiked) Color.Black else Color.Gray.copy(alpha = 0.8f),
                     modifier = Modifier.clickable { onLikeClick() }
                 )
-                Spacer(modifier = Modifier.width(10.dp))
-               // Text(text = getString(context, R.string.write_reply))
+                if(likeCount>0) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = "$likeCount")
+                }
             }
             Spacer(modifier = Modifier.height(15.dp))
         }

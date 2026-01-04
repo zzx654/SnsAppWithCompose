@@ -150,11 +150,18 @@ class AudioViewModel @Inject constructor(
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
     }
+    private fun stopAudioService() {
+        val intent = Intent(context, AudioService::class.java).apply {
+            action = AudioService.ACTION_FINISH
+        }
+        context.startService(intent)
+    }
 
     override fun onCleared() {
         super.onCleared()
         runCatching { context.unregisterReceiver(toggleReceiver) }
 
+        stopAudioService()
         progressJob?.cancel()
         mediaPlayer?.release()
         mediaPlayer = null

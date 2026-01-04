@@ -5,5 +5,6 @@ data class CommentUseCases(
     val GetComments: GetComments,
     val GetPopularComments: GetPopularComments,
     val ToggleLikeComment: ToggleLikeComment,
-    val PostComment: PostComment
+    val PostComment: PostComment,
+    val GetNotificationComment: GetNotificationComment
 )

@@ -42,6 +42,7 @@ import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.common.component.Chips
 import com.androiddev.snsappwithcompose.common.component.CustomChip
+import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -137,7 +138,8 @@ fun PostPrevItem(
             modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 5.dp)
         ) {
 
-            Text(text = "${post.nickname} · ${post.elapsedTime}", fontSize = 14.sp,color = Color.Gray)
+
+            Text(text = "${generateDisplayName(LocalContext.current,post.nickname,post.anonymousNickname)} · ${post.elapsedTime}", fontSize = 14.sp,color = Color.Gray)
         }
 
         Spacer(modifier = Modifier.height(7.dp))

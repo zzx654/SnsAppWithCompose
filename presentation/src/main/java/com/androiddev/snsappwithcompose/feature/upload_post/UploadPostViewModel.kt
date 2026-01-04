@@ -91,7 +91,7 @@ class UploadPostViewModel @Inject constructor(
             post.tags?.let {
                 _addedTags.addAll(it)
             }
-            _anonymous.value = post.anonymous
+            _anonymous.value = post.anonymousNickname!=null
             _locationOnOff.value = post.location != null
             post.images?.let {
                 _selectedImages.clear()

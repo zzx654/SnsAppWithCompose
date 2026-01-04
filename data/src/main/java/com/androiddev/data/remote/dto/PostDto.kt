@@ -49,24 +49,12 @@ fun PostDto.toPostPreview(
     votecount:Int?,
 ): PostPreview {
     //닉네임 거리 태그 이미지 투표 경과시간
-    var nick = ""
-    var anony = false
-    nickname?.let {
-        nick = nickname
-    }
-    anonymous?.let {
-        if(it!="NONE") {
-            nick = "익명[${it}]"
-            anony = true
-        }
-
-    }
     var imageList = images?.split(',')
     return PostPreview(
         postId = postid,
         userId = userid,
-        anonymous = anony,
-        nickname = nick,
+        anonymousNickname = anonymous,
+        nickname = nickname?:"",
         profileImage = profileimage,
         gender = gender,
         text = text,

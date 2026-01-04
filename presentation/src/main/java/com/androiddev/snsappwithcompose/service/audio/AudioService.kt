@@ -6,23 +6,17 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
 import android.widget.RemoteViews
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.util.NotificationConstants
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_AUDIO
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_AUDIO
 import com.androiddev.snsappwithcompose.common.util.NotificationHelper
 import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
-import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys
-//import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.ISPLAYING
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.NICKNAME
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.PROGRESS
-import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.URL
-import kotlinx.coroutines.*
 
 
 class AudioService : Service() {
@@ -52,6 +46,7 @@ class AudioService : Service() {
 
     companion object {
         const val ACTION_PREPARE = "com.androiddev.snsappwithcompose.ACTION_PREPARE"
+        const val ACTION_FINISH = "com.androiddev.snsappwithcompose.ACTION_FINISH"
         const val ACTION_TOGGLEPLAYBACK = "com.androiddev.snsappwithcompose.ACTION_TOGGLEPLAYBACK"
         const val ACTION_PLAYBACK_STATUS = "com.androiddev.snsappwithcompose.ACTION_PLAYBACK_STATUS"
     }
@@ -82,6 +77,15 @@ class AudioService : Service() {
                             startForegroundSafe()
                         }
                     )
+                }
+                ACTION_FINISH -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        stopForeground(true)
+                    }
+                    stopSelf()
                 }
                 ACTION_TOGGLEPLAYBACK -> {
 

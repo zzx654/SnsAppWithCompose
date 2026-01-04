@@ -104,11 +104,15 @@ import com.androiddev.snsappwithcompose.common.state.UiEvent
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.common.component.PagerDotsIndicator
+import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-
+private const val NOTIFICATION_COMMENT_INDEX = 2
+private const val NOTIFICATION_REPLY_INDEX = 3
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ContextCastToActivity")
 @Composable
@@ -195,7 +199,25 @@ fun PostDetailScreen(
                 }
             }
     }
+    LaunchedEffect(
+        postViewModel.notificationComment.value,
+        postViewModel.notificationReply.value
+    ) {
+        // Compose 레이아웃 계산을 위해 약간 delay
 
+        val indexToScroll = when {
+            postViewModel.notificationReply.value != null -> NOTIFICATION_REPLY_INDEX
+            postViewModel.notificationComment.value != null -> NOTIFICATION_COMMENT_INDEX
+            else -> null
+        }
+
+        indexToScroll?.let {
+            listState.animateScrollToItem(
+                index = it,
+                scrollOffset = -100 // optional, 위쪽 여백
+            )
+        }
+    }
     LaunchedEffect(Unit) {
 
         postViewModel.eventFlow.collectLatest { event ->
@@ -255,7 +277,7 @@ fun PostDetailScreen(
             topBar = {
                 //if (post != null) {
                 CenterAlignedTopBar(
-                    title = post?.nickname ?:"",
+                    title = post.nickname ?:"",
                     onBackClick = { navController.popBackStack() },
                     rightAction = {
                         IconButton(onClick = { dropdownMenuExpanded = true }) {
@@ -290,13 +312,10 @@ fun PostDetailScreen(
                     modifier = Modifier.fillMaxSize(),
                 ) {
 
-
-
-
                     item {
                         Column {
 
-                            post?.tags?.let { tags ->
+                            post.tags?.let { tags ->
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Chips(
                                     modifier = Modifier
@@ -320,9 +339,9 @@ fun PostDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 ProfileImage(
-                                    profileImage = post?.profileImage?:"",
-                                    gender = post?.gender?:"",
-                                    anonymous = post?.anonymous?:false,
+                                    profileImage = post.profileImage?:"",
+                                    gender = post.gender?:"",
+                                    anonymous = post.anonymousNickname!=null,
                                     context = context,
                                     imageLoader = imageLoader
                                 )
@@ -516,6 +535,38 @@ fun PostDetailScreen(
                         }
                     }
                     item {
+                        postViewModel.notificationComment.value?.let  { comment ->
+                            CommentRow(
+                                comment = comment,
+                                postViewModel = postViewModel,
+                                imageLoader = imageLoader,
+                                userViewModel = userViewModel
+                            )
+                            Divider(
+                                color = Color.LightGray,
+                                thickness = 1.dp
+                            )
+                        }
+
+                    }
+                    item {
+                        postViewModel.notificationReply.value?.let { reply ->
+                            ReplyRow(
+                                comment = reply,
+                                postViewModel = postViewModel,
+                                imageLoader = imageLoader,
+                                userViewModel = userViewModel
+                            )
+                            Divider(
+                                color = Color.LightGray,
+                                thickness = 1.dp
+                            )
+
+
+                        }
+
+                    }
+                    item {
                         if(getCommentsState.isRefreshing) {
                             Box(
                                 modifier = Modifier
@@ -531,31 +582,15 @@ fun PostDetailScreen(
                     items(
                         getCommentsState.comments
                     ) { comment ->
-
-                        val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
-                        CommentItem(
+                        CommentRow(
                             comment = comment,
-                            isLiked = commentLikeStatus.isLiked,
-                            likeCount = commentLikeStatus.likeCount,
+                            postViewModel = postViewModel,
                             imageLoader = imageLoader,
-                            onLikeClick = {
-                                comment.commentId?.let {
-                                    postViewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
-                                }
-                            },
-                            onOptionClick = {
-                                postViewModel.onCommentEvent(
-                                    CommentEvent.ShowCommentOptions(
-                                        myUserId = userViewModel.userId.value,
-                                        commentUserId = comment.userId
-                                    ))
-                            },
-                            onCommentClick = {
-                                postViewModel.onCommentEvent(
-                                    CommentEvent.GotoReplyScreen(
-                                        commentId = comment.commentId?:0
-                                    ))
-                            }
+                            userViewModel = userViewModel
+                        )
+                        Divider(
+                            color = Color.LightGray,
+                            thickness = 1.dp
                         )
                         Divider(
                             color = Color.LightGray,
@@ -616,6 +651,64 @@ fun PostDetailScreen(
 
 }
 
+@Composable
+fun CommentRow(comment:Comment,postViewModel: PostDetailsViewModel,imageLoader:ImageLoader,userViewModel: UserViewModel) {
+    val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+    CommentItem(
+        comment = comment,
+        isLiked = commentLikeStatus.isLiked,
+        likeCount = commentLikeStatus.likeCount,
+        imageLoader = imageLoader,
+        onLikeClick = {
+            comment.commentId?.let {
+                postViewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
+            }
+        },
+        onOptionClick = {
+            postViewModel.onCommentEvent(
+                CommentEvent.ShowCommentOptions(
+                    myUserId = userViewModel.userId.value,
+                    commentUserId = comment.userId
+                ))
+        },
+        onCommentClick = {
+            postViewModel.onCommentEvent(
+                CommentEvent.GotoReplyScreen(
+                    commentId = comment.commentId?:0
+                ))
+        }
+    )
+    Divider(
+        color = Color.LightGray,
+        thickness = 1.dp
+    )
+}
+@Composable
+fun ReplyRow(comment:Comment,postViewModel: PostDetailsViewModel,imageLoader:ImageLoader,userViewModel: UserViewModel) {
+    val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+    ReplyItem(
+        comment = comment,
+        isLiked = commentLikeStatus.isLiked,
+        likeCount = commentLikeStatus.likeCount,
+        imageLoader = imageLoader,
+        onLikeClick = {
+            comment.commentId?.let {
+                postViewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
+            }
+        },
+        onOptionClick = {
+            postViewModel.onCommentEvent(
+                CommentEvent.ShowCommentOptions(
+                    myUserId = userViewModel.userId.value,
+                    commentUserId = comment.userId
+                ))
+        }
+    )
+    Divider(
+        color = Color.LightGray,
+        thickness = 1.dp
+    )
+}
 @Composable
 fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean,context: Context,imageLoader: ImageLoader) {
     val sizeDp = 42.dp

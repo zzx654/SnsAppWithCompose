@@ -37,18 +37,6 @@ fun CommentDto.toComment(
     score:Int,
     commentliked: Int
 ): Comment {
-    var nick = ""
-    var anony = false
-    nickname?.let {
-        nick = nickname
-    }
-    anonymous?.let {
-        if(it!="NONE") {
-            nick = "익명[${it}]"
-            anony = true
-        }
-
-    }
     return Comment(
         postId = postid,
         commentId = commentid,
@@ -57,8 +45,8 @@ fun CommentDto.toComment(
         ref = ref,
         date = date,
         depth = depth,
-        anonymous = anony,
-        nickname = nick,
+        anonymousNickname = anonymous,
+        nickname = nickname?:"",
         gender = gender,
         profileImage = profileimage,
         replyCount = replycount,

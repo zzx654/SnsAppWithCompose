@@ -3,9 +3,11 @@ package com.androiddev.data.repository.postdetail
 import android.content.Context
 import com.androiddev.data.remote.api.postdetail.CommentApi
 import com.androiddev.data.remote.dto.toComments
+import com.androiddev.data.remote.dto.toNotificationComment
 import com.androiddev.data.remote.dto.toToggleLikeResult
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.Comments
+import com.androiddev.domain.model.NotificationComment
 import com.androiddev.domain.model.ToggleLikeResult
 import com.androiddev.domain.repository.postdetail.CommentRepository
 import com.androiddev.domain.util.Resource
@@ -23,19 +25,26 @@ class CommentRepositoryImpl @Inject constructor(
         score: Int
     ): Flow<Resource<Comments>> = safeApiCall(
         context = context,
-        apiCall = { api.getPopularComments(postId,commentId,score) },
+        apiCall = { api.getPopularComments(postId, commentId, score) },
         mapToResource = {
             it.toComments(comments = it.comments)
         }
     )
-
+    override suspend fun getNotificationComment(commentId: Int): Flow<Resource<NotificationComment>>  =
+        safeApiCall(
+            context = context,
+            apiCall = { api.getNotificationComment(commentId)},
+            mapToResource = {
+                it.toNotificationComment(comment = it.comment,reply = it.reply)
+            }
+        )
     override suspend fun getReplies(
         ref: Int,
         commentId: Int?,
         commentDate: String?
     ): Flow<Resource<Comments>> = safeApiCall(
         context = context,
-        apiCall = { api.getReplies(ref,commentId,commentDate) },
+        apiCall = { api.getReplies(ref, commentId, commentDate) },
         mapToResource = {
             it.toComments(comments = it.comments)
         }
@@ -47,7 +56,7 @@ class CommentRepositoryImpl @Inject constructor(
         commentId: Int
     ): Flow<Resource<Comments>> = safeApiCall(
         context = context,
-        apiCall = { api.getSelectedComment(postId,commentId) },
+        apiCall = { api.getSelectedComment(postId, commentId) },
         mapToResource = {
             it.toComments(comments = it.comments)
         }
@@ -59,12 +68,11 @@ class CommentRepositoryImpl @Inject constructor(
         commentDate: String?
     ): Flow<Resource<Comments>> = safeApiCall(
         context = context,
-        apiCall = { api.getComments(postId,commentId,commentDate) },
+        apiCall = { api.getComments(postId, commentId, commentDate) },
         mapToResource = {
             it.toComments(comments = it.comments)
         }
     )
-
 
     override suspend fun postComment(
         postId: Int,
@@ -72,7 +80,7 @@ class CommentRepositoryImpl @Inject constructor(
         anonymousNick: String?
     ): Flow<Resource<Comments>> = safeApiCall(
         context = context,
-        apiCall = { api.postComments(postId,text,anonymousNick) },
+        apiCall = { api.postComments(postId, text, anonymousNick) },
         mapToResource = {
             it.toComments(comments = it.comments)
         }
@@ -85,7 +93,7 @@ class CommentRepositoryImpl @Inject constructor(
         anonymousNick: String?
     ): Flow<Resource<Comments>> = safeApiCall(
         context = context,
-        apiCall = { api.postReply(postId,ref,text,anonymousNick) },
+        apiCall = { api.postReply(postId, ref, text, anonymousNick) },
         mapToResource = {
             it.toComments(comments = it.comments)
         }
@@ -96,11 +104,8 @@ class CommentRepositoryImpl @Inject constructor(
             context = context,
             apiCall = { api.toggleLikeComment(commentId) },
             mapToResource = {
-                it.toToggleLikeResult( isLiked = it.isLiked)
+                it.toToggleLikeResult(isLiked = it.isLiked)
             }
         )
-
-
-
 
 }

@@ -166,9 +166,11 @@ class NotificationViewModel @Inject constructor(
                                 }
                                 when(result.notificationActionResult) {
                                     is NotificationActionResult.Navigate -> {
+                                        val commentId = event.notification.extrajson.commentId
+                                        val postId = event.notification.extrajson.postId
                                         when(event.notification.type) {
                                             LIKEPOST-> { //게시물 페이지
-                                                event.notification.extrajson.postId?.let { id ->
+                                                postId?.let { id ->
                                                     Screen.PostDetailScreen(
                                                         id
                                                     )
@@ -176,14 +178,15 @@ class NotificationViewModel @Inject constructor(
                                                     ?.let { setEvent(it) }
 
                                             }
-                                            COMMENT -> { //게시물페이지
-
-                                            }
-                                            REPLY -> { //댓글페이지
-
-                                            }
-                                            LIKECOMMENT -> { //게시물페이지
-
+                                            COMMENT,REPLY,LIKECOMMENT -> { //게시물페이지
+                                                if(postId!=null&&commentId!=null) {
+                                                    setEvent(UiEvent.navigate(
+                                                        Screen.PostDetailScreen(
+                                                            postId = postId,
+                                                            notificationCommentId = commentId
+                                                        )
+                                                    ))
+                                                }
                                             }
                                         }
 

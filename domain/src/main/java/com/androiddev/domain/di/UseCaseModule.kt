@@ -33,6 +33,7 @@ import com.androiddev.domain.use_case.signin.EmailSignIn
 import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUp
 import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUpUseCases
 import com.androiddev.domain.use_case.postdetail.GetComments
+import com.androiddev.domain.use_case.postdetail.GetNotificationComment
 import com.androiddev.domain.use_case.postlist.GetNearPosts
 import com.androiddev.domain.use_case.postdetail.GetPopularComments
 import com.androiddev.domain.use_case.postdetail.GetPost
@@ -161,7 +162,8 @@ object UseCaseModule {
             GetComments = GetComments(commentRepository),
             GetPopularComments = GetPopularComments(commentRepository),
             PostComment = PostComment(commentRepository),
-            ToggleLikeComment = ToggleLikeComment(commentRepository)
+            ToggleLikeComment = ToggleLikeComment(commentRepository),
+            GetNotificationComment = GetNotificationComment(commentRepository)
         )
     }
     @Provides

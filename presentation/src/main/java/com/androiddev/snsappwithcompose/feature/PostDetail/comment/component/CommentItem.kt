@@ -29,6 +29,7 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
 import androidx.core.content.ContextCompat.getString
 import coil3.ImageLoader
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -59,7 +60,7 @@ fun CommentItem(
                 ProfileImage(
                     profileImage = comment.profileImage,
                     gender = comment.gender,
-                    anonymous = comment.anonymous,
+                    anonymous = comment.anonymousNickname != null,
                     context = context,
                     imageLoader = imageLoader
                 )
@@ -68,7 +69,7 @@ fun CommentItem(
 
                 Column {
                     Text(
-                        comment.nickname,
+                        generateDisplayName(LocalContext.current,comment.nickname,comment.anonymousNickname),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -86,12 +87,18 @@ fun CommentItem(
             Spacer(modifier = Modifier.height(15.dp))
             Row(modifier = Modifier.padding(horizontal = 50.dp)) {
                 Text(
-                    text = getString(context, R.string.like)+if(isLiked)" $likeCount" else "",
+                    text = getString(context, R.string.like),
                     fontWeight = if(isLiked) FontWeight.Bold else FontWeight.Normal,
                     color = if(isLiked) Color.Black else Color.Gray.copy(alpha = 0.8f),
                     modifier = Modifier.clickable { onLikeClick() }
                 )
-                Spacer(modifier = Modifier.width(10.dp))
+                if(likeCount>0) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = "$likeCount")
+                }
+
+
+                Spacer(modifier = Modifier.width(11.dp))
                 Text(text = getString(context, R.string.write_reply))
             }
             Spacer(modifier = Modifier.height(15.dp))

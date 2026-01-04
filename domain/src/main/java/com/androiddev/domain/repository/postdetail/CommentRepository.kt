@@ -2,11 +2,15 @@ package com.androiddev.domain.repository.postdetail
 
 
 import com.androiddev.domain.model.Comments
+import com.androiddev.domain.model.NotificationComment
 import com.androiddev.domain.model.ToggleLikeResult
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {
+    suspend fun getNotificationComment(
+        commentId:Int
+    ): Flow<Resource<NotificationComment>>
     suspend fun getReplies(
         ref: Int,
         commentId: Int?,

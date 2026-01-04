@@ -13,7 +13,7 @@ data class Comment(
     val gender:String,
     val elapsedTime:String,
     val depth: Int,
-    val anonymous: Boolean,
+    val anonymousNickname:String?,
     val nickname: String,
     val profileImage: String?,
     val replyCount: Int=0,

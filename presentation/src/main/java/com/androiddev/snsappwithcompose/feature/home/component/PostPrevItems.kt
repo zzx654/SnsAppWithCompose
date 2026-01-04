@@ -42,6 +42,7 @@ fun PostPrevItems(
             if(index >= posts().size - 1 && !endReached() && !isLoading()) {
                 loadNextPosts()
             }
+
             PostPrevItem(post = posts()[index],modifier = Modifier.clickable{ onPostClick(posts()[index].postId) })
             Spacer(modifier = Modifier.height(4.dp))
         }

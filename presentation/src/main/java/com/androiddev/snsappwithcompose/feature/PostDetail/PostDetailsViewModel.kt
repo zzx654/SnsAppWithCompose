@@ -72,9 +72,6 @@ class PostDetailsViewModel @Inject constructor(
     val _isLoad = mutableStateOf(false)
     val isLoad: State<Boolean>
         get() = _isLoad
-   // val _postId = mutableStateOf(0)
-   // val postId: State<Int>
-     //   get() = _postId
 
 
 
@@ -87,6 +84,12 @@ class PostDetailsViewModel @Inject constructor(
     private val _getCommentsState = mutableStateOf(GetCommentsState())
     val getCommentsState: State<GetCommentsState>
         get() = _getCommentsState
+    private val _notificationComment:MutableState<Comment?> =  mutableStateOf(null)
+    val notificationComment:State<Comment?>
+        get() = _notificationComment
+    private val _notificationReply:MutableState<Comment?> =  mutableStateOf(null)
+    val notificationReply:State<Comment?>
+        get() = _notificationReply
     val _commentSortType = mutableStateOf(CommentSortType.OLDEST)
     val commentSortType: State<CommentSortType>
         get() = _commentSortType
@@ -164,7 +167,12 @@ class PostDetailsViewModel @Inject constructor(
             val newIds = comments.map { it.commentId }.toSet()
             updateStatesForNewComments(comments)
             _getCommentsState.value = getCommentsState.value.copy(
-                comments = if (refresh) comments else getCommentsState.value.comments.filterNot{ it.commentId in newIds } + comments,
+                comments = (
+                        if (refresh) comments else getCommentsState.value.comments.filterNot{ it.commentId in newIds } + comments
+                        ).filterNot {
+                        it.commentId == notificationComment.value?.commentId ||
+                                it.commentId == notificationReply.value?.commentId
+                    },
                 endReached = comments.isEmpty() && getCommentsState.value.comments.isNotEmpty()
             )
 
@@ -188,13 +196,49 @@ class PostDetailsViewModel @Inject constructor(
                                 setEvent(UiEvent.popBackStack)
                             }
                             else {
+
                                 loadPostDetails(data.posts[0])
+                                args.notificationCommentId?.let {
+                                    loadCommentByNotification(it)
+                                }
                             }
 
                         }
                     )
                 }
         }
+    }
+    private fun loadCommentByNotification(commentId: Int) {
+        viewModelScope.launch {
+            commentUseCases.GetNotificationComment(commentId).collect { result ->
+                when(result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            updateStatesForNewComments(listOf(it.comment,it.reply))
+
+                            _notificationComment.value = it.comment
+                            _notificationReply.value = it.reply
+                            _getCommentsState.value = getCommentsState.value.copy(
+                                comments = getCommentsState.value.comments.filterNot{ comment ->
+                                    comment.commentId == it.comment.commentId ||
+                                            comment.commentId == it.reply?.commentId
+                                } )
+                        }
+
+                    }
+                    is Resource.Error -> {
+                        setEvent(UiEvent.ShowToast(result.message ?: getString(
+                            R.string.error)))
+                    }
+                    else ->{}
+                }
+
+
+            }
+
+        }
+
+
     }
     private fun loadPostDetails(post: PostPreview) {
         _isLiked.value = post.isliked
@@ -429,9 +473,9 @@ class PostDetailsViewModel @Inject constructor(
     protected fun resetDialogState() {
         _alertDialogState.value = AlertDialogState()
     }
-    fun updateStatesForNewComments(newComments: List<Comment>) {
+    fun updateStatesForNewComments(newComments: List<Comment?>) {
         newComments.forEach { comment ->
-            comment.commentId?.let { commentId->
+            comment?.commentId?.let { commentId->
                 _commentLikeStatusMap[commentId] = CommentLikeState(
                     isLiked = comment.commentLiked==1,
                     likeCount = comment.likeCount
