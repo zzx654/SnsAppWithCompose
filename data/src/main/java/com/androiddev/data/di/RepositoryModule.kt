@@ -15,6 +15,7 @@ import com.androiddev.data.remote.api.postdetail.ToggleLikePostApi
 import com.androiddev.data.remote.api.tag.TagApi
 import com.androiddev.data.remote.api.uploadpost.UploadPostApi
 import com.androiddev.data.remote.api.postdetail.VoteApi
+import com.androiddev.data.remote.api.user.UserApi
 import com.androiddev.data.repository.signup.AuthPhoneRepositoryImpl
 import com.androiddev.data.repository.postdetail.CommentRepositoryImpl
 import com.androiddev.data.repository.createprofile.CreateProfileRepositoryImpl
@@ -28,6 +29,7 @@ import com.androiddev.data.repository.postdetail.ToggleLikePostRepositoryImpl
 import com.androiddev.data.repository.tag.TagRepositoryImpl
 import com.androiddev.data.repository.uploadpost.UploadPostRepositoryImpl
 import com.androiddev.data.repository.postdetail.VoteRepositoryImpl
+import com.androiddev.data.repository.user.UserRepositoryImpl
 import com.androiddev.domain.repository.signup.AuthPhoneRepository
 import com.androiddev.domain.repository.createprofile.CreateProfileRepository
 import com.androiddev.domain.repository.fcm.FcmRepository
@@ -41,6 +43,7 @@ import com.androiddev.domain.repository.postdetail.ToggleLikePostRepository
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.repository.postdetail.VoteRepository
+import com.androiddev.domain.repository.user.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -121,6 +124,14 @@ object RepositoryModule {
     @Singleton
     fun provideNotificationRepository(api: NotificationApi, @ApplicationContext context: Context): NotificationRepository {
         return NotificationRepositoryImpl(
+            api = api,
+            context = context
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideUserRepository(api: UserApi, @ApplicationContext context: Context): UserRepository {
+        return UserRepositoryImpl(
             api = api,
             context = context
         )

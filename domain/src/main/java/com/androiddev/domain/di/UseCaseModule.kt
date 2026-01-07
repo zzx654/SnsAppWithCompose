@@ -14,6 +14,7 @@ import com.androiddev.domain.repository.postdetail.ToggleLikePostRepository
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.repository.postdetail.VoteRepository
+import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.use_case.signup.authphone.AuthPhoneUseCases
 import com.androiddev.domain.use_case.signup.authphone.AuthenticateCode
 import com.androiddev.domain.use_case.postdetail.CancelVote
@@ -64,6 +65,8 @@ import com.androiddev.domain.use_case.uploadpost.UploadPost
 import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
 import com.androiddev.domain.use_case.postdetail.Vote
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
+import com.androiddev.domain.use_case.user.GetSearchedUsers
+import com.androiddev.domain.use_case.user.UserUseCases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -196,7 +199,7 @@ object UseCaseModule {
     }
     @Provides
     @Singleton
-    fun provideNotificationUseCaseS(
+    fun provideNotificationUseCases(
         notificationRepository: NotificationRepository
     ): NotificationUseCases {
         return NotificationUseCases(
@@ -204,6 +207,15 @@ object UseCaseModule {
             readAllNotifications = ReadAllNotifications(notificationRepository),
             deleteNotifications = DeleteNotifications(notificationRepository),
             readNotification = ReadNotification(notificationRepository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideUserUseCases(
+        userRepository: UserRepository
+    ): UserUseCases {
+        return UserUseCases(
+            getSearchedUsers = GetSearchedUsers(userRepository)
         )
     }
 }
