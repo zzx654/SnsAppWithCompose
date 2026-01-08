@@ -2,7 +2,6 @@ package com.androiddev.snsappwithcompose.feature.auth.signin
 
 
 import android.Manifest
-import android.content.Intent
 import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -39,11 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
+import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
 import com.androiddev.snsappwithcompose.feature.auth.components.KakaoSignInButton
 import com.androiddev.snsappwithcompose.feature.auth.components.NaverSignInButton
 import com.androiddev.snsappwithcompose.feature.auth.components.SignInTextField
@@ -53,16 +51,13 @@ import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.addFocusCleaner
-import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.NICKNAME
-import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioIntentKeys.URL
-import com.androiddev.snsappwithcompose.service.audio.AudioService
 import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
 fun SignInScreen(
     navController: NavController,
-    userViewModel: UserViewModel,
+    currentUserViewModel: CurrentUserViewModel,
     signinViewModel: SignInViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -83,7 +78,7 @@ fun SignInScreen(
 
                 is UiEvent.navigate -> {
                     event.userId?.let {
-                        userViewModel.setUserId(it)
+                        currentUserViewModel.setUserId(it)
                     }
                     navController.navigate(event.screen)
                 }

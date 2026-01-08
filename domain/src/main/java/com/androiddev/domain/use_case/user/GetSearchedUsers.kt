@@ -11,6 +11,6 @@ class GetSearchedUsers @Inject constructor(
 ) {
     suspend operator fun invoke(
         nickname:String,
-        lastUserId:Int
+        lastUserId:Int?
     ): Flow<Resource<Users>> = repository.getSearchedUsers(nickname,lastUserId)
 }

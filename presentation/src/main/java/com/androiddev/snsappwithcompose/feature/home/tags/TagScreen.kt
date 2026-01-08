@@ -39,11 +39,6 @@ fun TagScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clickable {
-                Log.d("TagDebug", "📌 Favorite Tags: ${state.favoriteTags}")
-                Log.d("TagDebug", "🔥 Popular Tags: ${state.popularTags}")
-                Log.d("TagDebug", "🔍 Searched Tags: ${state.searchedTags}")
-            }
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

@@ -35,7 +35,7 @@ import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
-import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
+import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentInput
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentItem
@@ -50,7 +50,7 @@ fun ReplyScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
     viewModel: ReplyViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
-    userViewModel: UserViewModel
+    currentUserViewModel: CurrentUserViewModel
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -172,7 +172,7 @@ fun ReplyScreen(
                         onOptionClick = {
                             viewModel.onEvent(
                                 CommentEvent.ShowCommentOptions(
-                                myUserId = userViewModel.userId.value,
+                                myUserId = currentUserViewModel.userId.value,
                                 commentUserId = comment.userId
                             ))
                         }

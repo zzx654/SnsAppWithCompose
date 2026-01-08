@@ -8,7 +8,7 @@ import javax.inject.Inject
 import androidx.compose.runtime.State
 
 @HiltViewModel
-class UserViewModel @Inject constructor(): ViewModel() {
+class CurrentUserViewModel @Inject constructor(): ViewModel() {
     private val _userId: MutableState<Int> = mutableStateOf(0)
     val userId: State<Int>
         get() = _userId

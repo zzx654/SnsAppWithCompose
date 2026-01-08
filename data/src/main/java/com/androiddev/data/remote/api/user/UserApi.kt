@@ -12,6 +12,6 @@ interface UserApi {
     @POST("/getSearchedUsers")
     suspend fun getSearchedUsers(
         @Field("nickname")nickname: String,
-        @Field("lastuserid")lastuserid:Int
+        @Field("lastuserid")lastuserid:Int?
     ): Response<BaseApiResponse<UsersDto>>
 }

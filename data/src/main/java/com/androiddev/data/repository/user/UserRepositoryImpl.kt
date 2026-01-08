@@ -16,7 +16,7 @@ class UserRepositoryImpl @Inject constructor(
 ): UserRepository {
     override suspend fun getSearchedUsers(
         nickname: String,
-        lastUserId: Int
+        lastUserId: Int?
     ): Flow<Resource<Users>> = safeApiCall(
         context = context,
         apiCall = { api.getSearchedUsers(nickname,lastUserId)},

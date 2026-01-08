@@ -7,7 +7,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,7 +14,7 @@ import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.common.component.MainScaffold
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailScreen
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyScreen
-import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
+import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailsViewModel
 import com.androiddev.snsappwithcompose.feature.auth.init.InitScreen
 import com.androiddev.snsappwithcompose.feature.auth.signin.SignInScreen
@@ -33,7 +32,7 @@ import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostScreen
 @Composable
 fun Navigation(navController: NavHostController,modifier:Modifier) {
 
-    val userViewModel: UserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+    val currentUserViewModel: CurrentUserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
     val notificationViewModel: NotificationViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
     NavHost(
         modifier = modifier,navController = navController,
@@ -43,7 +42,7 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             //여기
             BackHandler(true) {
             }
-            InitScreen(navController = navController,userViewModel = userViewModel)
+            InitScreen(navController = navController,currentUserViewModel = currentUserViewModel)
         }
         composable<Screen.MainScreen> {
             val tagViewModel: TagViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()// 그냥 생성
@@ -61,7 +60,7 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             //여기
             BackHandler(true) {
             }
-            SignInScreen(navController = navController,userViewModel = userViewModel)
+            SignInScreen(navController = navController,currentUserViewModel = currentUserViewModel)
         }
         composable<Screen.AuthPhoneScreen> {
             BackHandler(true) {
@@ -110,7 +109,7 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             }
             PostDetailScreen(
                 postViewModel = postViewModel,
-                userViewModel = userViewModel,
+                currentUserViewModel = currentUserViewModel,
                 navController = navController,
                 navBackStackEntry = it,
             )
@@ -125,7 +124,7 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
                 comment = comment,
                 navController = navController,
                 navBackStackEntry = it,
-                userViewModel = userViewModel
+                currentUserViewModel = currentUserViewModel
             )
         }
         composable<Screen.TagPostsScreen> {

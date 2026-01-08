@@ -86,7 +86,7 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
 import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteEvent
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.viewmodel.UserViewModel
+import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioPlayer
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
@@ -107,7 +107,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.common.component.PagerDotsIndicator
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -119,7 +118,7 @@ private const val NOTIFICATION_REPLY_INDEX = 3
 fun PostDetailScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
-    userViewModel: UserViewModel,
+    currentUserViewModel: CurrentUserViewModel,
     audioViewModel: AudioViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     postViewModel: PostDetailsViewModel
 ) {
@@ -135,7 +134,7 @@ fun PostDetailScreen(
             .logger(DebugLogger())
             .build()
     }
-    val dropdownMenuItem = if(post?.userId == userViewModel.userId.value) {
+    val dropdownMenuItem = if(post?.userId == currentUserViewModel.userId.value) {
         listOf(
             MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(postViewModel.post.value))},
             MenuItem(getString(context,R.string.delete)) { postViewModel.onPostDetailEvent(
@@ -540,7 +539,7 @@ fun PostDetailScreen(
                                 comment = comment,
                                 postViewModel = postViewModel,
                                 imageLoader = imageLoader,
-                                userViewModel = userViewModel
+                                currentUserViewModel = currentUserViewModel
                             )
                             Divider(
                                 color = Color.LightGray,
@@ -555,7 +554,7 @@ fun PostDetailScreen(
                                 comment = reply,
                                 postViewModel = postViewModel,
                                 imageLoader = imageLoader,
-                                userViewModel = userViewModel
+                                currentUserViewModel = currentUserViewModel
                             )
                             Divider(
                                 color = Color.LightGray,
@@ -586,7 +585,7 @@ fun PostDetailScreen(
                             comment = comment,
                             postViewModel = postViewModel,
                             imageLoader = imageLoader,
-                            userViewModel = userViewModel
+                            currentUserViewModel = currentUserViewModel
                         )
                         Divider(
                             color = Color.LightGray,
@@ -652,7 +651,7 @@ fun PostDetailScreen(
 }
 
 @Composable
-fun CommentRow(comment:Comment,postViewModel: PostDetailsViewModel,imageLoader:ImageLoader,userViewModel: UserViewModel) {
+fun CommentRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:ImageLoader, currentUserViewModel: CurrentUserViewModel) {
     val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
     CommentItem(
         comment = comment,
@@ -667,7 +666,7 @@ fun CommentRow(comment:Comment,postViewModel: PostDetailsViewModel,imageLoader:I
         onOptionClick = {
             postViewModel.onCommentEvent(
                 CommentEvent.ShowCommentOptions(
-                    myUserId = userViewModel.userId.value,
+                    myUserId = currentUserViewModel.userId.value,
                     commentUserId = comment.userId
                 ))
         },
@@ -684,7 +683,7 @@ fun CommentRow(comment:Comment,postViewModel: PostDetailsViewModel,imageLoader:I
     )
 }
 @Composable
-fun ReplyRow(comment:Comment,postViewModel: PostDetailsViewModel,imageLoader:ImageLoader,userViewModel: UserViewModel) {
+fun ReplyRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:ImageLoader, currentUserViewModel: CurrentUserViewModel) {
     val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
     ReplyItem(
         comment = comment,
@@ -699,7 +698,7 @@ fun ReplyRow(comment:Comment,postViewModel: PostDetailsViewModel,imageLoader:Ima
         onOptionClick = {
             postViewModel.onCommentEvent(
                 CommentEvent.ShowCommentOptions(
-                    myUserId = userViewModel.userId.value,
+                    myUserId = currentUserViewModel.userId.value,
                     commentUserId = comment.userId
                 ))
         }
