@@ -8,7 +8,7 @@ data class UserDto(
     val gender:String,
     val profileimage:String?,
     val following:Int,
-    val followercount:Int,
+    val followercount:Int?,
 )
 fun UserDto.toUser(
     userId:Int,
@@ -16,7 +16,7 @@ fun UserDto.toUser(
     gender:String,
     profileImage:String?,
     following:Int,
-    followerCount:Int,
+    followerCount:Int?,
 ): User{
     return User(
         userId = userid,
@@ -24,6 +24,6 @@ fun UserDto.toUser(
         gender = gender,
         profileImage = profileimage,
         following = following,
-        followerCount = followercount
+        followerCount = followercount?:0
     )
 }

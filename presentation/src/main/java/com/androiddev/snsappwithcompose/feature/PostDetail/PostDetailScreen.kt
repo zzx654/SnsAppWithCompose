@@ -709,7 +709,7 @@ fun ReplyRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:I
     )
 }
 @Composable
-fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean,context: Context,imageLoader: ImageLoader) {
+fun ProfileImage(modifier:Modifier = Modifier.size(42.dp),profileImage: String?, gender: String, anonymous: Boolean,context: Context,imageLoader: ImageLoader) {
     val sizeDp = 42.dp
     val sizePx = with(LocalDensity.current) { sizeDp.roundToPx() }
     if (profileImage == null || anonymous) {
@@ -717,8 +717,7 @@ fun ProfileImage(profileImage: String?, gender: String, anonymous: Boolean,conte
             contentScale = ContentScale.Crop,
             painter = painterResource(id = if (gender == getString(context,R.string.male)) R.drawable.person_male else if (gender == getString(context,R.string.female)) R.drawable.person_female else R.drawable.person_none),
             contentDescription = null,
-            modifier = Modifier
-                .size(42.dp)
+            modifier = modifier
                 .clip(CircleShape) // clip to the circle shape
                 .border(1.dp, profileBorder, CircleShape)
         )

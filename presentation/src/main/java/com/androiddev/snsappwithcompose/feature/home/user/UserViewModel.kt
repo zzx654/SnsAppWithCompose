@@ -62,6 +62,7 @@ class UserViewModel @Inject constructor(
             extractItems = { response -> response.users }
         )
     fun onEvent(event:UserEvent) {
+        userPaginator.loadNextItems(refresh = false)
         when(event) {
             is UserEvent.TypeNickname-> {
                 _nicknameTextField.value = event.nickname
@@ -74,6 +75,11 @@ class UserViewModel @Inject constructor(
                     _getUsersState.value = getUsersState.value.copy(
                         users = listOf()
                     )
+                }
+            }
+            is UserEvent.LoadNext -> {
+                viewModelScope.launch {
+                    userPaginator.loadNextItems(refresh = false)
                 }
             }
         }

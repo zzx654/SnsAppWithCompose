@@ -12,13 +12,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.TabPager
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.feature.home.nearposts.NearPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.newPosts.NewPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.feature.home.user.SearchUserScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.record.RecordEvent
 
 @Composable
@@ -42,14 +45,14 @@ fun HomeScreen(navController: NavController, tagViewModel: TagViewModel) {
             }
         )
     }
-    val tabs = listOf("근처", "인기", "새로운","팔로우","태그","사람")
+    val tabs = listOf(getString(context, R.string.near), getString(context, R.string.hot), getString(context, R.string.recent),getString(context, R.string.follow),getString(context, R.string.tag),getString(context, R.string.user))
     val pages = listOf<@Composable () -> Unit>(
         {NearPostsScreen(navController)},
         {PlaceholderScreen("인기")},
         {NewPostsScreen(navController)},
         {PlaceholderScreen("팔로우")},
         {TagScreen(navController, tagViewModel)},
-        {PlaceholderScreen("사람")}
+        { SearchUserScreen(navController) }
     )
     Box(
         modifier = Modifier.fillMaxSize()
@@ -57,7 +60,7 @@ fun HomeScreen(navController: NavController, tagViewModel: TagViewModel) {
         TabPager(
             tabs = tabs,
             pages = pages,
-            startIndex = tabs.indexOf("새로운")
+            startIndex = tabs.indexOf(getString(context, R.string.recent))
         )
     }
 }
