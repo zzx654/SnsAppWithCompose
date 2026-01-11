@@ -1,6 +1,7 @@
 package com.androiddev.data.remote.api.user
 
 import com.androiddev.data.remote.BaseApiResponse
+import com.androiddev.data.remote.dto.ToggleFollowDto
 import com.androiddev.data.remote.dto.UsersDto
 import retrofit2.Response
 import retrofit2.http.Field
@@ -14,4 +15,10 @@ interface UserApi {
         @Field("nickname")nickname: String,
         @Field("lastuserid")lastuserid:Int?
     ): Response<BaseApiResponse<UsersDto>>
+
+    @FormUrlEncoded
+    @POST("/toggleFolllowUser")
+    suspend fun toggleFollowUser(
+        @Field("userid")userid: Int,
+    ): Response<BaseApiResponse<ToggleFollowDto>>
 }
