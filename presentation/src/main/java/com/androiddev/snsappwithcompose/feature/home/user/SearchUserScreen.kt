@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +24,8 @@ import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.SearchTextField
+import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun SearchUserScreen(
@@ -29,7 +34,23 @@ fun SearchUserScreen(
 ) {
     val context = LocalContext.current
     val state = viewModel.getUsersState.value
-
+    val listState = rememberLazyListState()
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .distinctUntilChanged()
+            .collect { lastVisibleIndex ->
+                val totalItemsCount = listState.layoutInfo.totalItemsCount
+                if (
+                    totalItemsCount!=0 &&
+                    lastVisibleIndex != null &&
+                    lastVisibleIndex >= totalItemsCount-1 &&
+                    !state.isLoading &&
+                    !state.endReached
+                ) {
+                    viewModel.onEvent(UserEvent.LoadNext)
+                }
+            }
+    }
     Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally) {
         // 상단 고정 검색창
         SearchTextField(
@@ -41,21 +62,20 @@ fun SearchUserScreen(
             hint = getString(context, R.string.searchtag_hint)
         )
 
-        // LazyColumn: 남은 공간을 채우면서 스크롤 가능
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             items(state.users.size) { index ->
-                if(index >= state.users.size - 1 && !state.endReached && !state.isLoading) {
-                    viewModel.onEvent(UserEvent.LoadNext)
-                }
+                val followUserStatus = viewModel.followUserStatusMap[state.users[index].userId]?: false
                 UserItem(
                     user = state.users[index],
+                    following = followUserStatus,
                     onUserClick = {},
-                    onFollowClick = {}
+                    onFollowClick = { viewModel.onEvent(UserEvent.ToggleFollowUser(state.users[index].userId))}
                 )
 
                 HorizontalDivider(
@@ -64,15 +84,15 @@ fun SearchUserScreen(
                     color = Color.LightGray
                 )
             }
-            item {
-                if(state.isLoading && state.users.isNotEmpty()) {
+            if(state.isLoading && state.users.isNotEmpty()) {
+                item {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = Color.Black.copy(alpha = 0.7f))
                     }
                 }
             }

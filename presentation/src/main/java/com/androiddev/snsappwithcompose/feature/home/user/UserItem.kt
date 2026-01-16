@@ -35,6 +35,7 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
 @Composable
 fun UserItem(
     user: User,
+    following:Boolean,
     onUserClick:()->Unit,
     onFollowClick:()->Unit
 ) {
@@ -46,7 +47,7 @@ fun UserItem(
             .build()
     }
     Box(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable { onUserClick() },
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).clickable { onUserClick() },
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -57,7 +58,7 @@ fun UserItem(
         ) {
             ProfileImage(
                 modifier = Modifier.align(Alignment.CenterVertically).size(46.dp),
-                profileImage = user.profileImage ?: "",
+                profileImage = user.profileImage,
                 gender = user.gender,
                 anonymous = false,
                 context = context,
@@ -88,7 +89,7 @@ fun UserItem(
             }
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                imageVector = if (user.following == 1) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                imageVector = if (following) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = null,
                 modifier = Modifier.align(Alignment.CenterVertically).clickable { onFollowClick() },
                 tint = Color.Gray

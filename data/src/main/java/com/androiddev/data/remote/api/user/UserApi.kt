@@ -17,7 +17,7 @@ interface UserApi {
     ): Response<BaseApiResponse<UsersDto>>
 
     @FormUrlEncoded
-    @POST("/toggleFolllowUser")
+    @POST("/toggleFollowUser")
     suspend fun toggleFollowUser(
         @Field("userid")userid: Int,
     ): Response<BaseApiResponse<ToggleFollowDto>>
