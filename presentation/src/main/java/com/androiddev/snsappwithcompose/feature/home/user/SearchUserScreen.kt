@@ -1,5 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.home.user
 
+import android.view.Gravity
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -24,7 +25,9 @@ import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.SearchTextField
+import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
@@ -51,6 +54,26 @@ fun SearchUserScreen(
                 }
             }
     }
+    LaunchedEffect(Unit) {
+
+        viewModel.eventFlow.collectLatest { event ->
+            when(event){
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                        it.setGravity(Gravity.BOTTOM, 0, 130)
+                        it.show()
+                    }
+                }
+                is UiEvent.navigate -> {
+                    navController.navigate(event.screen)
+                }
+                is UiEvent.popBackStack -> {
+                    navController.popBackStack()
+                }
+                else -> null
+            }
+        }
+    }
     Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally) {
         // 상단 고정 검색창
         SearchTextField(
@@ -74,7 +97,7 @@ fun SearchUserScreen(
                 UserItem(
                     user = state.users[index],
                     following = followUserStatus,
-                    onUserClick = {},
+                    onUserClick = { viewModel.onEvent(UserEvent.SelectUser(state.users[index].userId))},
                     onFollowClick = { viewModel.onEvent(UserEvent.ToggleFollowUser(state.users[index].userId))}
                 )
 

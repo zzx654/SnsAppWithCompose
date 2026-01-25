@@ -26,6 +26,8 @@ import com.androiddev.snsappwithcompose.feature.home.tagposts.TagPostScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostScreen
+import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileScreen
+import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 
 @RequiresApi(Build.VERSION_CODES.N)
 @SuppressLint("UnrememberedGetBackStackEntry", "NewApi")
@@ -113,6 +115,17 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
                 navController = navController,
                 navBackStackEntry = it,
             )
+        }
+        composable<Screen.UserProfileScreen> {
+            val userProfileViewModel: UserProfileViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+            BackHandler(true) {
+            }
+            UserProfileScreen(
+                userProfileViewModel = userProfileViewModel,
+                navController = navController,
+                navBackStackEntry = it,
+            )
+
         }
         composable<Screen.ReplyScreen>(
             typeMap = commentTypeMap
