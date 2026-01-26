@@ -29,6 +29,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKEPOST
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.REPLY
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 object NotificationEventBus {
     private val _events = MutableSharedFlow<NotificationItem>()
@@ -50,6 +52,8 @@ class NotificationViewModel @Inject constructor(
     private val notificationUseCases: NotificationUseCases,
     @ApplicationContext context: Context,
 ) : BaseViewModel(context) {
+    private val _pending = MutableStateFlow<PendingNotification?>(null)
+    val pending: StateFlow<PendingNotification?> = _pending
     private val _getNotificationsState = mutableStateOf(GetNotificationsState())
     val getNotificationsState: State<GetNotificationsState>
         get() = _getNotificationsState
@@ -105,7 +109,9 @@ class NotificationViewModel @Inject constructor(
             },
             extractItems = { response -> response.notifications }
         )
-
+    // 로그인 완료 여부
+    var isLoginReady: Boolean = false
+        private set
     init {
         viewModelScope.launch {
             NotificationEventBus.events.collect {
@@ -116,7 +122,17 @@ class NotificationViewModel @Inject constructor(
             notificationPaginator.loadNextItems(refresh = true)
         }
     }
-
+    // Pending 알림 저장
+    fun setPending(pendingNotification: PendingNotification) {
+        _pending.value = pendingNotification
+    }
+    // Pending 알림 소비 (navigate 완료 후)
+    fun consume() {
+        _pending.value = null
+    }
+    fun markLoginReady() {
+        isLoginReady = true
+    }
     /** FCM 도착 시 호출 */
     fun addNotification(notification:NotificationItem) {
         if(getNotificationsState.value.notifications.none{ it.id == notification.id }) {
