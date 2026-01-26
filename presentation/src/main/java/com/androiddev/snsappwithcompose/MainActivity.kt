@@ -2,6 +2,7 @@ package com.androiddev.snsappwithcompose
 
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,6 +29,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
+import com.androiddev.snsappwithcompose.feature.notification.PendingNotification
+import com.androiddev.snsappwithcompose.service.fcm.FcmKeys
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -38,6 +41,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        // createNotificationChannel(this)
+        handleNotificationIntent(intent)
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         // 권한 요청 콜백 등록
@@ -83,6 +87,20 @@ class MainActivity : ComponentActivity() {
             }
         }
         // Android 13 이상이면 알림 권한 요청
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleNotificationIntent(intent)
+    }
+    private fun handleNotificationIntent(intent: Intent) {
+        val type = intent.getStringExtra(FcmKeys.TYPE)
+        type?.let {
+            val pending = PendingNotification(
+                type = type,
+                extraJson = intent.getStringExtra(FcmKeys.EXTRA_JSON)?:""
+            )
+            notificationViewModel.setPending(pending)
+        }
     }
 
 }
