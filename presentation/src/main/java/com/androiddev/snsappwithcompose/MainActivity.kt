@@ -1,31 +1,24 @@
 package com.androiddev.snsappwithcompose
 
-import android.Manifest
-import android.Manifest.permission.POST_NOTIFICATIONS
+
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.LocalOverscrollFactory
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
@@ -33,17 +26,12 @@ import com.androiddev.snsappwithcompose.common.navigation.component.Navigation
 import com.androiddev.snsappwithcompose.ui.theme.SnsAppWithComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import com.androiddev.snsappwithcompose.common.util.NotificationHelper
-import com.androiddev.snsappwithcompose.common.util.createNotificationChannel
-import org.w3c.dom.Text
+import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val notificationViewModel: NotificationViewModel by viewModels()
 
     @SuppressLint("RestrictedApi", "UnusedMaterial3ScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.N)
@@ -85,6 +73,7 @@ class MainActivity : ComponentActivity() {
                         LocalOverscrollFactory provides null
                     ) {
                         Navigation(
+                            notificationViewModel = notificationViewModel,
                             navController = navController,
                             modifier = Modifier.fillMaxSize()
                         )

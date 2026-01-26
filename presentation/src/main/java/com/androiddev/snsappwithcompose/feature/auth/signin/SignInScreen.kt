@@ -51,6 +51,7 @@ import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.addFocusCleaner
+import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -58,7 +59,8 @@ import kotlinx.coroutines.flow.collectLatest
 fun SignInScreen(
     navController: NavController,
     currentUserViewModel: CurrentUserViewModel,
-    signinViewModel: SignInViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+    signinViewModel: SignInViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    notificationViewModel: NotificationViewModel
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -80,6 +82,7 @@ fun SignInScreen(
                     event.userId?.let {
                         currentUserViewModel.setUserId(it)
                     }
+                    if(event.screen is Screen.MainScreen) notificationViewModel.markLoginReady()
                     navController.navigate(event.screen)
                 }
                 else -> null

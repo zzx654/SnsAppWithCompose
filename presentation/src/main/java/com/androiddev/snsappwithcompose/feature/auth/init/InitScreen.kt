@@ -22,14 +22,17 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingProgressIndicator
+import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun InitScreen(
     navController: NavController,
     viewModel: SignInWithTokenViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
-    currentUserViewModel: CurrentUserViewModel
+    currentUserViewModel: CurrentUserViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
@@ -45,6 +48,8 @@ fun InitScreen(
                     event.userId?.let {
                         currentUserViewModel.setUserId(it)
                     }
+                    //홈화면으로 이동(로그인 완료)시 mark login
+                    if(event.screen is Screen.MainScreen) notificationViewModel.markLoginReady()
                     navController.navigate(event.screen)
                 }
 

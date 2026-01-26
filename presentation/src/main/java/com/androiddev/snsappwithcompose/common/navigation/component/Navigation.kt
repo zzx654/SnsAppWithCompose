@@ -32,10 +32,9 @@ import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 @RequiresApi(Build.VERSION_CODES.N)
 @SuppressLint("UnrememberedGetBackStackEntry", "NewApi")
 @Composable
-fun Navigation(navController: NavHostController,modifier:Modifier) {
+fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHostController,modifier:Modifier) {
 
     val currentUserViewModel: CurrentUserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
-    val notificationViewModel: NotificationViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
     NavHost(
         modifier = modifier,navController = navController,
         startDestination = Screen.InitScreen
@@ -44,7 +43,7 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             //여기
             BackHandler(true) {
             }
-            InitScreen(navController = navController,currentUserViewModel = currentUserViewModel)
+            InitScreen(navController = navController,currentUserViewModel = currentUserViewModel, notificationViewModel = notificationViewModel)
         }
         composable<Screen.MainScreen> {
             val tagViewModel: TagViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()// 그냥 생성
@@ -62,7 +61,7 @@ fun Navigation(navController: NavHostController,modifier:Modifier) {
             //여기
             BackHandler(true) {
             }
-            SignInScreen(navController = navController,currentUserViewModel = currentUserViewModel)
+            SignInScreen(navController = navController,currentUserViewModel = currentUserViewModel,notificationViewModel = notificationViewModel)
         }
         composable<Screen.AuthPhoneScreen> {
             BackHandler(true) {
