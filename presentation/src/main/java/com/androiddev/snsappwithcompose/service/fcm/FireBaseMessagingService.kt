@@ -23,6 +23,7 @@ import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFI
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_FOLLOW
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_LIKE
 import com.androiddev.snsappwithcompose.common.util.NotificationHelper
+import com.androiddev.snsappwithcompose.common.util.isAppInForeground
 import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -70,8 +71,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+            if(!isAppInForeground())
+                showNotification(id.toInt(),title, body, type, pendingIntent)
 
-            sendNotification(id.toInt(),title, body, type, pendingIntent)
             val notificationItem = NotificationItem(
                 id = id,
                 type = type,
@@ -92,7 +94,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
 
-    private fun sendNotification(id:Int,title: String, messageBody: String, type:String,pendingIntent:PendingIntent) {
+    private fun showNotification(id:Int,title: String, messageBody: String, type:String,pendingIntent:PendingIntent) {
 
         Log.d("MyFirebaseMessagingService", "Notification received: $title,")
         // Android 13+ 알림 권한 체크
