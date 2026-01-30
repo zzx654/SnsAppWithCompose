@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,13 +29,19 @@ import com.androiddev.snsappwithcompose.feature.home.user.SearchUserScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.record.RecordEvent
 
 @Composable
-fun HomeScreen(navController: NavController, tagViewModel: TagViewModel) {
+fun HomeScreen(navController: NavController, tagViewModel: TagViewModel,onHomeReady: (Boolean) -> Unit) {
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
     }
 
     val context = LocalContext.current
+    var isInitialTabReady by remember { mutableStateOf(false) }
+    LaunchedEffect(isInitialTabReady) {
+        if (isInitialTabReady) {
+            onHomeReady(true)
+        }
+    }
     LaunchedEffect(key1 = true) {
         val permissions = arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -49,7 +59,12 @@ fun HomeScreen(navController: NavController, tagViewModel: TagViewModel) {
     val pages = listOf<@Composable () -> Unit>(
         {NearPostsScreen(navController)},
         {PlaceholderScreen("인기")},
-        {NewPostsScreen(navController)},
+        {
+            NewPostsScreen(
+                navController = navController,
+                onLoaded = { isInitialTabReady = true }
+            )
+        },
         {PlaceholderScreen("팔로우")},
         {TagScreen(navController, tagViewModel)},
         { SearchUserScreen(navController) }

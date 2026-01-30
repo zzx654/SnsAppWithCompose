@@ -58,9 +58,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             val extra = Gson().fromJson(extraJson, NotificationExtra::class.java)
 
             val intent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra(FcmKeys.NOTIFICATION_ID,id)
                 putExtra(FcmKeys.TYPE, type)
-                putExtra(FcmKeys.EXTRA_JSON,extraJson)
+                putExtra(FcmKeys.EXTRA_JSON, extraJson)
             }
 
             val pendingIntent = PendingIntent.getActivity(
@@ -70,7 +71,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            sendNotification(title, body, type, pendingIntent)
+            sendNotification(id.toInt(),title, body, type, pendingIntent)
             val notificationItem = NotificationItem(
                 id = id,
                 type = type,
@@ -91,7 +92,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
 
-    private fun sendNotification(title: String, messageBody: String, type:String,pendingIntent:PendingIntent) {
+    private fun sendNotification(id:Int,title: String, messageBody: String, type:String,pendingIntent:PendingIntent) {
 
         Log.d("MyFirebaseMessagingService", "Notification received: $title,")
         // Android 13+ 알림 권한 체크
@@ -106,12 +107,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             NotificationType.COMMENT,NotificationType.REPLY -> CHANNEL_ID_COMMENT
             NotificationType.FOLLOW -> CHANNEL_ID_FOLLOW
             else -> ""
-        }
-        val notificationChannelId = when(type) {
-            NotificationType.LIKEPOST,NotificationType.LIKECOMMENT -> NOTIFICATION_ID_LIKE
-            NotificationType.COMMENT,NotificationType.REPLY -> NOTIFICATION_ID_COMMENT
-            NotificationType.FOLLOW -> NOTIFICATION_ID_FOLLOW
-            else -> 0
         }
         val channelName = when(type) {
             NotificationType.LIKEPOST, NotificationType.LIKECOMMENT -> CHANNEL_NAME_LIKE
@@ -131,7 +126,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             contentText = messageBody,
             contentIntent = pendingIntent
         )
-        NotificationManagerCompat.from(this).notify(notificationChannelId,notification)
+        NotificationManagerCompat.from(this).notify(id,notification)
 
     }
 }

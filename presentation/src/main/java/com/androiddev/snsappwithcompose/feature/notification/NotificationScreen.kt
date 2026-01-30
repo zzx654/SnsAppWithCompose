@@ -58,25 +58,7 @@ fun NotificationScreen(
             viewModel.onEvent(NotificationEvent.RefreshNotifictions)
         }
     )
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collectLatest { event ->
-            when(event){
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
-                }
-                is UiEvent.navigate -> {
-                    navController.navigate(event.screen)
-                }
-                is UiEvent.popBackStack -> {
-                    navController.popBackStack()
-                }
-                else -> null
-            }
-        }
-    }
+
     LoadingDialog {
         viewModel.isLoading.value
     }

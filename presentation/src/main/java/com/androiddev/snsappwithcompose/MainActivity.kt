@@ -96,6 +96,7 @@ class MainActivity : ComponentActivity() {
         val type = intent.getStringExtra(FcmKeys.TYPE)
         type?.let {
             val pending = PendingNotification(
+                notificationId = intent.getLongExtra(FcmKeys.NOTIFICATION_ID,0),
                 type = type,
                 extraJson = intent.getStringExtra(FcmKeys.EXTRA_JSON)?:""
             )

@@ -82,8 +82,7 @@ fun SignInScreen(
                     event.userId?.let {
                         currentUserViewModel.setUserId(it)
                     }
-                    if(event.screen is Screen.MainScreen) notificationViewModel.markLoginReady()
-                    navController.navigate(event.screen)
+                    UiEvent.navigate(event.screen)
                 }
                 else -> null
             }

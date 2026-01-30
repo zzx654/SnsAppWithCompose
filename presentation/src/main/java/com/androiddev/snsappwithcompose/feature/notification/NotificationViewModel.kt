@@ -8,6 +8,7 @@ import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.DeleteReason
 import com.androiddev.domain.model.NotificationActionResult
+import com.androiddev.domain.model.NotificationExtra
 import com.androiddev.domain.model.NotificationItem
 import com.androiddev.domain.model.Notifications
 import com.androiddev.domain.use_case.notification.NotificationUseCases
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKEPOST
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.REPLY
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -109,9 +111,7 @@ class NotificationViewModel @Inject constructor(
             },
             extractItems = { response -> response.notifications }
         )
-    // 로그인 완료 여부
-    var isLoginReady: Boolean = false
-        private set
+
     init {
         viewModelScope.launch {
             NotificationEventBus.events.collect {
@@ -127,11 +127,15 @@ class NotificationViewModel @Inject constructor(
         _pending.value = pendingNotification
     }
     // Pending 알림 소비 (navigate 완료 후)
-    fun consume() {
-        _pending.value = null
-    }
-    fun markLoginReady() {
-        isLoginReady = true
+    fun consumePending() {
+        pending.value?.let { pend ->
+            readNotification(
+                notificationId = pend.notificationId,
+                type = pend.type,
+                extraJson = Gson().fromJson(pend.extraJson, NotificationExtra::class.java)
+            )
+            _pending.value = null
+        }
     }
     /** FCM 도착 시 호출 */
     fun addNotification(notification:NotificationItem) {
@@ -161,73 +165,80 @@ class NotificationViewModel @Inject constructor(
                 showDeleteNotificationAlert()
             }
             is NotificationEvent.ReadNotification -> {
-                viewModelScope.launch {
-                    notificationUseCases.readNotification(event.notification.id).collect { result ->
+                readNotification(
+                    notificationId = event.notification.id,
+                    type = event.notification.type,
+                    extraJson = event.notification.extrajson
+                )
+            }
+        }
+    }
+    private fun readNotification(notificationId:Long,type:String,extraJson:NotificationExtra) {
+        viewModelScope.launch {
+            notificationUseCases.readNotification(notificationId).collect { result ->
 
-                        handleResource(
-                            resource = result,
-                            onSuccess = { result ->
-                                event.notification.id
-                                _getNotificationsState.value = getNotificationsState.value.copy(
-                                    notifications = getNotificationsState.value.notifications.map { notification ->
-                                        if(notification.id == event.notification.id) {
-                                            notification.copy(isRead = true)
-                                        } else {
-                                            notification
-                                        }
-                                    }
-                                )
-                                result.unreadCount?.let {
-                                    if(it == 0) _hasNewNotification.value = false
+                handleResource(
+                    resource = result,
+                    onSuccess = { result ->
+                        _getNotificationsState.value = getNotificationsState.value.copy(
+                            notifications = getNotificationsState.value.notifications.map { notification ->
+                                if(notification.id == notificationId) {
+                                    notification.copy(isRead = true)
+                                } else {
+                                    notification
                                 }
-                                when(result.notificationActionResult) {
-                                    is NotificationActionResult.Navigate -> {
-                                        val commentId = event.notification.extrajson.commentId
-                                        val postId = event.notification.extrajson.postId
-                                        when(event.notification.type) {
-                                            LIKEPOST-> { //게시물 페이지
-                                                postId?.let { id ->
-                                                    Screen.PostDetailScreen(
-                                                        id
-                                                    )
-                                                }?.let { screen -> UiEvent.navigate(screen) }
-                                                    ?.let { setEvent(it) }
-
-                                            }
-                                            COMMENT,REPLY,LIKECOMMENT -> { //게시물페이지
-                                                if(postId!=null&&commentId!=null) {
-                                                    setEvent(UiEvent.navigate(
-                                                        Screen.PostDetailScreen(
-                                                            postId = postId,
-                                                            notificationCommentId = commentId
-                                                        )
-                                                    ))
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                    is NotificationActionResult.TargetDeleted -> {
-                                        setEvent(UiEvent.ShowToast(
-                                            when ((result.notificationActionResult as NotificationActionResult.TargetDeleted).reason) {
-                                                DeleteReason.POST_DELETED -> "삭제된 게시물입니다"
-                                                DeleteReason.COMMENT_DELETED -> "삭제된 댓글입니다"
-                                                DeleteReason.REPLY_DELETED -> "삭제된 답글입니다"
-                                                else -> "이미 삭제된 알림입니다"
-                                            }
-                                        ))
-
-                                    }
-                                }
-                               //navigate(post(게시물,댓글),reply,profile)
                             }
                         )
+                        result.unreadCount?.let {
+                            if(it == 0) _hasNewNotification.value = false
+                        }
+                        when(result.notificationActionResult) {
+                            is NotificationActionResult.Navigate -> {
+                                val commentId = extraJson.commentId
+                                val postId = extraJson.postId
+                                when(type) {
+                                    LIKEPOST-> { //게시물 페이지
+                                        postId?.let { id ->
+                                            Screen.PostDetailScreen(
+                                                id
+                                            )
+                                        }?.let { screen -> UiEvent.navigate(screen) }
+                                            ?.let { setEvent(it) }
 
+                                    }
+                                    COMMENT,REPLY,LIKECOMMENT -> { //게시물페이지
+                                        if(postId!=null&&commentId!=null) {
+                                            setEvent(UiEvent.navigate(
+                                                Screen.PostDetailScreen(
+                                                    postId = postId,
+                                                    notificationCommentId = commentId
+                                                )
+                                            ))
+                                        }
+                                    }
+                                }
+
+                            }
+                            is NotificationActionResult.TargetDeleted -> {
+                                setEvent(UiEvent.ShowToast(
+                                    when ((result.notificationActionResult as NotificationActionResult.TargetDeleted).reason) {
+                                        DeleteReason.POST_DELETED -> "삭제된 게시물입니다"
+                                        DeleteReason.COMMENT_DELETED -> "삭제된 댓글입니다"
+                                        DeleteReason.REPLY_DELETED -> "삭제된 답글입니다"
+                                        else -> "이미 삭제된 알림입니다"
+                                    }
+                                ))
+
+                            }
+                        }
+                        //navigate(post(게시물,댓글),reply,profile)
                     }
-                }
+                )
 
             }
         }
+
+
     }
     private fun showReadAllNotificationAlert() {
         _alertDialogState.value = AlertDialogState(

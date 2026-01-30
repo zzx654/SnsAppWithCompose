@@ -27,6 +27,10 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.androiddev.snsappwithcompose.common.util.MainScreenPendingHandler
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
 import com.androiddev.snsappwithcompose.feature.notification.NotificationScreen
@@ -42,7 +46,11 @@ fun MainScaffold(
 ) {
     val tabNavController = rememberNavController()
     val hasNewNoti by notificationViewModel.hasNewNotification
-
+    var isHomeReady by remember { mutableStateOf(false) }
+    MainScreenPendingHandler(
+        notificationViewModel = notificationViewModel,
+        isPostsLoaded = isHomeReady
+    )
     Scaffold(
         bottomBar = {
             Column {
@@ -84,7 +92,11 @@ fun MainScaffold(
             composable<Screen.HomeScreen> {
                 BackHandler(true) {
                 }
-                HomeScreen(navController = rootNavController, tagViewModel = tagViewModel)
+                HomeScreen(
+                    navController = rootNavController,
+                    tagViewModel = tagViewModel,
+                    onHomeReady = { isHomeReady = it }
+                )
             }
             composable<Screen.NotificationScreen> {
                 BackHandler(true) {

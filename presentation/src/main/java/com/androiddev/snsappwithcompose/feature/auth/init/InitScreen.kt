@@ -48,8 +48,6 @@ fun InitScreen(
                     event.userId?.let {
                         currentUserViewModel.setUserId(it)
                     }
-                    //홈화면으로 이동(로그인 완료)시 mark login
-                    if(event.screen is Screen.MainScreen) notificationViewModel.markLoginReady()
                     navController.navigate(event.screen)
                 }
 
