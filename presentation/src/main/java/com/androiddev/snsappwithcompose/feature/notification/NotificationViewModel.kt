@@ -19,6 +19,7 @@ import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.COMMENT
+import com.androiddev.snsappwithcompose.feature.notification.NotificationType.FOLLOW
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKECOMMENT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -196,6 +197,7 @@ class NotificationViewModel @Inject constructor(
                             is NotificationActionResult.Navigate -> {
                                 val commentId = extraJson.commentId
                                 val postId = extraJson.postId
+                                val followerId = extraJson.followerId
                                 when(type) {
                                     LIKEPOST-> { //게시물 페이지
                                         postId?.let { id ->
@@ -215,6 +217,16 @@ class NotificationViewModel @Inject constructor(
                                                 )
                                             ))
                                         }
+                                    }
+                                    FOLLOW -> {
+                                        followerId?.let {
+                                            setEvent(
+                                                UiEvent.navigate(
+                                                    Screen.UserProfileScreen(it)
+                                                )
+                                            )
+                                        }
+
                                     }
                                 }
 
