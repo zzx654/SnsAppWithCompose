@@ -13,7 +13,7 @@ import retrofit2.http.Part
 
 interface CreateProfileApi {
     @Multipart
-    @POST("/createProfile")
+    @POST("auth/createProfile")
     suspend fun createProfile(
         @Part imageFile: MultipartBody.Part?,
         @Part("nickname")nickname: RequestBody,
@@ -21,7 +21,7 @@ interface CreateProfileApi {
         @Part("gender")gender: RequestBody
     ): Response<BaseApiResponse<Unit>>
     @FormUrlEncoded
-    @POST("/checkNickname")
+    @POST("auth/checkNickname")
     suspend fun checkNickname(
         @Field("nickname")nickname: String
     ): Response<BaseApiResponse<ValidationResultDto>>

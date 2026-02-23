@@ -8,7 +8,7 @@ import retrofit2.http.POST
 
 interface FcmApi {
     @FormUrlEncoded
-    @POST("/fcmToken")
+    @POST("fcm/fcmToken")
     suspend fun sendFcmToken(
         @Field("fcmtoken") fcmtoken: String
     ): Response<BaseApiResponse<Unit>>

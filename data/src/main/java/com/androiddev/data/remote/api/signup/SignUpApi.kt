@@ -11,12 +11,12 @@ import retrofit2.http.POST
 
 interface SignUpApi {
     @FormUrlEncoded
-    @POST("/requestEmailAuthCode")
+    @POST("auth/requestEmailAuthCode")
     suspend fun requestAuthCode(
         @Field("email")email: String
     ): Response<BaseApiResponse<ValidationResultDto>>
     @FormUrlEncoded
-    @POST("/emailSignUp")
+    @POST("auth/emailSignUp")
     suspend fun emailSignUp(
         @Field("account")account: String,
         @Field("password")password: String,
@@ -24,7 +24,7 @@ interface SignUpApi {
         @Field("authCode")authCode: String
     ): Response<BaseApiResponse<AuthCodeResultDto>>
     @FormUrlEncoded
-    @POST("/socialSignUp")
+    @POST("auth/socialSignUp")
     suspend fun socialSignUp(
         @Field("platform")platform: String,
         @Field("account")account: String,

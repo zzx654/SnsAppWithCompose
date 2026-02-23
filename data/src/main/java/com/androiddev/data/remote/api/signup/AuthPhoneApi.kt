@@ -10,12 +10,12 @@ import retrofit2.http.POST
 
 interface AuthPhoneApi {
     @FormUrlEncoded
-    @POST("/requestPhoneAuthCode")
+    @POST("auth/requestPhoneAuthCode")
     suspend fun requestAuthCode(
         @Field("phoneNumber")phoneNumber: String
     ): Response<BaseApiResponse<ValidationResultDto>>
     @FormUrlEncoded
-    @POST("/authenticateCode")
+    @POST("auth/authenticateCode")
     suspend fun authenticateCode(
         @Field("phoneNumber")phoneNumber: String,
         @Field("authCode")authCode: String

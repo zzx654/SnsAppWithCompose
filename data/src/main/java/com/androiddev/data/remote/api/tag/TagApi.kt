@@ -13,7 +13,7 @@ interface TagApi {
     suspend fun getTags(): Response<BaseApiResponse<TagsDto>>
 
     @FormUrlEncoded
-    @POST("/searchTag")
+    @POST("tag/searchTag")
     suspend fun searchTag(
         @Field("tag")tag: String,
     ): Response<BaseApiResponse<SearchedTagsDto>>

@@ -11,7 +11,7 @@ import retrofit2.http.Part
 
 interface UploadPostApi {
     @Multipart
-    @POST("/uploadPost")
+    @POST("post/uploadPost")
     suspend fun uploadPost(
         @Part ("anonymousNick") anonymousNick: RequestBody?,
         @Part ("tags") tags: RequestBody?,

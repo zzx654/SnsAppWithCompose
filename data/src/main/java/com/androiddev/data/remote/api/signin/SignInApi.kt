@@ -10,21 +10,21 @@ import retrofit2.http.POST
 
 interface SignInApi {
     @FormUrlEncoded
-    @POST("/emailSignIn")
+    @POST("auth/emailSignIn")
     suspend fun emailSignIn(
         @Field("account")account: String,
         @Field("password")password: String,
         @Field("fcmtoken")fcmtoken: String
     ): Response<BaseApiResponse<SigninResultDto>>
     @FormUrlEncoded
-    @POST("/socialSign")
+    @POST("auth/socialSign")
     suspend fun socialSignIn(
         @Field("platform")platform: String,
         @Field("account")account: String,
         @Field("fcmtoken")fcmtoken: String
     ): Response<BaseApiResponse<SigninResultDto>>
 
-    @POST("/signInWithToken")
+    @POST("auth/signInWithToken")
     suspend fun signInWithToken(): Response<BaseApiResponse<SigninWithTokenResultDto>>
 
 }
