@@ -37,7 +37,7 @@ interface GetPostsApi {
     ): Response<BaseApiResponse<GetPostsDto>>
 
     @FormUrlEncoded
-    @POST("/getNewPosts")
+    @POST("postlist/getNewPosts")
     suspend fun getNewPosts(
         @Field("postid")postid: Int?,
         @Field("postdate")postdate: String?,
