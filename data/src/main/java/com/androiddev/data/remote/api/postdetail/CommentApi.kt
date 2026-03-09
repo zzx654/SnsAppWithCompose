@@ -32,21 +32,21 @@ interface CommentApi {
         @Field("commentid")commentid: Int?,
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
-    @POST("/getComments")
+    @POST("comment/getComments")
     suspend fun getComments(
         @Field("postid")postid: Int,
         @Field("commentid")commentid: Int?,
         @Field("commentdate")commentdate : String?
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
-    @POST("/getPopularComments")
+    @POST("comment/getPopularComments")
     suspend fun getPopularComments(
         @Field("postid")postid: Int,
         @Field("commentid")commentid: Int?,
         @Field("score")score : Int
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
-    @POST("/postComment")
+    @POST("comment/postComment")
     suspend fun postComments(
         @Field("postid")postid: Int,
         @Field("text")text: String,
@@ -54,13 +54,13 @@ interface CommentApi {
     ): Response<BaseApiResponse<CommentsDto>>
 
     @FormUrlEncoded
-    @POST("/toggleLikeComment")
+    @POST("comment/toggleLikeComment")
     suspend fun toggleLikeComment(
         @Field("commentid")commentid: Int,
     ): Response<BaseApiResponse<ToggleLikeDto>>
 
     @FormUrlEncoded
-    @POST("/getNotificationComment")
+    @POST("comment/getNotificationComment")
     suspend fun getNotificationComment(
         @Field("commentid")commentid: Int,
     ): Response<BaseApiResponse<NotificationCommentDto>>

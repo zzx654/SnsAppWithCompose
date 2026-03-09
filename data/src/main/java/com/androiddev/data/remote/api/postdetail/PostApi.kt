@@ -14,7 +14,7 @@ interface PostApi {
         @Field("postid")postid: Int
     ): Response<BaseApiResponse<Unit>>
     @FormUrlEncoded
-    @POST("/getPost")
+    @POST("postdetail/getPost")
     suspend fun getPost(
         @Field("postid")postid: Int,
         @Field("latitude")latitude:Double?,

@@ -12,7 +12,7 @@ import retrofit2.http.POST
 interface ToggleLikePostApi {
 
     @FormUrlEncoded
-    @POST("/toggleLikePost")
+    @POST("postdetail/toggleLikePost")
     suspend fun toggleLikePost(
         @Field("postid")postid: Int,
     ): Response<BaseApiResponse<ToggleLikeDto>>

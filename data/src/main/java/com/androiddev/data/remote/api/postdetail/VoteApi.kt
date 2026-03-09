@@ -9,19 +9,19 @@ import retrofit2.http.POST
 
 interface VoteApi {
     @FormUrlEncoded
-    @POST("/getVoteInfo")
+    @POST("postdetail/getVoteInfo")
     suspend fun getVoteInfo(
         @Field("postid")postid: Int
     ): Response<BaseApiResponse<VoteInfoDto>>
 
     @FormUrlEncoded
-    @POST("/vote")
+    @POST("postdetail/vote")
     suspend fun vote(
         @Field("postid")postid: Int,
         @Field("optionid")optionid: Int
     ): Response<BaseApiResponse<VoteInfoDto>>
     @FormUrlEncoded
-    @POST("/cancelVote")
+    @POST("postdetail/cancelVote")
     suspend fun cancelVote(
         @Field("postid")postid: Int
     ): Response<BaseApiResponse<Unit>>

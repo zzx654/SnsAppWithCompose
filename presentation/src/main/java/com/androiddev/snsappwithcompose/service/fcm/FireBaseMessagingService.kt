@@ -44,6 +44,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
 
+
         // Notification 메시지 제목/본문
 
         remoteMessage.data.isNotEmpty().let {

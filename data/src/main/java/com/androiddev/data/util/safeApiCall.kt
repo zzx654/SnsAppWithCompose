@@ -19,8 +19,10 @@ fun <T, R> safeApiCall(
     try {
         emit(Resource.Loading())
         val response = apiCall()
+
         response.body()?.let { result ->
             val tokenValid = result.isTokenValid ?: true
+
             if (!tokenValid) {
                 // 토큰 처리
                 emit(Resource.TokenExpired<R>()) // 타입 안전!

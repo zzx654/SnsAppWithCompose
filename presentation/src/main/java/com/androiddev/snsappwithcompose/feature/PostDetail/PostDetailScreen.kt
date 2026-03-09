@@ -390,6 +390,7 @@ fun PostDetailScreen(
                                     // AsyncImage(model = images[page], contentDescription = null)
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
+                                            //.data("http://192.168.0.7:3000/image?filename=7FOtkf7xsDihLr8AMYXQe35MX.jpg")
                                             .data(BuildConfig.BASE_URL + images[page])
                                             .build(),
                                         imageLoader = imageLoader,

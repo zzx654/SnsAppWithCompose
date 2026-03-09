@@ -37,6 +37,8 @@ class SignInWithTokenViewModel @Inject constructor(
                     handleResource(
                         resource = result,
                         onSuccess = { data ->
+
+
                             if(data.signInResult) {
 
                                 if(data.profileWritten) {

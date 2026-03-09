@@ -9,7 +9,7 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
 interface TagApi {
-    @POST("/getTags")
+    @POST("tag/getTags")
     suspend fun getTags(): Response<BaseApiResponse<TagsDto>>
 
     @FormUrlEncoded
@@ -19,7 +19,7 @@ interface TagApi {
     ): Response<BaseApiResponse<SearchedTagsDto>>
 
     @FormUrlEncoded
-    @POST("/ToggleFavoriteTag")
+    @POST("tag/ToggleFavoriteTag")
     suspend fun toggleFavoriteTag(
         @Field("tagid")tagid: Int
     ): Response<BaseApiResponse<TagsDto>>

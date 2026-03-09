@@ -82,7 +82,7 @@ fun SignInScreen(
                     event.userId?.let {
                         currentUserViewModel.setUserId(it)
                     }
-                    UiEvent.navigate(event.screen)
+                    navController.navigate(event.screen)
                 }
                 else -> null
             }
