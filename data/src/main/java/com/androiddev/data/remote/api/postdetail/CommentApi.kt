@@ -11,7 +11,7 @@ import retrofit2.http.POST
 
 interface CommentApi {
     @FormUrlEncoded
-    @POST("/postReply")
+    @POST("comment/postReply")
     suspend fun postReply(
         @Field("postid")postid: Int,
         @Field("ref")ref: Int,
@@ -19,14 +19,14 @@ interface CommentApi {
         @Field("anonymousNick")anonymousNick : String?
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
-    @POST("/getReplies")
+    @POST("comment/getReplies")
     suspend fun getReplies(
         @Field("ref")ref: Int,
         @Field("commentid")commentid: Int?,
         @Field("commentdate")commentdate : String?
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
-    @POST("/getSelectedComment")
+    @POST("comment/getSelectedComment")
     suspend fun getSelectedComment(
         @Field("postid")postid: Int,
         @Field("commentid")commentid: Int?,

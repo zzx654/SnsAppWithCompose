@@ -94,6 +94,7 @@ class MainActivity : ComponentActivity() {
     }
     private fun handleNotificationIntent(intent: Intent) {
         val type = intent.getStringExtra(FcmKeys.TYPE)
+
         type?.let {
             val pending = PendingNotification(
                 notificationId = intent.getLongExtra(FcmKeys.NOTIFICATION_ID,0),
@@ -103,5 +104,4 @@ class MainActivity : ComponentActivity() {
             notificationViewModel.setPending(pending)
         }
     }
-
 }

@@ -24,7 +24,7 @@ interface UploadPostApi {
     ): Response<BaseApiResponse<Unit>>
 
     @Multipart
-    @POST("/editPost")
+    @POST("post/editPost")
     suspend fun editPost(
         @Part postid: MultipartBody.Part,
         @Part latitude: MultipartBody.Part?,

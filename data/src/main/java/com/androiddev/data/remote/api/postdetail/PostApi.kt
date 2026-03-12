@@ -9,7 +9,7 @@ import retrofit2.http.POST
 
 interface PostApi {
     @FormUrlEncoded
-    @POST("/deletePost")
+    @POST("postdetail/deletePost")
     suspend fun deletePost(
         @Field("postid")postid: Int
     ): Response<BaseApiResponse<Unit>>
