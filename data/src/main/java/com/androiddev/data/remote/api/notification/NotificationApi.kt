@@ -10,21 +10,21 @@ import retrofit2.http.Field
 
 interface NotificationApi {
     @FormUrlEncoded
-    @POST("/getNotifications")
+    @POST("notification/getNotifications")
     suspend fun getNotifications(
         @Field("notificationid")notificationid: Long?,
         @Field("notificationdate")notificationdate : String?
     ):Response<BaseApiResponse<NotificationsDto>>
 
-    @POST("/readAllNotifications")
+    @POST("notification/readAllNotifications")
     suspend fun readAllNotifications():Response<BaseApiResponse<NotificationsDto>>
 
     @FormUrlEncoded
-    @POST("/readNotification")
+    @POST("notification/readNotification")
     suspend fun readNotification(
         @Field("notificationid")notificationid: Long?,
     ):Response<BaseApiResponse<ReadNotificationDto>>
 
-    @POST("/deleteNotifications")
+    @POST("notification/deleteNotifications")
     suspend fun deleteNotifications():Response<BaseApiResponse<NotificationsDto>>
 }
