@@ -10,14 +10,14 @@ import retrofit2.http.POST
 
 interface UserApi {
     @FormUrlEncoded
-    @POST("/getSearchedUsers")
+    @POST("user/getSearchedUsers")
     suspend fun getSearchedUsers(
         @Field("nickname")nickname: String,
         @Field("lastuserid")lastuserid:Int?
     ): Response<BaseApiResponse<UsersDto>>
 
     @FormUrlEncoded
-    @POST("/toggleFollowUser")
+    @POST("user/toggleFollowUser")
     suspend fun toggleFollowUser(
         @Field("userid")userid: Int,
     ): Response<BaseApiResponse<ToggleFollowDto>>
