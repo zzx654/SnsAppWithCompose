@@ -2,8 +2,6 @@ package com.androiddev.snsappwithcompose.common.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -19,50 +17,42 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun <T>RadioChipButtons(
+    modifier: Modifier = Modifier,
     items: List<T>,
-    selectedValue: () -> Int,
-    onSelect: (T) -> Unit
+    selectedValue: T,
+    onSelect: (T) -> Unit,
+    label: (T) -> String
 ) {
 
-    Box(modifier = Modifier.background(Color.White)) {
-        LazyRow(modifier = Modifier.padding(vertical = 8.dp)) {
-            items(items) { distance ->
 
-                Row(
+        LazyRow(
+            modifier = modifier
+                .padding(vertical = 10.dp)
+        ) {
+            items(items) { item ->
+
+                val isSelected = item == selectedValue
+
+                Text(
+                    text = label(item),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    color = if (isSelected) Color.White else Color.Black,
                     modifier = Modifier
+                        .padding(horizontal = 6.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            if (isSelected) Color.Black
+                            else Color.LightGray.copy(alpha = 0.3f)
+                        )
+                        .clickable { onSelect(item) }
                         .padding(
-                            all = 8.dp,
-                        ),
-                ) {
-                    Text(
-                        text = "${distance}km",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        color = if(distance == selectedValue())Color.White else Color.Black.copy(alpha = 0.8f),
-                        modifier = Modifier
-                            .clip(
-                                shape = RoundedCornerShape(
-                                    size = 12.dp,
-                                ),
-                            )
-                            .clickable {
-                                onSelect(distance)
-                            }
-                            .background(
-                                if (distance == selectedValue()) {
-                                    Color.Black
-                                } else {
-                                    Color.LightGray.copy(alpha = 0.4f)
-                                }
-                            )
-                            .padding(
-                                vertical = 12.dp,
-                                horizontal = 16.dp,
-                            ),
-                    )
-                }
+                            horizontal = 16.dp,
+                            vertical = 10.dp
+                        )
+                )
             }
         }
     }
 
-}
+
