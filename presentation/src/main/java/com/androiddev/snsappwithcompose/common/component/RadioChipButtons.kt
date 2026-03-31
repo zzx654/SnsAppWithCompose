@@ -2,7 +2,9 @@ package com.androiddev.snsappwithcompose.common.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +20,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun <T>RadioChipButtons(
     modifier: Modifier = Modifier,
+    startPadding: Int = 0,
     items: List<T>,
     selectedValue: T,
     onSelect: (T) -> Unit,
@@ -33,13 +36,14 @@ fun <T>RadioChipButtons(
 
                 val isSelected = item == selectedValue
 
+                Spacer(modifier = Modifier.width(startPadding.dp))
+
                 Text(
                     text = label(item),
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp,
                     color = if (isSelected) Color.White else Color.Black,
                     modifier = Modifier
-                        .padding(horizontal = 6.dp)
                         .clip(RoundedCornerShape(50))
                         .background(
                             if (isSelected) Color.Black
@@ -51,6 +55,8 @@ fun <T>RadioChipButtons(
                             vertical = 10.dp
                         )
                 )
+
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }

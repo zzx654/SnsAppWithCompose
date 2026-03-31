@@ -710,7 +710,7 @@ fun ReplyRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:I
     )
 }
 @Composable
-fun ProfileImage(modifier:Modifier = Modifier.size(42.dp),profileImage: String?, gender: String, anonymous: Boolean,context: Context,imageLoader: ImageLoader) {
+fun ProfileImage(modifier:Modifier = Modifier.size(42.dp),profileImage: String?, gender: String, anonymous: Boolean = false,context: Context,imageLoader: ImageLoader) {
     val sizeDp = 42.dp
     val sizePx = with(LocalDensity.current) { sizeDp.roundToPx() }
     if (profileImage == null || anonymous) {

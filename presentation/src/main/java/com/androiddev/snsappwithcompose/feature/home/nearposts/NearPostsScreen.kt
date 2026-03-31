@@ -21,6 +21,7 @@ fun NearPostsScreen(
             RadioChipButtons(
                 modifier = Modifier.background(Color.White),
                 items = listOf(5, 10, 15, 20, 25, 50, 75, 100),
+                startPadding = 8,
                 selectedValue = viewModel.distance.value ,
                 onSelect = {
                     viewModel.onEvent(GetNearPostsEvent.SetDistance(it))
