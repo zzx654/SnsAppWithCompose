@@ -5,4 +5,5 @@ sealed class UserEvent {
     data object LoadNext: UserEvent()
     data class ToggleFollowUser(val userId: Int): UserEvent()
     data class SelectUser(val userId: Int): UserEvent()
+    data class GetUserInfo(val userId: Int): UserEvent()
 }

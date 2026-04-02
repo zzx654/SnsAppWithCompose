@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.androiddev.snsappwithcompose.common.util.MainScreenPendingHandler
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
 import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
 import com.androiddev.snsappwithcompose.feature.notification.NotificationScreen
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
@@ -42,6 +43,7 @@ fun MainScaffold(
     rootNavController: NavHostController,
     startTab: Screen = Screen.HomeScreen,
     tagViewModel: TagViewModel,
+    userViewModel: UserViewModel,
     notificationViewModel: NotificationViewModel
 ) {
     val tabNavController = rememberNavController()
@@ -95,6 +97,7 @@ fun MainScaffold(
                 HomeScreen(
                     navController = rootNavController,
                     tagViewModel = tagViewModel,
+                    userViewModel = userViewModel,
                     onHomeReady = { isHomeReady = it }
                 )
             }

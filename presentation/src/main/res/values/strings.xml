@@ -115,6 +115,10 @@
     <string name="photo">사진</string>
     <string name="video">영상</string>
 
+    <string name="user_profile_stats">
+    팔로워 %1$d · 게시물 %2$d개
+</string>
+
 
 
 

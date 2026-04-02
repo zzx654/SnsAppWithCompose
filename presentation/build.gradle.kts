@@ -69,6 +69,7 @@ dependencies {
     implementation(project(":data"))
     implementation(libs.gson)
 
+    implementation(libs.accompanist.placeholder)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.analytics)

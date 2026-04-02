@@ -3,9 +3,11 @@ package com.androiddev.data.repository.user
 import android.content.Context
 import com.androiddev.data.remote.api.user.UserApi
 import com.androiddev.data.remote.dto.toToggleFollowResult
+import com.androiddev.data.remote.dto.toUser
 import com.androiddev.data.remote.dto.toUsers
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.ToggleFollowResult
+import com.androiddev.domain.model.User
 import com.androiddev.domain.model.Users
 import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.util.Resource
@@ -29,5 +31,15 @@ class UserRepositoryImpl @Inject constructor(
         context = context,
         apiCall = { api.toggleFollowUser(userId)},
         mapToResource = { it.toToggleFollowResult(it.isFollowing)}
+    )
+
+    override suspend fun getUserInfo(userId: Int): Flow<Resource<Users>> = safeApiCall(
+        context = context,
+        apiCall = { api.getUserInfo(userId)},
+        mapToResource = {
+            it.toUsers(
+                it.users
+            )
+        }
     )
 }

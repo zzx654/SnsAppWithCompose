@@ -1,6 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.home.user
 
 import android.content.Context
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,10 @@ class UserViewModel @Inject constructor(
     val getUsersState: State<GetUsersState> get() = _getUsersState
     private val _followUserStatusMap = mutableStateMapOf<Int, Boolean>()
     val followUserStatusMap: Map<Int, Boolean> get() = _followUserStatusMap
+
+    private val _userInfo: MutableState<User?> = mutableStateOf(null)
+    val userInfo: State<User?>
+        get() = _userInfo
     val userPaginator =
         Paginator<Users, User>(
             loadItems = { handleResult,refresh ->
@@ -78,6 +83,22 @@ class UserViewModel @Inject constructor(
         }
 
     }
+    private fun fetchUserInfo(userId:Int) {
+        viewModelScope.launch {
+            userUseCases.getUserInfo(userId).collect { result ->
+                handleResource(
+                    resource = result,
+                    onSuccess = { data ->
+
+                        _userInfo.value = data.users[0]
+
+
+                    }
+                )
+
+            }
+        }
+    }
     fun onEvent(event:UserEvent) {
         when(event) {
             is UserEvent.TypeNickname-> {
@@ -123,6 +144,11 @@ class UserViewModel @Inject constructor(
 
                 }
 
+            }
+            is UserEvent.GetUserInfo -> {
+                viewModelScope.launch {
+                    fetchUserInfo(event.userId)
+                }
             }
         }
     }

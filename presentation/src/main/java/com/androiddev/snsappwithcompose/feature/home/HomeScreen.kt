@@ -26,10 +26,16 @@ import com.androiddev.snsappwithcompose.feature.home.newPosts.NewPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.SearchUserScreen
+import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
 import com.androiddev.snsappwithcompose.feature.upload_post.record.RecordEvent
 
 @Composable
-fun HomeScreen(navController: NavController, tagViewModel: TagViewModel,onHomeReady: (Boolean) -> Unit) {
+fun HomeScreen(
+    navController: NavController,
+    tagViewModel: TagViewModel,
+    userViewModel: UserViewModel,
+    onHomeReady: (Boolean) -> Unit
+) {
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
@@ -67,7 +73,7 @@ fun HomeScreen(navController: NavController, tagViewModel: TagViewModel,onHomeRe
         },
         {PlaceholderScreen("팔로우")},
         {TagScreen(navController, tagViewModel)},
-        { SearchUserScreen(navController) }
+        { SearchUserScreen(navController, userViewModel) }
     )
     Box(
         modifier = Modifier.fillMaxSize()

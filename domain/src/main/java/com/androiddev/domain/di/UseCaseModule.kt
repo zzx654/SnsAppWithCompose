@@ -66,6 +66,7 @@ import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
 import com.androiddev.domain.use_case.postdetail.Vote
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
 import com.androiddev.domain.use_case.user.GetSearchedUsers
+import com.androiddev.domain.use_case.user.GetUserInfo
 import com.androiddev.domain.use_case.user.ToggleFollowUser
 import com.androiddev.domain.use_case.user.UserUseCases
 import dagger.Module
@@ -217,7 +218,8 @@ object UseCaseModule {
     ): UserUseCases {
         return UserUseCases(
             getSearchedUsers = GetSearchedUsers(userRepository),
-            toggleFollowUser = ToggleFollowUser(userRepository)
+            toggleFollowUser = ToggleFollowUser(userRepository),
+            getUserInfo = GetUserInfo(userRepository)
         )
     }
 }

@@ -16,7 +16,8 @@ fun UsersDto.toUsers(
                 gender = it.gender,
                 profileImage = it.profileimage,
                 following = it.following,
-                followerCount = it.followercount
+                followerCount = it.followercount,
+                postCount = it.postcount
             )
         }
     )

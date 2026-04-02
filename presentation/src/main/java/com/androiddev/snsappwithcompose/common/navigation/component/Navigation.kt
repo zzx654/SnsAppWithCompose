@@ -38,6 +38,7 @@ import com.androiddev.snsappwithcompose.feature.createprofile.CreateProfileScree
 import com.androiddev.snsappwithcompose.feature.createprofile.component.CropScreen
 import com.androiddev.snsappwithcompose.feature.home.tagposts.TagPostScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.COMMENT
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.FOLLOW
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKECOMMENT
@@ -91,12 +92,14 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
         composable<Screen.MainScreen> {
             val tagViewModel: TagViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()// 그냥 생성
 
+            val userViewModel: UserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
             BackHandler(true) {
             }
             MainScaffold(
                 rootNavController = navController,
                 startTab = Screen.HomeScreen,
                 tagViewModel = tagViewModel,
+                userViewModel = userViewModel,
                 notificationViewModel = notificationViewModel
             )
 
@@ -162,10 +165,13 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
             PendingNotificationHandler(notificationViewModel)
         }
         composable<Screen.UserProfileScreen> {
+            val parentEntry = remember { navController.getBackStackEntry(Screen.MainScreen) }
+            val userViewModel: UserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(parentEntry)
             val userProfileViewModel: UserProfileViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
             BackHandler(true) {
             }
             UserProfileScreen(
+                userViewModel = userViewModel,
                 userProfileViewModel = userProfileViewModel,
                 navController = navController,
                 navBackStackEntry = it,

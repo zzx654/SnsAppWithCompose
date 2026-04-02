@@ -7,5 +7,5 @@ data class User(
     val profileImage:String?,
     val following:Int,
     val followerCount:Int,
-    val numberOfPosts:Int? = null
+    val postCount:Int? = null
 )

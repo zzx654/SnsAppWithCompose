@@ -32,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.toRoute
 import coil3.imageLoader
 import coil3.request.crossfade
 import coil3.util.DebugLogger
@@ -56,15 +58,25 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.component.RadioChipButtons
+import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
+import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
+import com.androiddev.snsappwithcompose.feature.home.user.UserEvent
+import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
 import com.androiddev.snsappwithcompose.feature.userprofile.component.UserProfileHeader
 
 @Composable
 fun UserProfileScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
+    userViewModel: UserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     userProfileViewModel:UserProfileViewModel
 ) {
+
+    var args = navBackStackEntry.toRoute<Screen.UserProfileScreen>()
+    val isFollowing = userViewModel.followUserStatusMap[args.userId]
+    println("뭐지 헤헤${isFollowing}")
+    println("뭐지 헤헤${userViewModel.nicknameTextField.value}")
     val context = LocalContext.current
     val imageLoader = remember {
         context.imageLoader.newBuilder()
@@ -79,6 +91,14 @@ fun UserProfileScreen(
     val focusManager = LocalFocusManager.current
 
     val scrollState = rememberScrollState()
+
+    val userInfoState = userViewModel.userInfo.value
+    LaunchedEffect(args.userId) {
+
+        userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
+
+
+    }
     Scaffold(
         topBar = {
             Surface(
@@ -87,7 +107,7 @@ fun UserProfileScreen(
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
                 CenterAlignedTopBar(
-                    title = "",
+                    title = userInfoState?.nickname?:"",
                     onBackClick = { navController.popBackStack() },
                 )
             }
@@ -107,7 +127,7 @@ fun UserProfileScreen(
             item {
                 Spacer(modifier = Modifier.height(20.dp))
                 UserProfileHeader(
-                    context = context,
+                    user = userInfoState,
                     imageLoader = imageLoader
 
 
@@ -118,7 +138,11 @@ fun UserProfileScreen(
             // 2. 구독 버튼
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                ActionSection()
+                ActionSection(
+                    isFollowing = isFollowing?:false,
+                    toggleFollow = { userViewModel.onEvent(UserEvent.ToggleFollowUser(args.userId))}
+
+                )
                 Spacer(modifier = Modifier.height(10.dp))
             }
             stickyHeader {
@@ -327,8 +351,11 @@ fun ActionButton(
 
 }
 @Composable
-fun ActionSection() {
-    var isFollowing by remember { mutableStateOf(false) }
+fun ActionSection(
+    isFollowing:Boolean,
+    toggleFollow:() -> Unit
+) {
+    //var isFollowing by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -339,7 +366,7 @@ fun ActionSection() {
             text = if (isFollowing) "Following" else "Follow",
             icon = if (isFollowing) Icons.Default.Check else Icons.Default.Add,
             isPrimary = !isFollowing,
-            onClick = { isFollowing = !isFollowing },
+            onClick = { toggleFollow() },
             modifier = Modifier.weight(1f)
         )
 
