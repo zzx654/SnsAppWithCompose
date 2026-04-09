@@ -65,6 +65,7 @@ import com.androiddev.domain.use_case.uploadpost.UploadPost
 import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
 import com.androiddev.domain.use_case.postdetail.Vote
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
+import com.androiddev.domain.use_case.postlist.GetUserPosts
 import com.androiddev.domain.use_case.user.GetSearchedUsers
 import com.androiddev.domain.use_case.user.GetUserInfo
 import com.androiddev.domain.use_case.user.ToggleFollowUser
@@ -133,7 +134,8 @@ object UseCaseModule {
             getNearPosts = GetNearPosts(repository),
             getNewPosts = GetNewPosts(repository),
             getPopularTagPosts = GetPopularTagPosts(repository),
-            getNewTagPosts = GetNewTagPosts(repository)
+            getNewTagPosts = GetNewTagPosts(repository),
+            getUserPosts = GetUserPosts(repository)
         )
     }
     @Provides

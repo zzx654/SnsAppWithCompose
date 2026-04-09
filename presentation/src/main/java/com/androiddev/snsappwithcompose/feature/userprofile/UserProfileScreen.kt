@@ -60,6 +60,8 @@ import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.component.RadioChipButtons
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
+import com.androiddev.snsappwithcompose.feature.home.component.postPrevItemsContent
+import com.androiddev.snsappwithcompose.feature.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserEvent
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
@@ -69,14 +71,13 @@ import com.androiddev.snsappwithcompose.feature.userprofile.component.UserProfil
 fun UserProfileScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
+    userPostsViewModel: UserPostsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     userViewModel: UserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     userProfileViewModel:UserProfileViewModel
 ) {
 
     var args = navBackStackEntry.toRoute<Screen.UserProfileScreen>()
     val isFollowing = userViewModel.followUserStatusMap[args.userId]
-    println("뭐지 헤헤${isFollowing}")
-    println("뭐지 헤헤${userViewModel.nicknameTextField.value}")
     val context = LocalContext.current
     val imageLoader = remember {
         context.imageLoader.newBuilder()
@@ -97,8 +98,11 @@ fun UserProfileScreen(
 
         userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
 
-
     }
+    LaunchedEffect(args.userId) {
+        userPostsViewModel.initUserPosts(args.userId)
+    }
+
     Scaffold(
         topBar = {
             Surface(
@@ -119,75 +123,77 @@ fun UserProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
-            contentPadding = PaddingValues(horizontal = 19.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
             // 1. 헤더
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                UserProfileHeader(
-                    user = userInfoState,
-                    imageLoader = imageLoader
+                Column(modifier = Modifier.padding(horizontal = 19.dp)) {
+                    UserProfileHeader(
+                        user = userInfoState,
+                        imageLoader = imageLoader
 
 
-                )
+                    )
+                }
                // ChannelHeader()
             }
 
             // 2. 구독 버튼
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                ActionSection(
-                    isFollowing = isFollowing?:false,
-                    toggleFollow = { userViewModel.onEvent(UserEvent.ToggleFollowUser(args.userId))}
+                Column(modifier = Modifier.padding(horizontal = 19.dp)) {
+                    ActionSection(
+                        isFollowing = isFollowing?:false,
+                        toggleFollow = { userViewModel.onEvent(UserEvent.ToggleFollowUser(args.userId))}
 
-                )
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
             }
             stickyHeader {
-                RadioChipButtons(
-                    items = userProfileViewModel.tabs,
-                    selectedValue = selectedTab,
-                    onSelect = { userProfileViewModel.selectTab(it) },
-                    label = {
-                        when (it) {
-                            UserContent.HOME -> getString(context, R.string.home)
-                            UserContent.PHOTO -> getString(context,R.string.photo)
-                            UserContent.VIDEO -> getString(context,R.string.video)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 19.dp)
+                ) {
+                    RadioChipButtons(
+                        items = userProfileViewModel.tabs,
+                        selectedValue = selectedTab,
+                        onSelect = { userProfileViewModel.selectTab(it) },
+                        label = {
+                            when (it) {
+                                UserContent.HOME -> getString(context, R.string.home)
+                                UserContent.PHOTO -> getString(context,R.string.photo)
+                                UserContent.VIDEO -> getString(context,R.string.video)
+                            }
                         }
-                    }
 
-                )
+                    )
+                }
                 //CustomTabSection(
                  //   selectedTab = selectedTab,
                   //  onTabSelected = { selectedTab = it }
                // )
             }
 
-            // 3. 탭 (고정)
-            /**stickyHeader {
-                TabRow(selectedTabIndex = selectedTab) {
 
-                    Tab(
-                        selected = selectedTab == 0,
-                        onClick = { selectedTab = 0 },
-                        text = { Text("List") }
-                    )
-
-                    Tab(
-                        selected = selectedTab == 1,
-                        onClick = { selectedTab = 1 },
-                        text = { Text("Grid") }
-                    )
-                }
-            }**/
 
             when (selectedTab) {
                 UserContent.HOME -> {
-                    items(videoList) { item ->
-                        VideoListItem(item)
-                    }
+                   // items(videoList) { item ->
+                     //   VideoListItem(item)
+                   // }
+                    postPrevItemsContent(
+                        isLoading = { userPostsViewModel.getPostState.value.isLoading },
+                        endReached = { userPostsViewModel.getPostState.value.endReached },
+                        posts = { userPostsViewModel.getPostState.value.posts },
+                        loadNextPosts = { userPostsViewModel.onEvent(GetPostsEvent.LoadNext) },
+                        onPostClick = { postId ->
+                            userPostsViewModel.onEvent(GetPostsEvent.SelectPost(postId))
+                        }
+                    )
 
                 }
                 UserContent.PHOTO-> {

@@ -33,4 +33,12 @@ interface GetPostsRepository {
         longitude:Double?,
     ):Flow<Resource<Posts>>
 
+    suspend fun getUserPosts(
+        userId:Int?,
+        postId:Int?,
+        postDate:String?,
+        latitude:Double?,
+        longitude:Double?,
+    ):Flow<Resource<Posts>>
+
 }

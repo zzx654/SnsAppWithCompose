@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshState
 import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.androiddev.domain.model.PostPreview
 
@@ -33,31 +36,55 @@ fun PostPrevItems(
         modifier = Modifier.fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
+        postPrevItemsContent(
+            isLoading = isLoading,
+            endReached = endReached,
+            posts = posts,
+            loadNextPosts = loadNextPosts,
+            onPostClick = onPostClick
+        )
 
 
-        items(
-            posts().size,
-        ) { index ->
+    }
+}
+fun LazyListScope.postPrevItemsContent(
+    isLoading: () -> Boolean,
+    endReached: () -> Boolean,
+    posts: () -> List<PostPreview>,
+    loadNextPosts: () -> Unit,
+    onPostClick: (Int) -> Unit
+) {
 
-            if(index >= posts().size - 1 && !endReached() && !isLoading()) {
-                loadNextPosts()
-            }
+    items(posts().size) { index ->
 
-            PostPrevItem(post = posts()[index],modifier = Modifier.clickable{ onPostClick(posts()[index].postId) })
-            Spacer(modifier = Modifier.height(4.dp))
+        if (index >= posts().size - 1 && !endReached() && !isLoading()) {
+            loadNextPosts()
         }
-        item {
-            if(isLoading() && posts().isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+
+        PostPrevItem(
+            post = posts()[index],
+            modifier = Modifier.clickable {
+                onPostClick(posts()[index].postId)
+            }
+        )
+        //Spacer(modifier = Modifier.height(4.dp))
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(),
+            thickness = 2.dp,
+            color = Color.LightGray
+        )
+    }
+
+    item {
+        if (isLoading() && posts().isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
-
     }
 }

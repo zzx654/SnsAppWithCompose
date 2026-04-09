@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.SearchTextField
 import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.util.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -44,7 +45,7 @@ fun SearchUserScreen(
             .collect { lastVisibleIndex ->
                 val totalItemsCount = listState.layoutInfo.totalItemsCount
                 if (
-                    totalItemsCount!=0 &&
+                    totalItemsCount>=PAGE_SIZE &&
                     lastVisibleIndex != null &&
                     lastVisibleIndex >= totalItemsCount-1 &&
                     !state.isLoading &&

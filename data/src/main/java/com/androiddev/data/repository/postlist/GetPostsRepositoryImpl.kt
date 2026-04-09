@@ -59,6 +59,18 @@ class GetPostsRepositoryImpl @Inject constructor(
         mapToResource = { it.toPosts(posts = it.posts) }
     )
 
+    override suspend fun getUserPosts(
+        userId: Int?,
+        postId: Int?,
+        postDate: String?,
+        latitude: Double?,
+        longitude: Double?
+    ): Flow<Resource<Posts>> = safeApiCall(
+        context = context,
+        apiCall = { api.getUserPosts(userId,postId,postDate,latitude,longitude)},
+        mapToResource = { it.toPosts(posts = it.posts)}
+    )
+
 
 
 

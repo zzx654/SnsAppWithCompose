@@ -744,8 +744,7 @@ fun ProfileImage(
         AsyncImage(
             model = imageRequest,
             imageLoader = imageLoader,
-            modifier = Modifier
-                .size(sizeDp)
+            modifier = modifier
                 .clip(CircleShape) // clip to the circle shape
                 .border(1.dp, profileBorder, CircleShape),
             contentScale = ContentScale.Crop,

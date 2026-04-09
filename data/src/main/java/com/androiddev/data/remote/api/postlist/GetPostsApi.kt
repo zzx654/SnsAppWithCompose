@@ -45,5 +45,15 @@ interface GetPostsApi {
         @Field("longitude")longitude:Double?
     ): Response<BaseApiResponse<GetPostsDto>>
 
+    @FormUrlEncoded
+    @POST("postlist/getUserPosts")
+    suspend fun getUserPosts(
+        @Field("userid")userid: Int?,
+        @Field("postid")postid: Int?,
+        @Field("postdate")postdate: String?,
+        @Field("latitude")latitude:Double?,
+        @Field("longitude")longitude:Double?
+    ): Response<BaseApiResponse<GetPostsDto>>
+
 
 }
