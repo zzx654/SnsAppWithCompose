@@ -2,6 +2,7 @@ package com.androiddev.snsappwithcompose.feature.upload_post
 
 import android.Manifest
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -20,11 +21,17 @@ import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.domain.model.Posts
 import com.androiddev.snsappwithcompose.feature.upload_post.component.EditableImage
+import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
+import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaType
+import com.androiddev.snsappwithcompose.feature.upload_post.util.getVideoThumbnail
+import com.androiddev.snsappwithcompose.feature.upload_post.util.isVideo
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -59,6 +66,9 @@ class UploadPostViewModel @Inject constructor(
     private val _selectedImages = mutableStateListOf<EditableImage>()
     val selectedImages: SnapshotStateList<EditableImage>
         get() = _selectedImages
+    private val _selectedMediaItems = mutableStateListOf<MediaItem>()
+    val selectedMediaItems: SnapshotStateList<MediaItem>
+        get() = _selectedMediaItems
     val deletedImages = mutableStateListOf<String>()
     private val _locationOnOff = mutableStateOf(false)
     val locationOnOff: State<Boolean>
@@ -82,6 +92,28 @@ class UploadPostViewModel @Inject constructor(
             )
         }
 
+    }
+    private fun addMedia(context: Context,uriList: List<Uri>) {
+        viewModelScope.launch {
+            val newItems = uriList.map { uri ->
+                if (isVideo(context, uri)) {
+                    val thumbnail = withContext(Dispatchers.IO) {
+                        getVideoThumbnail(context, uri)
+                    }
+                    MediaItem(
+                        uri = uri,
+                        type = MediaType.VIDEO,
+                        thumbnail = thumbnail
+                    )
+                } else {
+                    MediaItem(
+                        uri = uri,
+                        type = MediaType.IMAGE)
+                }
+            }
+            _selectedMediaItems.addAll(newItems)
+
+        }
     }
 
     fun initPost(post: PostPreview) {
@@ -186,6 +218,10 @@ class UploadPostViewModel @Inject constructor(
                 }
 
             }
+            is UploadPostEvent.AddMedia -> {
+                addMedia(context,event.uris)
+
+            }
 
             is UploadPostEvent.AddImages -> {
                 _selectedImages.addAll(
@@ -238,6 +274,7 @@ class UploadPostViewModel @Inject constructor(
                 handleUploadPost(event)
             }
 
+            else -> {}
         }
 
 

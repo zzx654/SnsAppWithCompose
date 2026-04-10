@@ -57,6 +57,7 @@ import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.CheckBoxWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.ContentTextField
 import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedImageCards
+import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedMediaCards
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadRecordIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadVoteIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.record.BottomRecorder
@@ -97,7 +98,8 @@ fun UploadPostScreen(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { uriList ->
             selectedImageUriList = uriList
-            viewModel.onEvent(UploadPostEvent.AddImages(uriList))
+            //viewModel.onEvent(UploadPostEvent.AddImages(uriList))
+            viewModel.onEvent(UploadPostEvent.AddMedia(uriList))
         }
     )
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
@@ -269,7 +271,7 @@ fun UploadPostScreen(
                         onClick = {
                             imageLauncher.launch(
                                 PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    ActivityResultContracts.PickVisualMedia.ImageAndVideo
                                 )
                             )
                         }
@@ -401,14 +403,23 @@ fun UploadPostScreen(
             }
 
             Spacer(modifier = Modifier.height(10.dp))
-            SelectedImageCards(
+            SelectedMediaCards(
+                selectedMedia = {
+                    viewModel.selectedMediaItems
+                },
+                onDeleteClick = {
+                    viewModel.onEvent(UploadPostEvent.DeleteMedia(it))
+                }
+            )
+
+            /**SelectedImageCards(
                 selectedImages = {
                     viewModel.selectedImages
                 },
                 onDeleteClick = {
                     viewModel.onEvent(UploadPostEvent.DeleteImage(it))
                 }
-            )
+            )**/
         }
     )
 }
