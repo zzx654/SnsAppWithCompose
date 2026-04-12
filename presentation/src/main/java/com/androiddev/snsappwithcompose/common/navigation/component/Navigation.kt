@@ -50,6 +50,9 @@ import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileScreen
 import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.collectLatest
+import androidx.navigation.compose.navigation
+import com.androiddev.snsappwithcompose.feature.upload_post.MediaPreviewScreen
+import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostViewModel
 
 @RequiresApi(Build.VERSION_CODES.N)
 @SuppressLint("UnrememberedGetBackStackEntry", "NewApi")
@@ -83,6 +86,7 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
         modifier = modifier,navController = navController,
         startDestination = Screen.InitScreen
     ) {
+
         composable<Screen.InitScreen> {
             //여기
             BackHandler(true) {
@@ -140,7 +144,51 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
             }
             CropScreen(navController = navController,navBackStackEntry = it)
         }
-        composable<Screen.UploadPostScreen>(
+        navigation(
+            route = UPLOAD_FLOW,
+            startDestination = Screen.UploadPostScreen::class.qualifiedName!!
+        ) {
+
+            composable<Screen.UploadPostScreen>(
+                typeMap = postTypeMap
+            ) {
+                val parentEntry = remember {
+                    navController.getBackStackEntry(UPLOAD_FLOW)
+                }
+
+                val uploadViewModel: UploadPostViewModel =
+                    androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(parentEntry)
+
+                val post = it.toRoute<Screen.UploadPostScreen>().post
+
+                BackHandler(true) {}
+
+                UploadPostScreen(
+                    post = post,
+                    navController = navController,
+                    viewModel = uploadViewModel
+                )
+
+                PendingNotificationHandler(notificationViewModel)
+            }
+
+            composable<Screen.MediaPreviewScreen> {
+                val parentEntry = remember {
+                    navController.getBackStackEntry(UPLOAD_FLOW)
+                }
+
+                val uploadViewModel: UploadPostViewModel =
+                    androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(parentEntry)
+
+                BackHandler(true) {}
+
+                MediaPreviewScreen(
+                    navController = navController,
+                    viewModel = uploadViewModel
+                )
+            }
+        }
+        /**composable<Screen.UploadPostScreen>(
             typeMap = postTypeMap
         ) {
             val post = it.toRoute<Screen.UploadPostScreen>().post
@@ -151,6 +199,9 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 navController = navController)
             PendingNotificationHandler(notificationViewModel)
         }
+        composable<Screen.MediaPreviewScreen> {
+
+        }**/
         composable<Screen.PostDetailScreen>{
             val postViewModel: PostDetailsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 
@@ -205,6 +256,7 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
             )
             PendingNotificationHandler(notificationViewModel)
         }
+
 
 
     }

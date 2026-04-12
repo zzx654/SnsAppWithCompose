@@ -39,8 +39,14 @@ sealed interface Screen {
     data class TagPostsScreen(val tagId:Int): Screen
     @Serializable
     data class UserProfileScreen(val userId:Int): Screen
+    @Serializable
+    data object MediaPreviewScreen: Screen
+
+    @Serializable
+    data object UploadFlow : Screen
 
 }
+const val UPLOAD_FLOW = "upload_flow"
 inline fun <reified T : Any?> serializableType(
     isNullableAllowed: Boolean = false,
     json: Json = Json,
