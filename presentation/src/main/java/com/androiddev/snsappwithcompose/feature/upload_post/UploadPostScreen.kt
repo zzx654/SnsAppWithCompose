@@ -54,6 +54,7 @@ import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
+import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.upload_post.component.CheckBoxWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.ContentTextField
 import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedImageCards
@@ -407,6 +408,7 @@ fun UploadPostScreen(
                 selectedMedia = {
                     viewModel.selectedMediaItems
                 },
+                onClickItem = { navController.navigate(Screen.MediaPreviewScreen)},
                 onDeleteClick = {
                     viewModel.onEvent(UploadPostEvent.DeleteMedia(it))
                 }

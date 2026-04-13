@@ -32,7 +32,8 @@ import com.androiddev.snsappwithcompose.ui.theme.Black
 @Composable
 fun SelectedMediaCards(
     selectedMedia: () -> List<MediaItem>,
-    onDeleteClick: (MediaItem) -> Unit
+    onDeleteClick: (MediaItem) -> Unit,
+    onClickItem: () ->Unit
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -45,6 +46,7 @@ fun SelectedMediaCards(
                 modifier = Modifier
                     .width(IntrinsicSize.Min)
                     .height(IntrinsicSize.Min)
+                    .clickable { onClickItem()}
             ) {
 
                 if (media.type == MediaType.VIDEO) {
