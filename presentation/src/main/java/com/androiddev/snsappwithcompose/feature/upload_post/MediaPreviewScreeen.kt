@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.feature.upload_post
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +24,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
+import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItemView
+import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaType
 
 @Composable
 fun MediaPreviewScreen(
@@ -75,8 +78,18 @@ fun MediaPreviewScreen(
                 items(viewModel.selectedMediaItems) { item ->
                     MediaItemView(
                         item = item,
-                        onClick = {},
-                        onDelete = {}
+                        onClick = {
+                            if(item.type== MediaType.VIDEO) {
+                                val encoded = Uri.encode(item.uri.toString())
+                                navController.navigate(Screen.VideoPreviewScreen(encoded))
+
+                            }
+
+                                  },
+                        onDelete = { item ->
+                            viewModel.onEvent(UploadPostEvent.DeleteMedia(item))
+
+                        }
                     )
 
                 }

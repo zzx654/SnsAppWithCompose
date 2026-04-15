@@ -88,6 +88,7 @@ dependencies {
     // Dagger - Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.media3.datasource.okhttp)
+    implementation(libs.androidx.media3.ui)
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
 

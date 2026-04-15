@@ -273,6 +273,13 @@ class UploadPostViewModel @Inject constructor(
             is UploadPostEvent.UploadPost -> {
                 handleUploadPost(event)
             }
+            is UploadPostEvent.DeleteMedia -> {
+                _selectedMediaItems.remove(event.media)
+                //if (!event.image.isNew && event.image.remotePath != null) {
+                 //   deletedImages.add(event.image.remotePath)
+                //}
+                //_selectedImages.remove(event.image)
+            }
 
             else -> {}
         }

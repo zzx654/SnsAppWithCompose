@@ -41,6 +41,8 @@ sealed interface Screen {
     data class UserProfileScreen(val userId:Int): Screen
     @Serializable
     data object MediaPreviewScreen: Screen
+    @Serializable
+    data class VideoPreviewScreen(val encodedUri:String): Screen
 
     @Serializable
     data object UploadFlow : Screen
