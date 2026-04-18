@@ -21,15 +21,15 @@ class UploadPostRepositoryImpl @Inject constructor(
     override suspend fun uploadPost(
         anonymousNick: RequestBody?,
         tags: RequestBody?,
-        images: List<MultipartBody.Part>?,
-        audio:MultipartBody.Part?,
+        media: List<MultipartBody.Part>?,
+        mediaTypes:List<RequestBody>?,
         voteOptions:RequestBody?,
         text: RequestBody,
         latitude: MultipartBody.Part?,
         longitude: MultipartBody.Part?
     ): Flow<Resource<Unit>> = safeApiCall(
         context = context,
-        apiCall = { api.uploadPost(anonymousNick,tags,images,audio,voteOptions,text,latitude,longitude) },
+        apiCall = { api.uploadPost(anonymousNick,tags,media,mediaTypes,voteOptions,text,latitude,longitude) },
         mapToResource = {}
     )
 

@@ -19,10 +19,10 @@ import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
+import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.Posts
 import com.androiddev.snsappwithcompose.feature.upload_post.component.EditableImage
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
-import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaType
 import com.androiddev.snsappwithcompose.feature.upload_post.util.getVideoThumbnail
 import com.androiddev.snsappwithcompose.feature.upload_post.util.isVideo
 import com.google.gson.Gson
@@ -103,12 +103,14 @@ class UploadPostViewModel @Inject constructor(
                     MediaItem(
                         uri = uri,
                         type = MediaType.VIDEO,
-                        thumbnail = thumbnail
+                        thumbnail = thumbnail,
+                        isNew = true
                     )
                 } else {
                     MediaItem(
                         uri = uri,
-                        type = MediaType.IMAGE)
+                        type = MediaType.IMAGE
+                    ,isNew = true)
                 }
             }
             _selectedMediaItems.addAll(newItems)
@@ -292,7 +294,8 @@ class UploadPostViewModel @Inject constructor(
             val requestBodies = buildRequestBodies(event)
             when (postMode) {
                 PostMode.CREATE -> uploadNewPost(requestBodies, event)
-                PostMode.EDIT -> editExistingPost(requestBodies, event)
+                PostMode.EDIT -> null
+                    //editExistingPost(requestBodies, event)
                 else -> null
             }
 
@@ -305,16 +308,34 @@ class UploadPostViewModel @Inject constructor(
         } else null
 
         val requestText = contentTextField.value.toRequestBody("text/plain".toMediaTypeOrNull())
+        val mediaParts = mutableListOf<MultipartBody.Part>()
+        val mediaTypes = mutableListOf<RequestBody>()
 
-        val requestImages = selectedImages.filter { it.isNew }
-            .mapNotNull { it.uri?.let { uri -> getMultipartBody(uri, context) } }
+        selectedMediaItems.filter { it.isNew }.forEach { media ->
+            media.uri?.let { uri ->
 
-        val requestAudio = event.audioFilePath?.let { path ->
-            val file = File(path)
-            if (file.exists()) MultipartBody.Part.createFormData(
-                "audio", file.name, file.asRequestBody("audio/mp4".toMediaTypeOrNull())
-            ) else null
+                val part = getMultipartBody(
+                    uri = uri,
+                    context = context,
+                    type = media.type
+                )
+                mediaParts.add(part)
+                mediaTypes.add(media.type.name.toRequestBody("text/plain".toMediaTypeOrNull()))
+
+
+            }
+
         }
+        event.audioFilePath?.let { path ->
+            val part = getMultipartBody(
+                path = path,
+                context = context,
+                type = MediaType.AUDIO
+            )
+            mediaParts.add(part)
+            mediaTypes.add(MediaType.AUDIO.name.toRequestBody("text/plain".toMediaTypeOrNull()))
+        }
+
 
         val requestLat =
             event.lat?.let { MultipartBody.Part.createFormData("latitude", it.toString()) }
@@ -324,8 +345,8 @@ class UploadPostViewModel @Inject constructor(
         return UploadRequestData(
             tags = requestTags,
             text = requestText,
-            images = requestImages,
-            audio = requestAudio,
+            media = if(mediaParts.isEmpty()) null else mediaParts,
+            mediaTypes = if(mediaTypes.isEmpty()) null else mediaTypes,
             latitude = requestLat,
             longitude = requestLong
         )
@@ -342,16 +363,17 @@ class UploadPostViewModel @Inject constructor(
                 generateAnonymousNickname().toRequestBody("text/plain".toMediaTypeOrNull())
             else null,
             tags = data.tags,
-            images = data.images,
+            media = data.media,
+            mediaTypes = data.mediaTypes,
             text = data.text,
-            audio = data.audio,
+
             voteOptions = voteOptionsJson,
             latitude = data.latitude,
             longitude = data.longitude
         ).collect { handleResult(it) }
     }
 
-    private suspend fun editExistingPost(
+    /**private suspend fun editExistingPost(
         data: UploadRequestData,
         event: UploadPostEvent.UploadPost
     ) {
@@ -373,7 +395,7 @@ class UploadPostViewModel @Inject constructor(
             deleteAudio = event.deleteAudio?.toRequestBody("text/plain".toMediaTypeOrNull()),
             text = data.text
         ).collect { handleResult(it) }
-    }
+    }**/
 
     private suspend fun <T> handleResult(
         result: Resource<T>,
@@ -400,8 +422,10 @@ class UploadPostViewModel @Inject constructor(
 data class UploadRequestData(
     val tags: RequestBody?,
     val text: RequestBody,
-    val images: List<MultipartBody.Part>?,
-    val audio: MultipartBody.Part?,
+    val media:List<MultipartBody.Part>?,
+    val mediaTypes:List<RequestBody>?,
+    //val images: List<MultipartBody.Part>?,
+    //val audio: MultipartBody.Part?,
     val latitude: MultipartBody.Part?,
     val longitude: MultipartBody.Part?
 )

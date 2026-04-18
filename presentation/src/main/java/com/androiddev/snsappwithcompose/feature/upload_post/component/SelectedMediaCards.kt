@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.ui.theme.Black
 

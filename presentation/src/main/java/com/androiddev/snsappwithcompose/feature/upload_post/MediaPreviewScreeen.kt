@@ -23,12 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItemView
-import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaType
+
 
 @Composable
 fun MediaPreviewScreen(

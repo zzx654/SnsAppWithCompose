@@ -15,8 +15,8 @@ interface UploadPostApi {
     suspend fun uploadPost(
         @Part ("anonymousNick") anonymousNick: RequestBody?,
         @Part ("tags") tags: RequestBody?,
-        @Part imageFiles: List<MultipartBody.Part>?,
-        @Part audioFile: MultipartBody.Part?,
+        @Part media: List<MultipartBody.Part>?,
+        @Part ("mediaTypes")mediaTypes: List<@JvmSuppressWildcards RequestBody>?,
         @Part ("voteoptions") voteOptions: RequestBody?,
         @Part ("text") text: RequestBody,
         @Part latitude: MultipartBody.Part?,

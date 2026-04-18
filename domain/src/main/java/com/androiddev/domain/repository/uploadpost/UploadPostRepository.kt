@@ -12,8 +12,8 @@ interface UploadPostRepository {
     suspend fun uploadPost(
         anonymousNick: RequestBody?,
         tags: RequestBody?,
-        image:List<MultipartBody.Part>?,
-        audio:MultipartBody.Part?,
+        media:List<MultipartBody.Part>?,
+        mediaTypes:List<RequestBody>?,
         voteOptions:RequestBody?,
         text: RequestBody,
         latitude: MultipartBody.Part?,

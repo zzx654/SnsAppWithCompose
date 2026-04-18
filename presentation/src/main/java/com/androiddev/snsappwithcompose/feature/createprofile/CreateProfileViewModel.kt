@@ -18,6 +18,7 @@ import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogStat
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.data.util.getMultipartBody
+import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -196,7 +197,8 @@ class CreateProfileViewModel @Inject constructor(
                     var requestImage: MultipartBody.Part? = null
                     val requestNickname = nickname.value.toRequestBody("text/plain".toMediaTypeOrNull())
                     val requestGender = gender.value.toRequestBody("text/plain".toMediaTypeOrNull())
-                    profileBmap.value?.let { requestImage = getMultipartBody(getImageUri(context,it),context) }
+                    profileBmap.value?.let {
+                        requestImage = getMultipartBody(uri = getImageUri(context,it),context = context,type = MediaType.IMAGE) }
                     createProfileUseCases.createProfile(requestImage,requestNickname,birthYear.value!!,requestGender)
                         .collect { result ->
 

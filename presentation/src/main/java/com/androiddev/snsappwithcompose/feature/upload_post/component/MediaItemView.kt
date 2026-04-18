@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.BuildConfig
 
 @Composable
@@ -82,6 +83,7 @@ fun MediaItemView(
                             .size(48.dp)
                     )
                 }
+                 else -> null
             }
         }
 
