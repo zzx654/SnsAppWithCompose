@@ -13,12 +13,6 @@ data class NotificationDto (
     val date: String
 )
 fun NotificationDto.toNotificationItem(
-    id: Long,
-    type: String,
-    content: String,
-    extrajson: NotificationExtra,
-    isRead: Int,
-    date: String
 ):NotificationItem {
 
     return NotificationItem(
@@ -26,7 +20,7 @@ fun NotificationDto.toNotificationItem(
         type = type,
         content = content,
         extrajson = extrajson,
-        isRead = isRead == 1,
+        isRead = isread == 1,
         date = date,
         elapsedTime = elapsedTime(date)
     )

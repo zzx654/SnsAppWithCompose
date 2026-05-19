@@ -18,12 +18,7 @@ class VoteRepositoryImpl @Inject constructor(
         safeApiCall(
             context = context,
             apiCall = { api.getVoteInfo(postId) },
-            mapToResource = { it.toVoteInfo(
-                isMyPost = it.isMyPost,
-                hasVoted = it.hasVoted,
-                selectedChoiceId = it.selectedChoiceId,
-                voteOptions = it.voteOptions
-            )}
+            mapToResource = { it.toVoteInfo()}
         )
 
     override suspend fun vote(postId: Int, optionId: Int): Flow<Resource<VoteInfo>> =
@@ -31,10 +26,6 @@ class VoteRepositoryImpl @Inject constructor(
             context = context,
             apiCall = { api.vote(postId,optionId) },
             mapToResource = { it.toVoteInfo(
-                isMyPost = it.isMyPost,
-                hasVoted = it.hasVoted,
-                selectedChoiceId = it.selectedChoiceId,
-                voteOptions = it.voteOptions
             )}
         )
 

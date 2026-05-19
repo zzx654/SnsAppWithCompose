@@ -10,10 +10,6 @@ data class VoteInfoDto(
     val voteOptions: List<VoteOptionInfo>
 )
 fun VoteInfoDto.toVoteInfo(
-    isMyPost: Boolean,
-    hasVoted: Boolean,
-    selectedChoiceId: Int?,
-    voteOptions: List<VoteOptionInfo>
 ): VoteInfo = VoteInfo(
     isMyPost = isMyPost,
     hasVoted = hasVoted,

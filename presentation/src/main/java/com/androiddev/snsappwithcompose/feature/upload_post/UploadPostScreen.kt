@@ -121,9 +121,14 @@ fun UploadPostScreen(
             it.vote?.let {
                 createVoteViewModel.initVoteState()
             }
-            it.audio?.let{ remotePath ->
-                recordViewModel.initRecordState(remotePath = remotePath)
+            it.media.firstOrNull { it.type == "AUDIO" }?.let { media ->
+
+                recordViewModel.initRecordState(remotePath = media.url)
             }
+
+            //it.audio?.let{ remotePath ->
+             //   recordViewModel.initRecordState(remotePath = remotePath)
+            //}
 
             contentTextFieldState.edit {
                 replace(0, contentTextFieldState.text.toString().length, it.text)

@@ -27,7 +27,7 @@ class CommentRepositoryImpl @Inject constructor(
         context = context,
         apiCall = { api.getPopularComments(postId, commentId, score) },
         mapToResource = {
-            it.toComments(comments = it.comments)
+            it.toComments()
         }
     )
     override suspend fun getNotificationComment(commentId: Int): Flow<Resource<NotificationComment>>  =
@@ -35,7 +35,7 @@ class CommentRepositoryImpl @Inject constructor(
             context = context,
             apiCall = { api.getNotificationComment(commentId)},
             mapToResource = {
-                it.toNotificationComment(comment = it.comment,reply = it.reply)
+                it.toNotificationComment()
             }
         )
     override suspend fun getReplies(
@@ -46,7 +46,7 @@ class CommentRepositoryImpl @Inject constructor(
         context = context,
         apiCall = { api.getReplies(ref, commentId, commentDate) },
         mapToResource = {
-            it.toComments(comments = it.comments)
+            it.toComments()
         }
 
     )
@@ -58,7 +58,7 @@ class CommentRepositoryImpl @Inject constructor(
         context = context,
         apiCall = { api.getSelectedComment(postId, commentId) },
         mapToResource = {
-            it.toComments(comments = it.comments)
+            it.toComments()
         }
     )
 
@@ -70,7 +70,7 @@ class CommentRepositoryImpl @Inject constructor(
         context = context,
         apiCall = { api.getComments(postId, commentId, commentDate) },
         mapToResource = {
-            it.toComments(comments = it.comments)
+            it.toComments()
         }
     )
 
@@ -82,7 +82,7 @@ class CommentRepositoryImpl @Inject constructor(
         context = context,
         apiCall = { api.postComments(postId, text, anonymousNick) },
         mapToResource = {
-            it.toComments(comments = it.comments)
+            it.toComments()
         }
     )
 
@@ -95,7 +95,7 @@ class CommentRepositoryImpl @Inject constructor(
         context = context,
         apiCall = { api.postReply(postId, ref, text, anonymousNick) },
         mapToResource = {
-            it.toComments(comments = it.comments)
+            it.toComments()
         }
     )
 
@@ -104,7 +104,7 @@ class CommentRepositoryImpl @Inject constructor(
             context = context,
             apiCall = { api.toggleLikeComment(commentId) },
             mapToResource = {
-                it.toToggleLikeResult(isLiked = it.isLiked)
+                it.toToggleLikeResult()
             }
         )
 

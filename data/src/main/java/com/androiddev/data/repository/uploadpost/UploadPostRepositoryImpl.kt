@@ -47,7 +47,7 @@ class UploadPostRepositoryImpl @Inject constructor(
     ): Flow<Resource<Posts>> = safeApiCall(
         context = context,
         apiCall = { api.editPost(postid,latitude,longitude,anonymousNick,deleteImages,tags,image,audio,deleteAudio,text) },
-        mapToResource = { it.toPosts(posts = it.posts) }
+        mapToResource = { it.toPosts() }
     )
 
 }

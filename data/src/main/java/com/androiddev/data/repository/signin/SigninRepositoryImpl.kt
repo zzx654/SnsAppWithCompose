@@ -24,10 +24,6 @@ class SigninRepositoryImpl @Inject constructor(
         context = context,
         apiCall = { api.socialSignIn(platform,account,fcmToken) },
         mapToResource = { it.toSigninResult(
-            isMember = it.isMember,
-            profileWritten = it.profileWritten,
-            userId = it.userId,
-            token = it.token
         )}
     )
     override suspend fun emailSignIn(
@@ -37,22 +33,13 @@ class SigninRepositoryImpl @Inject constructor(
     ): Flow<Resource<SigninResult>> = safeApiCall(
         context = context,
         apiCall = { api.emailSignIn(account,password,fcmToken) },
-        mapToResource = { it.toSigninResult(
-            isMember = it.isMember,
-            profileWritten = it.profileWritten,
-            userId = it.userId,
-            token = it.token
-        )}
+        mapToResource = { it.toSigninResult()}
     )
 
     override suspend fun signInWithToken(): Flow<Resource<SigninWithTokenResult>> =
         safeApiCall(
             context = context,
             apiCall = { api.signInWithToken() },
-            mapToResource = { it.toSigninWithTokenResult(
-                signInResult = it.signInResult,
-                profileWritten = it.profileWritten,
-                userId = it.userId
-            )}
+            mapToResource = { it.toSigninWithTokenResult()}
         )
 }

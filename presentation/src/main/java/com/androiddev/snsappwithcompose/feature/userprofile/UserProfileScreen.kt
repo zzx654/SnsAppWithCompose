@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
@@ -71,8 +73,8 @@ import com.androiddev.snsappwithcompose.feature.userprofile.component.UserProfil
 fun UserProfileScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
-    userPostsViewModel: UserPostsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
-    userViewModel: UserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    userPostsViewModel: UserPostsViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel(),
     userProfileViewModel:UserProfileViewModel
 ) {
 
@@ -192,7 +194,8 @@ fun UserProfileScreen(
                         loadNextPosts = { userPostsViewModel.onEvent(GetPostsEvent.LoadNext) },
                         onPostClick = { postId ->
                             userPostsViewModel.onEvent(GetPostsEvent.SelectPost(postId))
-                        }
+                        },
+                        uiPosts = userPostsViewModel.uiPosts
                     )
 
                 }
@@ -253,7 +256,7 @@ fun CustomChip(
             .height(36.dp)
             .background(
                 color = backgroundColor,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+                shape = RoundedCornerShape(50)
             )
             .padding(horizontal = 16.dp)
             .clickable { onClick() },

@@ -30,6 +30,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
+import com.androiddev.snsappwithcompose.common.base.viewmodel.PostUiState
 import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.Paginator
@@ -103,6 +104,13 @@ class PostDetailsViewModel @Inject constructor(
     val _post = mutableStateOf<PostPreview?>(null)
     val post: State<PostPreview?>
         get() = _post
+
+    val audioUrl: String?
+        get() = post.value?.media
+            ?.firstOrNull { it.type == "AUDIO" }
+            ?.url
+
+
     val _commentText = mutableStateOf("")
     val commentText: State<String>
         get() = _commentText

@@ -96,7 +96,8 @@ fun <VM : BasePostsViewModel> BasePostsScreen(
                     pullRefreshState = pullRefreshState,
                     onPostClick = { postId ->
                         viewModel.onEvent(GetPostsEvent.SelectPost(postId))
-                    }
+                    },
+                    uiPosts = viewModel.uiPosts
                 )
             }
         }

@@ -23,7 +23,7 @@ class GetPostsRepositoryImpl @Inject constructor(
     ): Flow<Resource<Posts>> = safeApiCall(
         context = context,
         apiCall = { api.getNewTagPosts(postId,postDate,tagId,latitude,longitude) },
-        mapToResource = { it.toPosts(posts = it.posts) }
+        mapToResource = { it.toPosts() }
     )
     override suspend fun getPopularTagPosts(
         postId: Int?,
@@ -34,7 +34,7 @@ class GetPostsRepositoryImpl @Inject constructor(
     ): Flow<Resource<Posts>>  = safeApiCall(
         context = context,
         apiCall = { api.getPopularTagPosts(postId,tagId,score,latitude,longitude) },
-        mapToResource = { it.toPosts(posts = it.posts) }
+        mapToResource = { it.toPosts() }
     )
     override suspend fun getNearPosts(
         postId: Int?,
@@ -45,7 +45,7 @@ class GetPostsRepositoryImpl @Inject constructor(
     ): Flow<Resource<Posts>> = safeApiCall(
         context = context,
         apiCall = { api.getNearPosts(postId,postDate,maxDistance,latitude,longitude) },
-        mapToResource = { it.toPosts(posts = it.posts) }
+        mapToResource = { it.toPosts() }
     )
 
     override suspend fun getNewPosts(
@@ -56,7 +56,7 @@ class GetPostsRepositoryImpl @Inject constructor(
     ): Flow<Resource<Posts>> =  safeApiCall(
         context = context,
         apiCall = { api.getNewPosts(postId,postDate,latitude,longitude) },
-        mapToResource = { it.toPosts(posts = it.posts) }
+        mapToResource = { it.toPosts() }
     )
 
     override suspend fun getUserPosts(
@@ -68,7 +68,7 @@ class GetPostsRepositoryImpl @Inject constructor(
     ): Flow<Resource<Posts>> = safeApiCall(
         context = context,
         apiCall = { api.getUserPosts(userId,postId,postDate,latitude,longitude)},
-        mapToResource = { it.toPosts(posts = it.posts)}
+        mapToResource = { it.toPosts()}
     )
 
 

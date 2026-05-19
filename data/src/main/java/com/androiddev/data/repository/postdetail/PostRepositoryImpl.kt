@@ -32,7 +32,7 @@ class PostRepositoryImpl @Inject constructor(
     ): Flow<Resource<Posts>> =  safeApiCall(
         context = context,
         apiCall = { api.getPost(postId,latitude,longitude) },
-        mapToResource = { it.toPosts(posts = it.posts) }
+        mapToResource = { it.toPosts() }
     )
 
 

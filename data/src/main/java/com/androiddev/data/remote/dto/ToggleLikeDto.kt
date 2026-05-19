@@ -6,7 +6,6 @@ data class ToggleLikeDto(
     val isLiked:Boolean
 )
 fun ToggleLikeDto.toToggleLikeResult(
-    isLiked: Boolean
 ): ToggleLikeResult {
     return ToggleLikeResult(isLiked = isLiked )
 }

@@ -12,21 +12,15 @@ data class UserDto(
     val postcount:Int?
 )
 fun UserDto.toUser(
-    userId:Int,
-    nickname:String,
-    gender:String,
-    profileImage:String?,
-    following:Int,
-    followerCount:Int?,
-    postCount:Int?
+
 ): User{
     return User(
-        userId = userId,
+        userId = userid,
         nickname = nickname,
         gender = gender,
-        profileImage = profileImage,
+        profileImage = profileimage,
         following = following,
-        followerCount = followerCount?:0,
-        postCount = postCount
+        followerCount = followercount?:0,
+        postCount = postcount
     )
 }

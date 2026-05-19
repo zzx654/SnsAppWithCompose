@@ -6,7 +6,6 @@ data class ToggleFollowDto(
     val isFollowing:Boolean
 )
 fun ToggleFollowDto.toToggleFollowResult(
-    isFollowing: Boolean
 ): ToggleFollowResult {
     return ToggleFollowResult(isFollowing = isFollowing )
 }

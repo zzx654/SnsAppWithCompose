@@ -124,6 +124,7 @@ fun PostDetailScreen(
 ) {
 
     val post = postViewModel.post.value
+    val audioUrl = postViewModel.audioUrl
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -150,10 +151,10 @@ fun PostDetailScreen(
         )
     }
 
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { post?.imageSize ?: 0 }
-    )
+    //val pagerState = rememberPagerState(
+    //    initialPage = 0,
+     //   pageCount = { post?.imageSize ?: 0 }
+    //)
     var pendingScrollByCount by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
@@ -188,15 +189,15 @@ fun PostDetailScreen(
     }
     val getCommentsState = postViewModel.getCommentsState.value
 
-    LaunchedEffect(post) {
-            post?.let { post ->
-                post.audio?.let {
-                    audioViewModel.prepareAudio(
-                        url = BuildConfig.BASE_URL + it,
-                        nickname = post.nickname
-                    )
-                }
+    LaunchedEffect(audioUrl) {
+        audioUrl?.let {
+            if (post != null) {
+                audioViewModel.prepareAudio(
+                    url = BuildConfig.BASE_URL + it,
+                    nickname = post.anonymousNickname ?: post.nickname
+                )
             }
+        }
     }
     LaunchedEffect(
         postViewModel.notificationComment.value,
@@ -329,7 +330,7 @@ fun PostDetailScreen(
                                     }
                                 )
                             }
-                            Spacer(modifier = Modifier.height(if (post?.tags == null) 15.dp else 5.dp))
+                            Spacer(modifier = Modifier.height(if (post.tags == null) 15.dp else 5.dp))
 
                             Row(
                                 modifier = Modifier
@@ -349,13 +350,13 @@ fun PostDetailScreen(
 
                                 Column {
                                     Text(
-                                        post?.nickname?:"",
+                                        post.anonymousNickname ?: post.nickname,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "${post?.elapsedTime} · ${post?.distance?:0}km ",
+                                        text = "${post.elapsedTime} · ${post.distance ?:0}km ",
                                         fontSize = 13.sp,
                                         color = Color.Gray
                                     )
@@ -371,13 +372,13 @@ fun PostDetailScreen(
                             )
                             Spacer(modifier = Modifier.height(15.dp))
                             Text(
-                                text = post?.text?:"",
+                                text = post.text,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 24.dp),
                             )
                             Spacer(modifier = Modifier.height(15.dp))
-                            post?.images?.let { images ->
+                            /**post?.images?.let { images ->
                                 HorizontalPager(
                                     state = pagerState,
                                     modifier = Modifier
@@ -421,9 +422,9 @@ fun PostDetailScreen(
                                 }
 
 
-                            }
+                            }**/
 
-                            Spacer(modifier = Modifier.height(if (post?.images == null) 0.dp else 15.dp))
+                            //Spacer(modifier = Modifier.height(if (post?.images == null) 0.dp else 15.dp))
                             PollCard(
                                 voteState = postViewModel.voteState.value,
                                 onOptionSelected = { optionId -> postViewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
@@ -439,7 +440,7 @@ fun PostDetailScreen(
                                         .align(Alignment.CenterEnd) // 오른쪽 끝
                                         .padding(end = 8.dp,top = 10.dp),
                                     viewModel = audioViewModel,
-                                    url = post?.audio
+                                    url = audioUrl
                                 )
                             }
 

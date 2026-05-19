@@ -21,7 +21,7 @@ class ToggleLikePostRepositoryImpl @Inject constructor(
         safeApiCall(
             context = context,
             apiCall = { api.toggleLikePost(postid) },
-            mapToResource = { it.toToggleLikeResult(isLiked = it.isLiked) }
+            mapToResource = { it.toToggleLikeResult() }
         )
 
 }

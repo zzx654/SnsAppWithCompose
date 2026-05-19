@@ -22,21 +22,21 @@ class NotificationRepositoryImpl @Inject constructor(
     ): Flow<Resource<Notifications>> = safeApiCall(
         context = context,
         apiCall = { api.getNotifications(notificationId,notificationDate) },
-        mapToResource = { it.toNotifications(notifications = it.notifications, unreadCount = it.unreadCount) }
+        mapToResource = { it.toNotifications() }
     )
 
     override suspend fun readAllNotifications(): Flow<Resource<Notifications>>
     = safeApiCall(
         context = context,
         apiCall = { api.readAllNotifications() },
-        mapToResource = { it.toNotifications(notifications = it.notifications, unreadCount = it.unreadCount)}
+        mapToResource = { it.toNotifications()}
     )
 
     override suspend fun deleteNotifications(): Flow<Resource<Notifications>>
     = safeApiCall(
         context = context,
         apiCall = { api.deleteNotifications() },
-        mapToResource = { it.toNotifications(notifications = it.notifications, unreadCount = it.unreadCount)}
+        mapToResource = { it.toNotifications()}
     )
 
     override suspend fun readNotification(notificationId:Long): Flow<Resource<ReadNotificationResult>> = safeApiCall(
@@ -44,9 +44,6 @@ class NotificationRepositoryImpl @Inject constructor(
         apiCall = { api.readNotification(notificationId) },
         mapToResource = {
             it.toReadNotificationResult(
-                status = it.status,
-                reason = it.reason,
-                unreadCount = it.unreadCount
             )
         }
     )

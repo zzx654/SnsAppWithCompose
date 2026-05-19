@@ -9,8 +9,7 @@ data class TagsDto(
 )
 
 fun TagsDto.toTags(
-    favoriteTags:List<Tag>,
-    popularTags: List<Tag> ): Tags {
+): Tags {
     return Tags(
         favoriteTags = favoriteTags,
         popularTags = popularTags

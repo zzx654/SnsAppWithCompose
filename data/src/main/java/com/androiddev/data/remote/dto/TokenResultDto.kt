@@ -6,5 +6,4 @@ data class TokenResultDto (
     val token: String
 )
 fun TokenResultDto.toTokenResult(
-    token: String
 ): TokenResult = TokenResult(token)

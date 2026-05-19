@@ -6,7 +6,6 @@ data class AuthCodeResultDto(
     val isCorrect:Boolean
 )
 fun AuthCodeResultDto.toAuthCodeResult(
-    isCorrect: Boolean
 ): AuthCodeResult {
     return AuthCodeResult(isCorrect = isCorrect)
 }

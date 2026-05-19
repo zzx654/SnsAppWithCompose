@@ -9,9 +9,6 @@ data class SigninWithTokenResultDto(
     val userId: Int?,
 )
 fun SigninWithTokenResultDto.toSigninWithTokenResult(
-    signInResult: Boolean,
-    profileWritten: Boolean,
-    userId: Int?
 ):SigninWithTokenResult {
     return SigninWithTokenResult(
         signInResult = signInResult,

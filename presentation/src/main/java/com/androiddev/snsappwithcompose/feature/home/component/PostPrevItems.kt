@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.androiddev.domain.model.PostPreview
+import com.androiddev.snsappwithcompose.common.base.viewmodel.PostUiState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -27,6 +28,7 @@ fun PostPrevItems(
     isLoading:()->Boolean,
     endReached:()->Boolean,
     posts:()->List<PostPreview>,
+    uiPosts:List<PostUiState>,
     loadNextPosts:()->Unit,
     pullRefreshState: PullRefreshState,
     onPostClick:(Int)->Unit
@@ -40,6 +42,7 @@ fun PostPrevItems(
             isLoading = isLoading,
             endReached = endReached,
             posts = posts,
+            uiPosts = uiPosts,
             loadNextPosts = loadNextPosts,
             onPostClick = onPostClick
         )
@@ -51,6 +54,7 @@ fun LazyListScope.postPrevItemsContent(
     isLoading: () -> Boolean,
     endReached: () -> Boolean,
     posts: () -> List<PostPreview>,
+    uiPosts:List<PostUiState>,
     loadNextPosts: () -> Unit,
     onPostClick: (Int) -> Unit
 ) {
@@ -65,7 +69,11 @@ fun LazyListScope.postPrevItemsContent(
             post = posts()[index],
             modifier = Modifier.clickable {
                 onPostClick(posts()[index].postId)
-            }
+            },
+            image = uiPosts[index].imageUrls,
+            hasVideo = uiPosts[index].hasVideo,
+            hasAudio = uiPosts[index].hasAudio,
+            displayUserName = uiPosts[index].displayUserName
         )
         //Spacer(modifier = Modifier.height(4.dp))
         HorizontalDivider(

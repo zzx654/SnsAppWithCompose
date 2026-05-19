@@ -36,7 +36,7 @@ class CreateProfileRepositoryImpl @Inject constructor(
         safeApiCall(
             context = context,
             apiCall = { api.checkNickname(nickname) },
-            mapToResource = { it.toValidationResult(isValid = it.isValid)}
+            mapToResource = { it.toValidationResult()}
         )
 
 

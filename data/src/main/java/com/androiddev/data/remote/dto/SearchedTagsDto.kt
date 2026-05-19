@@ -8,7 +8,6 @@ data class SearchedTagsDto(
 )
 
 fun SearchedTagsDto.toSearchTags(
-    searchedTags: List<Tag>
 ): SearchedTags {
     return SearchedTags(searchedTags = searchedTags)
 }

@@ -25,7 +25,7 @@ class AuthPhoneRepositoryImpl @Inject constructor(
         safeApiCall(
             context = context,
             apiCall = { api.requestAuthCode(phoneNumber) },
-            mapToResource = { it.toValidationResult(isValid = it.isValid) }
+            mapToResource = { it.toValidationResult() }
         )
 
     override suspend fun authenticateCode(
@@ -35,7 +35,7 @@ class AuthPhoneRepositoryImpl @Inject constructor(
         safeApiCall(
             context = context,
             apiCall = { api.authenticateCode(phoneNumber,authCode) },
-            mapToResource = { it.toAuthCodeResult(isCorrect = it.isCorrect) }
+            mapToResource = { it.toAuthCodeResult() }
 
         )
 

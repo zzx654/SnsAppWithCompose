@@ -127,14 +127,14 @@ class UploadPostViewModel @Inject constructor(
             }
             _anonymous.value = post.anonymousNickname!=null
             _locationOnOff.value = post.location != null
-            post.images?.let {
+            /**post.images?.let {
                 _selectedImages.clear()
                 _selectedImages.addAll(
                     it.map { path ->
                         EditableImage(remotePath = path, isNew = false)
                     }
                 )
-            }
+            }**/
             isInitialized = true
         }
 

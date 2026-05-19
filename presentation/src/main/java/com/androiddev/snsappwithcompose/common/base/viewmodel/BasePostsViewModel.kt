@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.androiddev.snsappwithcompose.feature.home.GetPostsState
 import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
+import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.feature.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
@@ -29,6 +30,16 @@ abstract class BasePostsViewModel(
     protected val _getPostState = mutableStateOf(GetPostsState())
     val getPostState: State<GetPostsState> get() = _getPostState
 
+    val uiPosts: List<PostUiState>
+        get() = getPostState.value.posts.map { post ->
+            PostUiState(
+                post = post,
+                imageUrls = post.media.filter { it.type == "IMAGE" }.map{ it.url },
+                hasVideo = post.media.any { it.type == "VIDEO" },
+                hasAudio = post.media.any { it.type == "AUDIO"},
+                displayUserName = post.anonymousNickname ?: post.nickname
+            )
+        }
     protected val _locationPermissionGranted = mutableStateOf(true)
     val locationPermissionGranted: State<Boolean>
         get() = _locationPermissionGranted
@@ -118,3 +129,11 @@ abstract class BasePostsViewModel(
     }
 
 }
+data class PostUiState(
+    val post: PostPreview,
+    val imageUrls:List<String>,
+    val hasAudio: Boolean,
+    val hasVideo: Boolean,
+    val displayUserName: String
+
+)

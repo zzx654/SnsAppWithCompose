@@ -31,13 +31,13 @@ class SignupRepositoryImpl @Inject constructor(
     ): Flow<Resource<TokenResult>> = safeApiCall(
         context = context,
         apiCall = { api.socialSignUp(platform,account,phonenumber,fcmToken) },
-        mapToResource = { it.toTokenResult(it.token) }
+        mapToResource = { it.toTokenResult() }
     )
     override suspend fun requestAuthCode(email: String): Flow<Resource<ValidationResult>> =
         safeApiCall(
             context= context,
             apiCall = { api.requestAuthCode(email) },
-            mapToResource = { it.toValidationResult(it.isValid)}
+            mapToResource = { it.toValidationResult()}
         )
 
     override suspend fun emailSignUp(
@@ -48,7 +48,7 @@ class SignupRepositoryImpl @Inject constructor(
     ): Flow<Resource<AuthCodeResult>> = safeApiCall(
         context = context,
         apiCall = { api.emailSignUp(account,password, phonenumber, authCode) },
-        mapToResource = { it.toAuthCodeResult(isCorrect = it.isCorrect) }
+        mapToResource = { it.toAuthCodeResult() }
     )
 
 }

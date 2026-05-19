@@ -9,10 +9,6 @@ data class SigninResultDto (
     val token: String,
 )
 fun SigninResultDto.toSigninResult(
-    isMember: Boolean,
-    profileWritten: Boolean,
-    userId: Int?,
-    token: String,
 ): SigninResult {
     return SigninResult(
         isMember = isMember,

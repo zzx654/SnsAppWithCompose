@@ -21,21 +21,6 @@ data class CommentDto (
     val commentliked: Int
 )
 fun CommentDto.toComment(
-    postid: Int,
-    commentid: Int,
-    userid: Int,
-    text: String,
-    ref: Int,
-    date:String,
-    depth: Int,
-    anonymous: String?,
-    nickname: String?,
-    profileimage: String?,
-    gender: String,
-    replycount: Int,
-    likecount: Int,
-    score:Int,
-    commentliked: Int
 ): Comment {
     return Comment(
         postId = postid,

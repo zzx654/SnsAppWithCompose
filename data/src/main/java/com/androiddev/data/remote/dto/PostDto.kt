@@ -1,5 +1,6 @@
 package com.androiddev.data.remote.dto
 
+import com.androiddev.domain.model.Media
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.util.elapsedTime
 import kotlin.math.round
@@ -15,8 +16,7 @@ data class PostDto(
     val text:String,
     val tags:String?,
     val date:String,
-    val images:String?,
-    val audio:String?,
+    val media:List<MediaDto>,
     var commentcount:Int,
     var likecount:Int,
     var isliked:Int?,
@@ -28,28 +28,10 @@ data class PostDto(
 
 )
 fun PostDto.toPostPreview(
-    postid:Int,
-    userid:Int,
-    nickname:String?,
-    anonymous:String?,
-    profileimage:String?,
-    location:Double?,
-    gender:String,
-    text:String,
-    tags:String?,
-    date:String,
-    images:String?,
-    audio:String?,
-    commentcount:Int,
-    likecount:Int,
-    isliked:Int?,
-    popularityScore: Double?,
-    distance:Double?,
-    vote:String?,
-    votecount:Int?,
+
 ): PostPreview {
     //닉네임 거리 태그 이미지 투표 경과시간
-    var imageList = images?.split(',')
+
     return PostPreview(
         postId = postid,
         userId = userid,
@@ -59,10 +41,7 @@ fun PostDto.toPostPreview(
         gender = gender,
         text = text,
         location = location,
-        audio = audio,
-        images = imageList,
-        firstImage = imageList?.get(0),
-        imageSize = imageList?.size,
+        media = media.map { it.toMedia() },
         tags = tags?.split('#'),
         date = date,
         elapsedTime = elapsedTime(date),

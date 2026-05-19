@@ -19,9 +19,7 @@ class TagRepositoryImpl @Inject constructor(
     override suspend fun getTags(): Flow<Resource<Tags>> = safeApiCall(
         context = context,
         apiCall = { api.getTags() },
-        mapToResource = { it.toTags(
-            favoriteTags = it.favoriteTags,
-            popularTags = it.popularTags)
+        mapToResource = { it.toTags()
         }
     )
     override suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<Tags>> =
@@ -30,8 +28,6 @@ class TagRepositoryImpl @Inject constructor(
             apiCall = { api.toggleFavoriteTag(tagId) },
             mapToResource = {
                 it.toTags(
-                    favoriteTags = it.favoriteTags,
-                    popularTags = it.popularTags
                 )
             }
         )
@@ -41,7 +37,6 @@ class TagRepositoryImpl @Inject constructor(
             apiCall = { api.searchTag(tag) },
             mapToResource = {
                 it.toSearchTags(
-                    searchedTags = it.searchedTags
                 )
             }
         )

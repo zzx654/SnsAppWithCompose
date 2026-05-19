@@ -24,13 +24,13 @@ class UserRepositoryImpl @Inject constructor(
     ): Flow<Resource<Users>> = safeApiCall(
         context = context,
         apiCall = { api.getSearchedUsers(nickname,lastUserId)},
-        mapToResource = { it.toUsers(it.users) }
+        mapToResource = { it.toUsers() }
     )
 
     override suspend fun toggleFollowUser(userId: Int): Flow<Resource<ToggleFollowResult>> = safeApiCall(
         context = context,
         apiCall = { api.toggleFollowUser(userId)},
-        mapToResource = { it.toToggleFollowResult(it.isFollowing)}
+        mapToResource = { it.toToggleFollowResult()}
     )
 
     override suspend fun getUserInfo(userId: Int): Flow<Resource<Users>> = safeApiCall(
@@ -38,7 +38,6 @@ class UserRepositoryImpl @Inject constructor(
         apiCall = { api.getUserInfo(userId)},
         mapToResource = {
             it.toUsers(
-                it.users
             )
         }
     )

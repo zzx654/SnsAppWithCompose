@@ -20,6 +20,8 @@ import androidx.compose.material.icons.outlined.Comment
 import androidx.compose.material.icons.outlined.HowToVote
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.Movie
+import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -48,7 +50,11 @@ import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 @Composable
 fun PostPrevItem(
     modifier:Modifier,
-    post: PostPreview
+    post: PostPreview,
+    image:List<String>,
+    hasVideo: Boolean,
+    hasAudio: Boolean,
+    displayUserName:String
 ) {
     //로딩이랑 거리버튼 누르면 로딩되면서 불러오는 것 추가,위치권한 확인후 안되어있으면 텍스트 표시//
     //페이징추가
@@ -86,8 +92,7 @@ fun PostPrevItem(
                 modifier = Modifier.weight(0.7f)
             )
             Spacer(modifier = Modifier.weight(0.08f))
-            post.images?.let { images ->
-
+            if(image.isNotEmpty()) {
                 Box(
                     modifier = Modifier
                         .weight(0.25f)
@@ -99,7 +104,7 @@ fun PostPrevItem(
                         .build()
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(BuildConfig.BASE_URL+ post.firstImage)
+                            .data(BuildConfig.BASE_URL+ image.first())
                             .build(),
                         imageLoader = imageLoader,
                         modifier = Modifier
@@ -109,29 +114,26 @@ fun PostPrevItem(
                         contentScale = ContentScale.Crop,
                         contentDescription = null
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(90.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.Black.copy(alpha = 0.4f))
+                    )
+                    Text(
+                        text = "+${image.size.minus(1)}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(7.dp)
+                    )
 
-                    if ((post.imageSize ?: 0) > 1) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .size(90.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color.Black.copy(alpha = 0.4f))
-                        )
-                        Text(
-                            text = "+${post.imageSize?.minus(1)}",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(7.dp)
-                        )
-                    }
                 }
-
-
             }
+
 
         }
         Row(
@@ -188,7 +190,14 @@ fun PostPrevItem(
                 Text("${post.voteCount?:0}",color = Color.DarkGray.copy(0.8f))
                 Spacer(modifier = Modifier.width(9.dp))
             }
-            post.audio?.let {
+            if(hasVideo) {
+                Icon (
+                    imageVector = Icons.Outlined.SmartDisplay,
+                    contentDescription = null,
+                    tint = Color.DarkGray.copy(0.8f)
+                )
+            }
+            if(hasAudio) {
                 Icon(
                     imageVector = Icons.Outlined.Mic,
                     contentDescription = null,
