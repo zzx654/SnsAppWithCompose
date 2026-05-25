@@ -5,4 +5,9 @@ object Constants {
     const val PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$!%*#?&.])[A-Za-z[0-9]$@$!%*#?&.]{8,16}$"
 
     const val PAGE_SIZE = 15
+
+    const val MEDIA_TYPE_IMAGE = "IMAGE"
+    const val MEDIA_TYPE_VIDEO = "VIDEO"
+    const val MEDIA_TYPE_AUDIO = "AUDIO"
+
 }

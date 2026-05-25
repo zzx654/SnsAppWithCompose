@@ -17,6 +17,9 @@ import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.google.android.gms.location.FusedLocationProviderClient
 import kotlinx.coroutines.launch
 import com.androiddev.domain.model.Posts
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.feature.home.util.PostPaginator
 import dagger.hilt.android.qualifiers.ApplicationContext
 
@@ -34,9 +37,9 @@ abstract class BasePostsViewModel(
         get() = getPostState.value.posts.map { post ->
             PostUiState(
                 post = post,
-                imageUrls = post.media.filter { it.type == "IMAGE" }.map{ it.url },
-                hasVideo = post.media.any { it.type == "VIDEO" },
-                hasAudio = post.media.any { it.type == "AUDIO"},
+                imageUrls = post.media.filter { it.type == MEDIA_TYPE_IMAGE }.map{ it.url },
+                hasVideo = post.media.any { it.type == MEDIA_TYPE_VIDEO },
+                hasAudio = post.media.any { it.type == MEDIA_TYPE_AUDIO },
                 displayUserName = post.anonymousNickname ?: post.nickname
             )
         }

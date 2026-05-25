@@ -104,6 +104,7 @@ import com.androiddev.snsappwithcompose.common.state.UiEvent
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.collectAsState
 import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.common.component.PagerDotsIndicator
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
@@ -125,6 +126,7 @@ fun PostDetailScreen(
 
     val post = postViewModel.post.value
     val audioUrl = postViewModel.audioUrl
+    val mediaUiState by postViewModel.mediaUiModel.collectAsState()
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()

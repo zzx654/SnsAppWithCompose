@@ -16,6 +16,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Comments
+import com.androiddev.domain.model.Media
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
@@ -35,6 +36,9 @@ import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
@@ -42,6 +46,8 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -104,6 +110,9 @@ class PostDetailsViewModel @Inject constructor(
     val _post = mutableStateOf<PostPreview?>(null)
     val post: State<PostPreview?>
         get() = _post
+
+    private val _mediaUiModel = MutableStateFlow(MediaUiModel(emptyList(), emptyList()))
+    val mediaUiModel: StateFlow<MediaUiModel> = _mediaUiModel
 
     val audioUrl: String?
         get() = post.value?.media
@@ -251,6 +260,7 @@ class PostDetailsViewModel @Inject constructor(
     private fun loadPostDetails(post: PostPreview) {
         _isLiked.value = post.isliked
         _post.value = post
+        _mediaUiModel.value = post.media.toMediaUiModel()
         viewModelScope.launch {
             commentPaginator.loadNextItems(refresh = true)
         }
@@ -522,6 +532,20 @@ class PostDetailsViewModel @Inject constructor(
     private fun resetBottomSheetDialogState() {
         _customBottomSheetDialogState.value = CustomBottomSheetDialogState()
     }
+
+}
+data class MediaUiModel(
+    val visualMedia: List<Media>, // image + video
+    val audioMedia: List<Media>
+)
+fun List<Media>.toMediaUiModel(): MediaUiModel {
+    val visual = filter { it.type == MEDIA_TYPE_IMAGE || it.type == MEDIA_TYPE_VIDEO }
+    val audio = filter { it.type == MEDIA_TYPE_AUDIO }
+    return MediaUiModel(
+        visualMedia = visual,
+        audioMedia = audio
+    )
+
 
 }
 
