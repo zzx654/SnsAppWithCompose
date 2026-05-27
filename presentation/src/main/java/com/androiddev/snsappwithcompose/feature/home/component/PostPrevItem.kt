@@ -114,22 +114,25 @@ fun PostPrevItem(
                         contentScale = ContentScale.Crop,
                         contentDescription = null
                     )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .size(90.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.Black.copy(alpha = 0.4f))
-                    )
-                    Text(
-                        text = "+${image.size.minus(1)}",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(7.dp)
-                    )
+                    if(image.size > 1) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .size(90.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.Black.copy(alpha = 0.4f))
+                        )
+                        Text(
+                            text = "+${image.size.minus(1)}",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(7.dp)
+                        )
+                    }
+
 
                 }
             }
@@ -196,6 +199,7 @@ fun PostPrevItem(
                     contentDescription = null,
                     tint = Color.DarkGray.copy(0.8f)
                 )
+                Spacer(modifier = Modifier.width(9.dp))
             }
             if(hasAudio) {
                 Icon(
