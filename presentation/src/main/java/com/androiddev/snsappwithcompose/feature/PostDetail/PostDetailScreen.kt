@@ -107,6 +107,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.collectAsState
 import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.common.component.PagerDotsIndicator
+import com.androiddev.snsappwithcompose.feature.PostDetail.component.MediaGrid
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -380,6 +381,11 @@ fun PostDetailScreen(
                                     .padding(horizontal = 24.dp),
                             )
                             Spacer(modifier = Modifier.height(15.dp))
+
+                            if(mediaUiState.visualMedia.isNotEmpty()) {
+                                MediaGrid(mediaUiState.visualMedia)
+
+                            }
                             /**post?.images?.let { images ->
                                 HorizontalPager(
                                     state = pagerState,

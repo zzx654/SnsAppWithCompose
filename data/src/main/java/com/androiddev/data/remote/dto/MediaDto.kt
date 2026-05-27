@@ -6,7 +6,7 @@ data class MediaDto(
     val id: Int,
     val url: String,
     val type: String,
-    val thumbnail: String?
+    val thumbnailurl: String?
 )
 fun MediaDto.toMedia(
-) = Media(id = id,url = url,type= type, thumbnail = thumbnail)
+) = Media(id = id,url = url,type= type, thumbnailUrl = thumbnailurl)

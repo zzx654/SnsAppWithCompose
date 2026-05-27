@@ -10,6 +10,6 @@ data class Media(
     val id: Int,
     val url: String,
     val type: String,
-    val thumbnail:String?
+    val thumbnailUrl:String?
 
 ):Parcelable
