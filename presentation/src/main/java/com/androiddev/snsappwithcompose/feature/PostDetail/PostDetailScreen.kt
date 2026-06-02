@@ -105,8 +105,10 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.res.stringResource
 import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.common.component.PagerDotsIndicator
+import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 import com.androiddev.snsappwithcompose.feature.PostDetail.component.MediaGrid
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
 import kotlinx.coroutines.flow.collectLatest
@@ -280,7 +282,7 @@ fun PostDetailScreen(
             topBar = {
                 //if (post != null) {
                 CenterAlignedTopBar(
-                    title = post.nickname ?:"",
+                    title = generateDisplayName(context,post.nickname,post.anonymousNickname),
                     onBackClick = { navController.popBackStack() },
                     rightAction = {
                         IconButton(onClick = { dropdownMenuExpanded = true }) {
@@ -353,7 +355,7 @@ fun PostDetailScreen(
 
                                 Column {
                                     Text(
-                                        post.anonymousNickname ?: post.nickname,
+                                        text = generateDisplayName(context,post.nickname,post.anonymousNickname),
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -386,51 +388,6 @@ fun PostDetailScreen(
                                 MediaGrid(mediaUiState.visualMedia)
 
                             }
-                            /**post?.images?.let { images ->
-                                HorizontalPager(
-                                    state = pagerState,
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                    //.height(270.dp),
-                                    // count = currentPost?.imageSize ?: 0
-                                ) { page ->
-                                    // 여기에 페이지별로 보여줄 UI 구현 (예: 이미지)
-                                    // 예시:
-                                    // AsyncImage(model = images[page], contentDescription = null)
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(LocalContext.current)
-                                            //.data("http://192.168.0.7:3000/image?filename=7FOtkf7xsDihLr8AMYXQe35MX.jpg")
-                                            .data(BuildConfig.BASE_URL + images[page])
-                                            .build(),
-                                        imageLoader = imageLoader,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .aspectRatio(1f)
-                                            //.heightIn(min = 200.dp, max = 400.dp)
-                                            .padding(horizontal = 24.dp),
-
-                                        contentScale = ContentScale.Fit,
-                                        contentDescription = null
-                                    )
-
-                                }
-
-                                Spacer(modifier = Modifier.height(15.dp))
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.TopCenter
-                                ) {
-                                    if(pagerState.pageCount > 1){
-                                        PagerDotsIndicator(
-                                            pagerState = pagerState,
-                                            modifier = Modifier.padding(top = 8.dp)
-                                        )
-                                    }
-
-                                }
-
-
-                            }**/
 
                             //Spacer(modifier = Modifier.height(if (post?.images == null) 0.dp else 15.dp))
                             PollCard(

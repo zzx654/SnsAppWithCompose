@@ -9,5 +9,6 @@ data class MediaItem(
     val remotePath:String? = null,
     val type: MediaType,
     val thumbnail: Bitmap? = null,
+    val remoteThumbnailPath:String? = null,
     val isNew: Boolean = false
 )

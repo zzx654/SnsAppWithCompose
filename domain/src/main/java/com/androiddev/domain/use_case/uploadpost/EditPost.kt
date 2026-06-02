@@ -16,12 +16,23 @@ class EditPost @Inject constructor(
         latitude: MultipartBody.Part?,
         longitude: MultipartBody.Part?,
         anonymousNick: RequestBody?,
-        deleteImages: RequestBody?,
+        deletedVisualMedia: RequestBody?,
         tags: RequestBody?,
-        images:List<MultipartBody.Part>?,
-        audio:MultipartBody.Part?,
-        deleteAudio:RequestBody?,
+        media:List<MultipartBody.Part>?,
+        mediaTypes:List<RequestBody>?,
+        deletedAudio:RequestBody?,
         text: RequestBody
-    ): Flow<Resource<Posts>> = repository.editPost(postid,latitude,longitude,anonymousNick,deleteImages,tags,images,audio,deleteAudio,text)
+    ): Flow<Resource<Posts>> = repository.editPost(
+        postid = postid,
+        latitude = latitude,
+        longitude = longitude,
+        anonymousNick = anonymousNick,
+        deletedVisualMedia = deletedVisualMedia,
+        tags = tags,
+        media = media,
+        mediaTypes = mediaTypes,
+        deletedAudio = deletedAudio,
+        text = text
+    )
 
 }

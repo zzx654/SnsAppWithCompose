@@ -25,14 +25,5 @@ fun VideoItem(media: Media, modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-
-        /**Icon(
-            imageVector = Icons.Default.PlayArrow,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(48.dp)
-        )**/
     }
 }

@@ -24,11 +24,11 @@ interface UploadPostRepository {
         latitude: MultipartBody.Part?,
         longitude: MultipartBody.Part?,
         anonymousNick: RequestBody?,
-        deleteImages: RequestBody?,
         tags: RequestBody?,
-        images:List<MultipartBody.Part>?,
-        audio:MultipartBody.Part?,
-        deleteAudio:RequestBody?,
+        media:List<MultipartBody.Part>?,
+        mediaTypes:List<RequestBody>?,
+        deletedVisualMedia:RequestBody?,
+        deletedAudio:RequestBody?,
         text: RequestBody
     ): Flow<Resource<Posts>>
 

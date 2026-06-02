@@ -30,11 +30,11 @@ interface UploadPostApi {
         @Part latitude: MultipartBody.Part?,
         @Part longitude: MultipartBody.Part?,
         @Part ("anonymousNick") anonymousNick: RequestBody?,
-        @Part ("deleteImages") deleteImages: RequestBody?,
+        @Part ("deletedVisualMedia") deletedVisualMedia: RequestBody?,
         @Part ("tags") tags: RequestBody?,
-        @Part imageFiles: List<MultipartBody.Part>?,
-        @Part audioFile: MultipartBody.Part?,
-        @Part ("deleteAudio") deleteAudio: RequestBody?,
+        @Part media: List<MultipartBody.Part>?,
+        @Part ("mediaTypes")mediaTypes: List<@JvmSuppressWildcards RequestBody>?,
+        @Part ("deletedAudio") deletedAudio: RequestBody?,
         @Part ("text") text: RequestBody
     ): Response<BaseApiResponse<GetPostsDto>>
 

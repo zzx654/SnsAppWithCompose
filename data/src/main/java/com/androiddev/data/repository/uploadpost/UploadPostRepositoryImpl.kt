@@ -38,15 +38,26 @@ class UploadPostRepositoryImpl @Inject constructor(
         latitude: MultipartBody.Part?,
         longitude: MultipartBody.Part?,
         anonymousNick: RequestBody?,
-        deleteImages: RequestBody?,
         tags: RequestBody?,
-        image: List<MultipartBody.Part>?,
-        audio: MultipartBody.Part?,
-        deleteAudio: RequestBody?,
+        media: List<MultipartBody.Part>?,
+        mediaTypes:List<RequestBody>?,
+        deletedVisualMedia: RequestBody?,
+        deletedAudio: RequestBody?,
         text: RequestBody
     ): Flow<Resource<Posts>> = safeApiCall(
         context = context,
-        apiCall = { api.editPost(postid,latitude,longitude,anonymousNick,deleteImages,tags,image,audio,deleteAudio,text) },
+        apiCall = {
+            api.editPost(
+                postid = postid,
+                latitude = latitude,
+                longitude = longitude,
+                anonymousNick = anonymousNick,
+                tags = tags,
+                media = media,
+                mediaTypes = mediaTypes,
+                deletedVisualMedia = deletedVisualMedia,
+                deletedAudio = deletedAudio,
+                text = text) },
         mapToResource = { it.toPosts() }
     )
 

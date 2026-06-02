@@ -21,6 +21,8 @@ import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.Posts
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.feature.upload_post.component.EditableImage
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.androiddev.snsappwithcompose.feature.upload_post.util.getVideoThumbnail
@@ -69,7 +71,8 @@ class UploadPostViewModel @Inject constructor(
     private val _selectedMediaItems = mutableStateListOf<MediaItem>()
     val selectedMediaItems: SnapshotStateList<MediaItem>
         get() = _selectedMediaItems
-    val deletedImages = mutableStateListOf<String>()
+    //val deletedImages = mutableStateListOf<String>()
+    val deletedVisualMedia = mutableStateListOf<String>()
     private val _locationOnOff = mutableStateOf(false)
     val locationOnOff: State<Boolean>
         get() = _locationOnOff
@@ -127,6 +130,30 @@ class UploadPostViewModel @Inject constructor(
             }
             _anonymous.value = post.anonymousNickname!=null
             _locationOnOff.value = post.location != null
+            val visualMedia = post.media.filter{ it.type == MEDIA_TYPE_IMAGE || it.type == MEDIA_TYPE_VIDEO }
+            if(visualMedia.isNotEmpty()) {
+
+                _selectedMediaItems.clear()
+                _selectedMediaItems.addAll(
+                    visualMedia.map { media ->
+                        if (media.type == MEDIA_TYPE_VIDEO) {
+
+                            MediaItem(
+                                type = MediaType.VIDEO,
+                                remotePath = media.url,
+                                remoteThumbnailPath = media.thumbnailUrl,
+                                isNew = false
+                            )
+                        } else {
+                            MediaItem(
+                                type = MediaType.IMAGE,
+                                remotePath = media.url
+                                ,isNew = false)
+                        }
+                    }
+                )
+
+            }
             /**post.images?.let {
                 _selectedImages.clear()
                 _selectedImages.addAll(
@@ -233,13 +260,13 @@ class UploadPostViewModel @Inject constructor(
                 )
             }
 
-            is UploadPostEvent.DeleteImage -> {
+            /**is UploadPostEvent.DeleteImage -> {
                 _selectedImages.remove(event.image)
                 if (!event.image.isNew && event.image.remotePath != null) {
-                    deletedImages.add(event.image.remotePath)
+                //    deletedImages.add(event.image.remotePath)
                 }
                 _selectedImages.remove(event.image)
-            }
+            }**/
 
             is UploadPostEvent.SetLocationOnOff -> {
                 _locationOnOff.value = event.onOff
@@ -277,6 +304,11 @@ class UploadPostViewModel @Inject constructor(
             }
             is UploadPostEvent.DeleteMedia -> {
                 _selectedMediaItems.remove(event.media)
+                //_selectedImages.remove(event.image)
+                if (!event.media.isNew && event.media.remotePath != null) {
+                    deletedVisualMedia.add(event.media.remotePath)
+                }
+                //_selectedImages.remove(event.image)
                 //if (!event.image.isNew && event.image.remotePath != null) {
                  //   deletedImages.add(event.image.remotePath)
                 //}
@@ -294,8 +326,7 @@ class UploadPostViewModel @Inject constructor(
             val requestBodies = buildRequestBodies(event)
             when (postMode) {
                 PostMode.CREATE -> uploadNewPost(requestBodies, event)
-                PostMode.EDIT -> null
-                    //editExistingPost(requestBodies, event)
+                PostMode.EDIT -> editExistingPost(requestBodies, event)
                 else -> null
             }
 
@@ -373,13 +404,13 @@ class UploadPostViewModel @Inject constructor(
         ).collect { handleResult(it) }
     }
 
-    /**private suspend fun editExistingPost(
+    private suspend fun editExistingPost(
         data: UploadRequestData,
         event: UploadPostEvent.UploadPost
     ) {
-        val deleteImagesJson = Gson().toJson(deletedImages)
-        val deleteImagesBody =
-            deleteImagesJson.toRequestBody("application/json".toMediaTypeOrNull())
+        val deletedVisualMediaJson = Gson().toJson(deletedVisualMedia)
+        val deletedVisualMediaBody =
+            deletedVisualMediaJson.toRequestBody("application/json".toMediaTypeOrNull())
 
         uploadPostUseCases.editPost(
             postid = MultipartBody.Part.createFormData("postid", postId.toString()),
@@ -388,14 +419,14 @@ class UploadPostViewModel @Inject constructor(
             anonymousNick = if (anonymous.value)
                 generateAnonymousNickname().toRequestBody("text/plain".toMediaTypeOrNull())
             else null,
-            deleteImages = deleteImagesBody,
+            deletedVisualMedia = deletedVisualMediaBody,
             tags = data.tags,
-            images = data.images,
-            audio = data.audio,
-            deleteAudio = event.deleteAudio?.toRequestBody("text/plain".toMediaTypeOrNull()),
+            media = data.media,
+            mediaTypes = data.mediaTypes,
+            deletedAudio = event.deleteAudio?.toRequestBody("text/plain".toMediaTypeOrNull()),
             text = data.text
         ).collect { handleResult(it) }
-    }**/
+    }
 
     private suspend fun <T> handleResult(
         result: Resource<T>,
