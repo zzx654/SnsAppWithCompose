@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.androiddev.domain.model.MediaType
+import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagEvent
@@ -82,8 +83,14 @@ fun MediaPreviewScreen(
                         item = item,
                         onClick = {
                             if(item.type== MediaType.VIDEO) {
-                                val encoded = Uri.encode(item.uri.toString())
-                                navController.navigate(Screen.VideoPreviewScreen(encoded))
+                                val source = item.uri?.toString()
+                                    ?: (BuildConfig.BASE_URL + item.remotePath)
+
+                                val encoded = Uri.encode(source)
+                                navController.navigate(
+                                    Screen.VideoPreviewScreen(
+                                        encodedUri = encoded,
+                                ))
 
                             }
 

@@ -28,7 +28,7 @@ import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 
 @Composable
-fun VideoPreviewScreen(
+fun VideoPlayerScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
 
@@ -39,6 +39,7 @@ fun VideoPreviewScreen(
 
     val decodedUriString = Uri.decode(args.encodedUri)
     val videoUri = Uri.parse(decodedUriString)
+
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
