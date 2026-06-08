@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -21,12 +24,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.BuildConfig
 
-@Composable
+/**@Composable
 fun MediaItemView(
     item: MediaItem,
     onClick: (MediaItem) -> Unit,
@@ -34,8 +40,8 @@ fun MediaItemView(
 ) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
+            .fillMaxWidth().clickable{ onClick(item)}
+            //.aspectRatio(1f)
     ) {
 
 
@@ -48,7 +54,7 @@ fun MediaItemView(
                 MediaType.IMAGE -> {
                     AsyncImage(
                         model = item.uri ?: (BuildConfig.BASE_URL + item.remotePath),
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxSize(),
                         contentDescription = null
@@ -69,11 +75,19 @@ fun MediaItemView(
                             bitmap = it.asImageBitmap(),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Fit
                         )
                     }
+                    item.remoteThumbnailPath?.let {
+                        AsyncImage(
+                            model = BuildConfig.BASE_URL + it,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
 
-                    // ▶ 아이콘
+                    }
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = null,
@@ -85,6 +99,78 @@ fun MediaItemView(
                 }
                  else -> null
             }
+        }
+
+        IconButton(
+            onClick = { onDelete(item) },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(4.dp)
+                .size(28.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "삭제",
+                tint = Color.White
+            )
+        }
+    }
+}**/
+@Composable
+fun MediaItemView(
+    item: MediaItem,
+    onClick: (MediaItem) -> Unit,
+    onDelete: (MediaItem) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth().wrapContentHeight()
+            .clickable { onClick(item) }
+    ) {
+
+        when (item.type) {
+
+            MediaType.IMAGE -> {
+                AsyncImage(
+                    model = item.uri ?: (BuildConfig.BASE_URL + item.remotePath),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            MediaType.VIDEO -> {
+
+                    item.thumbnail?.let {
+                        Image(
+                            bitmap = it.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+
+                    item.remoteThumbnailPath?.let {
+                        AsyncImage(
+                            model = BuildConfig.BASE_URL + it,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(48.dp)
+                    )
+
+            }
+
+            else -> Unit
         }
 
         IconButton(

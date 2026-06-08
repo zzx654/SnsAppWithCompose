@@ -36,7 +36,6 @@ fun MediaPreviewScreen(
     navController:NavController,
     viewModel: UploadPostViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
-    println("보여주시;오${viewModel.selectedMediaItems}")
 
     Scaffold(
         topBar = {
@@ -76,7 +75,9 @@ fun MediaPreviewScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
 
-                items(viewModel.selectedMediaItems) { item ->
+                items(
+                    items = viewModel.selectedMediaItems
+                ) { item ->
                     MediaItemView(
                         item = item,
                         onClick = {
