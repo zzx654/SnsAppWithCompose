@@ -42,7 +42,7 @@ sealed interface Screen {
     @Serializable
     data object MediaPreviewScreen: Screen
     @Serializable
-    data class VideoPreviewScreen(val encodedUri:String): Screen
+    data class VideoPlayerScreen(val encodedUri:String): Screen
 
     @Serializable
     data object UploadFlow : Screen

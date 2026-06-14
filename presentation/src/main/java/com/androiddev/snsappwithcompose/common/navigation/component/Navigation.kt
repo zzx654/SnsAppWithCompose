@@ -53,7 +53,8 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.navigation.compose.navigation
 import com.androiddev.snsappwithcompose.feature.upload_post.MediaPreviewScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostViewModel
-import com.androiddev.snsappwithcompose.feature.upload_post.VideoPreviewScreen
+import com.androiddev.snsappwithcompose.feature.upload_post.VideoPlayerScreen
+
 
 @RequiresApi(Build.VERSION_CODES.N)
 @SuppressLint("UnrememberedGetBackStackEntry", "NewApi")
@@ -145,10 +146,10 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
             }
             CropScreen(navController = navController,navBackStackEntry = it)
         }
-        composable<Screen.VideoPreviewScreen> {
+        composable<Screen.VideoPlayerScreen> {
             BackHandler(true) {
             }
-            VideoPreviewScreen(navController = navController,navBackStackEntry = it)
+            VideoPlayerScreen(navController = navController,navBackStackEntry = it)
 
         }
         navigation(

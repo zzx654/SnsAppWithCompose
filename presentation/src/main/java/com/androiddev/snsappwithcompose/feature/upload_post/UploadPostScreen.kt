@@ -56,6 +56,7 @@ import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
+import com.androiddev.snsappwithcompose.common.util.rememberMediaPicker
 import com.androiddev.snsappwithcompose.feature.upload_post.component.CheckBoxWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.ContentTextField
 import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedImageCards
@@ -93,17 +94,9 @@ fun UploadPostScreen(
     val fusedLocationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
-    var selectedImageUriList by remember {
-        mutableStateOf<List<Uri>>(emptyList())
+    val launchMediaPicker = rememberMediaPicker { uriList ->
+        viewModel.onEvent(UploadPostEvent.AddMedia(uriList))
     }
-    val imageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(),
-        onResult = { uriList ->
-            selectedImageUriList = uriList
-            //viewModel.onEvent(UploadPostEvent.AddImages(uriList))
-            viewModel.onEvent(UploadPostEvent.AddMedia(uriList))
-        }
-    )
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
@@ -275,13 +268,7 @@ fun UploadPostScreen(
                     Spacer(modifier = Modifier.width(5.dp))
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = {
-                            imageLauncher.launch(
-                                PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageAndVideo
-                                )
-                            )
-                        }
+                        onClick = launchMediaPicker
                     ) {
                         Icon(
                             Icons.Default.Photo,

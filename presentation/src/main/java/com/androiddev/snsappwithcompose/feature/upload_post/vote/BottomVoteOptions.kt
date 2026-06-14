@@ -39,8 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import kotlinx.coroutines.launch
@@ -52,6 +55,7 @@ fun BottomVoteOptions(
 
 ) {
 
+    val context = LocalContext.current
     val voteOptions = createVoteViewModel.voteOptions
     if(createVoteViewModel.showBottomVoteDialog.value) {
 
@@ -84,7 +88,7 @@ fun BottomVoteOptions(
                         contentColor = MaterialTheme.colorScheme.onSurface
                     ) {
                         CenterAlignedTopBar(
-                            title = "투표",
+                            title = getString(context, R.string.vote_title),
                             onBackClick = { createVoteViewModel.onEvent(CreateVoteEvent.onCancelClick) },
                             rightAction = {
                                 IconButton(onClick = {
@@ -116,7 +120,7 @@ fun BottomVoteOptions(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(contentPadding)
-                        //.background(MaterialTheme.colorScheme.background)
+
                 ) {
                     LazyColumn(
                         state = listState,
@@ -136,11 +140,9 @@ fun BottomVoteOptions(
                                 onValueChange = { newValue ->
                                     createVoteViewModel.onEvent(CreateVoteEvent.TypeVoteOption(index,newValue))
 
-                                   // voteOptions =
-                                    //    voteOptions.toMutableList().also { it[index] = newValue }
 
                                 },
-                                hint = "보기 ${index + 1}",
+                                hint = "${getString(context,R.string.option)} ${index + 1}",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
@@ -167,7 +169,7 @@ fun BottomVoteOptions(
 
                             ) {
                                 Text(
-                                    "보기 추가",
+                                    "${getString(context,R.string.option)} ${getString(context,R.string.add)}",
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }

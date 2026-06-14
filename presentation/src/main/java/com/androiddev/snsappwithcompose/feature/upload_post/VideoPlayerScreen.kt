@@ -35,7 +35,7 @@ fun VideoPlayerScreen(
 ) {
     val context = LocalContext.current
 
-    val args = navBackStackEntry.toRoute<Screen.VideoPreviewScreen>()
+    val args = navBackStackEntry.toRoute<Screen.VideoPlayerScreen>()
 
     val decodedUriString = Uri.decode(args.encodedUri)
     val videoUri = Uri.parse(decodedUriString)
