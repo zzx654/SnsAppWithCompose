@@ -385,7 +385,10 @@ fun PostDetailScreen(
                             Spacer(modifier = Modifier.height(15.dp))
 
                             if(mediaUiState.visualMedia.isNotEmpty()) {
-                                MediaGrid(mediaUiState.visualMedia)
+                                MediaGrid(
+                                    mediaList = mediaUiState.visualMedia,
+                                    onClick = { navController.navigate(Screen.MediaScreen(mediaUiState.visualMedia))}
+                                )
 
                             }
 

@@ -2,7 +2,6 @@ package com.androiddev.snsappwithcompose.common.navigation.component
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -20,10 +19,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
-import com.androiddev.domain.model.NotificationExtra
 import com.androiddev.snsappwithcompose.common.component.MainScaffold
 import com.androiddev.snsappwithcompose.common.state.UiEvent
-import com.androiddev.snsappwithcompose.common.util.MainScreenPendingHandler
 import com.androiddev.snsappwithcompose.common.util.PendingNotificationHandler
 
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailScreen
@@ -39,21 +36,16 @@ import com.androiddev.snsappwithcompose.feature.createprofile.component.CropScre
 import com.androiddev.snsappwithcompose.feature.home.tagposts.TagPostScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
-import com.androiddev.snsappwithcompose.feature.notification.NotificationType.COMMENT
-import com.androiddev.snsappwithcompose.feature.notification.NotificationType.FOLLOW
-import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKECOMMENT
-import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKEPOST
-import com.androiddev.snsappwithcompose.feature.notification.NotificationType.REPLY
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostScreen
 import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileScreen
 import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
-import com.google.gson.Gson
 import kotlinx.coroutines.flow.collectLatest
 import androidx.navigation.compose.navigation
-import com.androiddev.snsappwithcompose.feature.upload_post.MediaPreviewScreen
+import com.androiddev.snsappwithcompose.feature.PostDetail.VisualMediaScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostViewModel
 import com.androiddev.snsappwithcompose.feature.upload_post.VideoPlayerScreen
+import com.androiddev.snsappwithcompose.feature.upload_post.VisualMediaEditScreen
 
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -180,7 +172,7 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 PendingNotificationHandler(notificationViewModel)
             }
 
-            composable<Screen.MediaPreviewScreen> {
+            composable<Screen.MediaEditScreen> {
                 val parentEntry = remember {
                     navController.getBackStackEntry(UPLOAD_FLOW)
                 }
@@ -190,10 +182,22 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
 
                 BackHandler(true) {}
 
-                MediaPreviewScreen(
+                VisualMediaEditScreen(
                     navController = navController,
                     viewModel = uploadViewModel
                 )
+            }
+            composable<Screen.MediaScreen>(
+                typeMap = mediaTypeMap
+            ) {
+                BackHandler(true) {}
+
+                VisualMediaScreen(
+                    navController = navController,
+                    navBackStackEntry = it
+                )
+
+
             }
         }
         /**composable<Screen.UploadPostScreen>(

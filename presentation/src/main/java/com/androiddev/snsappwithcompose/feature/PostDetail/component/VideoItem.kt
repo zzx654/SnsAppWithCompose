@@ -15,12 +15,13 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.androiddev.domain.model.Media
 import com.androiddev.snsappwithcompose.BuildConfig
+import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 
 @Composable
-fun VideoItem(media: Media, modifier: Modifier = Modifier) {
+fun VideoItem(thumbnailUrl: String, modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
         AsyncImage(
-            model = BuildConfig.BASE_URL + (media.thumbnailUrl ?: media.url),
+            model = BuildConfig.BASE_URL + thumbnailUrl,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop

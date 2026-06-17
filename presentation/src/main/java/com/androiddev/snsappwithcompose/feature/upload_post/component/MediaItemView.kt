@@ -35,6 +35,7 @@ import com.androiddev.snsappwithcompose.BuildConfig
 @Composable
 fun MediaItemView(
     item: MediaItem,
+    isEditMode:Boolean = false,
     onClick: (MediaItem) -> Unit,
     onDelete: (MediaItem) -> Unit
 ) {
@@ -75,6 +76,7 @@ fun MediaItemView(
                         )
                     }
 
+
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = null,
@@ -88,19 +90,23 @@ fun MediaItemView(
 
             else -> Unit
         }
+        if(isEditMode) {
+            IconButton(
+                onClick = { onDelete(item) },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .size(28.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "삭제",
+                    tint = Color.White
+                )
+            }
 
-        IconButton(
-            onClick = { onDelete(item) },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(4.dp)
-                .size(28.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "삭제",
-                tint = Color.White
-            )
         }
+
+
     }
 }

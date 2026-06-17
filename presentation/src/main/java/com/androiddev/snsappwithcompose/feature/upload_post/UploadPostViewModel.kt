@@ -66,12 +66,9 @@ class UploadPostViewModel @Inject constructor(
     val anonymous: State<Boolean>
         get() = _anonymous
     private val _selectedImages = mutableStateListOf<EditableImage>()
-    val selectedImages: SnapshotStateList<EditableImage>
-        get() = _selectedImages
     private val _selectedMediaItems = mutableStateListOf<MediaItem>()
     val selectedMediaItems: SnapshotStateList<MediaItem>
         get() = _selectedMediaItems
-    //val deletedImages = mutableStateListOf<String>()
     val deletedVisualMedia = mutableStateListOf<String>()
     private val _locationOnOff = mutableStateOf(false)
     val locationOnOff: State<Boolean>
@@ -154,14 +151,7 @@ class UploadPostViewModel @Inject constructor(
                 )
 
             }
-            /**post.images?.let {
-                _selectedImages.clear()
-                _selectedImages.addAll(
-                    it.map { path ->
-                        EditableImage(remotePath = path, isNew = false)
-                    }
-                )
-            }**/
+
             isInitialized = true
         }
 
@@ -260,14 +250,6 @@ class UploadPostViewModel @Inject constructor(
                 )
             }
 
-            /**is UploadPostEvent.DeleteImage -> {
-                _selectedImages.remove(event.image)
-                if (!event.image.isNew && event.image.remotePath != null) {
-                //    deletedImages.add(event.image.remotePath)
-                }
-                _selectedImages.remove(event.image)
-            }**/
-
             is UploadPostEvent.SetLocationOnOff -> {
                 _locationOnOff.value = event.onOff
             }
@@ -304,15 +286,9 @@ class UploadPostViewModel @Inject constructor(
             }
             is UploadPostEvent.DeleteMedia -> {
                 _selectedMediaItems.remove(event.media)
-                //_selectedImages.remove(event.image)
                 if (!event.media.isNew && event.media.remotePath != null) {
                     deletedVisualMedia.add(event.media.remotePath)
                 }
-                //_selectedImages.remove(event.image)
-                //if (!event.image.isNew && event.image.remotePath != null) {
-                 //   deletedImages.add(event.image.remotePath)
-                //}
-                //_selectedImages.remove(event.image)
             }
 
             else -> {}

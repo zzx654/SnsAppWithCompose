@@ -6,7 +6,6 @@ import android.net.Uri
 import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,7 +57,6 @@ import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.rememberMediaPicker
 import com.androiddev.snsappwithcompose.feature.upload_post.component.CheckBoxWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.ContentTextField
-import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedImageCards
 import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedMediaCards
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadRecordIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadVoteIcon
@@ -401,7 +398,7 @@ fun UploadPostScreen(
                 selectedMedia = {
                     viewModel.selectedMediaItems
                 },
-                onClickItem = { navController.navigate(Screen.MediaPreviewScreen)},
+                onClickItem = { navController.navigate(Screen.MediaEditScreen)},
                 onDeleteClick = {
                     viewModel.onEvent(UploadPostEvent.DeleteMedia(it))
                 }

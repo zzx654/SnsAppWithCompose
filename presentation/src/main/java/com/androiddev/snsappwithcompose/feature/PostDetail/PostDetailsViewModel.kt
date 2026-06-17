@@ -17,6 +17,7 @@ import androidx.navigation.toRoute
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.Media
+import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
@@ -42,6 +43,7 @@ import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
+import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -545,8 +547,6 @@ fun List<Media>.toMediaUiModel(): MediaUiModel {
         visualMedia = visual,
         audioMedia = audio
     )
-
-
 }
 
 enum class CommentSortType(@StringRes val labelResId: Int) {
