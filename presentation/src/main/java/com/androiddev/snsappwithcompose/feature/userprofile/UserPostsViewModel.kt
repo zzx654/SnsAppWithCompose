@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.Posts
 import com.androiddev.domain.use_case.postlist.GetPostsUseCases
+import com.androiddev.domain.use_case.user.UserUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BasePostsViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UserPostsViewModel @Inject constructor(
     private val getPostsUseCases: GetPostsUseCases,
+    private val userUseCases:UserUseCases,
     locationClient: FusedLocationProviderClient,
     @ApplicationContext context: Context,
 ): BasePostsViewModel(

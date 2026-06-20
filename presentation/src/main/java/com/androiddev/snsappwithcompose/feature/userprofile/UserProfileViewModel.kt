@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
+import com.androiddev.domain.use_case.user.UserUseCases
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     @ApplicationContext context: Context,
+    private val userUseCases: UserUseCases,
     locationClient: FusedLocationProviderClient,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel(context) {

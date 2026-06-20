@@ -2,10 +2,13 @@ package com.androiddev.data.repository.user
 
 import android.content.Context
 import com.androiddev.data.remote.api.user.UserApi
+import com.androiddev.data.remote.dto.toMediaPostPreview
+import com.androiddev.data.remote.dto.toMediaPosts
 import com.androiddev.data.remote.dto.toToggleFollowResult
 import com.androiddev.data.remote.dto.toUser
 import com.androiddev.data.remote.dto.toUsers
 import com.androiddev.data.util.safeApiCall
+import com.androiddev.domain.model.MediaPosts
 import com.androiddev.domain.model.ToggleFollowResult
 import com.androiddev.domain.model.User
 import com.androiddev.domain.model.Users
@@ -39,6 +42,27 @@ class UserRepositoryImpl @Inject constructor(
         mapToResource = {
             it.toUsers(
             )
+        }
+    )
+
+    override suspend fun getMedia(
+        userId: Int,
+        type: String,
+        mediaId: Int?,
+        latitude: Double?,
+        longitude: Double?
+    ): Flow<Resource<MediaPosts>> = safeApiCall(
+        context = context,
+        apiCall = { api.getMedia(
+            userid = userId,
+            type = type,
+            mediaid = mediaId,
+            latitude = latitude,
+            longitude = longitude
+
+        )},
+        mapToResource = {
+            it.toMediaPosts()
         }
     )
 }

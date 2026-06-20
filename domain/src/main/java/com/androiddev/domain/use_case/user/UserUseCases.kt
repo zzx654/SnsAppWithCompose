@@ -3,5 +3,6 @@ package com.androiddev.domain.use_case.user
 data class UserUseCases(
     val getSearchedUsers:GetSearchedUsers,
     val toggleFollowUser: ToggleFollowUser,
-    val getUserInfo: GetUserInfo
+    val getUserInfo: GetUserInfo,
+    val getMediaPosts: GetMediaPosts
 )

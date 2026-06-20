@@ -1,5 +1,6 @@
 package com.androiddev.domain.repository.user
 
+import com.androiddev.domain.model.MediaPosts
 import com.androiddev.domain.model.ToggleFollowResult
 import com.androiddev.domain.model.User
 import com.androiddev.domain.model.Users
@@ -10,4 +11,5 @@ interface UserRepository {
     suspend fun getSearchedUsers(nickname:String,lastUserId:Int?): Flow<Resource<Users>>
     suspend fun toggleFollowUser(userId:Int): Flow<Resource<ToggleFollowResult>>
     suspend fun getUserInfo(userId:Int): Flow<Resource<Users>>
+    suspend fun getMedia(userId:Int,type:String,mediaId:Int?,latitude:Double?,longitude:Double?): Flow<Resource<MediaPosts>>
 }
