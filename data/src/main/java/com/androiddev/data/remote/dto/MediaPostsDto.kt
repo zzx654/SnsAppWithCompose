@@ -8,6 +8,6 @@ data class MediaPostsDto(
 
 fun MediaPostsDto.toMediaPosts():MediaPosts {
     return MediaPosts(mediaPosts.map{
-        it.toMediaPostPreview()
+        it.toMediaPost()
     })
 }

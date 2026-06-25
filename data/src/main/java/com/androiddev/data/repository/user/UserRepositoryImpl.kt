@@ -1,16 +1,17 @@
 package com.androiddev.data.repository.user
 
 import android.content.Context
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.androiddev.data.paging.MediaPostPagingSource
 import com.androiddev.data.remote.api.user.UserApi
-import com.androiddev.data.remote.dto.toMediaPostPreview
-import com.androiddev.data.remote.dto.toMediaPosts
 import com.androiddev.data.remote.dto.toToggleFollowResult
-import com.androiddev.data.remote.dto.toUser
 import com.androiddev.data.remote.dto.toUsers
 import com.androiddev.data.util.safeApiCall
-import com.androiddev.domain.model.MediaPosts
+import com.androiddev.domain.model.MediaPost
+import com.androiddev.domain.model.MediaPostQuery
 import com.androiddev.domain.model.ToggleFollowResult
-import com.androiddev.domain.model.User
 import com.androiddev.domain.model.Users
 import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.util.Resource
@@ -45,24 +46,29 @@ class UserRepositoryImpl @Inject constructor(
         }
     )
 
-    override suspend fun getMedia(
+    override fun getMediaPosts(
         userId: Int,
         type: String,
-        mediaId: Int?,
         latitude: Double?,
         longitude: Double?
-    ): Flow<Resource<MediaPosts>> = safeApiCall(
-        context = context,
-        apiCall = { api.getMedia(
-            userid = userId,
-            type = type,
-            mediaid = mediaId,
-            latitude = latitude,
-            longitude = longitude
+    ): Flow<PagingData<MediaPost>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                prefetchDistance = 5
+            ),
 
-        )},
-        mapToResource = {
-            it.toMediaPosts()
-        }
-    )
+            pagingSourceFactory = {
+                MediaPostPagingSource(
+                    api,
+                    MediaPostQuery(
+                        userId = userId,
+                        type = type,
+                        latitude = latitude,
+                        longitude = longitude
+                    )
+                )
+            }
+        ).flow
+    }
 }

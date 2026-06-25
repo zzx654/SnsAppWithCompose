@@ -66,6 +66,7 @@ import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
 import com.androiddev.domain.use_case.postdetail.Vote
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
 import com.androiddev.domain.use_case.postlist.GetUserPosts
+import com.androiddev.domain.use_case.user.GetMediaPosts
 import com.androiddev.domain.use_case.user.GetSearchedUsers
 import com.androiddev.domain.use_case.user.GetUserInfo
 import com.androiddev.domain.use_case.user.ToggleFollowUser
@@ -221,7 +222,8 @@ object UseCaseModule {
         return UserUseCases(
             getSearchedUsers = GetSearchedUsers(userRepository),
             toggleFollowUser = ToggleFollowUser(userRepository),
-            getUserInfo = GetUserInfo(userRepository)
+            getUserInfo = GetUserInfo(userRepository),
+            getMediaPosts = GetMediaPosts(userRepository)
         )
     }
 }

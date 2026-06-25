@@ -67,6 +67,7 @@ dependencies {
 
     implementation(project(":domain"))
     implementation(project(":data"))
+    implementation(libs.paging.compose)
     implementation(libs.gson)
 
     implementation(libs.accompanist.placeholder)

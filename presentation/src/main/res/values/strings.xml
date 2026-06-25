@@ -23,6 +23,7 @@
     <string name="password_rule">영문,숫자,특수문자 포함 8자-15자</string>
     <string name="enter_password">비밀번호를 입력해주세요</string>
     <string name="error">에러가 발생했습니다</string>
+    <string name="connection_error">네트워크 연결을 확인해주세요</string>
     <string name="kakao">kakao</string>
     <string name="naver">naver</string>
     <string name="check_phonenumber">전화번호를 확인해주세요</string>

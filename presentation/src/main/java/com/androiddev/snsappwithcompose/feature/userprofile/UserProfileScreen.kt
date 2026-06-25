@@ -34,6 +34,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.imageLoader
 import coil3.request.crossfade
 import coil3.util.DebugLogger
@@ -67,6 +69,8 @@ import com.androiddev.snsappwithcompose.feature.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserEvent
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
+import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaGridContent
+import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaPostGridItem
 import com.androiddev.snsappwithcompose.feature.userprofile.component.UserProfileHeader
 
 @Composable
@@ -79,6 +83,7 @@ fun UserProfileScreen(
 ) {
 
     var args = navBackStackEntry.toRoute<Screen.UserProfileScreen>()
+
     val isFollowing = userViewModel.followUserStatusMap[args.userId]
     val context = LocalContext.current
     val imageLoader = remember {
@@ -90,7 +95,28 @@ fun UserProfileScreen(
     val videoList = remember {
         List(21) { "Video $it" } // 일부러 홀수
     }
-    val selectedTab = userProfileViewModel.selectedTab.value
+    val selectedTab by userProfileViewModel.selectedTab.collectAsState()
+    val mediaPosts =
+        if (selectedTab != UserContent.HOME) {
+
+            remember(selectedTab) {
+                userProfileViewModel.getMediaPosts(selectedTab)
+            }.collectAsLazyPagingItems()
+
+        } else {
+
+            null
+
+        }
+    mediaPosts?.let {
+
+        LaunchedEffect(it.loadState) {
+
+            userProfileViewModel.onPagingStateChanged(
+                it.loadState
+            )
+        }
+    }
     val focusManager = LocalFocusManager.current
 
     val scrollState = rememberScrollState()
@@ -125,7 +151,7 @@ fun UserProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
 
             // 1. 헤더
@@ -167,7 +193,7 @@ fun UserProfileScreen(
                         label = {
                             when (it) {
                                 UserContent.HOME -> getString(context, R.string.home)
-                                UserContent.PHOTO -> getString(context,R.string.photo)
+                                UserContent.IMAGE -> getString(context,R.string.photo)
                                 UserContent.VIDEO -> getString(context,R.string.video)
                             }
                         }
@@ -199,8 +225,15 @@ fun UserProfileScreen(
                     )
 
                 }
-                UserContent.PHOTO-> {
-                    items(videoList.chunked(2)) { row ->
+                UserContent.IMAGE-> {
+                    mediaPosts?.let {
+
+                        MediaGridContent(
+                            posts = it,
+                            columns = 2
+                        )
+                    }
+                    /**items(videoList.chunked(2)) { row ->
                         Row (
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -224,12 +257,14 @@ fun UserProfileScreen(
                             }
 
                         }
-                    }
+                    }**/
 
                 }
                 UserContent.VIDEO -> {
 
                 }
+
+                else -> {}
             }
 
 

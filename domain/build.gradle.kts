@@ -37,6 +37,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.paging.common)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)

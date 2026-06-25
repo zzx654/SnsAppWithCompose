@@ -1,5 +1,7 @@
 package com.androiddev.domain.repository.user
 
+import androidx.paging.PagingData
+import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.model.MediaPosts
 import com.androiddev.domain.model.ToggleFollowResult
 import com.androiddev.domain.model.User
@@ -11,5 +13,5 @@ interface UserRepository {
     suspend fun getSearchedUsers(nickname:String,lastUserId:Int?): Flow<Resource<Users>>
     suspend fun toggleFollowUser(userId:Int): Flow<Resource<ToggleFollowResult>>
     suspend fun getUserInfo(userId:Int): Flow<Resource<Users>>
-    suspend fun getMedia(userId:Int,type:String,mediaId:Int?,latitude:Double?,longitude:Double?): Flow<Resource<MediaPosts>>
+    fun getMediaPosts(userId:Int,type:String,latitude:Double?,longitude:Double?):Flow<PagingData<MediaPost>>
 }

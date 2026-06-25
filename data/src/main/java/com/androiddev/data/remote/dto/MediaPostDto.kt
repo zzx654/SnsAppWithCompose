@@ -1,6 +1,6 @@
 package com.androiddev.data.remote.dto
 
-import com.androiddev.domain.model.MediaPostPreview
+import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.util.elapsedTime
 import kotlin.math.round
 
@@ -19,10 +19,10 @@ data class MediaPostDto (
     val distance: Double?
 )
 
-fun MediaPostDto.toMediaPostPreview(
+fun MediaPostDto.toMediaPost(
 
-):MediaPostPreview {
-    return MediaPostPreview(
+): MediaPost {
+    return MediaPost(
         id = id,
         postId = postid,
         userId = userid,

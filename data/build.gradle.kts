@@ -46,6 +46,7 @@ android {
 
 dependencies {
     implementation(project(":domain"))
+    implementation(libs.paging.runtime)
     //DataStore
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core)

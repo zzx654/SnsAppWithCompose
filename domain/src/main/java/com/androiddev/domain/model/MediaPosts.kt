@@ -1,3 +1,3 @@
 package com.androiddev.domain.model
 
-data class MediaPosts(val mediaPosts: List<MediaPostPreview>)
+data class MediaPosts(val mediaPosts: List<MediaPost>)

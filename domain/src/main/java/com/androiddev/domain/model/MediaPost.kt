@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class MediaPostPreview (
+data class MediaPost (
     val id: Int,
     val postId:Int,
     val userId:Int,
@@ -21,4 +21,12 @@ data class MediaPostPreview (
     val thumbnailUrl:String?,
     val type: String
 
-):Parcelable
+):Parcelable {
+    val previewUrl: String
+        get() = if (type == MediaType.IMAGE.name) {
+            url.orEmpty()
+        } else {
+            thumbnailUrl.orEmpty()
+        }
+
+}
