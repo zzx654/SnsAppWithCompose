@@ -1,27 +1,43 @@
 package com.androiddev.snsappwithcompose.feature.userprofile
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
+import androidx.compose.material.TabRowDefaults
+import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -29,7 +45,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -39,14 +57,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
@@ -70,8 +97,10 @@ import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserEvent
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
 import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaGridContent
+import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaGridTab
 import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaPostGridItem
 import com.androiddev.snsappwithcompose.feature.userprofile.component.UserProfileHeader
+import kotlinx.coroutines.launch
 
 @Composable
 fun UserProfileScreen(
@@ -84,6 +113,13 @@ fun UserProfileScreen(
 
     var args = navBackStackEntry.toRoute<Screen.UserProfileScreen>()
 
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { userProfileViewModel.tabs.size }
+    )
+    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+    val pagerNestedScrollConnection = rememberNestedScrollConnection(scrollState)
     val isFollowing = userViewModel.followUserStatusMap[args.userId]
     val context = LocalContext.current
     val imageLoader = remember {
@@ -92,42 +128,15 @@ fun UserProfileScreen(
             .logger(DebugLogger())
             .build()
     }
-    val videoList = remember {
-        List(21) { "Video $it" } // 일부러 홀수
-    }
-    val selectedTab by userProfileViewModel.selectedTab.collectAsState()
-    val mediaPosts =
-        if (selectedTab != UserContent.HOME) {
-
-            remember(selectedTab) {
-                userProfileViewModel.getMediaPosts(selectedTab)
-            }.collectAsLazyPagingItems()
-
-        } else {
-
-            null
-
-        }
-    mediaPosts?.let {
-
-        LaunchedEffect(it.loadState) {
-
-            userProfileViewModel.onPagingStateChanged(
-                it.loadState
-            )
-        }
-    }
     val focusManager = LocalFocusManager.current
 
-    val scrollState = rememberScrollState()
 
     val userInfoState = userViewModel.userInfo.value
+
+
     LaunchedEffect(args.userId) {
 
         userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
-
-    }
-    LaunchedEffect(args.userId) {
         userPostsViewModel.initUserPosts(args.userId)
     }
 
@@ -135,234 +144,129 @@ fun UserProfileScreen(
         topBar = {
             Surface(
                 shadowElevation = 3.dp,
-                color = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.surface
             ) {
                 CenterAlignedTopBar(
-                    title = userInfoState?.nickname?:"",
-                    onBackClick = { navController.popBackStack() },
+                    title = userInfoState?.nickname ?: "",
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }
-
-    ) { contentPadding ->
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) { padding ->
+        BoxWithConstraints(
+            modifier = Modifier.padding(padding)
         ) {
+            val screenHeight = maxHeight
 
-            // 1. 헤더
-            item {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(state = scrollState)
+            ) {
+                Spacer(modifier = Modifier.height(25.dp))
+
+                UserProfileHeader(
+                    modifier = Modifier.padding(horizontal = 19.dp),
+                    user = userInfoState,
+                    imageLoader = imageLoader
+                )
+
                 Spacer(modifier = Modifier.height(20.dp))
-                Column(modifier = Modifier.padding(horizontal = 19.dp)) {
-                    UserProfileHeader(
-                        user = userInfoState,
-                        imageLoader = imageLoader
 
+                ActionSection(
+                    modifier = Modifier.padding(horizontal = 19.dp),
+                    isFollowing = isFollowing?:false,
+                    toggleFollow = { userViewModel.onEvent(UserEvent.ToggleFollowUser(args.userId))}
+                )
 
-                    )
-                }
-               // ChannelHeader()
-            }
+                Spacer(modifier = Modifier.height(40.dp))
 
-            // 2. 구독 버튼
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Column(modifier = Modifier.padding(horizontal = 19.dp)) {
-                    ActionSection(
-                        isFollowing = isFollowing?:false,
-                        toggleFollow = { userViewModel.onEvent(UserEvent.ToggleFollowUser(args.userId))}
-
-                    )
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-            stickyHeader {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 19.dp)
-                ) {
-                    RadioChipButtons(
-                        items = userProfileViewModel.tabs,
-                        selectedValue = selectedTab,
-                        onSelect = { userProfileViewModel.selectTab(it) },
-                        label = {
-                            when (it) {
-                                UserContent.HOME -> getString(context, R.string.home)
-                                UserContent.IMAGE -> getString(context,R.string.photo)
-                                UserContent.VIDEO -> getString(context,R.string.video)
-                            }
-                        }
-
-                    )
-                }
-                //CustomTabSection(
-                 //   selectedTab = selectedTab,
-                  //  onTabSelected = { selectedTab = it }
-               // )
-            }
-
-
-
-            when (selectedTab) {
-                UserContent.HOME -> {
-                   // items(videoList) { item ->
-                     //   VideoListItem(item)
-                   // }
-                    postPrevItemsContent(
-                        isLoading = { userPostsViewModel.getPostState.value.isLoading },
-                        endReached = { userPostsViewModel.getPostState.value.endReached },
-                        posts = { userPostsViewModel.getPostState.value.posts },
-                        loadNextPosts = { userPostsViewModel.onEvent(GetPostsEvent.LoadNext) },
-                        onPostClick = { postId ->
-                            userPostsViewModel.onEvent(GetPostsEvent.SelectPost(postId))
+                Column(modifier = Modifier.height(screenHeight)) {
+                    // 탭바 영역
+                    SecondaryTabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        indicator = {
+                            androidx.compose.material3.TabRowDefaults.SecondaryIndicator(
+                                modifier = Modifier.tabIndicatorOffset(pagerState.currentPage),
+                                color = Color.Black
+                            )
                         },
-                        uiPosts = userPostsViewModel.uiPosts
-                    )
+                        containerColor = Color.White
+                    ) {
 
-                }
-                UserContent.IMAGE-> {
-                    mediaPosts?.let {
+                        userProfileViewModel.tabs.forEachIndexed { index, tab ->
 
-                        MediaGridContent(
-                            posts = it,
-                            columns = 2
-                        )
-                    }
-                    /**items(videoList.chunked(2)) { row ->
-                        Row (
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-
-
-                        ) {
-                            row.forEach { item ->
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                ) {
-                                    VideoGridItem(item)
+                            Tab(
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
                                 }
-
+                            ) {
+                                Text(
+                                    text = when (tab) {
+                                        UserContent.HOME -> getString(context, R.string.home)
+                                        UserContent.IMAGE -> getString(context,R.string.photo)
+                                        UserContent.VIDEO -> getString(context,R.string.video)
+                                    },
+                                    modifier = Modifier.padding(vertical = 16.dp)
+                                )
                             }
-
-                            if(row.size == 1) {
-                                Spacer(modifier = Modifier.weight(1f))
-
-                            }
-
                         }
-                    }**/
+                    }
+
+                    HorizontalPager(
+                        state = pagerState,
+                        beyondViewportPageCount = 1,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .nestedScroll(pagerNestedScrollConnection)
+                    ) { page ->
+
+                        when (userProfileViewModel.tabs[page]) {
+
+                            UserContent.HOME -> {
+
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("HOME")
+                                }
+                            }
+
+                            UserContent.IMAGE -> {
+
+                                MediaGridTab(
+                                    type = UserContent.IMAGE,
+                                    viewModel = userProfileViewModel
+                                )
+                            }
+
+                            UserContent.VIDEO -> {
+
+                                MediaGridTab(
+                                    type = UserContent.VIDEO,
+                                    viewModel = userProfileViewModel
+                                )
+                            }
+                        }
+                    }
+
 
                 }
-                UserContent.VIDEO -> {
 
-                }
 
-                else -> {}
             }
+
 
 
         }
 
-
-    }
-
-
-
-
-}
-@Composable
-fun CustomChip(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val backgroundColor = if (selected) Color.Black else Color.LightGray
-    val textColor = if (selected) Color.White else Color.Black
-
-    Box(
-        modifier = Modifier
-            .height(36.dp)
-            .background(
-                color = backgroundColor,
-                shape = RoundedCornerShape(50)
-            )
-            .padding(horizontal = 16.dp)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-@Composable
-fun CustomTabSection(
-    selectedTab: Int,
-    onTabSelected: (Int) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-
-        CustomChip(
-            text = "List",
-            selected = selectedTab == 0,
-            onClick = { onTabSelected(0) }
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        CustomChip(
-            text = "Grid",
-            selected = selectedTab == 1,
-            onClick = { onTabSelected(1) }
-        )
-    }
-}
-@Composable
-fun VideoListItem(title: String) {
-    Text(
-        text = title,
-        modifier = Modifier
-            .fillMaxWidth()
-           // .padding(16.dp)
-    )
-}
-
-@Composable
-fun VideoGridItem(title: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .background(Color.LightGray),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(title)
-    }
-}
-@Composable
-fun ChannelHeader() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp)
-            .background(Color.Gray),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("HEADER", color = Color.White)
     }
 }
 @Composable
@@ -396,13 +300,14 @@ fun ActionButton(
 }
 @Composable
 fun ActionSection(
+    modifier:Modifier = Modifier,
     isFollowing:Boolean,
     toggleFollow:() -> Unit
 ) {
     //var isFollowing by remember { mutableStateOf(false) }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
@@ -423,3 +328,11 @@ fun ActionSection(
         )
     }
 }
+
+
+
+
+
+
+
+

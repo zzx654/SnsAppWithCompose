@@ -23,10 +23,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
+import com.androiddev.domain.util.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.SearchTextField
 import com.androiddev.snsappwithcompose.common.state.UiEvent
-import com.androiddev.snsappwithcompose.common.util.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged

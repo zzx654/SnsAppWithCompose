@@ -1,8 +1,5 @@
 package com.androiddev.snsappwithcompose.feature.notification
 
-
-import android.view.Gravity
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -23,7 +20,6 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,10 +33,8 @@ import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
-import com.androiddev.snsappwithcompose.common.state.UiEvent
-import com.androiddev.snsappwithcompose.common.util.Constants.PAGE_SIZE
+import com.androiddev.domain.util.Constants.PAGE_SIZE
 import com.androiddev.snsappwithcompose.feature.notification.component.NotificationItem
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

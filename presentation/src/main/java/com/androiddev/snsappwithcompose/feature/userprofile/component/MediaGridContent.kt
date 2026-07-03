@@ -5,10 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
@@ -24,6 +26,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import coil3.compose.AsyncImage
 import com.androiddev.domain.model.MediaPost
+import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.BuildConfig
 
 
@@ -76,6 +79,11 @@ fun LazyListScope.MediaGridContent(
             }
         }
     }
+    item {
+        Spacer(
+            modifier = Modifier.height(300.dp)
+        )
+    }
 
     when {
 
@@ -127,7 +135,7 @@ fun MediaPostGridItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
+            .aspectRatio(if(post.type == MediaType.IMAGE.name)1f else 2f/3f)
             .background(Color.LightGray)
             .clickable {
                 //onClick()

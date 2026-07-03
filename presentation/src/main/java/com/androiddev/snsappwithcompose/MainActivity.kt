@@ -81,6 +81,9 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             modifier = Modifier.fillMaxSize()
                         )
+                        val sampleData = listOf("유튜브 모작 영상 아이템 1개","유튜브 모작 영상 아이템 2개")
+                        //val sampleData = listOf("유튜브 모작 영상 아이템 1개","유튜브 모작 영상 아이템 2개","3","4","5","6","7")
+                        //YouTubeStyleProfileScreen()
                     }
 
                 }

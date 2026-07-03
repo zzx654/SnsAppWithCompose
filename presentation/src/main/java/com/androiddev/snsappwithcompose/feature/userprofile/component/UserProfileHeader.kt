@@ -28,6 +28,7 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
 
 @Composable
 fun UserProfileHeader(
+    modifier: Modifier = Modifier,
     user: User?,
     imageLoader: ImageLoader
 ) {
@@ -35,7 +36,7 @@ fun UserProfileHeader(
     val isLoading = user == null
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -88,6 +89,7 @@ fun UserProfileHeader(
                     color = Color.Gray
                 )
             }
+            //Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
