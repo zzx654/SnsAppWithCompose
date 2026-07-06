@@ -96,6 +96,7 @@ import com.androiddev.snsappwithcompose.feature.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserEvent
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
+import com.androiddev.snsappwithcompose.feature.userprofile.component.HomeGridTab
 import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaGridContent
 import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaGridTab
 import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaPostGridItem
@@ -231,12 +232,7 @@ fun UserProfileScreen(
 
                             UserContent.HOME -> {
 
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("HOME")
-                                }
+                                HomeGridTab(viewModel = userProfileViewModel)
                             }
 
                             UserContent.IMAGE -> {

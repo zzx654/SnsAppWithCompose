@@ -54,7 +54,7 @@ class UserPostsViewModel @Inject constructor(
                 lastPostId = last().postId
             }
         }
-        viewModelScope.launch {
+        /**viewModelScope.launch {
 
             getPostsUseCases.getUserPosts(
                 userId = userId.value?:0,
@@ -66,6 +66,6 @@ class UserPostsViewModel @Inject constructor(
                 handleResult(result)
             }
 
-        }
+        }**/
     }
 }

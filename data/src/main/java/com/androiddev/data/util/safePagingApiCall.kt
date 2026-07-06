@@ -10,11 +10,11 @@ import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
 
-suspend fun <T, R : Any> safePagingApiCall(
+suspend fun <T, R : Any, K: Any> safePagingApiCall(
     apiCall: suspend () -> Response<BaseApiResponse<T>>,
     mapper: (T) -> List<R>,
-    nextKey: (List<R>) -> Int?
-): PagingSource.LoadResult<Int, R> {
+    nextKey: (List<R>) -> K?
+): PagingSource.LoadResult<K, R> {
 
     return try {
 

@@ -1,5 +1,7 @@
 package com.androiddev.domain.repository.postlist
 
+import androidx.paging.PagingData
+import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.Posts
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -33,12 +35,10 @@ interface GetPostsRepository {
         longitude:Double?,
     ):Flow<Resource<Posts>>
 
-    suspend fun getUserPosts(
-        userId:Int?,
-        postId:Int?,
-        postDate:String?,
+    fun getUserPosts(
+        userId:Int,
         latitude:Double?,
         longitude:Double?,
-    ):Flow<Resource<Posts>>
+    ):Flow<PagingData<PostPreview>>
 
 }

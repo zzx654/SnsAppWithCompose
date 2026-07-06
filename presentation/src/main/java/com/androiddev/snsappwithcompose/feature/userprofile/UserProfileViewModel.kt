@@ -8,6 +8,8 @@ import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.androiddev.domain.model.MediaPost
+import com.androiddev.domain.model.PostPreview
+import com.androiddev.domain.use_case.postlist.GetPostsUseCases
 import com.androiddev.domain.use_case.user.UserUseCases
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BasePagingViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
@@ -26,6 +28,7 @@ import javax.inject.Inject
 class UserProfileViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val userUseCases: UserUseCases,
+    private val getPostsUseCases: GetPostsUseCases,
     locationClient: FusedLocationProviderClient,
     savedStateHandle: SavedStateHandle
 ) : BasePagingViewModel(context,locationClient) {
@@ -35,9 +38,7 @@ class UserProfileViewModel @Inject constructor(
         UserContent.IMAGE,
         UserContent.VIDEO
     )
-    init {
-        println(args.userId)
-    }
+
 
     // 선택된 값 (State)
     private val currentTab =
@@ -53,21 +54,29 @@ class UserProfileViewModel @Inject constructor(
         currentTab.value = tab
 
     }
-
-    private val pagerCache =
+    private var homePager: Flow<PagingData<PostPreview>>? = null
+    private val mediaPagerCache =
         mutableMapOf<
                 UserContent,
                 Flow<PagingData<MediaPost>>
                 >()
 
-
+    fun getHomePosts(): Flow<PagingData<PostPreview>> {
+        println("!!!!!!!!!!!!!!!!!!${getLatitude()}")
+        return homePager ?: getPostsUseCases.getUserPosts(
+            userId = args.userId,
+            latitude = getLatitude(),
+            longitude = getLongitude()
+        ).cachedIn(viewModelScope)
+            .also { homePager = it }
+    }
     fun getMediaPosts(
         tab: UserContent
     ): Flow<PagingData<MediaPost>> {
 
         require(tab != UserContent.HOME)
 
-        return pagerCache.getOrPut(tab) {
+        return mediaPagerCache.getOrPut(tab) {
 
 
             userUseCases.getMediaPosts(
