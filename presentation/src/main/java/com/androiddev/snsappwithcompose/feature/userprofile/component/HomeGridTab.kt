@@ -26,11 +26,8 @@ import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 fun HomeGridTab(
     viewModel: UserProfileViewModel
 ) {
-    val pagingFlow = remember(viewModel) {
-        viewModel.getHomePosts()
-    }
-
-    val pagingItems = pagingFlow.collectAsLazyPagingItems()
+    val pagingItems =
+        viewModel.homePosts.collectAsLazyPagingItems()
 
     when (val refreshState = pagingItems.loadState.refresh) {
 

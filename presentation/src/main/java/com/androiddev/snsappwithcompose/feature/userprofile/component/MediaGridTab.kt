@@ -30,11 +30,10 @@ fun MediaGridTab(
     type: UserContent,
     viewModel: UserProfileViewModel
 ) {
-    val pagingFlow = remember(viewModel, type) {
+    val pagingItems =
         viewModel.getMediaPosts(type)
-    }
+            .collectAsLazyPagingItems()
 
-    val pagingItems = pagingFlow.collectAsLazyPagingItems()
 
     when (val refreshState = pagingItems.loadState.refresh) {
         is LoadState.Loading -> {

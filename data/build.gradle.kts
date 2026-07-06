@@ -46,6 +46,9 @@ android {
 
 dependencies {
     implementation(project(":domain"))
+    //location service
+    implementation(libs.service.location)
+    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.paging.runtime)
     //DataStore
     implementation(libs.androidx.datastore.preferences)

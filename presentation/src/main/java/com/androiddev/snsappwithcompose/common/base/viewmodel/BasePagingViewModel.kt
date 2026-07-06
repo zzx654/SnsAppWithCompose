@@ -1,7 +1,6 @@
 package com.androiddev.snsappwithcompose.common.base.viewmodel
 
 import android.Manifest
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -10,17 +9,18 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import com.androiddev.domain.exception.ConnectionException
 import com.androiddev.domain.exception.TokenExpiredException
+import com.androiddev.domain.location.LocationProvider
+import com.androiddev.domain.location.LocationState
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.PagingUiState
 import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
-import com.androiddev.snsappwithcompose.common.util.fetchLocation
-import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,7 +29,7 @@ import kotlinx.coroutines.withContext
 
 abstract class BasePagingViewModel(
     @ApplicationContext protected val context: Context,
-    protected val locationClient: FusedLocationProviderClient,
+    private val locationProvider: LocationProvider,
     private val isLocationPermissionRequired: Boolean = false
 ) : ViewModel() {
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -52,11 +52,15 @@ abstract class BasePagingViewModel(
     ) {
         _event.emit(event)
     }**/
-    private var currentLatitude: Double? = null
-    private var currentLongitude: Double? = null
+    private val _location =
+        MutableStateFlow(
+            LocationState(
+                latitude = null,
+                longitude = null
+            )
+        )
 
-    protected fun getLatitude() = currentLatitude
-    protected fun getLongitude() = currentLongitude
+    val location: StateFlow<LocationState> = _location.asStateFlow()
 
     init {
         loadLocation()
@@ -75,12 +79,10 @@ abstract class BasePagingViewModel(
 
             onGranted = {
 
-                fetchLocation(locationClient) { lat, lon ->
+                viewModelScope.launch {
 
-
-                    currentLatitude = lat
-                    currentLongitude = lon
-                    println("??????????????????????????????????${currentLatitude},${currentLongitude}")
+                    _location.value =
+                        locationProvider.getCurrentLocation()
 
                 }
 
@@ -90,13 +92,13 @@ abstract class BasePagingViewModel(
 
                 if (!isLocationPermissionRequired) {
 
-                    currentLatitude = null
-                    currentLongitude = null
-
+                    _location.value = LocationState(
+                        latitude = null,
+                        longitude = null
+                    )
                 }
 
             }
-
         )
     }
     protected fun getString(@StringRes id: Int): String {

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.androiddev.domain.location.LocationProvider
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.use_case.postlist.GetPostsUseCases
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
 
@@ -29,9 +31,9 @@ class UserProfileViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val userUseCases: UserUseCases,
     private val getPostsUseCases: GetPostsUseCases,
-    locationClient: FusedLocationProviderClient,
+    locationProvider: LocationProvider,
     savedStateHandle: SavedStateHandle
-) : BasePagingViewModel(context,locationClient) {
+) : BasePagingViewModel(context,locationProvider) {
     val args: Screen.UserProfileScreen = savedStateHandle.toRoute<Screen.UserProfileScreen>()
     val tabs = listOf(
         UserContent.HOME,
@@ -54,22 +56,29 @@ class UserProfileViewModel @Inject constructor(
         currentTab.value = tab
 
     }
-    private var homePager: Flow<PagingData<PostPreview>>? = null
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val homePosts =
+        location
+            .filterNotNull()
+            .flatMapLatest { location ->
+
+                getPostsUseCases.getUserPosts(
+                    userId = args.userId,
+                    latitude = location.latitude,
+                    longitude = location.longitude
+                )
+
+            }
+            .cachedIn(viewModelScope)
     private val mediaPagerCache =
         mutableMapOf<
                 UserContent,
                 Flow<PagingData<MediaPost>>
                 >()
 
-    fun getHomePosts(): Flow<PagingData<PostPreview>> {
-        println("!!!!!!!!!!!!!!!!!!${getLatitude()}")
-        return homePager ?: getPostsUseCases.getUserPosts(
-            userId = args.userId,
-            latitude = getLatitude(),
-            longitude = getLongitude()
-        ).cachedIn(viewModelScope)
-            .also { homePager = it }
-    }
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getMediaPosts(
         tab: UserContent
     ): Flow<PagingData<MediaPost>> {
@@ -78,13 +87,18 @@ class UserProfileViewModel @Inject constructor(
 
         return mediaPagerCache.getOrPut(tab) {
 
+            location
+                .flatMapLatest { location ->
 
-            userUseCases.getMediaPosts(
-                userId = args.userId,
-                type = tab.name,
-                latitude = getLatitude(),
-                longitude = getLongitude()
-            ).cachedIn(viewModelScope)
+                    userUseCases.getMediaPosts(
+                        userId = args.userId,
+                        type = tab.name,
+                        latitude = location.latitude,
+                        longitude = location.longitude
+                    )
+
+                }
+                .cachedIn(viewModelScope)
 
         }
     }
