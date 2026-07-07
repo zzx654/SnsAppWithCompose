@@ -154,18 +154,19 @@ fun PostPrevItem(
             modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Outlined.LocationOn,
-                contentDescription = null,
-                tint = Color.DarkGray.copy(0.8f)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
+
             post.distance?.let { distance ->
+                Icon(
+                    imageVector = Icons.Outlined.LocationOn,
+                    contentDescription = null,
+                    tint = Color.DarkGray.copy(0.8f)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
 
                 Text("${distance}km",color = Color.DarkGray)
-            }
+                Spacer(modifier = Modifier.width(9.dp))
 
-            Spacer(modifier = Modifier.width(9.dp))
+            }
             Icon(
                 imageVector = Icons.Outlined.Comment,
                 contentDescription = null,
