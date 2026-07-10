@@ -138,7 +138,7 @@ fun MediaPostGridItem(
             .aspectRatio(if(post.type == MediaType.IMAGE.name)1f else 2f/3f)
             .background(Color.LightGray)
             .clickable {
-                //onClick()
+                onClick()
             }
     ) {
         AsyncImage(

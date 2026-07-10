@@ -11,17 +11,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.paging.PagingAppendState
 import com.androiddev.snsappwithcompose.common.component.paging.PagingScreen
+import com.androiddev.snsappwithcompose.common.navigation.component.Screen
+import com.androiddev.snsappwithcompose.feature.mediaviewer.MediaViewerArgs
 import com.androiddev.snsappwithcompose.feature.userprofile.UserContent
 import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 
 @Composable
 fun MediaGridTab(
     type: UserContent,
-    viewModel: UserProfileViewModel
+    viewModel: UserProfileViewModel,
+    onMediaClick:(List<MediaPost>, Int) -> Unit
 ) {
     val pagingItems =
         viewModel.getMediaPosts(type)
@@ -30,7 +36,7 @@ fun MediaGridTab(
         refreshState = pagingItems.loadState.refresh,
         itemCount = pagingItems.itemCount,
         onRetry = { pagingItems.retry() },
-        emptyMessage = getString(LocalContext.current,if(type == UserContent.IMAGE) R.string.photo_not_exist else R.string.video_not_exist)
+        emptyMessage = getString(LocalContext.current,if(type == UserContent.IMAGE) R.string.image_not_exist else R.string.video_not_exist)
     ) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -48,7 +54,12 @@ fun MediaGridTab(
 
                     MediaPostGridItem(
                         post = post,
-                        onClick = {}
+                        onClick = {
+                            onMediaClick(
+                                pagingItems.itemSnapshotList.items,
+                                index
+                            )
+                        }
                     )
                 }
             }

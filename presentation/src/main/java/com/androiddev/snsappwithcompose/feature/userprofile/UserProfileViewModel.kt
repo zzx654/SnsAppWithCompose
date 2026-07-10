@@ -14,6 +14,7 @@ import com.androiddev.domain.use_case.postlist.GetPostsUseCases
 import com.androiddev.domain.use_case.user.UserUseCases
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BasePagingViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
+import com.androiddev.snsappwithcompose.common.state.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -77,6 +79,15 @@ class UserProfileViewModel @Inject constructor(
                 >()
 
 
+    fun onEvent(event:UserProfileEvent) {
+        when(event) {
+            is UserProfileEvent.OnClickImageItem -> {
+                viewModelScope.launch {
+                }
+            }
+        }
+
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getMediaPosts(

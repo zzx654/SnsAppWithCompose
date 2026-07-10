@@ -43,6 +43,7 @@ import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 import kotlinx.coroutines.flow.collectLatest
 import androidx.navigation.compose.navigation
 import com.androiddev.snsappwithcompose.feature.PostDetail.VisualMediaScreen
+import com.androiddev.snsappwithcompose.feature.mediaviewer.ImageViewerScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostViewModel
 import com.androiddev.snsappwithcompose.feature.upload_post.VideoPlayerScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.VisualMediaEditScreen
@@ -240,6 +241,13 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 navBackStackEntry = it,
             )
             PendingNotificationHandler(notificationViewModel)
+
+        }
+        composable<Screen.ImageViewerScreen> {
+
+            BackHandler(true) {
+            }
+            ImageViewerScreen(navController = navController, navBackStackEntry = it)
 
         }
         composable<Screen.ReplyScreen>(

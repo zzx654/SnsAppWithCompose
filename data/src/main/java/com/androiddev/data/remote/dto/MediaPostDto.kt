@@ -29,7 +29,6 @@ fun MediaPostDto.toMediaPost(
         nickname = nickname,
         text = text,
         date = date,
-        elapsedTime = elapsedTime(date),
         distance = distance?.let{ round(it).toInt()},
         commentCount = commentcount,
         likecount = likecount,

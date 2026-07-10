@@ -9,6 +9,7 @@ import kotlin.reflect.typeOf
 import android.net.Uri
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Media
+import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 
 sealed interface Screen {
@@ -47,6 +48,11 @@ sealed interface Screen {
     data class MediaScreen(val mediaItems:List<Media>?): Screen
     @Serializable
     data class VideoPlayerScreen(val encodedUri:String): Screen
+
+    @Serializable
+    data object ImageViewerScreen: Screen
+
+
 
     @Serializable
     data object UploadFlow : Screen
@@ -88,3 +94,4 @@ inline fun <reified T : Any?> serializableType(
 val postTypeMap = mapOf(typeOf<PostPreview?>() to serializableType<PostPreview?>(isNullableAllowed = true))
 val commentTypeMap = mapOf(typeOf<Comment?>() to serializableType<Comment?>(isNullableAllowed = true))
 val mediaTypeMap = mapOf(typeOf<List<Media>?>() to serializableType<List<Media>?>(isNullableAllowed = true))
+val mediaPostsTypeMap = mapOf(typeOf<List<MediaPost>?>() to serializableType<List<MediaPost>?>(isNullableAllowed = true))

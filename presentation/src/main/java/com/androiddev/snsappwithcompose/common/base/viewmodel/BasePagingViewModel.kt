@@ -28,12 +28,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 abstract class BasePagingViewModel(
-    @ApplicationContext protected val context: Context,
+    context:Context,
     private val locationProvider: LocationProvider,
     private val isLocationPermissionRequired: Boolean = false
-) : ViewModel() {
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
+) : BaseViewModel(context) {
+
 
     private val _pagingUiState =
         MutableStateFlow(PagingUiState())
@@ -41,17 +40,7 @@ abstract class BasePagingViewModel(
     val pagingUiState =
         _pagingUiState.asStateFlow()
 
-    //private val _event =
-    //    MutableSharedFlow<E>()
 
-    //val event =
-     //   _event.asSharedFlow()
-
-    /**protected suspend fun setEvent(
-        event: E
-    ) {
-        _event.emit(event)
-    }**/
     private val _location =
         MutableStateFlow(
             LocationState(
@@ -100,12 +89,6 @@ abstract class BasePagingViewModel(
 
             }
         )
-    }
-    protected fun getString(@StringRes id: Int): String {
-        return context.getString(id)
-    }
-    suspend fun setEvent(event: UiEvent) = withContext(Dispatchers.Main) {
-        _eventFlow.emit(event)
     }
 
     fun onPagingStateChanged(

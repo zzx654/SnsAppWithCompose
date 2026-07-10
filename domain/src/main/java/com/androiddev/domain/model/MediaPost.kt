@@ -13,7 +13,6 @@ data class MediaPost (
     val nickname:String,
     val text: String,
     val date:String,
-    val elapsedTime:String,
     var distance:Int?,
     var commentCount:Int,
     var likecount:Int,

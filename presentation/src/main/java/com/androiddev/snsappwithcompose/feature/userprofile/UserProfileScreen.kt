@@ -48,11 +48,13 @@ import androidx.navigation.toRoute
 import coil3.imageLoader
 import coil3.request.crossfade
 import coil3.util.DebugLogger
+import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.home.user.UserEvent
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
+import com.androiddev.snsappwithcompose.feature.mediaviewer.MediaViewerArgs
 import com.androiddev.snsappwithcompose.feature.userprofile.component.HomeTab
 import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaGridTab
 import com.androiddev.snsappwithcompose.feature.userprofile.component.UserProfileHeader
@@ -89,7 +91,28 @@ fun UserProfileScreen(
 
     val userInfoState = userViewModel.userInfo.value
 
+    val openMediaViewer: (List<MediaPost>, Int, UserContent) -> Unit =
+        { mediaList, index, type ->
 
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.set(MediaViewerArgs.MEDIA, mediaList)
+
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.set(MediaViewerArgs.CLICKED_INDEX, index)
+
+            when (type) {
+                UserContent.IMAGE ->
+                    navController.navigate(Screen.ImageViewerScreen)
+
+                UserContent.VIDEO -> {
+                }
+
+
+                else -> Unit
+            }
+        }
     LaunchedEffect(args.userId) {
 
         userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
@@ -166,7 +189,7 @@ fun UserProfileScreen(
                                 Text(
                                     text = when (tab) {
                                         UserContent.HOME -> getString(context, R.string.home)
-                                        UserContent.IMAGE -> getString(context,R.string.photo)
+                                        UserContent.IMAGE -> getString(context,R.string.image)
                                         UserContent.VIDEO -> getString(context,R.string.video)
                                     },
                                     modifier = Modifier.padding(vertical = 16.dp)
@@ -194,7 +217,10 @@ fun UserProfileScreen(
 
                                 MediaGridTab(
                                     type = UserContent.IMAGE,
-                                    viewModel = userProfileViewModel
+                                    viewModel = userProfileViewModel,
+                                    onMediaClick = { mediaList, index ->
+                                        openMediaViewer(mediaList, index, UserContent.IMAGE)
+                                    }
                                 )
                             }
 
@@ -202,7 +228,10 @@ fun UserProfileScreen(
 
                                 MediaGridTab(
                                     type = UserContent.VIDEO,
-                                    viewModel = userProfileViewModel
+                                    viewModel = userProfileViewModel,
+                                    onMediaClick = { mediaList, index ->
+                                        openMediaViewer(mediaList, index, UserContent.VIDEO)
+                                    }
                                 )
                             }
                         }

@@ -117,9 +117,9 @@
     <string name="user">유저</string>
     <string name="home">홈</string>
     <string name="media">미디어</string>
-    <string name="photo">사진</string>
+    <string name="image">사진</string>
     <string name="video">영상</string>
-    <string name="photo_not_exist">사진 게시물이 없습니다</string>>
+    <string name="image_not_exist">사진 게시물이 없습니다</string>>
     <string name="video_not_exist">영상 게시물이 없습니다</string>
     <string name="post_not_exist">게시물이 없습니다</string>
 
