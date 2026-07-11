@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.feature.mediaviewer.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +19,8 @@ import com.androiddev.snsappwithcompose.BuildConfig
 fun ImagePager(
     images:List<MediaPost>,
     pagerState:PagerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTap:() -> Unit = {}
 ) {
 
     HorizontalPager(
@@ -27,7 +29,7 @@ fun ImagePager(
     ) { page ->
         val image = images[page]
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().clickable { onTap() },
             contentAlignment = Alignment.Center
         ) {
 

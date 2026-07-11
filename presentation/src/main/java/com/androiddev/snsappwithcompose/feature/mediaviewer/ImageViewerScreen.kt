@@ -1,5 +1,9 @@
 package com.androiddev.snsappwithcompose.feature.mediaviewer
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.rememberPagerState
@@ -13,11 +17,13 @@ import androidx.navigation.NavController
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ImagePager
 import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ImageViewerBottomBar
+import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ImageViewerOverlay
 import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ImageViewerTopBar
 import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ZoomableContainer
 
 @Composable
 fun ImageViewerScreen(
+    viewModel: ImageViewerViewModel=androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     navController: NavController,
     navBackStackEntry: NavBackStackEntry
 ) {
@@ -48,6 +54,12 @@ fun ImageViewerScreen(
         pageCount = { imagePosts.size }
     )
 
+    LaunchedEffect(pagerState.currentPage) {
+        viewModel.setCurrentPage(
+            pagerState.currentPage
+        )
+    }
+
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -59,23 +71,29 @@ fun ImageViewerScreen(
             ImagePager(
                 images = imagePosts,
                 pagerState = pagerState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                onTap = { viewModel.toggleOverlay() }
+            )
+        }
+        AnimatedVisibility(
+            modifier = Modifier.fillMaxSize(),
+            visible = viewModel.uiState.showOverlayUi,
+            enter = fadeIn(tween(120)),
+            exit = fadeOut(tween(120))
+        ) {
+            ImageViewerOverlay(
+                currentPage = viewModel.uiState.currentPage,
+                totalCount = imagePosts.size,
+                imagePost = imagePosts[viewModel.uiState.currentPage],
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onMoreClick = {},
+                navigateToPost = {}
             )
         }
 
-        ImageViewerTopBar(
-            modifier = Modifier.align(Alignment.TopCenter),
-            currentPage = pagerState.currentPage,
-            totalCount = imagePosts.size,
-            onBackClick = {
-                navController.popBackStack()
-            }
-        )
-        ImageViewerBottomBar(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            navigateToPost = {},
-            imagePost =imagePosts[pagerState.currentPage],
-        )
+
     }
 
 }
