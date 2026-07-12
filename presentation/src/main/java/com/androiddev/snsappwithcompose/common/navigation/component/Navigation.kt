@@ -247,7 +247,7 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
 
             BackHandler(true) {
             }
-            ImageViewerScreen(navController = navController, navBackStackEntry = it)
+            ImageViewerScreen(navController = navController)
 
         }
         composable<Screen.ReplyScreen>(

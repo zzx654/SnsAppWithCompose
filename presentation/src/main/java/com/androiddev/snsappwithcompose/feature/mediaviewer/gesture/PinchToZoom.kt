@@ -25,6 +25,8 @@ fun PinchToZoom(
     modifier: Modifier = Modifier,
     onScaleChanged: (Float) -> Unit = {},
     onDrag: (Offset) -> Boolean = { false },
+    onGestureStateChanged: (Boolean) -> Unit = {},
+    onZoomStateChanged: (Boolean) -> Unit = {},
     content: @Composable BoxScope.(
         scale: Float,
         offset: Offset
@@ -64,7 +66,8 @@ fun PinchToZoom(
                         val event = awaitPointerEvent()
                         if (event.changes.size > 1) {
 
-                            isZoomGesture = true
+                            onGestureStateChanged(true)
+
 
                             val zoom = event.calculateZoom()
                             val pan = event.calculatePan()
@@ -78,10 +81,15 @@ fun PinchToZoom(
                                     containerSize
                                 )
                             } else {
+                                scale = 1f
+                                offset = Offset.Zero
+
+                                hasMoved = false
                                 offset = Offset.Zero
                             }
 
                             onScaleChanged(scale)
+                            onZoomStateChanged(scale > 1.01f)
 
                             if (scale > 1.01f) {
                                 //확대됨
@@ -101,7 +109,7 @@ fun PinchToZoom(
                                 dragAmount.getDistance() > touchSlop
                             ) {
                                 hasMoved = true
-                                isDragGesture = true
+                                onGestureStateChanged(true)
                             }
                             offset = clampOffset(
                                 offset + dragAmount,
@@ -117,7 +125,7 @@ fun PinchToZoom(
                         }
 
                     } while (event.changes.any { it.pressed })
-
+                    onGestureStateChanged(false)
 
 
                 }

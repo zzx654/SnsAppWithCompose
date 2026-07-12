@@ -28,9 +28,14 @@ import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ZoomableCo
 fun ImageViewerScreen(
     viewModel: ImageViewerViewModel=androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     navController: NavController,
-    navBackStackEntry: NavBackStackEntry
 ) {
+    var isGestureRunning by remember {
+        mutableStateOf(false)
+    }
 
+    var isZoomed by remember {
+        mutableStateOf(false)
+    }
 
     val previousEntry = remember(navController) {
         navController.previousBackStackEntry
@@ -55,9 +60,6 @@ fun ImageViewerScreen(
         initialPage = index,
         pageCount = { imagePosts.size }
     )
-    var isZooming by remember {
-        mutableStateOf(false)
-    }
 
     LaunchedEffect(pagerState.currentPage) {
         viewModel.setCurrentPage(
@@ -77,10 +79,28 @@ fun ImageViewerScreen(
                 images = imagePosts,
                 pagerState = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                onTap = { viewModel.toggleOverlay() },
-                userScrollEnabled = !isZooming,
-                onScaleChanged = {
-                    isZooming = it > 1f
+
+                userScrollEnabled = !isZoomed,
+
+                onGestureStateChanged = {
+                    isGestureRunning = it
+                },
+
+
+                onZoomStateChanged = { zoomed ->
+                    isZoomed = zoomed
+
+                    if (zoomed) {
+                        viewModel.hideOverlay()
+                    } else {
+                        viewModel.showOverlay()
+                    }
+                },
+
+                onTap = {
+                    if (!isGestureRunning && !isZoomed) {
+                        viewModel.toggleOverlay()
+                    }
                 }
             )
         }

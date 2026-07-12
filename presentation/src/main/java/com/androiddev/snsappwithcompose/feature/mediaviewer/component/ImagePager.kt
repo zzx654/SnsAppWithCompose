@@ -22,7 +22,9 @@ fun ImagePager(
     modifier: Modifier = Modifier,
     userScrollEnabled: Boolean = true,
     onTap:() -> Unit = {},
-    onScaleChanged: (Float) -> Unit = {}
+    onScaleChanged: (Float) -> Unit = {},
+    onGestureStateChanged:(Boolean) -> Unit = {},
+    onZoomStateChanged:(Boolean) -> Unit = {}
 ) {
 
     HorizontalPager(
@@ -39,7 +41,9 @@ fun ImagePager(
                 image = image,
                 modifier = Modifier.fillMaxSize(),
                 onTap = onTap,
-                onScaleChanged = onScaleChanged
+                onScaleChanged = onScaleChanged,
+                onZoomStateChanged = onZoomStateChanged,
+                onGestureStateChanged = onGestureStateChanged
 
             )
 
