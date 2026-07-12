@@ -20,31 +20,29 @@ fun ImagePager(
     images:List<MediaPost>,
     pagerState:PagerState,
     modifier: Modifier = Modifier,
-    onTap:() -> Unit = {}
+    userScrollEnabled: Boolean = true,
+    onTap:() -> Unit = {},
+    onScaleChanged: (Float) -> Unit = {}
 ) {
 
     HorizontalPager(
         state = pagerState,
+        userScrollEnabled = userScrollEnabled,
         modifier = modifier
     ) { page ->
         val image = images[page]
         Box(
-            modifier = Modifier.fillMaxSize().clickable { onTap() },
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
+            ZoomableImage(
+                image = image,
+                modifier = Modifier.fillMaxSize(),
+                onTap = onTap,
+                onScaleChanged = onScaleChanged
 
-            SubcomposeAsyncImage(
-                model = BuildConfig.BASE_URL+image.url,
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
-                contentScale = ContentScale.Fit,
-                loading = {
-                    ImagePlaceholder()
-                },
-                error = {
-                    ImagePlaceholder()
-                }
             )
+
 
             //Text(text = "${page + 1} / ${images.size}",color = Color.White)
 

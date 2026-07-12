@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
@@ -27,7 +30,6 @@ fun ImageViewerScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry
 ) {
-
 
 
     val previousEntry = remember(navController) {
@@ -53,6 +55,9 @@ fun ImageViewerScreen(
         initialPage = index,
         pageCount = { imagePosts.size }
     )
+    var isZooming by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(pagerState.currentPage) {
         viewModel.setCurrentPage(
@@ -72,7 +77,11 @@ fun ImageViewerScreen(
                 images = imagePosts,
                 pagerState = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                onTap = { viewModel.toggleOverlay() }
+                onTap = { viewModel.toggleOverlay() },
+                userScrollEnabled = !isZooming,
+                onScaleChanged = {
+                    isZooming = it > 1f
+                }
             )
         }
         AnimatedVisibility(

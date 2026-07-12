@@ -102,7 +102,6 @@ androidx-browser = { group = "androidx.browser", name = "browser", version.ref =
 kakao-v2-all = { group = "com.kakao.sdk", name = "v2-all", version.ref = "kakaosdk"}
 kakao-v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaosdk"}
 
-
 #구글 위치
 service-location = {group = "com.google.android.gms", name = "play-services-location", version.ref = "serviceslocation"}
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
