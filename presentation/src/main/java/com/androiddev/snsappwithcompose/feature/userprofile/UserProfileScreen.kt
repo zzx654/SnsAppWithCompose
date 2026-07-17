@@ -107,6 +107,7 @@ fun UserProfileScreen(
                     navController.navigate(Screen.ImageViewerScreen)
 
                 UserContent.VIDEO -> {
+                    navController.navigate(Screen.VideoViewerScreen)
                 }
 
 

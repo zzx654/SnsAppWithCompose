@@ -52,6 +52,11 @@ sealed interface Screen {
     @Serializable
     data object ImageViewerScreen: Screen
 
+    @Serializable
+    data object VideoViewerScreen: Screen
+
+
+
 
 
     @Serializable

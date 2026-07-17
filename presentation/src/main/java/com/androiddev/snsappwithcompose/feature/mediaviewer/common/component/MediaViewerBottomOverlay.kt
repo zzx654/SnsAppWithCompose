@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.mediaviewer.component
+package com.androiddev.snsappwithcompose.feature.mediaviewer.common.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,7 +26,7 @@ import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.util.elapsedTime
 
 @Composable
-fun ImageViewerBottomBar(
+fun MediaViewerBottomOverlay(
     modifier:Modifier = Modifier,
     navigateToPost:() -> Unit = {},
     imagePost: MediaPost

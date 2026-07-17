@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.mediaviewer
+package com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

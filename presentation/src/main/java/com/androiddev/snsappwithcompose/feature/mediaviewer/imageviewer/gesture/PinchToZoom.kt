@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.mediaviewer.gesture
+package com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.gesture
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -23,8 +23,6 @@ import androidx.compose.ui.unit.IntSize
 @Composable
 fun PinchToZoom(
     modifier: Modifier = Modifier,
-    onScaleChanged: (Float) -> Unit = {},
-    onDrag: (Offset) -> Boolean = { false },
     onGestureStateChanged: (Boolean) -> Unit = {},
     onZoomStateChanged: (Boolean) -> Unit = {},
     content: @Composable BoxScope.(
@@ -50,8 +48,6 @@ fun PinchToZoom(
             }
             .pointerInput(Unit) {
                 awaitEachGesture {
-                    var isZoomGesture = false
-                    var isDragGesture = false
                     var hasMoved = false
 
                     val touchSlop = viewConfiguration.touchSlop
@@ -83,12 +79,8 @@ fun PinchToZoom(
                             } else {
                                 scale = 1f
                                 offset = Offset.Zero
-
                                 hasMoved = false
-                                offset = Offset.Zero
                             }
-
-                            onScaleChanged(scale)
                             onZoomStateChanged(scale > 1.01f)
 
                             if (scale > 1.01f) {
@@ -100,6 +92,7 @@ fun PinchToZoom(
                                 }
                             }
                         } else if( scale > 1.01f) {
+                            //확대된상태 + 드래그
                             val change = event.changes.first()
 
 
@@ -117,11 +110,7 @@ fun PinchToZoom(
                                 containerSize
                             )
 
-                            val shouldConsume = onDrag(dragAmount)
 
-                            if (shouldConsume) {
-                                change.consume()
-                            }
                         }
 
                     } while (event.changes.any { it.pressed })

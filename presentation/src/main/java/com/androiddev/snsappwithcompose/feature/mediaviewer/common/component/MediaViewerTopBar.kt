@@ -1,4 +1,5 @@
-package com.androiddev.snsappwithcompose.feature.mediaviewer.component
+package com.androiddev.snsappwithcompose.feature.mediaviewer.common.component
+
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ImageViewerTopBar(
+fun MediaViewerTopOverlay(
     modifier:Modifier = Modifier,
     currentPage: Int,
     totalCount: Int,

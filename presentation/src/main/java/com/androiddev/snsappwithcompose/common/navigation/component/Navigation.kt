@@ -43,7 +43,8 @@ import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 import kotlinx.coroutines.flow.collectLatest
 import androidx.navigation.compose.navigation
 import com.androiddev.snsappwithcompose.feature.PostDetail.VisualMediaScreen
-import com.androiddev.snsappwithcompose.feature.mediaviewer.ImageViewerScreen
+import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.ImageViewerScreen
+import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.VideoViewerScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostViewModel
 import com.androiddev.snsappwithcompose.feature.upload_post.VideoPlayerScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.VisualMediaEditScreen
@@ -249,6 +250,12 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
             }
             ImageViewerScreen(navController = navController)
 
+        }
+        composable<Screen.VideoViewerScreen> {
+            BackHandler(true) {
+
+            }
+            VideoViewerScreen(navController = navController)
         }
         composable<Screen.ReplyScreen>(
             typeMap = commentTypeMap

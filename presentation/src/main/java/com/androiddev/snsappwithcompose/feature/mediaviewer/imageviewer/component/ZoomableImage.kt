@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.mediaviewer.component
+package com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.component
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -13,14 +13,13 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.SubcomposeAsyncImage
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.BuildConfig
-import com.androiddev.snsappwithcompose.feature.mediaviewer.gesture.PinchToZoom
+import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.gesture.PinchToZoom
 
 @Composable
 fun ZoomableImage(
     image: MediaPost,
     modifier: Modifier = Modifier,
     onTap:() -> Unit = {},
-    onScaleChanged: (Float) -> Unit = {},
     onZoomStateChanged: (Boolean) -> Unit = {},
     onGestureStateChanged:(Boolean) -> Unit = {},
 ) {
@@ -29,7 +28,6 @@ fun ZoomableImage(
 
     PinchToZoom(
         modifier = modifier,
-        onScaleChanged = onScaleChanged,
         onGestureStateChanged = onGestureStateChanged,
         onZoomStateChanged = onZoomStateChanged
     ) { scale,offset ->

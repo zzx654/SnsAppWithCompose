@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.mediaviewer
+package com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -13,20 +13,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.androiddev.domain.model.MediaPost
-import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ImagePager
-import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ImageViewerBottomBar
-import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ImageViewerOverlay
-import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ImageViewerTopBar
-import com.androiddev.snsappwithcompose.feature.mediaviewer.component.ZoomableContainer
+import com.androiddev.snsappwithcompose.feature.mediaviewer.MediaViewerArgs
+import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.component.ImagePager
+import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.component.ImageViewerOverlay
+import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.component.ZoomableContainer
 
 @Composable
 fun ImageViewerScreen(
-    viewModel: ImageViewerViewModel=androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    viewModel: ImageViewerViewModel =androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     navController: NavController,
 ) {
     var isGestureRunning by remember {

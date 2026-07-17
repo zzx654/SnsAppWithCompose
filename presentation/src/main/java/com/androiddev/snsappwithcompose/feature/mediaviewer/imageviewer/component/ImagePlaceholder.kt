@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.mediaviewer.component
+package com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
