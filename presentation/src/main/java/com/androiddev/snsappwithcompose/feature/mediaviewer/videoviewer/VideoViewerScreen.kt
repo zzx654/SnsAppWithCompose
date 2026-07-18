@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -15,12 +16,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.feature.mediaviewer.MediaViewerArgs
+import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoController
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoPlayer
 
 @Composable
@@ -31,9 +34,8 @@ fun VideoViewerScreen(
 
 
     val context = LocalContext.current
-    val previousEntry = remember(navController) {
-        navController.previousBackStackEntry
-    }
+    val previousEntry = navController.previousBackStackEntry
+
 
     val videoPosts =
         previousEntry
@@ -77,7 +79,9 @@ fun VideoViewerScreen(
         pagerState.currentPage
     ) {
 
+
         isPlaying = true
+
 
         playerState.play(
             url = videoPosts[pagerState.currentPage].url
@@ -108,6 +112,40 @@ fun VideoViewerScreen(
                     player = playerState.player,
                     modifier = Modifier.fillMaxSize()
                 )
+
+                if(!isPlaying){
+
+                    VideoController(
+                        isPlaying = isPlaying,
+                        onBackwardClick = {
+                            isPlaying = true
+                            playerState.skipBackward()
+                        },
+                        onForwardClick = {
+                            isPlaying = true
+                            playerState.skipForward()
+
+                        },
+                        onPlayClick = {
+
+                            isPlaying = !isPlaying
+
+                            playerState.setPlaying(isPlaying)
+
+                        }
+                    )
+
+                }
+            }
+
+            if(playerState.isBuffering){
+
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center),
+                    color = Color.White
+                )
+
             }
 
 

@@ -7,5 +7,5 @@ object Constants {
     const val MEDIA_TYPE_IMAGE = "IMAGE"
     const val MEDIA_TYPE_VIDEO = "VIDEO"
     const val MEDIA_TYPE_AUDIO = "AUDIO"
-
+    const val SEEK_TIME = 5_000L
 }
