@@ -9,11 +9,24 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.common.util.Constants.SEEK_TIME
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class VideoPlayerState(
     context: Context
 ) {
+    var currentPosition by mutableStateOf(0L)
+        private set
 
+    var duration by mutableStateOf(0L)
+        private set
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     var isBuffering by mutableStateOf(false)
         private set
     val player = ExoPlayer.Builder(context).build().apply {
@@ -34,6 +47,7 @@ class VideoPlayerState(
 
     init {
         player.addListener(listener)
+        startProgressUpdate()
     }
 
 
@@ -54,7 +68,8 @@ class VideoPlayerState(
 
 
         if(currentUrl != newUrl){
-
+            currentPosition = 0L
+            duration = 0L
 
             player.setMediaItem(
                 MediaItem.fromUri(newUrl)
@@ -66,7 +81,27 @@ class VideoPlayerState(
 
         player.play()
     }
+    private fun startProgressUpdate() {
 
+        scope.launch {
+
+            while (isActive) {
+
+                val safeDuration =
+                    if (player.duration > 0)
+                        player.duration
+                    else
+                        0L
+
+                duration = safeDuration
+
+                currentPosition =
+                    player.currentPosition.coerceAtMost(safeDuration)
+
+                delay(200)
+            }
+        }
+    }
 
     fun setPlaying(isPlaying:Boolean){
 
@@ -77,7 +112,11 @@ class VideoPlayerState(
         }
 
     }
+    fun seekTo(position: Long) {
+        player.seekTo(position)
+        currentPosition = position
 
+    }
     fun skipForward() {
 
         val newPosition =
@@ -98,7 +137,9 @@ class VideoPlayerState(
         player.play()
     }
 
-    fun release(){
+    fun release() {
+
+        scope.cancel()
 
         player.removeListener(listener)
         player.release()

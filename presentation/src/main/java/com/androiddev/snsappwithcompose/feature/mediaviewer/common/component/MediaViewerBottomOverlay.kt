@@ -1,6 +1,15 @@
 package com.androiddev.snsappwithcompose.feature.mediaviewer.common.component
 
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +25,11 @@ import androidx.compose.material.icons.outlined.Comment
 import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,14 +38,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.util.elapsedTime
+import androidx.compose.material3.Slider
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun MediaViewerBottomOverlay(
     modifier:Modifier = Modifier,
     navigateToPost:() -> Unit = {},
-    imagePost: MediaPost
+    mediaPost: MediaPost,
+    showSeekBar:Boolean = false,
+
+    duration:Long = 0L,
+
+    currentPosition:Long = 0L,
+
+    onSeek:(Long)->Unit = {}
 ) {
 
+    var isDragging by remember {
+        mutableStateOf(false)
+    }
+    var sliderPosition by remember {
+        mutableFloatStateOf(0f)
+    }
+    LaunchedEffect(currentPosition, duration, isDragging) {
+    //사용자 시크바 사용안하고 재생중일때 처리
+         if (!isDragging && duration > 0) {
+             sliderPosition = currentPosition.toFloat() / duration.toFloat()
+         }
+    }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -41,8 +76,9 @@ fun MediaViewerBottomOverlay(
             position = GradientPosition.BOTTOM,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
+                .height(210.dp)
                 .align(Alignment.BottomCenter)
+
         )
         Column(
             modifier = Modifier
@@ -52,13 +88,16 @@ fun MediaViewerBottomOverlay(
                     horizontal = 14.dp,
                     vertical = 24.dp
                 )
+                .animateContentSize(
+                    animationSpec = tween(220)
+                )
         ) {
-            Text(text = imagePost.nickname,color = Color.White)
+            Text(text = mediaPost.nickname,color = Color.White)
             Spacer(modifier = Modifier.height(3.dp))
-            Text(text = "${elapsedTime(imagePost.date)} · ${imagePost.distance}km",color = Color.LightGray, fontSize = 12.sp)
+            Text(text = "${elapsedTime(mediaPost.date)} · ${mediaPost.distance}km",color = Color.LightGray, fontSize = 12.sp)
             Spacer(modifier = Modifier.height(11.dp))
             Text(
-                text = imagePost.text,
+                text = mediaPost.text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.clickable{ navigateToPost() },
@@ -72,7 +111,7 @@ fun MediaViewerBottomOverlay(
                     tint = Color.White.copy(0.8f)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("${imagePost.likecount}",color = Color.LightGray)
+                Text("${mediaPost.likecount}",color = Color.LightGray)
 
                 Spacer(modifier = Modifier.width(17.dp))
 
@@ -82,13 +121,60 @@ fun MediaViewerBottomOverlay(
                     tint = Color.White.copy(0.8f)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("${imagePost.commentCount}",color = Color.LightGray)
+                Text("${mediaPost.commentCount}",color = Color.LightGray)
 
 
             }
 
 
+            AnimatedVisibility(
+                visible = showSeekBar,
+                enter = fadeIn(animationSpec = tween(120)),
+                exit = fadeOut(animationSpec = tween(120)),
+            ){
+                Column {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "${formatTime(currentPosition)}/${formatTime(duration)}",
+                            color = Color.White
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Slider(
+                        value = sliderPosition,
+                        onValueChange = {
+                            isDragging = true
+                            sliderPosition = it
+                        },
+                        onValueChangeFinished = {
+                            isDragging = false
+                            onSeek((sliderPosition * duration).toLong())
+                        }
+                    )
+                }
+            }
         }
     }
+}
 
+
+private fun formatTime(timeMs: Long): String {
+
+    val totalSeconds = timeMs / 1000
+
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+
+    return if (hours > 0) {
+        String.format("%d:%02d:%02d", hours, minutes, seconds)
+    } else {
+        String.format("%02d:%02d", minutes, seconds)
+    }
 }

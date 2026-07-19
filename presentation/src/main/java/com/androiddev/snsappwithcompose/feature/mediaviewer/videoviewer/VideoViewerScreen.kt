@@ -1,6 +1,10 @@
 package com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,15 +24,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.feature.mediaviewer.MediaViewerArgs
+import com.androiddev.snsappwithcompose.feature.mediaviewer.common.component.MediaViewerOverlay
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoController
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoPlayer
 
 @Composable
 fun VideoViewerScreen(
-    viewModel:VideoViewerViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    viewModel:VideoViewerViewModel = hiltViewModel(),
     navController:NavController
 ) {
 
@@ -113,8 +119,35 @@ fun VideoViewerScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                if(!isPlaying){
+                MediaViewerOverlay(
+                    currentPage = pagerState.currentPage,
+                    totalCount = videoPosts.size,
+                    mediaPost = videoPosts[pagerState.currentPage],
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onMoreClick = {
+                        // TODO
+                    },
+                    navigateToPost = {
+                        // TODO
+                    },
+                    showSeekBar = !isPlaying,
+                    duration = playerState.duration,
+                    currentPosition = playerState.currentPosition,
+                    onSeek = { playerState.seekTo(it)}
+                )
 
+
+                AnimatedVisibility(
+                    visible = !isPlaying,
+                    enter = fadeIn(
+                        animationSpec = tween(120)
+                    ),
+                    exit = fadeOut(
+                        animationSpec = tween(120)
+                    )
+                ) {
                     VideoController(
                         isPlaying = isPlaying,
                         onBackwardClick = {
@@ -124,19 +157,15 @@ fun VideoViewerScreen(
                         onForwardClick = {
                             isPlaying = true
                             playerState.skipForward()
-
                         },
                         onPlayClick = {
-
                             isPlaying = !isPlaying
-
                             playerState.setPlaying(isPlaying)
-
                         }
                     )
-
                 }
-            }
+                }
+
 
             if(playerState.isBuffering){
 
