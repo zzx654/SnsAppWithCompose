@@ -1,6 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component
 
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -15,6 +16,7 @@ fun VideoPlayer(
 
     AndroidView(
         factory = { context ->
+            Log.d("PlayerView", "Create PlayerView")
             PlayerView(context).apply {
                 useController = false
                 keepScreenOn = true

@@ -1,6 +1,5 @@
 package com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -28,7 +27,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.feature.mediaviewer.MediaViewerArgs
-import com.androiddev.snsappwithcompose.feature.mediaviewer.common.component.MediaViewerOverlay
+import com.androiddev.snsappwithcompose.feature.mediaviewer.common.component.MediaViewerBottomOverlay
+import com.androiddev.snsappwithcompose.feature.mediaviewer.common.component.MediaViewerTopOverlay
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoController
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoPlayer
 
@@ -93,93 +93,106 @@ fun VideoViewerScreen(
             url = videoPosts[pagerState.currentPage].url
         )
     }
-
-    VerticalPager(
-        state = pagerState,
-        key = { page -> videoPosts[page].id},
+    Box(
         modifier = Modifier.fillMaxSize()
-    ) { page ->
+    ) {
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    isPlaying = !isPlaying
-                    playerState.setPlaying(isPlaying)
-                }
-        ) {
+        VerticalPager(
+            state = pagerState,
+            key = { page -> videoPosts[page].id},
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
 
-            if (page == pagerState.currentPage) {
-                VideoPlayer(
-                    player = playerState.player,
-                    modifier = Modifier.fillMaxSize()
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        isPlaying = !isPlaying
+                        playerState.setPlaying(isPlaying)
+                    }
+            ) {
 
-                MediaViewerOverlay(
-                    currentPage = pagerState.currentPage,
-                    totalCount = videoPosts.size,
-                    mediaPost = videoPosts[pagerState.currentPage],
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
-                    onMoreClick = {
-                        // TODO
-                    },
-                    navigateToPost = {
-                        // TODO
-                    },
-                    showSeekBar = !isPlaying,
-                    duration = playerState.duration,
-                    currentPosition = playerState.currentPosition,
-                    onSeek = { playerState.seekTo(it)}
-                )
+               if (page == pagerState.currentPage) {
+                   VideoPlayer(
+                       player = playerState.player,
+                       modifier = Modifier.fillMaxSize()
+                   )
+               }
 
 
-                AnimatedVisibility(
-                    visible = !isPlaying,
-                    enter = fadeIn(
-                        animationSpec = tween(120)
-                    ),
-                    exit = fadeOut(
-                        animationSpec = tween(120)
+
+                    MediaViewerBottomOverlay(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        mediaPost = videoPosts[page],
+                        navigateToPost = {},
+                        showSeekBar = !isPlaying && page == pagerState.currentPage,
+                        duration = playerState.duration,
+                        currentPosition = playerState.currentPosition,
+                        onSeek = { playerState.seekTo(it)}
                     )
-                ) {
-                    VideoController(
-                        isPlaying = isPlaying,
-                        onBackwardClick = {
-                            isPlaying = true
-                            playerState.skipBackward()
-                        },
-                        onForwardClick = {
-                            isPlaying = true
-                            playerState.skipForward()
-                        },
-                        onPlayClick = {
-                            isPlaying = !isPlaying
-                            playerState.setPlaying(isPlaying)
-                        }
+
+
+
+                    AnimatedVisibility(
+                        visible =  !isPlaying &&
+                                page == pagerState.currentPage,
+                        enter = fadeIn(
+                            animationSpec = tween(120)
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(120)
+                        )
+                    ) {
+                        VideoController(
+                            isPlaying = isPlaying,
+                            onBackwardClick = {
+                                isPlaying = true
+                                playerState.skipBackward()
+                            },
+                            onForwardClick = {
+                                isPlaying = true
+                                playerState.skipForward()
+                            },
+                            onPlayClick = {
+                                isPlaying = !isPlaying
+                                playerState.setPlaying(isPlaying)
+                            }
+                        )
+                    }
+
+
+
+                if(playerState.isBuffering){
+
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center),
+                        color = Color.White
                     )
+
                 }
-                }
 
 
-            if(playerState.isBuffering){
 
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center),
-                    color = Color.White
-                )
 
             }
-
-
-
-
         }
+
+        MediaViewerTopOverlay(
+            modifier = Modifier.align(Alignment.TopCenter),
+            currentPage = pagerState.currentPage,
+            totalCount = videoPosts.size,
+            onBackClick = {
+                navController.popBackStack()
+            },
+            onMoreClick = {}
+        )
+
     }
+
+
 }

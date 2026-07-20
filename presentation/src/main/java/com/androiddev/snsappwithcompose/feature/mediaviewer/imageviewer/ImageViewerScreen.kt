@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.snsappwithcompose.feature.mediaviewer.MediaViewerArgs
-import com.androiddev.snsappwithcompose.feature.mediaviewer.common.component.MediaViewerOverlay
 import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.component.ImagePager
+import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.component.ImageViewerOverlay
 import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.component.ZoomableContainer
 
 @Composable
@@ -107,10 +107,10 @@ fun ImageViewerScreen(
             enter = fadeIn(tween(120)),
             exit = fadeOut(tween(120))
         ) {
-            MediaViewerOverlay(
+            ImageViewerOverlay(
                 currentPage = viewModel.uiState.currentPage,
                 totalCount = imagePosts.size,
-                mediaPost = imagePosts[viewModel.uiState.currentPage],
+                imagePost = imagePosts[viewModel.uiState.currentPage],
                 onBackClick = {
                     navController.popBackStack()
                 },
