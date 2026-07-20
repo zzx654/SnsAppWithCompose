@@ -25,7 +25,8 @@ class VideoPlayerState(
 
     var duration by mutableStateOf(0L)
         private set
-
+    var wasPlayingBeforeLifecyclePause = false
+        private set
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     var isBuffering by mutableStateOf(false)
         private set
@@ -137,6 +138,21 @@ class VideoPlayerState(
         player.play()
     }
 
+
+    fun pauseByLifecycle(){
+
+        wasPlayingBeforeLifecyclePause = player.isPlaying
+
+        player.pause()
+    }
+
+
+    fun resumeByLifecycle(){
+
+        if(wasPlayingBeforeLifecyclePause){
+            player.play()
+        }
+    }
     fun release() {
 
         scope.cancel()

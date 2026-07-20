@@ -31,7 +31,9 @@ import com.androiddev.snsappwithcompose.feature.mediaviewer.common.component.Med
 import com.androiddev.snsappwithcompose.feature.mediaviewer.common.component.MediaViewerTopOverlay
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoController
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoPlayer
-
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 @Composable
 fun VideoViewerScreen(
     viewModel:VideoViewerViewModel = hiltViewModel(),
@@ -41,7 +43,7 @@ fun VideoViewerScreen(
 
     val context = LocalContext.current
     val previousEntry = navController.previousBackStackEntry
-
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val videoPosts =
         previousEntry
@@ -67,8 +69,35 @@ fun VideoViewerScreen(
     val playerState = remember {
         VideoPlayerState(context)
     }
-    DisposableEffect(Unit) {
+
+    DisposableEffect(lifecycleOwner) {
+
+        val observer =
+            LifecycleEventObserver { _, event ->
+
+                when(event){
+
+                    Lifecycle.Event.ON_PAUSE -> {
+                        playerState.pauseByLifecycle()
+                    }
+
+                    Lifecycle.Event.ON_RESUME -> {
+                        playerState.resumeByLifecycle()
+                    }
+
+                    else -> Unit
+                }
+
+            }
+
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+
         onDispose {
+
+            lifecycleOwner.lifecycle.removeObserver(observer)
+
             playerState.release()
         }
     }
