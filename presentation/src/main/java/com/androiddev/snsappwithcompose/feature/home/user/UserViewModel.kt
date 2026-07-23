@@ -99,6 +99,9 @@ class UserViewModel @Inject constructor(
             }
         }
     }
+    fun refreshUser(userId: Int) {
+        onEvent(UserEvent.GetUserInfo(userId))
+    }
     fun onEvent(event:UserEvent) {
         when(event) {
             is UserEvent.TypeNickname-> {

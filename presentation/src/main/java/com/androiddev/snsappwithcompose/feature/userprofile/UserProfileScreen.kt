@@ -116,7 +116,8 @@ fun UserProfileScreen(
         }
     LaunchedEffect(args.userId) {
 
-        userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
+        //userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
+        userViewModel.refreshUser(args.userId)
         userPostsViewModel.initUserPosts(args.userId)
     }
 
@@ -199,6 +200,8 @@ fun UserProfileScreen(
                         }
                     }
 
+                    val canRefresh = scrollState.value == 0
+
                     HorizontalPager(
                         state = pagerState,
                         beyondViewportPageCount = 1,
@@ -221,7 +224,9 @@ fun UserProfileScreen(
                                     viewModel = userProfileViewModel,
                                     onMediaClick = { mediaList, index ->
                                         openMediaViewer(mediaList, index, UserContent.IMAGE)
-                                    }
+                                    },
+                                    refreshUserInfo = { userViewModel.refreshUser(args.userId)},
+                                    canRefresh = canRefresh
                                 )
                             }
 
@@ -232,7 +237,9 @@ fun UserProfileScreen(
                                     viewModel = userProfileViewModel,
                                     onMediaClick = { mediaList, index ->
                                         openMediaViewer(mediaList, index, UserContent.VIDEO)
-                                    }
+                                    },
+                                    refreshUserInfo = { userViewModel.refreshUser(args.userId)},
+                                    canRefresh = canRefresh
                                 )
                             }
                         }
