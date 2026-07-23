@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -117,7 +118,7 @@ fun VideoViewerScreen(
 
         isPlaying = true
 
-
+        kotlinx.coroutines.yield()
         playerState.play(
             url = videoPosts[pagerState.currentPage].url
         )
@@ -129,8 +130,17 @@ fun VideoViewerScreen(
         VerticalPager(
             state = pagerState,
             key = { page -> videoPosts[page].id},
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            beyondViewportPageCount = 1
         ) { page ->
+            val isCurrentPage = page == pagerState.currentPage
+
+//현재 페이지이면서 새 영상 로딩/준비 중이 아닐 때만 실제 재생 정보 전달
+            val isReadyToDisplay = isCurrentPage &&
+                    !playerState.isPreparingNewVideo &&
+                    !pagerState.isScrollInProgress
+            val displayDuration = if (isReadyToDisplay) playerState.duration else 0L
+            val displayPosition = if (isReadyToDisplay) playerState.currentPosition else 0L
 
             Box(
                 modifier = Modifier
@@ -145,24 +155,27 @@ fun VideoViewerScreen(
                     }
             ) {
 
-               if (page == pagerState.currentPage) {
                    VideoPlayer(
-                       player = playerState.player,
+                       player = if (page == pagerState.currentPage) playerState.player else null,
                        modifier = Modifier.fillMaxSize()
+                           .graphicsLayer {
+                            alpha = if (playerState.isPreparingNewVideo) 0f else 1f
+                       }
                    )
-               }
 
 
 
-                    MediaViewerBottomOverlay(
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                        mediaPost = videoPosts[page],
-                        navigateToPost = {},
-                        showSeekBar = !isPlaying && page == pagerState.currentPage,
-                        duration = playerState.duration,
-                        currentPosition = playerState.currentPosition,
-                        onSeek = { playerState.seekTo(it)}
-                    )
+
+                MediaViewerBottomOverlay(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    mediaPost = videoPosts[page],
+                    navigateToPost = {},
+                    showSeekBar = isCurrentPage && !pagerState.isScrollInProgress,
+                    seekBarEnabled = !isPlaying && isCurrentPage && !pagerState.isScrollInProgress,
+                    duration = displayDuration,
+                    currentPosition = displayPosition,
+                    onSeek = { playerState.seekTo(it) }
+                )
 
 
 
@@ -195,7 +208,7 @@ fun VideoViewerScreen(
 
 
 
-                if(playerState.isBuffering){
+                if(playerState.isBuffering|| playerState.isPreparingNewVideo){
 
                     CircularProgressIndicator(
                         modifier = Modifier

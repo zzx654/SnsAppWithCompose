@@ -10,7 +10,7 @@ import androidx.media3.ui.PlayerView
 
 @Composable
 fun VideoPlayer(
-    player: ExoPlayer,
+    player: ExoPlayer?,
     modifier: Modifier = Modifier
 ) {
 
@@ -24,7 +24,10 @@ fun VideoPlayer(
             }
         },
         update = { playerView ->
-            playerView.player = player
+            // 플레이어가 바뀔 때만 교체
+            if (playerView.player != player) {
+                playerView.player = player
+            }
         },
         modifier = modifier
     )

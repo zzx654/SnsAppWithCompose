@@ -6,30 +6,24 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Comment
 import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.util.elapsedTime
-import androidx.compose.material3.Slider
-import androidx.compose.runtime.LaunchedEffect
+import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoSeekBar
+import androidx.compose.foundation.layout.Spacer
 
 @Composable
 fun MediaViewerBottomOverlay(
@@ -47,6 +41,8 @@ fun MediaViewerBottomOverlay(
     navigateToPost:() -> Unit = {},
     mediaPost: MediaPost,
     showSeekBar:Boolean = false,
+    seekBarEnabled:Boolean = false,
+
 
     duration:Long = 0L,
 
@@ -55,18 +51,7 @@ fun MediaViewerBottomOverlay(
     onSeek:(Long)->Unit = {}
 ) {
 
-    var isDragging by remember {
-        mutableStateOf(false)
-    }
-    var sliderPosition by remember {
-        mutableFloatStateOf(0f)
-    }
-    LaunchedEffect(currentPosition, duration, isDragging) {
-    //사용자 시크바 사용안하고 재생중일때 처리
-         if (!isDragging && duration > 0) {
-             sliderPosition = currentPosition.toFloat() / duration.toFloat()
-         }
-    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -128,9 +113,9 @@ fun MediaViewerBottomOverlay(
 
 
             AnimatedVisibility(
-                visible = showSeekBar,
-                enter = fadeIn(animationSpec = tween(120)),
-                exit = fadeOut(animationSpec = tween(120)),
+                visible = seekBarEnabled,
+                enter = fadeIn(animationSpec = tween(80)),
+                exit = fadeOut(animationSpec = tween(80)),
             ){
                 Column {
                     Spacer(modifier = Modifier.height(10.dp))
@@ -144,21 +129,21 @@ fun MediaViewerBottomOverlay(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
 
-                    Slider(
-                        value = sliderPosition,
-                        onValueChange = {
-                            isDragging = true
-                            sliderPosition = it
-                        },
-                        onValueChangeFinished = {
-                            isDragging = false
-                            onSeek((sliderPosition * duration).toLong())
-                        }
-                    )
                 }
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
+            VideoSeekBar(
+                currentPosition = currentPosition,
+                duration = duration,
+                onSeek = { targetPosition ->
+                    onSeek(targetPosition)
+                },
+                showSeekBar = showSeekBar,
+                enabled = seekBarEnabled,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
