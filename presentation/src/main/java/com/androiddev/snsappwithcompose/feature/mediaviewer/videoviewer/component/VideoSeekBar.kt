@@ -109,7 +109,7 @@ fun VideoSeekBar(
         )
 
         // 활성 트랙 (진행 바 - showSeekBar가 true일 때만 렌더링)
-        if (showSeekBar && sliderPosition > 0f) {
+        //if (showSeekBar && sliderPosition > 0f) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraction = sliderPosition)
@@ -119,7 +119,7 @@ fun VideoSeekBar(
                         RoundedCornerShape(trackHeight / 2)
                     )
             )
-        }
+       // }
 
         // 탐색용 썸네일 (드래그 활성화 시만)
         val thumbMaxTravel = maxWidth - 12.dp

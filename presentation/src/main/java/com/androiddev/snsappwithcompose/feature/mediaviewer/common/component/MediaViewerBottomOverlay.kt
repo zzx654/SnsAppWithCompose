@@ -34,6 +34,9 @@ import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.util.elapsedTime
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoSeekBar
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 
 @Composable
 fun MediaViewerBottomOverlay(
@@ -79,8 +82,8 @@ fun MediaViewerBottomOverlay(
         ) {
             Text(text = mediaPost.nickname,color = Color.White)
             Spacer(modifier = Modifier.height(3.dp))
-            Text(text = "${elapsedTime(mediaPost.date)} · ${mediaPost.distance}km",color = Color.LightGray, fontSize = 12.sp)
-            Spacer(modifier = Modifier.height(11.dp))
+            Text(text = "${elapsedTime(mediaPost.date)} · ${mediaPost.distance}km",color = Color.White.copy(0.7f), fontSize = 13.sp)
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = mediaPost.text,
                 maxLines = 1,
@@ -98,7 +101,7 @@ fun MediaViewerBottomOverlay(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("${mediaPost.likecount}",color = Color.LightGray)
 
-                Spacer(modifier = Modifier.width(17.dp))
+                Spacer(modifier = Modifier.width(15.dp))
 
                 Icon(
                     imageVector = Icons.Outlined.Comment,
@@ -115,16 +118,26 @@ fun MediaViewerBottomOverlay(
             AnimatedVisibility(
                 visible = seekBarEnabled,
                 enter = fadeIn(animationSpec = tween(80)),
-                exit = fadeOut(animationSpec = tween(80)),
+                exit = fadeOut(animationSpec = tween(80)
+
+
+
+                ),
             ){
                 Column {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "${formatTime(currentPosition)}/${formatTime(duration)}",
+                            text = buildAnnotatedString {
+                                append(formatTime(currentPosition))
+
+                                withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.6f))) {
+                                    append(" / ${formatTime(duration)}")
+                                }
+                            },
                             color = Color.White
                         )
                     }
@@ -133,17 +146,21 @@ fun MediaViewerBottomOverlay(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-            VideoSeekBar(
-                currentPosition = currentPosition,
-                duration = duration,
-                onSeek = { targetPosition ->
-                    onSeek(targetPosition)
-                },
-                showSeekBar = showSeekBar,
-                enabled = seekBarEnabled,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Spacer(modifier = Modifier.height(4.dp))
+            if(showSeekBar) {
+                VideoSeekBar(
+                    currentPosition = currentPosition,
+                    duration = duration,
+                    onSeek = { targetPosition ->
+                        onSeek(targetPosition)
+                    },
+                    showSeekBar = showSeekBar,
+                    enabled = seekBarEnabled,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+            }
+
         }
     }
 }
