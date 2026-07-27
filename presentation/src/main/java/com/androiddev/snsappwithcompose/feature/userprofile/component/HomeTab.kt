@@ -15,25 +15,28 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.paging.PagingAppendState
 import com.androiddev.snsappwithcompose.common.component.paging.PagingScreen
 import com.androiddev.snsappwithcompose.common.mapper.toUiState
-import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
-import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
-import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
-import com.androiddev.snsappwithcompose.feature.home.component.PostPrevItem
 import com.androiddev.snsappwithcompose.feature.home.component.PostPreviewItem
 import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 
 @Composable
 fun HomeTab(
-    viewModel: UserProfileViewModel
+    viewModel: UserProfileViewModel,
+    refreshUserInfo: () -> Unit = {},
+    canRefresh: Boolean = true,
+
 ) {
     val pagingItems =
         viewModel.homePosts.collectAsLazyPagingItems()
 
     PagingScreen(
-        refreshState = pagingItems.loadState.refresh,
-        itemCount = pagingItems.itemCount,
-        onRetry = { pagingItems.retry() },
-        emptyMessage = getString(LocalContext.current, R.string.post_not_exist)
+        pagingItems = pagingItems,
+        emptyMessage = getString(LocalContext.current, R.string.post_not_exist),
+        onRefresh = refreshUserInfo,
+        canRefresh = canRefresh
+        //refreshState = pagingItems.loadState.refresh,
+        //itemCount = pagingItems.itemCount,
+        //onRetry = { pagingItems.retry() },
+        //emptyMessage =
 
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()){
@@ -45,6 +48,7 @@ fun HomeTab(
                 pagingItems[index]?.let { post ->
 
                     PostPreviewItem(
+                        modifier = Modifier,
                         uiState = post.toUiState()
                     )
 

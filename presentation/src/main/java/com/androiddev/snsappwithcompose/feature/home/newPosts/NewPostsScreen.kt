@@ -6,8 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.androiddev.snsappwithcompose.common.base.component.BasePostsScreen
+import com.androiddev.snsappwithcompose.common.base.component.BasePostssScreen
+import kotlinx.coroutines.flow.filter
 
 @Composable
 fun NewPostsScreen(
@@ -16,17 +21,23 @@ fun NewPostsScreen(
     onLoaded: ()-> Unit
 ) {
     var isInitialLoadComplete by remember { mutableStateOf(false) }
-    val getPosts = viewModel.getPostState.value
-    LaunchedEffect(getPosts.posts) {
-        if(getPosts.posts.isNotEmpty()&&!isInitialLoadComplete) {
-            isInitialLoadComplete = true
-            onLoaded()
-        }
+    val pagingItems = viewModel.newPosts.collectAsLazyPagingItems()
+    LaunchedEffect(pagingItems) {
+        snapshotFlow { pagingItems.loadState.refresh }
+            .filter { it is LoadState.NotLoading }
+            .collect {
+
+                if (!isInitialLoadComplete && pagingItems.itemCount > 0) {
+                    isInitialLoadComplete = true
+                    onLoaded()
+                }
+            }
 
 
     }
-    BasePostsScreen(
+    BasePostssScreen(
         navController = navController,
-        viewModel = viewModel
+        viewModel = viewModel,
+        pagingItems = pagingItems
     )
 }

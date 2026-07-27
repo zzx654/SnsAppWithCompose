@@ -35,12 +35,47 @@ class PostPagingSource(
                             longitude = query.longitude
                         )
                     }
+                    is PostQuery.Near -> {
+                        api.getNearPosts(
+                            postid = params.key?.postId,
+                            postdate = params.key?.postDate,
+                            maxdistance = query.distance,
+                            latitude = query.latitude,
+                            longitude = query.longitude
+                        )
+                    }
+                    is PostQuery.NewTag -> {
+                        api.getNewTagPosts(
+                            postid = params.key?.postId,
+                            postdate = params.key?.postDate,
+                            tagid = query.tagId,
+                            latitude = query.latitude,
+                            longitude = query.longitude
+                        )
+                    }
+                    /**is PostQuery.New -> {
+                        api.getNewPosts(
+                            postid = params.key?.postId,
+                            postdate = params.key?.postDate,
+                            latitude = query.latitude,
+                            longitude = query.longitude
+                        )
+                    }
+                    is PostQuery.User -> {
+                        api.getUserPosts(
+                            userid = query.userId,
+                            postid = params.key?.postId,
+                            postdate = params.key?.postDate,
+                            latitude = query.latitude,
+                            longitude = query.longitude
+                        )
+                    }
 
                     is PostQuery.Near -> {
                         api.getNearPosts(
                             postid = params.key?.postId,
                             postdate = params.key?.postDate,
-                            distancemax = query.distance,
+                            maxdistance = query.distance,
                             latitude = query.latitude,
                             longitude = query.longitude
                         )
@@ -54,7 +89,7 @@ class PostPagingSource(
                             latitude = query.latitude,
                             longitude = query.longitude
                         )
-                    }
+                    }**/
 
                 }
 

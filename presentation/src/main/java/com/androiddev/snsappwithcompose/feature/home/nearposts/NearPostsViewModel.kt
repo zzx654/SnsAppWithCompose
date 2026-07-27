@@ -1,81 +1,55 @@
 package com.androiddev.snsappwithcompose.feature.home.nearposts
 
 import android.content.Context
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.androiddev.domain.model.Posts
+import androidx.paging.cachedIn
+import com.androiddev.domain.location.LocationProvider
 import com.androiddev.domain.use_case.postlist.GetPostsUseCases
-import com.androiddev.domain.util.Resource
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BasePostsViewModel
-import com.androiddev.snsappwithcompose.feature.home.events.GetNearPostsEvent
-import com.androiddev.snsappwithcompose.feature.home.events.GetPostsEvent
+import com.androiddev.snsappwithcompose.common.base.viewmodel.BasePagingViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 
 @HiltViewModel
 class NearPostsViewModel @Inject constructor(
     private val getPostsUseCases: GetPostsUseCases,
-    locationClient: FusedLocationProviderClient,
+    locationProvider: LocationProvider,
     @ApplicationContext context: Context
-): BasePostsViewModel(
+): BasePagingViewModel(
     context = context,
-    locationClient = locationClient,
+    locationProvider = locationProvider,
     isLocationPermissionRequired = true
 ) {
 
-    private val _distance = mutableStateOf(5)
-    val distance: State<Int>
-        get() = _distance
+    private val _distance = MutableStateFlow(5)
 
-    init{
-        viewModelScope.launch {
-            postPaginator.loadNextItems(refresh = false)
-        }
+    val distance: StateFlow<Int> = _distance.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val nearPosts = combine(
+        location.filterNotNull(),
+        _distance
+    ) { loc, dist ->
+
+        Pair(loc, dist)
+    }.flatMapLatest { (loc, dist) ->
+
+        getPostsUseCases.getNearPosts(
+            maxDistance = dist,
+            latitude = loc.latitude ?: 0.0,
+            longitude = loc.longitude ?: 0.0
+        )
+    }.cachedIn(viewModelScope)
+
+    fun setDistance(distance:Int) {
+        _distance.value = distance
     }
 
-    override fun fetchPostsWithLocation(
-        latitude: Double?,
-        longitude: Double?,
-        refresh: Boolean,
-        handleResult: suspend (Resource<Posts>) -> Unit
-    ) {
-        var lastPostId: Int? = null
-        var lastPostDate: String? = null
-        with(getPostState.value.posts) {
-            if (isNotEmpty() && !refresh) {
-                lastPostDate = last().date
-                lastPostId = last().postId
-            }
-        }
-        viewModelScope.launch {
-            getPostsUseCases.getNearPosts(
-                postid = lastPostId,
-                postdate = lastPostDate,
-                latitude = latitude!!,
-                longitude = longitude!!,
-                maxDistance = distance.value
-            ).collect { result ->
-                handleResult(result)
-            }
-        }
-    }
-
-    override fun onEvent(event: GetPostsEvent) {
-        super.onEvent(event)
-        when(event) {
-            is GetNearPostsEvent.SetDistance -> {
-                _distance.value = event.distance
-                _getPostState.value = getPostState.value.copy(posts = emptyList())
-                viewModelScope.launch {
-                    postPaginator.loadNextItems(refresh = false)
-                }
-            }
-            else -> {
-            }
-        }
-    }
 }

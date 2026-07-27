@@ -21,19 +21,15 @@ interface GetPostsRepository {
         latitude:Double?,
         longitude:Double?,
     ):Flow<Resource<Posts>>
-    suspend fun getNearPosts(
-        postId:Int?,
-        postDate:String?,
+    fun getNearPosts(
         maxDistance:Int,
         latitude:Double,
         longitude:Double,
-    ):Flow<Resource<Posts>>
-    suspend fun getNewPosts(
-        postId:Int?,
-        postDate:String?,
+    ):Flow<PagingData<PostPreview>>
+    fun getNewPosts(
         latitude:Double?,
         longitude:Double?,
-    ):Flow<Resource<Posts>>
+    ):Flow<PagingData<PostPreview>>
 
     fun getUserPosts(
         userId:Int,

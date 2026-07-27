@@ -214,7 +214,11 @@ fun UserProfileScreen(
 
                             UserContent.HOME -> {
 
-                                HomeTab(viewModel = userProfileViewModel)
+                                HomeTab(
+                                    viewModel = userProfileViewModel,
+                                    refreshUserInfo = { userViewModel.refreshUser(args.userId)},
+                                    canRefresh = canRefresh
+                                )
                             }
 
                             UserContent.IMAGE -> {

@@ -1,14 +1,19 @@
 package com.androiddev.domain.use_case.postlist
 
-import com.androiddev.domain.model.Posts
+import androidx.paging.PagingData
+import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.repository.postlist.GetPostsRepository
 import kotlinx.coroutines.flow.Flow
-import com.androiddev.domain.util.Resource
 import javax.inject.Inject
 
 
 class GetNearPosts @Inject constructor(
     private val repository: GetPostsRepository
 ) {
-    suspend operator fun invoke(postid:Int? = null,postdate:String? = null,latitude:Double,longitude:Double,maxDistance:Int): Flow<Resource<Posts>> = repository.getNearPosts(postid,postdate,maxDistance,latitude,longitude)
+    operator fun invoke(
+        maxDistance: Int,
+        latitude:Double,
+        longitude:Double
+    ): Flow<PagingData<PostPreview>> = repository.getNearPosts(maxDistance,latitude,longitude)
+
 }

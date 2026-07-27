@@ -2,11 +2,9 @@ package com.androiddev.data.repository.postlist
 
 import com.androiddev.data.util.safeApiCall
 import android.content.Context
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSourceFactory
 import com.androiddev.data.paging.PostPagingSource
+import com.androiddev.data.paging.createPager
 import com.androiddev.data.remote.api.postlist.GetPostsApi
 import com.androiddev.data.remote.dto.toPosts
 import com.androiddev.domain.model.PostPreview
@@ -21,6 +19,8 @@ class GetPostsRepositoryImpl @Inject constructor(
     private val api: GetPostsApi,
     private val context: Context
 ): GetPostsRepository {
+
+
     override suspend fun getNewTagPosts(
         postId: Int?,
         postDate:String?,
@@ -43,51 +43,36 @@ class GetPostsRepositoryImpl @Inject constructor(
         apiCall = { api.getPopularTagPosts(postId,tagId,score,latitude,longitude) },
         mapToResource = { it.toPosts() }
     )
-    override suspend fun getNearPosts(
-        postId: Int?,
-        postDate: String?,
+    override fun getNearPosts(
         maxDistance: Int,
         latitude: Double,
         longitude: Double
-    ): Flow<Resource<Posts>> = safeApiCall(
-        context = context,
-        apiCall = { api.getNearPosts(postId,postDate,maxDistance,latitude,longitude) },
-        mapToResource = { it.toPosts() }
-    )
+    ): Flow<PagingData<PostPreview>> {
+        return createPager {
+            PostPagingSource(api, PostQuery.Near(maxDistance,latitude, longitude))
+        }
+    }
 
-    override suspend fun getNewPosts(
-        postId: Int?,
-        postDate: String?,
+
+
+
+    override fun getNewPosts(
         latitude: Double?,
         longitude: Double?
-    ): Flow<Resource<Posts>> =  safeApiCall(
-        context = context,
-        apiCall = { api.getNewPosts(postId,postDate,latitude,longitude) },
-        mapToResource = { it.toPosts() }
-    )
+    ): Flow<PagingData<PostPreview>> {
+        return createPager {
+            PostPagingSource(api, PostQuery.New(latitude, longitude))
+        }
+    }
 
     override fun getUserPosts(
         userId: Int,
         latitude: Double?,
         longitude: Double?
     ): Flow<PagingData<PostPreview>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                prefetchDistance = 5
-            ),
-            pagingSourceFactory = {
-                PostPagingSource(
-                    api,
-                    PostQuery.User(
-                        userId = userId,
-                        latitude = latitude,
-                        longitude = longitude
-                    )
-
-                )
-            }
-        ).flow
+        return createPager {
+            PostPagingSource(api, PostQuery.User(userId, latitude, longitude))
+        }
     }
 
 
