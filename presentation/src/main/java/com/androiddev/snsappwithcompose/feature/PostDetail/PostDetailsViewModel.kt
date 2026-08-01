@@ -17,7 +17,6 @@ import androidx.navigation.toRoute
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.Media
-import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
@@ -32,18 +31,16 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
-import com.androiddev.snsappwithcompose.common.base.viewmodel.PostUiState
 import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.Paginator
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
-import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -211,7 +208,7 @@ class PostDetailsViewModel @Inject constructor(
                         resource = result,
                         onSuccess = { data ->
                             if(data.posts.isEmpty()) {
-                                setEvent(UiEvent.ShowToast(getString(context,R.string.post_not_exist_alert)))
+                                //setEvent(UiEvent.ShowToast(getString(context,R.string.post_not_exist_alert)))
                                 setEvent(UiEvent.popBackStack)
                             }
                             else {
@@ -246,8 +243,9 @@ class PostDetailsViewModel @Inject constructor(
 
                     }
                     is Resource.Error -> {
-                        setEvent(UiEvent.ShowToast(result.message ?: getString(
-                            R.string.error)))
+                       // setEvent(
+                        //    UiEvent.ShowToast(result.message ?: getString(
+                            //R.string.error)))
                     }
                     else ->{}
                 }
@@ -284,8 +282,9 @@ class PostDetailsViewModel @Inject constructor(
                     }
                     is Resource.Error -> {
                         _voteState.value = voteState.value.copy(isLoading = false)
-                        setEvent(UiEvent.ShowToast(result.message ?: getString(
-                            R.string.error)))
+                       // setEvent(
+                          //  UiEvent.ShowToast(result.message ?: getString(
+                           // R.string.error)))
                     }
                     is Resource.Loading -> {
                         _voteState.value = voteState.value.copy(isLoading = true)

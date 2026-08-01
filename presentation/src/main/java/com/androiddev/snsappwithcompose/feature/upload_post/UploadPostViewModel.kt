@@ -15,7 +15,7 @@ import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
@@ -38,9 +38,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -187,14 +185,14 @@ class UploadPostViewModel @Inject constructor(
                                     }
 
                                     is Resource.Error -> {
-                                        setEvent(
-                                            UiEvent.ShowToast(
-                                                message = result.message ?: getString(
-                                                    context,
-                                                    R.string.error
-                                                )
-                                            )
-                                        )
+                                       // setEvent(
+                                     //       UiEvent.ShowToast(
+                                         //       message = result.message ?: getString(
+                                                //    context,
+                                                //    R.string.error
+                                            //    )
+                                        //    )
+                                      //  )
                                     }
 
                                     else -> null
@@ -229,11 +227,11 @@ class UploadPostViewModel @Inject constructor(
                         R.string.anonymous_off
                     )
                 viewModelScope.launch {
-                    setEvent(
-                        UiEvent.ShowToast(
-                            message = message
-                        )
-                    )
+                   // setEvent(
+                  //      UiEvent.ShowToast(
+                  //          message = message
+                  //      )
+                  //  )
                 }
 
             }
@@ -261,20 +259,20 @@ class UploadPostViewModel @Inject constructor(
                         R.string.location_on
                     ) else getString(context, R.string.location_off)
                     viewModelScope.launch {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = message
-                            )
-                        )
+                      //  setEvent(
+                      //      UiEvent.ShowToast(
+                      //          message = message
+                      //      )
+                     //   )
                         _locationOnOff.value = event.onOff
                     }
                 } else {
                     viewModelScope.launch {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                getString(context, R.string.unable_to_change_location)
-                            )
-                        )
+                     //   setEvent(
+                     //       UiEvent.ShowToast(
+                     //           getString(context, R.string.unable_to_change_location)
+                     //       )
+                    //    )
 
                     }
                 }

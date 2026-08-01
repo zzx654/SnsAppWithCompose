@@ -27,7 +27,7 @@ import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingProgressIndicator
 
 import com.androiddev.snsappwithcompose.feature.home.events.GetPostsEvent
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.feature.home.component.PostPrevItems
 import kotlinx.coroutines.flow.collectLatest
 

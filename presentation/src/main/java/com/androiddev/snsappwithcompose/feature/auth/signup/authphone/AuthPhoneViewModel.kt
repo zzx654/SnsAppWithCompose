@@ -9,12 +9,11 @@ import com.androiddev.data.local.UserPreferences
 import com.androiddev.domain.use_case.signup.authphone.AuthPhoneUseCases
 import com.androiddev.domain.use_case.signup.authphone.InvalidPhoneNumberException
 import com.androiddev.domain.use_case.signup.socialsignup.SocialSignUpUseCase
-import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.common.util.Constants.AUTH_LIMITEDTIME
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.withFcmToken
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

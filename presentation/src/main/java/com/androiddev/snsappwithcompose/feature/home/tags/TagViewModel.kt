@@ -10,7 +10,8 @@ import com.androiddev.domain.use_case.tag.TagUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -82,7 +83,9 @@ class TagViewModel @Inject constructor(
                     is Resource.Error -> {
                         setEvent(
                             UiEvent.ShowToast(
-                                result.message ?: getString(context, R.string.error)
+                                UiText.DynamicString("")
+
+                                //result.message ?: getString(context, R.string.error)
                             )
                         )
                     }

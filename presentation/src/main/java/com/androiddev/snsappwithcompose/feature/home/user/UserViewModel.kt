@@ -11,9 +11,8 @@ import com.androiddev.domain.model.Users
 import com.androiddev.domain.use_case.user.UserUseCases
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.Paginator
-import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay

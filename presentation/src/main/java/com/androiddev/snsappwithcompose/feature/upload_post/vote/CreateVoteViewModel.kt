@@ -12,7 +12,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.PostMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

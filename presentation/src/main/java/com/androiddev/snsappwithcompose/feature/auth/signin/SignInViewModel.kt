@@ -14,9 +14,9 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.withFcmToken
-import com.google.firebase.messaging.FirebaseMessaging
 import com.kakao.sdk.user.UserApiClient
 import com.navercorp.nid.NidOAuth
 import com.navercorp.nid.oauth.util.NidOAuthCallback
@@ -66,7 +66,8 @@ class SignInViewModel @Inject constructor(
             ) {
                 viewModelScope.launch {
                     setEvent(
-                        UiEvent.ShowToast("errorCode:$errorCode, errorDesc:$errorDesc")
+                        UiEvent.ShowToast(
+                            UiText.DynamicString("errorCode:$errorCode, errorDesc:$errorDesc"))
                     )
                 }
             }
