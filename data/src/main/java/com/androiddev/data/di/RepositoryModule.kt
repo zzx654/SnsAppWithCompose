@@ -29,6 +29,7 @@ import com.androiddev.data.repository.postdetail.ToggleLikePostRepositoryImpl
 import com.androiddev.data.repository.tag.TagRepositoryImpl
 import com.androiddev.data.repository.uploadpost.UploadPostRepositoryImpl
 import com.androiddev.data.repository.postdetail.VoteRepositoryImpl
+import com.androiddev.data.repository.postlist.PostListRepositoryImpl
 import com.androiddev.data.repository.user.UserRepositoryImpl
 import com.androiddev.domain.repository.signup.AuthPhoneRepository
 import com.androiddev.domain.repository.createprofile.CreateProfileRepository
@@ -43,7 +44,9 @@ import com.androiddev.domain.repository.postdetail.ToggleLikePostRepository
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.repository.postdetail.VoteRepository
+import com.androiddev.domain.repository.postlist.PostListRepository
 import com.androiddev.domain.repository.user.UserRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,87 +56,96 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
-    @Provides
+abstract class RepositoryModule {
+    @Binds
     @Singleton
-    fun provideSignInRepository(api: SignInApi, @ApplicationContext context: Context): SigninRepository {
-        return SigninRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun provideSignUpRepository(api: SignUpApi, @ApplicationContext context: Context): SignupRepository {
-        return SignupRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun provideAuthPhoneRepository(api: AuthPhoneApi, @ApplicationContext context: Context): AuthPhoneRepository {
-        return AuthPhoneRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun provideCreateProfileRepository(api: CreateProfileApi, @ApplicationContext context: Context): CreateProfileRepository {
-        return CreateProfileRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun provideUploadPostRepository(api: UploadPostApi, @ApplicationContext context: Context): UploadPostRepository {
-        return UploadPostRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun provideGetPostsRepository(api: GetPostsApi, @ApplicationContext context: Context): GetPostsRepository {
-        return GetPostsRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun provideToggleLikePostRepository(api: ToggleLikePostApi, @ApplicationContext context: Context): ToggleLikePostRepository {
-        return ToggleLikePostRepositoryImpl(api,context)
-    }
+    abstract fun bindPostsRepository(
+        postListRepositoryImpl: PostListRepositoryImpl
+    ): PostListRepository
+    companion object {
 
-    @Provides
-    @Singleton
-    fun provideGetCommentsRepository(api: CommentApi, @ApplicationContext context: Context): CommentRepository {
-        return CommentRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun provideVoteRepository(api: VoteApi, @ApplicationContext context: Context): VoteRepository {
-        return VoteRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun provideTagRepository(api: TagApi, @ApplicationContext context: Context): TagRepository {
-        return TagRepositoryImpl(api,context)
-    }
-    @Provides
-    @Singleton
-    fun providePostRepository(api: PostApi, @ApplicationContext context: Context): PostRepository {
-        return PostRepositoryImpl(
-            api = api,
-            context = context)
-    }
-    @Provides
-    @Singleton
-    fun provideFcmRepository(api: FcmApi, userPreferences: UserPreferences): FcmRepository {
-        return FcmRepositoryImpl(
-            api = api,
-            userPreferences = userPreferences
-        )
-    }
-    @Provides
-    @Singleton
-    fun provideNotificationRepository(api: NotificationApi, @ApplicationContext context: Context): NotificationRepository {
-        return NotificationRepositoryImpl(
-            api = api,
-            context = context
-        )
-    }
-    @Provides
-    @Singleton
-    fun provideUserRepository(api: UserApi, @ApplicationContext context: Context): UserRepository {
-        return UserRepositoryImpl(
-            api = api,
-            context = context
-        )
+        @Provides
+        @Singleton
+        fun provideSignInRepository(api: SignInApi, @ApplicationContext context: Context): SigninRepository {
+            return SigninRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideSignUpRepository(api: SignUpApi, @ApplicationContext context: Context): SignupRepository {
+            return SignupRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideAuthPhoneRepository(api: AuthPhoneApi, @ApplicationContext context: Context): AuthPhoneRepository {
+            return AuthPhoneRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideCreateProfileRepository(api: CreateProfileApi, @ApplicationContext context: Context): CreateProfileRepository {
+            return CreateProfileRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideUploadPostRepository(api: UploadPostApi, @ApplicationContext context: Context): UploadPostRepository {
+            return UploadPostRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideToggleLikePostRepository(api: ToggleLikePostApi, @ApplicationContext context: Context): ToggleLikePostRepository {
+            return ToggleLikePostRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideGetCommentsRepository(api: CommentApi, @ApplicationContext context: Context): CommentRepository {
+            return CommentRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideVoteRepository(api: VoteApi, @ApplicationContext context: Context): VoteRepository {
+            return VoteRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideTagRepository(api: TagApi, @ApplicationContext context: Context): TagRepository {
+            return TagRepositoryImpl(api, context)
+        }
+
+        @Provides
+        @Singleton
+        fun providePostRepository(api: PostApi, @ApplicationContext context: Context): PostRepository {
+            return PostRepositoryImpl(api = api, context = context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideFcmRepository(api: FcmApi, userPreferences: UserPreferences): FcmRepository {
+            return FcmRepositoryImpl(api = api, userPreferences = userPreferences)
+        }
+
+        @Provides
+        @Singleton
+        fun provideNotificationRepository(api: NotificationApi, @ApplicationContext context: Context): NotificationRepository {
+            return NotificationRepositoryImpl(api = api, context = context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideUserRepository(api: UserApi, @ApplicationContext context: Context): UserRepository {
+            return UserRepositoryImpl(api = api, context = context)
+        }
+        @Provides
+        @Singleton
+        fun provideGetPostsRepository(api: GetPostsApi, @ApplicationContext context: Context): GetPostsRepository {
+            return GetPostsRepositoryImpl(api,context)
+        }
     }
 }
+
