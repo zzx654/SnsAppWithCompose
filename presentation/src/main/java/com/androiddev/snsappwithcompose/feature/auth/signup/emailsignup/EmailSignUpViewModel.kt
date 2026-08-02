@@ -68,11 +68,11 @@ class EmailSignUpViewModel @Inject constructor(
                             )
                         }
                     } catch (e: InvalidEmailException) {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = e.message ?: getString(context,R.string.check_email)
-                            )
-                        )
+                        //setEvent(
+                         //   UiEvent.ShowToast(
+                          //      message = e.message ?: getString(context,R.string.check_email)
+                           // )
+                        //)
                     }
                 }
             }

@@ -84,7 +84,7 @@ abstract class BasePagingViewModel(
         )
     }
 
-    fun onPagingStateChanged(
+    /**fun onPagingStateChanged(
         loadStates: CombinedLoadStates
     ) {
 
@@ -134,5 +134,5 @@ abstract class BasePagingViewModel(
                     setEvent(UiEvent.ShowToast(getString(R.string.error)))
             }
         }
-    }
+    }**/
 }

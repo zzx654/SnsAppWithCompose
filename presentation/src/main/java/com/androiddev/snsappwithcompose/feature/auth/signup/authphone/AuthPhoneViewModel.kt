@@ -62,11 +62,11 @@ class AuthPhoneViewModel @Inject constructor(
                             )
                         }
                     } catch (e: InvalidPhoneNumberException) {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = e.message ?: getString(context,R.string.check_phonenumber)
-                            )
-                        )
+                        //setEvent(
+                         //   UiEvent.ShowToast(
+                          //      message = e.message ?: getString(context,R.string.check_phonenumber)
+                           // )
+                        //)
                     }
                 }
             }

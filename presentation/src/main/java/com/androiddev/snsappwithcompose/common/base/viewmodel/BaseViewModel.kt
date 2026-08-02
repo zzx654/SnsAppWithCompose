@@ -51,10 +51,10 @@ abstract class BaseViewModel (protected val context: Context): ViewModel() {
             is Resource.Error -> {
                 setLoading(false)
                 onError?.invoke()
-                    ?: setEvent(
-                        UiEvent.ShowToast(resource.message ?: getString(
-                        R.string.error))
-                    )
+                  //  ?: setEvent(
+                   //     UiEvent.ShowToast(resource.message ?: getString(
+                    //    R.string.error))
+                    //)
                 return
             }
             is Resource.TokenExpired -> {

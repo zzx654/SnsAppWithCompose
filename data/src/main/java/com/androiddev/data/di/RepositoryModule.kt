@@ -21,7 +21,6 @@ import com.androiddev.data.repository.postdetail.CommentRepositoryImpl
 import com.androiddev.data.repository.createprofile.CreateProfileRepositoryImpl
 import com.androiddev.data.repository.fcm.FcmRepositoryImpl
 import com.androiddev.data.repository.notification.NotificationRepositoryImpl
-import com.androiddev.data.repository.postlist.GetPostsRepositoryImpl
 import com.androiddev.data.repository.postdetail.PostRepositoryImpl
 import com.androiddev.data.repository.signin.SigninRepositoryImpl
 import com.androiddev.data.repository.signup.SignupRepositoryImpl
@@ -29,6 +28,7 @@ import com.androiddev.data.repository.postdetail.ToggleLikePostRepositoryImpl
 import com.androiddev.data.repository.tag.TagRepositoryImpl
 import com.androiddev.data.repository.uploadpost.UploadPostRepositoryImpl
 import com.androiddev.data.repository.postdetail.VoteRepositoryImpl
+import com.androiddev.data.repository.postlist.GetPostsRepositoryImpl
 import com.androiddev.data.repository.postlist.PostListRepositoryImpl
 import com.androiddev.data.repository.user.UserRepositoryImpl
 import com.androiddev.domain.repository.signup.AuthPhoneRepository

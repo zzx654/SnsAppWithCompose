@@ -45,7 +45,7 @@ fun <VM : BasePostsViewModel> BasePostsScreen(
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
                         it.setGravity(Gravity.BOTTOM, 0, 130)
                         it.show()
                     }

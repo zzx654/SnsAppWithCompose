@@ -53,7 +53,7 @@ class UserProfileViewModel @Inject constructor(
         currentTab.value = tab
 
     }
-    @OptIn(ExperimentalCoroutinesApi::class)
+    /**@OptIn(ExperimentalCoroutinesApi::class)
     val homePosts =
         location
             .filterNotNull()
@@ -66,7 +66,7 @@ class UserProfileViewModel @Inject constructor(
                 )
 
             }
-            .cachedIn(viewModelScope)
+            .cachedIn(viewModelScope)**/
     private val mediaPagerCache =
         mutableMapOf<
                 UserContent,

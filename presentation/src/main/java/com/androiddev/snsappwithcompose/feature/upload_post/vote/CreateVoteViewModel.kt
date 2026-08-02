@@ -60,11 +60,11 @@ class CreateVoteViewModel @Inject constructor(
                 } else {
                     //토스트메시지 요청
                     viewModelScope.launch {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = getString(context,R.string.cannot_edit_vote)
-                            )
-                        )
+                       // setEvent(
+                        //    UiEvent.ShowToast(
+                         //       message = getString(context,R.string.cannot_edit_vote)
+                          //  )
+                        //)
                     }
 
                 }
@@ -88,11 +88,11 @@ class CreateVoteViewModel @Inject constructor(
                     _showBottomVoteDialog.value = false
                 } else {
                     viewModelScope.launch {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = getString(context,R.string.error_minimum_poll_options)
-                            )
-                        )
+                        //setEvent(
+                            //UiEvent.ShowToast(
+                             //   message = getString(context,R.string.error_minimum_poll_options)
+                            //)
+                        //)
                     }
 
                 }

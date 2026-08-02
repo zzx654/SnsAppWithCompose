@@ -1,0 +1,181 @@
+package com.androiddev.snsappwithcompose.common.component.paging
+
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.paging.compose.LazyPagingItems
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.itemKey
+
+@Composable
+fun <T : Any> PagingListContent(
+    items: LazyPagingItems<T>,
+    itemContent: @Composable (T) -> Unit,
+    modifier: Modifier = Modifier,
+    keyExtractor: ((T) -> Any)? = null, // Key 지정으로 리컴포지션 최적화
+    listState: LazyListState = rememberLazyListState(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    showDivider:Boolean = true,
+    dividerContent: @Composable () -> Unit = {
+        HorizontalDivider(
+            //modifier = Modifier.padding(horizontal = 16.dp),
+            thickness = 4.dp,
+            color = Color.LightGray.copy(0.25f)
+        )
+    },
+    emptyContent: @Composable () -> Unit = { DefaultEmptyView() }
+) {
+    var isManualRefreshing by remember { mutableStateOf(false) }
+
+
+    //직접 당겼을 때 + 로딩 중일 때 + 기존 아이템이 있을 때만 상단 인디케이터 표시
+    val isRefreshing = isManualRefreshing &&
+            (items.loadState.refresh is LoadState.Loading) &&
+            items.itemCount > 0
+
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    LaunchedEffect(items.loadState.refresh) {
+        if (isManualRefreshing && items.loadState.refresh is LoadState.NotLoading) {
+            // 로딩이 성공적으로 끝났을 때만 최상단으로 스크롤
+            listState.animateScrollToItem(0)
+            // 스크롤 이동 후 플래그 해제
+            isManualRefreshing = false
+        }
+    }
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .pullToRefresh(
+                state = pullToRefreshState,
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    isManualRefreshing = true
+                    items.refresh()
+                },
+            )
+    ) {
+        //첫 페이지 로딩 중일 때
+        if (items.loadState.refresh is LoadState.Loading && items.itemCount == 0) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.TopCenter).padding(top = 100.dp),color = Color.Gray)
+        }
+        //첫 페이지 로딩 실패했을 때
+        else if (items.loadState.refresh is LoadState.Error) {
+            isManualRefreshing = false
+            val error = (items.loadState.refresh as LoadState.Error).error
+            DefaultErrorView(
+                message = error.localizedMessage ?: "데이터를 불러오지 못했습니다.",
+                onRetry = { items.retry() },
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+        // 로딩 완료 후 데이터가 비어있을 때
+        else if (items.loadState.refresh is LoadState.NotLoading && items.itemCount == 0) {
+            emptyContent()
+        }
+        // 리스트 표시
+        else {
+            LazyColumn(
+                state = listState,
+                contentPadding = contentPadding,
+                verticalArrangement = verticalArrangement,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(
+                    count = items.itemCount,
+                    key = items.itemKey { item ->
+                        keyExtractor?.invoke(item) ?: item.hashCode()
+                    }
+                ) { index ->
+                    val item = items[index]
+                    if (item != null) {
+                        itemContent(item)
+
+                        if (showDivider && index < items.itemCount - 1) {
+                            dividerContent()
+                        }
+                    }
+                }
+
+                // 다음 페이지(추가 데이터) 로딩 중 처리 (Append)
+                when (items.loadState.append) {
+                    is LoadState.Loading -> {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.TopCenter),color = Color.Gray)
+                            }
+                        }
+                    }
+                    is LoadState.Error -> {
+                        val error = (items.loadState.append as LoadState.Error).error
+                        item {
+                            DefaultErrorView(
+                                message = error.localizedMessage ?: "추가 로딩 실패",
+                                onRetry = { items.retry() }
+                            )
+                        }
+                    }
+                    else -> {}
+                }
+            }
+        }
+        PullToRefreshDefaults.Indicator(
+            state = pullToRefreshState,
+            isRefreshing = isRefreshing,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+    }
+}
+
+// 기본 에러 뷰
+@Composable
+private fun DefaultErrorView(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {
+        Text(text = message)
+        Button(onClick = onRetry, modifier = Modifier.padding(top = 8.dp)) {
+            Text(text = "재시도")
+        }
+    }
+}
+
+// 기본 빈 화면 뷰
+@Composable
+private fun DefaultEmptyView() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "표시할 데이터가 없습니다.")
+    }
+}

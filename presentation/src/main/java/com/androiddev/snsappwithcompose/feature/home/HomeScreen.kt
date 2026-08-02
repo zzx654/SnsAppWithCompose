@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.TabPager
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
+import com.androiddev.snsappwithcompose.feature.home.RecentPosts.RecentPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.nearposts.NearPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.newPosts.NewPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagScreen
@@ -66,9 +67,13 @@ fun HomeScreen(
         {NearPostsScreen(navController)},
         {PlaceholderScreen("인기")},
         {
-            NewPostsScreen(
+            //NewPostsScreen(
+             //   navController = navController,
+              //  onLoaded = { isInitialTabReady = true }
+            //)
+            RecentPostsScreen(
                 navController = navController,
-                onLoaded = { isInitialTabReady = true }
+                onLoaded = { isInitialTabReady = true}
             )
         },
         {PlaceholderScreen("팔로우")},

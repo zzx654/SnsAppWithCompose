@@ -20,14 +20,16 @@ import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.feature.home.component.PostPrevItem
 import com.androiddev.snsappwithcompose.feature.home.component.PostPreviewItem
+import com.androiddev.snsappwithcompose.feature.home.component.PostPreviewItemm
+import com.androiddev.snsappwithcompose.feature.postlist.PostListViewModel
 import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 
 @Composable
 fun HomeTab(
-    viewModel: UserProfileViewModel
+    viewModel: PostListViewModel
 ) {
     val pagingItems =
-        viewModel.homePosts.collectAsLazyPagingItems()
+        viewModel.pagingDataStream.collectAsLazyPagingItems()
 
     PagingScreen(
         refreshState = pagingItems.loadState.refresh,
@@ -44,7 +46,7 @@ fun HomeTab(
 
                 pagingItems[index]?.let { post ->
 
-                    PostPreviewItem(
+                    PostPreviewItemm(
                         uiState = post.toUiState()
                     )
 

@@ -233,15 +233,15 @@ class NotificationViewModel @Inject constructor(
 
                             }
                             is NotificationActionResult.TargetDeleted -> {
-                                setEvent(
-                                    UiEvent.ShowToast(
-                                    when ((result.notificationActionResult as NotificationActionResult.TargetDeleted).reason) {
-                                        DeleteReason.POST_DELETED -> "삭제된 게시물입니다"
-                                        DeleteReason.COMMENT_DELETED -> "삭제된 댓글입니다"
-                                        DeleteReason.REPLY_DELETED -> "삭제된 답글입니다"
-                                        else -> "이미 삭제된 알림입니다"
-                                    }
-                                ))
+                               // setEvent(
+                                //    UiEvent.ShowToast(
+                                 //   when ((result.notificationActionResult as NotificationActionResult.TargetDeleted).reason) {
+                                  //      DeleteReason.POST_DELETED -> "삭제된 게시물입니다"
+                                   //     DeleteReason.COMMENT_DELETED -> "삭제된 댓글입니다"
+                                    //    DeleteReason.REPLY_DELETED -> "삭제된 답글입니다"
+                                     //   else -> "이미 삭제된 알림입니다"
+                                    //}
+                                //))
 
                             }
                         }

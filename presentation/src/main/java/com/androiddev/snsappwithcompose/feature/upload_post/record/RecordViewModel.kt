@@ -270,14 +270,14 @@ class RecordViewModel @Inject constructor(
         if(recordedFilePath.value == null) {
             _saveResult.value = false
             viewModelScope.launch {
-                setEvent(
-                    UiEvent.ShowToast(
-                        message = getString(
-                            context,
-                            R.string.no_recording
-                        )
-                    )
-                )
+                //setEvent(
+                 //   UiEvent.ShowToast(
+                  //      message = getString(
+                   //         context,
+                    //        R.string.no_recording
+                     //   )
+                    //)
+               // )
             }
             return
         }
