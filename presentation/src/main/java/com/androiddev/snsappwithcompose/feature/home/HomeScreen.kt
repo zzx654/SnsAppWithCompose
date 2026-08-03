@@ -22,6 +22,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.TabPager
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.feature.home.RecentPosts.RecentPostsScreen
+import com.androiddev.snsappwithcompose.feature.home.nearbyposts.NearbypostsScreen
 import com.androiddev.snsappwithcompose.feature.home.nearposts.NearPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.newPosts.NewPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagScreen
@@ -64,13 +65,9 @@ fun HomeScreen(
     }
     val tabs = listOf(getString(context, R.string.near), getString(context, R.string.hot), getString(context, R.string.recent),getString(context, R.string.follow),getString(context, R.string.tag),getString(context, R.string.user))
     val pages = listOf<@Composable () -> Unit>(
-        {NearPostsScreen(navController)},
+        { NearbypostsScreen(navController = navController) },
         {PlaceholderScreen("인기")},
         {
-            //NewPostsScreen(
-             //   navController = navController,
-              //  onLoaded = { isInitialTabReady = true }
-            //)
             RecentPostsScreen(
                 navController = navController,
                 onLoaded = { isInitialTabReady = true}

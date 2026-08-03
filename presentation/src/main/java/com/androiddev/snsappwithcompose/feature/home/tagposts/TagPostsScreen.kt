@@ -22,6 +22,7 @@ import com.androiddev.snsappwithcompose.feature.home.tags.TagEvent
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.home.tagposts.newtagposts.NewTagPostsScreen
+import com.androiddev.snsappwithcompose.feature.home.tagposts.newtagposts.TagRecentPostsScreen
 import com.androiddev.snsappwithcompose.feature.home.tagposts.populartagposts.PopularTagPostsScreen
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -34,14 +35,9 @@ fun TagPostScreen(
 ) {
     var args = navBackStackEntry.toRoute<Screen.TagPostsScreen>()
     val tag = viewModel.getTagById(args.tagId)
-    //val tabs = listOf("새로운", "인기")
-    //val pages = listOf<@Composable () -> Unit>(
-    //    { NewTagPostsScreen(navController,args.tagId) },
-     //   { PopularTagPostsScreen(navController,args.tagId) },
-    //)
-    // 3. 각 탭 Composable을 remember로 고정
+
     val newTagPostsScreen: @Composable () -> Unit = remember(args.tagId) {
-        { NewTagPostsScreen(navController, args.tagId) }
+        { TagRecentPostsScreen(navController, args.tagId) }
     }
     val popularTagPostsScreen: @Composable () -> Unit = remember(args.tagId) {
         { PopularTagPostsScreen(navController, args.tagId) }

@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.common.component.paging
 
+import android.content.Context
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,9 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import androidx.paging.LoadState
 import androidx.paging.compose.itemKey
+import com.androiddev.snsappwithcompose.R
 
 @Composable
 fun <T : Any> PagingListContent(
@@ -48,8 +52,10 @@ fun <T : Any> PagingListContent(
             color = Color.LightGray.copy(0.25f)
         )
     },
-    emptyContent: @Composable () -> Unit = { DefaultEmptyView() }
+    emptyContent: @Composable () -> Unit = { DefaultEmptyView(getString(LocalContext.current,R.string.nodata_to_display)) },
+    additionalHeader: @Composable (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     var isManualRefreshing by remember { mutableStateOf(false) }
 
 
@@ -89,9 +95,10 @@ fun <T : Any> PagingListContent(
             isManualRefreshing = false
             val error = (items.loadState.refresh as LoadState.Error).error
             DefaultErrorView(
-                message = error.localizedMessage ?: "데이터를 불러오지 못했습니다.",
+                message = error.localizedMessage ?: getString(context, R.string.data_load_failed),
                 onRetry = { items.retry() },
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
+                context = context
             )
         }
         // 로딩 완료 후 데이터가 비어있을 때
@@ -106,6 +113,9 @@ fun <T : Any> PagingListContent(
                 verticalArrangement = verticalArrangement,
                 modifier = Modifier.fillMaxSize()
             ) {
+                item {
+                    additionalHeader?.invoke()
+                }
                 items(
                     count = items.itemCount,
                     key = items.itemKey { item ->
@@ -140,8 +150,9 @@ fun <T : Any> PagingListContent(
                         val error = (items.loadState.append as LoadState.Error).error
                         item {
                             DefaultErrorView(
-                                message = error.localizedMessage ?: "추가 로딩 실패",
-                                onRetry = { items.retry() }
+                                message = error.localizedMessage ?: getString(context,R.string.failed_to_loadmore),
+                                onRetry = { items.retry() },
+                                context = context
                             )
                         }
                     }
@@ -162,20 +173,21 @@ fun <T : Any> PagingListContent(
 private fun DefaultErrorView(
     message: String,
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    context: Context
 ) {
     Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {
         Text(text = message)
         Button(onClick = onRetry, modifier = Modifier.padding(top = 8.dp)) {
-            Text(text = "재시도")
+            Text(text = getString(context, R.string.retry))
         }
     }
 }
 
 // 기본 빈 화면 뷰
 @Composable
-private fun DefaultEmptyView() {
+private fun DefaultEmptyView(emptyMessage:String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "표시할 데이터가 없습니다.")
+        Text(text = emptyMessage)
     }
 }

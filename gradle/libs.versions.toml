@@ -46,8 +46,10 @@ foundation = "1.8.3"
 fcm = "4.4.4"
 firebaseMessagingKtx = "25.0.1"
 media3 = "1.10.1"
-
+googleaccompanist = "0.34.0"
 [libraries]
+#권한체크
+accompanist-permission = { module ="com.google.accompanist:accompanist-permissions",version.ref ="googleaccompanist"  }
 #paging3
 paging-runtime = { module = "androidx.paging:paging-runtime-ktx",version.ref = "paging3"}
 paging-common = { module = "androidx.paging:paging-common-ktx",version.ref = "paging3"}

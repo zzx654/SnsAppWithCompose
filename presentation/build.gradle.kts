@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.paging.compose)
     implementation(libs.gson)
 
+    implementation(libs.accompanist.permission)
     implementation(libs.accompanist.placeholder)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)

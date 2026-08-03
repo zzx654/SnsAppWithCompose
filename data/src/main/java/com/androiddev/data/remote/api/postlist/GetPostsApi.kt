@@ -28,7 +28,7 @@ interface GetPostsApi {
         @Field("longitude")longitude:Double?
     ): Response<BaseApiResponse<GetPostsDto>>
     @FormUrlEncoded
-    @POST("/getNearPosts")
+    @POST("postlist/getNearPosts")
     suspend fun getNearbyPosts(
         @Field("postid")postid: Int?,
         @Field("postdate")postdate: String?,
