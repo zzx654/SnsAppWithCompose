@@ -220,7 +220,7 @@ fun UserProfileScreen(
 
                             UserContent.HOME -> {
 
-                                HomeTab(viewModel = userPostViewModel)
+                                HomeTab(viewModel = userPostViewModel,canRefresh = canRefresh)
                             }
 
                             UserContent.IMAGE -> {

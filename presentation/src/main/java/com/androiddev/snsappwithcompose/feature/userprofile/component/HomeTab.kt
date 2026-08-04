@@ -28,7 +28,8 @@ import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 
 @Composable
 fun HomeTab(
-    viewModel: PostListViewModel
+    viewModel: PostListViewModel,
+    canRefresh:Boolean
 ) {
     val postItems =
         viewModel.pagingDataStream.collectAsLazyPagingItems()
@@ -40,7 +41,8 @@ fun HomeTab(
             PostPreviewItemm(
                 uiState = post.toUiState()
             )
-        }
+        },
+        canRefresh = canRefresh
 
     )
     /**PagingScreen(
