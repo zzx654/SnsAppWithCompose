@@ -14,9 +14,12 @@ import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.androiddev.domain.location.LocationState
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.Media
+import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
@@ -30,7 +33,6 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteState
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.Paginator
@@ -38,16 +40,18 @@ import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
+import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -56,10 +60,9 @@ class PostDetailsViewModel @Inject constructor(
     private val postDetailUseCases: PostDetailUseCases,
     private val commentUseCases: CommentUseCases,
     private val voteUseCases: VoteUseCases,
-    @ApplicationContext context: Context,
     locationClient: FusedLocationProviderClient,
     savedStateHandle: SavedStateHandle
-) : BaseViewModel(context) {
+) : BaseViewModel() {
     //로딩처리. 댓글 상단 고정
     val args:Screen.PostDetailScreen = savedStateHandle.toRoute<Screen.PostDetailScreen>()
     private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
@@ -106,8 +109,8 @@ class PostDetailsViewModel @Inject constructor(
     val _anonymousChecked = mutableStateOf(false)
     val anonymousChecked: State<Boolean>
         get() = _anonymousChecked
-    val _post = mutableStateOf<PostPreview?>(null)
-    val post: State<PostPreview?>
+    val _post = mutableStateOf<Post?>(null)
+    val post: State<Post?>
         get() = _post
 
     private val _mediaUiModel = MutableStateFlow(MediaUiModel(emptyList(), emptyList()))
@@ -128,20 +131,31 @@ class PostDetailsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            checkPermissions(
-                context = context,
-                permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION),
-                onGranted = {
-                    fetchLocation(locationClient) { latitude, longitude ->
-                        getPost(args.postId,latitude,longitude)
+            postDetailUseCases.GetPost(
+                postId = args.postId
+            ).collect { result ->
+                result.handle(
+                    onSuccess = { postdata ->
+                        if (postdata.isEmpty()) {
+                            // 1. 서버에서 게시물을 찾을 수 없을 때
+                            emitUiEvent(UiEvent.ShowToast(UiText.StringResource(R.string.post_not_exist_alert)))
+                            emitUiEvent(UiEvent.popBackStack)
+                        } else {
+                            // 2. 게시물 정보 정상 로드
+                            loadPostDetails(postdata[0])
+
+                            // 3. 알림을 통해 들어온 경우 해당 댓글/답글 로드
+                            args.notificationCommentId?.let { commentId ->
+                                loadCommentByNotification(commentId)
+                            }
+                        }
                     }
-                            },
-                onUnGranted = {
-                     getPost(args.postId)
-                }
-            )
+                )
+
+            }
+
         }
+
     }
     val commentPaginator =
         Paginator<Comments, Comment>(loadItems = { handleResult, refresh ->
@@ -200,7 +214,7 @@ class PostDetailsViewModel @Inject constructor(
     private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
     val alertDialogState: State<AlertDialogState>
         get() = _alertDialogState
-    private fun getPost(postId:Int, latitude:Double? = null,longitude:Double? = null) {
+    /**private fun getPost(postId:Int, latitude:Double? = null,longitude:Double? = null) {
         viewModelScope.launch {
             postDetailUseCases.GetPost(postid = postId, latitude = latitude, longitude = longitude)
                 .collect { result ->
@@ -223,7 +237,7 @@ class PostDetailsViewModel @Inject constructor(
                     )
                 }
         }
-    }
+    }**/
     private fun loadCommentByNotification(commentId: Int) {
         viewModelScope.launch {
             commentUseCases.GetNotificationComment(commentId).collect { result ->
@@ -257,7 +271,7 @@ class PostDetailsViewModel @Inject constructor(
 
 
     }
-    private fun loadPostDetails(post: PostPreview) {
+    private fun loadPostDetails(post: Post) {
         _isLiked.value = post.isliked
         _post.value = post
         _mediaUiModel.value = post.media.toMediaUiModel()
@@ -465,7 +479,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
     private fun showDeleteAlert() {
-        _alertDialogState.value = AlertDialogState(
+        /**_alertDialogState.value = AlertDialogState(
             title = getString(context,R.string.delete_post_alert),
             confirmText = getString(context,R.string.confirm),
             onClickConfirm = {
@@ -474,7 +488,7 @@ class PostDetailsViewModel @Inject constructor(
             },
             cancelText = getString(context,R.string.cancel),
             onClickCancel = { resetDialogState() }
-        )
+        )**/
     }
     private fun deletePost(postId: Int) {
         viewModelScope.launch {
@@ -503,7 +517,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
     private fun showBottomSheetDialog(myUserId:Int,commentUserId:Int) {
-        val items: MutableList<BottomSheetItem> = if(myUserId == commentUserId) {
+        /**val items: MutableList<BottomSheetItem> = if(myUserId == commentUserId) {
             mutableListOf(
                 BottomSheetItem(R.drawable.outline_edit,getString(context,R.string.edit)) {
                     resetBottomSheetDialogState()
@@ -528,7 +542,7 @@ class PostDetailsViewModel @Inject constructor(
         _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
             showDialog = true,
             items,
-        ) { resetBottomSheetDialogState() }
+        ) { resetBottomSheetDialogState() }**/
     }
     private fun resetBottomSheetDialogState() {
         _customBottomSheetDialogState.value = CustomBottomSheetDialogState()

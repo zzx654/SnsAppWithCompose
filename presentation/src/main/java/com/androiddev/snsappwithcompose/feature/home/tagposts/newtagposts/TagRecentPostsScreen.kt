@@ -1,8 +1,10 @@
 package com.androiddev.snsappwithcompose.feature.home.tagposts.newtagposts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -38,7 +40,8 @@ fun TagRecentPostsScreen(
             verticalArrangement = Arrangement.spacedBy(6.dp),
             itemContent = { post ->
                 PostPreviewItemm(
-                    uiState = post.toUiState()
+                    uiState = post.toUiState(),
+                    modifier = Modifier.clickable{ viewModel.onClickPostItem(post.postId)}
                 )
             }
 

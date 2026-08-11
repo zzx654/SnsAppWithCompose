@@ -20,6 +20,7 @@ import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.domain.model.MediaType
+import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.Posts
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
@@ -116,7 +117,7 @@ class UploadPostViewModel @Inject constructor(
         }
     }
 
-    fun initPost(post: PostPreview) {
+    fun initPost(post: Post) {
         if (!isInitialized) {
             postMode = PostMode.EDIT
             postId = post.postId

@@ -103,6 +103,7 @@ import com.androiddev.snsappwithcompose.common.base.UiEvent
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
 import com.androiddev.domain.model.Comment
+import com.androiddev.domain.model.Post
 import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 import com.androiddev.snsappwithcompose.feature.PostDetail.component.MediaGrid
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
@@ -238,7 +239,7 @@ fun PostDetailScreen(
             }
         }
     }
-    val editedPost = navBackStackEntry.savedStateHandle.get<PostPreview>(getString(context,R.string.editedPost))
+    val editedPost = navBackStackEntry.savedStateHandle.get<Post>(getString(context,R.string.editedPost))
     editedPost?.let { post ->
         postViewModel.onPostDetailEvent(PostDetailEvent.LoadEditedPostDetails(post))
         //post.audio?.let {

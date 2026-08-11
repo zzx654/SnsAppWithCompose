@@ -1,5 +1,6 @@
 package com.androiddev.snsappwithcompose.feature.userprofile.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,7 +40,8 @@ fun HomeTab(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         itemContent = { post ->
             PostPreviewItemm(
-                uiState = post.toUiState()
+                uiState = post.toUiState(),
+                modifier = Modifier.clickable{ viewModel.onClickPostItem(post.postId)}
             )
         },
         canRefresh = canRefresh

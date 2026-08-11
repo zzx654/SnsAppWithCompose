@@ -10,6 +10,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import com.androiddev.data.R
 import com.androiddev.data.remote.BaseApiResponse
+import com.androiddev.domain.util.DataError
 
 fun <T, R> safeApiCall(
     context: Context,
@@ -36,5 +37,31 @@ fun <T, R> safeApiCall(
         emit(Resource.Error(e.localizedMessage ?: getString(context, com.androiddev.data.R.string.unexpected_error)))
     } catch (e: IOException) {
         emit(Resource.Error(getString(context, com.androiddev.data.R.string.connection_error)))
+    }
+}
+fun <T, R> safeApiCall(
+    apiCall: suspend () -> Response<BaseApiResponse<T>>,
+    mapToResource: (T) -> R
+): Flow<Resource<R>> = flow {
+    try {
+        emit(Resource.Loading())
+        val response = apiCall()
+
+        response.body()?.let { result ->
+            val tokenValid = result.isTokenValid ?: true
+
+            if (!tokenValid) {
+                emit(Resource.TokenExpired())
+            } else if (result.resultCode == 200) {
+                emit(Resource.Success(result.data?.let(mapToResource)))
+            } else {
+                // R.string 대신 Enum을 던짐!
+                emit(Resource.Error(DataError.Network.SERVER_ERROR))
+            }
+        }
+    } catch (e: IOException) {
+        emit(Resource.Error(DataError.Network.CONNECTION_ERROR))
+    } catch (e: Exception) {
+        emit(Resource.Error(DataError.Network.UNEXPECTED_ERROR))
     }
 }

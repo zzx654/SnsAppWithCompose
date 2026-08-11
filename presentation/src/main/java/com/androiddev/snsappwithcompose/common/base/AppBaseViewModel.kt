@@ -6,6 +6,8 @@ import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.util.UiText
+import com.androiddev.snsappwithcompose.common.util.toUiText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 abstract class BaseViewModel : ViewModel(), UiStateProvider {
 
@@ -37,6 +40,46 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
     protected fun setLoading(loading: Boolean) {
         _isLoading.value = loading
     }
+    suspend fun setEvent(event: UiEvent) = withContext(Dispatchers.Main) {
+        _eventFlow.emit(event)
+    }
+    protected suspend fun <T> handleResource(
+        resource: Resource<T>,
+        onSuccess: suspend (T) -> Unit = {},
+        onSuccessUnit: suspend () -> Unit = {},
+        onError: (suspend () -> Unit)? = null,
+        onTokenExpired: (suspend () -> Unit)? = null
+    ) {
+        when (resource) {
+            is Resource.Success -> {
+                setLoading(false)
+                resource.data?.let {
+                    onSuccess(it)
+                } ?: run {
+                    onSuccessUnit()
+                }
+            }
+            is Resource.Loading -> setLoading(true)
+            is Resource.Error -> {
+                setLoading(false)
+                onError?.invoke()
+                //  ?: setEvent(
+                //     UiEvent.ShowToast(resource.message ?: getString(
+                //    R.string.error))
+                //)
+                return
+            }
+            is Resource.TokenExpired -> {
+                // 토큰 만료 시 공통 처리
+                setLoading(false)
+                onTokenExpired?.invoke()?:   setEvent(
+                    UiEvent.navigate(
+                        screen = Screen.SignInScreen
+                    )
+                )
+            }
+        }
+    }
 
     protected inline fun <T> Resource<T>.handle(
 
@@ -57,20 +100,19 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
 
     ): Resource<T> {
 
-// Loading 여부 자동 처리 (Resource.Loading이면 true, 나머지는 false)
 
         setLoading(this is Resource.Loading)
 
 
-
-// 각 상태별 액션 실행
-
         when (this) {
             is Resource.Success -> data?.let(onSuccess)
             is Resource.Error -> {
-                // 서버가 보내준 message가 있으면 DynamicString으로 처리
-                // 메시지가 null이면 앱 내부 R.string.error_unknown 리소스 ID 사용
-                val errorUiText = message?.let { UiText.DynamicString(it) }
+
+                //DataError가 들어왔으면 toUiText() 매퍼 실행
+                //기존 String message만 넘어온 레거시 코드면 DynamicString으로 처리 (호환성 유지)
+                //둘 다 없으면 기본 알 수 없는 에러 문자열 사용
+                val errorUiText = error?.toUiText()
+                    ?: message?.let { UiText.DynamicString(it) }
                     ?: UiText.StringResource(R.string.error)
 
                 onError(errorUiText)

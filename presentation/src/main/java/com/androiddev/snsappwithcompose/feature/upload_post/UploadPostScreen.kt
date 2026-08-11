@@ -47,6 +47,7 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
+import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
@@ -73,7 +74,7 @@ import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteViewM
 @Composable
 fun UploadPostScreen(
     navController: NavController,
-    post: PostPreview?,
+    post: Post?,
     viewModel: UploadPostViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     recordViewModel: RecordViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     createVoteViewModel: CreateVoteViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()

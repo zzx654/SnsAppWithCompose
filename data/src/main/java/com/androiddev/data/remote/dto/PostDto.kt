@@ -1,6 +1,5 @@
 package com.androiddev.data.remote.dto
 
-import com.androiddev.domain.model.Media
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.util.elapsedTime

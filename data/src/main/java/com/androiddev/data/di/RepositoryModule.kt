@@ -121,7 +121,7 @@ abstract class RepositoryModule {
         @Provides
         @Singleton
         fun providePostRepository(api: PostApi, @ApplicationContext context: Context): PostRepository {
-            return PostRepositoryImpl(api = api, context = context)
+            return PostRepositoryImpl(api = api)
         }
 
         @Provides
