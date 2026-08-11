@@ -2,8 +2,6 @@ package com.androiddev.snsappwithcompose.common.base.viewmodel
 
 import android.Manifest
 import android.content.Context
-import androidx.annotation.StringRes
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -14,18 +12,13 @@ import com.androiddev.domain.location.LocationState
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.PagingUiState
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 abstract class BasePagingViewModel(
     context:Context,
@@ -91,7 +84,7 @@ abstract class BasePagingViewModel(
         )
     }
 
-    fun onPagingStateChanged(
+    /**fun onPagingStateChanged(
         loadStates: CombinedLoadStates
     ) {
 
@@ -141,5 +134,5 @@ abstract class BasePagingViewModel(
                     setEvent(UiEvent.ShowToast(getString(R.string.error)))
             }
         }
-    }
+    }**/
 }

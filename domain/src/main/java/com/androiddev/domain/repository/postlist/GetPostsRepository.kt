@@ -35,10 +35,10 @@ interface GetPostsRepository {
         longitude:Double?,
     ):Flow<Resource<Posts>>
 
-    fun getUserPosts(
+    /**fun getUserPosts(
         userId:Int,
         latitude:Double?,
         longitude:Double?,
-    ):Flow<PagingData<PostPreview>>
+    ):Flow<PagingData<PostPreview>>**/
 
 }

@@ -11,7 +11,7 @@ import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.feature.home.events.GetPostsEvent
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.common.util.fetchLocation
 import com.google.android.gms.location.FusedLocationProviderClient

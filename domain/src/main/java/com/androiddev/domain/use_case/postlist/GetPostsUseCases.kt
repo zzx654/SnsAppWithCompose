@@ -6,5 +6,5 @@ data class GetPostsUseCases(
     val getNewPosts: GetNewPosts,
     val getPopularTagPosts: GetPopularTagPosts,
     val getNewTagPosts: GetNewTagPosts,
-    val getUserPosts: GetUserPosts
+
 )

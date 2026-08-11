@@ -48,7 +48,7 @@ import com.androiddev.snsappwithcompose.feature.auth.components.SignInTextField
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
@@ -72,7 +72,7 @@ fun SignInScreen(
         signinViewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
                         it.setGravity(Gravity.BOTTOM, 0, 130)
                         it.show()
                     }

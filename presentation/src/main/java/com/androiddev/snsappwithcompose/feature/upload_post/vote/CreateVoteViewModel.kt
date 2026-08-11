@@ -12,7 +12,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.PostMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -60,11 +60,11 @@ class CreateVoteViewModel @Inject constructor(
                 } else {
                     //토스트메시지 요청
                     viewModelScope.launch {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = getString(context,R.string.cannot_edit_vote)
-                            )
-                        )
+                       // setEvent(
+                        //    UiEvent.ShowToast(
+                         //       message = getString(context,R.string.cannot_edit_vote)
+                          //  )
+                        //)
                     }
 
                 }
@@ -88,11 +88,11 @@ class CreateVoteViewModel @Inject constructor(
                     _showBottomVoteDialog.value = false
                 } else {
                     viewModelScope.launch {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = getString(context,R.string.error_minimum_poll_options)
-                            )
-                        )
+                        //setEvent(
+                            //UiEvent.ShowToast(
+                             //   message = getString(context,R.string.error_minimum_poll_options)
+                            //)
+                        //)
                     }
 
                 }

@@ -22,7 +22,7 @@ import com.androiddev.data.util.FileUtil
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.service.record.RecordIntentKeys
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_IDLE
@@ -270,14 +270,14 @@ class RecordViewModel @Inject constructor(
         if(recordedFilePath.value == null) {
             _saveResult.value = false
             viewModelScope.launch {
-                setEvent(
-                    UiEvent.ShowToast(
-                        message = getString(
-                            context,
-                            R.string.no_recording
-                        )
-                    )
-                )
+                //setEvent(
+                 //   UiEvent.ShowToast(
+                  //      message = getString(
+                   //         context,
+                    //        R.string.no_recording
+                     //   )
+                    //)
+               // )
             }
             return
         }

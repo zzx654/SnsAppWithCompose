@@ -49,12 +49,14 @@ import coil3.imageLoader
 import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.androiddev.domain.model.MediaPost
+import com.androiddev.domain.model.PostListType
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.feature.home.user.UserEvent
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
 import com.androiddev.snsappwithcompose.feature.mediaviewer.MediaViewerArgs
+import com.androiddev.snsappwithcompose.feature.postlist.PostListViewModel
 import com.androiddev.snsappwithcompose.feature.userprofile.component.HomeTab
 import com.androiddev.snsappwithcompose.feature.userprofile.component.MediaGridTab
 import com.androiddev.snsappwithcompose.feature.userprofile.component.UserProfileHeader
@@ -65,6 +67,7 @@ fun UserProfileScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
     userPostsViewModel: UserPostsViewModel = hiltViewModel(),
+    userPostViewModel: PostListViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     userProfileViewModel:UserProfileViewModel
 ) {
@@ -119,6 +122,9 @@ fun UserProfileScreen(
         //userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
         userViewModel.refreshUser(args.userId)
         userPostsViewModel.initUserPosts(args.userId)
+    }
+    LaunchedEffect(Unit) {
+        userPostViewModel.setListType(PostListType.Recent)
     }
 
     Scaffold(
@@ -214,7 +220,7 @@ fun UserProfileScreen(
 
                             UserContent.HOME -> {
 
-                                HomeTab(viewModel = userProfileViewModel)
+                                HomeTab(viewModel = userPostViewModel,canRefresh = canRefresh)
                             }
 
                             UserContent.IMAGE -> {

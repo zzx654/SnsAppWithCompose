@@ -16,7 +16,7 @@ import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent

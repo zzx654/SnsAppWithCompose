@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -100,14 +99,10 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.vote.component.PollCa
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 import com.androiddev.snsappwithcompose.common.model.MenuItem
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.res.stringResource
 import com.androiddev.domain.model.Comment
-import com.androiddev.snsappwithcompose.common.component.PagerDotsIndicator
 import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 import com.androiddev.snsappwithcompose.feature.PostDetail.component.MediaGrid
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
@@ -228,7 +223,7 @@ fun PostDetailScreen(
         postViewModel.eventFlow.collectLatest { event ->
             when(event){
                 is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
                         it.setGravity(Gravity.BOTTOM, 0, 130)
                         it.show()
                     }

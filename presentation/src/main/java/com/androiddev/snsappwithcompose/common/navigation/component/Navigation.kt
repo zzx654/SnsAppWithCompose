@@ -20,7 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.common.component.MainScaffold
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.PendingNotificationHandler
 
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailScreen
@@ -63,7 +63,7 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
         notificationViewModel.eventFlow.collectLatest { event ->
             when(event){
                 is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).also {
+                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
                         it.setGravity(Gravity.BOTTOM, 0, 130)
                         it.show()
                     }

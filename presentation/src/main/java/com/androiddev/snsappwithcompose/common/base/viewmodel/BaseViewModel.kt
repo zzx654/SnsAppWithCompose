@@ -1,23 +1,18 @@
 package com.androiddev.snsappwithcompose.common.base.viewmodel
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.UiEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 
 abstract class BaseViewModel (protected val context: Context): ViewModel() {
@@ -56,9 +51,10 @@ abstract class BaseViewModel (protected val context: Context): ViewModel() {
             is Resource.Error -> {
                 setLoading(false)
                 onError?.invoke()
-                    ?: setEvent(UiEvent.ShowToast(resource.message ?: getString(
-                        R.string.error))
-                    )
+                  //  ?: setEvent(
+                   //     UiEvent.ShowToast(resource.message ?: getString(
+                    //    R.string.error))
+                    //)
                 return
             }
             is Resource.TokenExpired -> {

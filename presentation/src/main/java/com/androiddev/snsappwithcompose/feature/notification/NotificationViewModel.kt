@@ -16,7 +16,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.COMMENT
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.FOLLOW
@@ -210,7 +210,8 @@ class NotificationViewModel @Inject constructor(
                                     }
                                     COMMENT,REPLY,LIKECOMMENT -> { //게시물페이지
                                         if(postId!=null&&commentId!=null) {
-                                            setEvent(UiEvent.navigate(
+                                            setEvent(
+                                                UiEvent.navigate(
                                                 Screen.PostDetailScreen(
                                                     postId = postId,
                                                     notificationCommentId = commentId
@@ -232,14 +233,15 @@ class NotificationViewModel @Inject constructor(
 
                             }
                             is NotificationActionResult.TargetDeleted -> {
-                                setEvent(UiEvent.ShowToast(
-                                    when ((result.notificationActionResult as NotificationActionResult.TargetDeleted).reason) {
-                                        DeleteReason.POST_DELETED -> "삭제된 게시물입니다"
-                                        DeleteReason.COMMENT_DELETED -> "삭제된 댓글입니다"
-                                        DeleteReason.REPLY_DELETED -> "삭제된 답글입니다"
-                                        else -> "이미 삭제된 알림입니다"
-                                    }
-                                ))
+                               // setEvent(
+                                //    UiEvent.ShowToast(
+                                 //   when ((result.notificationActionResult as NotificationActionResult.TargetDeleted).reason) {
+                                  //      DeleteReason.POST_DELETED -> "삭제된 게시물입니다"
+                                   //     DeleteReason.COMMENT_DELETED -> "삭제된 댓글입니다"
+                                    //    DeleteReason.REPLY_DELETED -> "삭제된 답글입니다"
+                                     //   else -> "이미 삭제된 알림입니다"
+                                    //}
+                                //))
 
                             }
                         }

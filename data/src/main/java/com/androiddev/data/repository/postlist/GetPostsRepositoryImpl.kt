@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSourceFactory
 import com.androiddev.data.paging.PostPagingSource
 import com.androiddev.data.remote.api.postlist.GetPostsApi
+import com.androiddev.data.remote.dto.toPostPreview
 import com.androiddev.data.remote.dto.toPosts
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.PostQuery
@@ -29,8 +30,13 @@ class GetPostsRepositoryImpl @Inject constructor(
         longitude: Double?
     ): Flow<Resource<Posts>> = safeApiCall(
         context = context,
-        apiCall = { api.getNewTagPosts(postId,postDate,tagId,latitude,longitude) },
-        mapToResource = { it.toPosts() }
+        apiCall = { api.getTagRecentPosts(postId,postDate,tagId,latitude,longitude) },
+        mapToResource = { it ->
+            Posts(
+            posts = it.posts.map{
+                it.toPostPreview()
+            } )
+        }
     )
     override suspend fun getPopularTagPosts(
         postId: Int?,
@@ -51,8 +57,13 @@ class GetPostsRepositoryImpl @Inject constructor(
         longitude: Double
     ): Flow<Resource<Posts>> = safeApiCall(
         context = context,
-        apiCall = { api.getNearPosts(postId,postDate,maxDistance,latitude,longitude) },
-        mapToResource = { it.toPosts() }
+        apiCall = { api.getNearbyPosts(postId,postDate,maxDistance,latitude,longitude) },
+        mapToResource = { it ->
+            Posts(
+                posts = it.posts.map{
+                    it.toPostPreview()
+                } )
+        }
     )
 
     override suspend fun getNewPosts(
@@ -62,11 +73,16 @@ class GetPostsRepositoryImpl @Inject constructor(
         longitude: Double?
     ): Flow<Resource<Posts>> =  safeApiCall(
         context = context,
-        apiCall = { api.getNewPosts(postId,postDate,latitude,longitude) },
-        mapToResource = { it.toPosts() }
+        apiCall = { api.getRecentPosts(postId,postDate,latitude,longitude) },
+        mapToResource = { it ->
+            Posts(
+                posts = it.posts.map{
+                    it.toPostPreview()
+                } )
+        }
     )
 
-    override fun getUserPosts(
+    /**override fun getUserPosts(
         userId: Int,
         latitude: Double?,
         longitude: Double?
@@ -88,7 +104,7 @@ class GetPostsRepositoryImpl @Inject constructor(
                 )
             }
         ).flow
-    }
+    }**/
 
 
 

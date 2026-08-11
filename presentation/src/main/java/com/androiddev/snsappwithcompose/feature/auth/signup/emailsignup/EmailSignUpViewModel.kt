@@ -7,12 +7,11 @@ import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUpUseCases
 import com.androiddev.domain.use_case.signup.emailsignup.InvalidEmailException
-import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.common.util.Constants
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.UiEvent
+import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -69,11 +68,11 @@ class EmailSignUpViewModel @Inject constructor(
                             )
                         }
                     } catch (e: InvalidEmailException) {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                message = e.message ?: getString(context,R.string.check_email)
-                            )
-                        )
+                        //setEvent(
+                         //   UiEvent.ShowToast(
+                          //      message = e.message ?: getString(context,R.string.check_email)
+                           // )
+                        //)
                     }
                 }
             }

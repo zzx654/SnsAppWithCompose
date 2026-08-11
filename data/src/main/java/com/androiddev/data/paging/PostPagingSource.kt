@@ -4,66 +4,72 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.androiddev.data.paging.cursor.PostCursor
 import com.androiddev.data.remote.api.postlist.GetPostsApi
+import com.androiddev.data.remote.dto.toPost
 import com.androiddev.data.remote.dto.toPostPreview
+import com.androiddev.data.remote.dto.toPosts
 import com.androiddev.data.util.safePagingApiCall
+import com.androiddev.domain.location.LocationState
+import com.androiddev.domain.model.Post
+import com.androiddev.domain.model.PostListType
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.PostQuery
 import com.androiddev.domain.util.Constants.PAGE_SIZE
 
 class PostPagingSource(
     private val api: GetPostsApi,
-    private val query: PostQuery
-): PagingSource<PostCursor, PostPreview>() {
-    override suspend fun load(params: LoadParams<PostCursor>): LoadResult<PostCursor, PostPreview> {
+    private val type: PostListType,
+    private val location: LocationState,
+): PagingSource<PostCursor, Post>() {
+    override suspend fun load(params: LoadParams<PostCursor>): LoadResult<PostCursor, Post> {
         return safePagingApiCall(
             apiCall =  {
-                when(query) {
-                    is PostQuery.New -> {
-                        api.getNewPosts(
+                when(type) {
+                    is PostListType.Recent -> {
+                        api.getRecentPosts(
                             postid = params.key?.postId,
                             postdate = params.key?.postDate,
-                            latitude = query.latitude,
-                            longitude = query.longitude
+                            latitude = location.latitude,
+                            longitude = location.longitude
                         )
+
                     }
-                    is PostQuery.User -> {
+                    is PostListType.User -> {
                         api.getUserPosts(
-                            userid = query.userId,
+                            userid = type.userId,
                             postid = params.key?.postId,
                             postdate = params.key?.postDate,
-                            latitude = query.latitude,
-                            longitude = query.longitude
+                            latitude = location.latitude,
+                            longitude = location.longitude
                         )
-                    }
 
-                    is PostQuery.Near -> {
-                        api.getNearPosts(
+                    }
+                    is PostListType.Nearby -> {
+
+                        api.getNearbyPosts(
                             postid = params.key?.postId,
                             postdate = params.key?.postDate,
-                            distancemax = query.distance,
-                            latitude = query.latitude,
-                            longitude = query.longitude
+                            distancemax = type.radiusKm,
+                            latitude = location.latitude?:0.0,
+                            longitude = location.longitude?:0.0
                         )
-                    }
 
-                    is PostQuery.NewTag -> {
-                        api.getNewTagPosts(
+
+                    }
+                    is PostListType.TagRecent -> {
+                        api.getTagRecentPosts(
                             postid = params.key?.postId,
                             postdate = params.key?.postDate,
-                            tagid = query.tagId,
-                            latitude = query.latitude,
-                            longitude = query.longitude
+                            tagid = type.tagId,
+                            latitude = location.latitude,
+                            longitude = location.longitude
                         )
-                    }
 
+                    }
                 }
 
             },
-            mapper = {
-                it.posts.map { post ->
-                    post.toPostPreview()
-
-                }
+            mapper = { it ->
+                it.toPosts()
 
             },
             nextKey = { items ->
@@ -77,6 +83,6 @@ class PostPagingSource(
     }
 
 
-    override fun getRefreshKey(state: PagingState<PostCursor, PostPreview>): PostCursor? = null
+    override fun getRefreshKey(state: PagingState<PostCursor, Post>): PostCursor? = null
 
 }
