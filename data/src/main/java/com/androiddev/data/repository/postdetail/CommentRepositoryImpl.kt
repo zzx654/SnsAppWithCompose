@@ -3,8 +3,8 @@ package com.androiddev.data.repository.postdetail
 import android.content.Context
 import com.androiddev.data.remote.api.postdetail.CommentApi
 import com.androiddev.data.remote.dto.toComments
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.remote.dto.toNotificationComment
-import com.androiddev.data.remote.dto.toToggleLikeResult
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.NotificationComment
@@ -104,7 +104,7 @@ class CommentRepositoryImpl @Inject constructor(
             context = context,
             apiCall = { api.toggleLikeComment(commentId) },
             mapToResource = {
-                it.toToggleLikeResult()
+                it.toDomain()
             }
         )
 

@@ -620,11 +620,11 @@ fun PostDetailScreen(
 
 @Composable
 fun CommentRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:ImageLoader, currentUserViewModel: CurrentUserViewModel) {
-    val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+    //val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
     CommentItem(
         comment = comment,
-        isLiked = commentLikeStatus.isLiked,
-        likeCount = commentLikeStatus.likeCount,
+        //isLiked = commentLikeStatus.isLiked,
+        //likeCount = commentLikeStatus.likeCount,
         imageLoader = imageLoader,
         onLikeClick = {
             comment.commentId?.let {
@@ -652,11 +652,11 @@ fun CommentRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader
 }
 @Composable
 fun ReplyRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:ImageLoader, currentUserViewModel: CurrentUserViewModel) {
-    val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+    //val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
     ReplyItem(
         comment = comment,
-        isLiked = commentLikeStatus.isLiked,
-        likeCount = commentLikeStatus.likeCount,
+        //isLiked = commentLikeStatus.isLiked,
+        //likeCount = commentLikeStatus.likeCount,
         imageLoader = imageLoader,
         onLikeClick = {
             comment.commentId?.let {

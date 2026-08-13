@@ -3,8 +3,8 @@ package com.androiddev.data.repository.postdetail
 import android.content.Context
 
 import com.androiddev.data.remote.api.postdetail.ToggleLikePostApi
+import com.androiddev.data.remote.dto.toDomain
 
-import com.androiddev.data.remote.dto.toToggleLikeResult
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.ToggleLikeResult
 import com.androiddev.domain.repository.postdetail.ToggleLikePostRepository
@@ -21,7 +21,7 @@ class ToggleLikePostRepositoryImpl @Inject constructor(
         safeApiCall(
             context = context,
             apiCall = { api.toggleLikePost(postid) },
-            mapToResource = { it.toToggleLikeResult() }
+            mapToResource = { it.toDomain() }
         )
 
 }

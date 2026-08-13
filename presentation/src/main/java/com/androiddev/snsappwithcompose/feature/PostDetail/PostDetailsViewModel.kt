@@ -37,13 +37,10 @@ import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
-import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -172,7 +169,7 @@ class PostDetailsViewModel @Inject constructor(
             _isCommentsEmpty.value =
                 _getCommentsState.value.comments.isEmpty() && comments.isEmpty()
             val newIds = comments.map { it.commentId }.toSet()
-            updateStatesForNewComments(comments)
+            //updateStatesForNewComments(comments)
             _getCommentsState.value = getCommentsState.value.copy(
                 comments = (
                         if (refresh) comments else getCommentsState.value.comments.filterNot{ it.commentId in newIds } + comments
@@ -185,8 +182,8 @@ class PostDetailsViewModel @Inject constructor(
 
         }, extractItems = { response -> response.comments })
 
-    private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
-    val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
+    //private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
+    //val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
 
 
     private fun loadCommentByNotification(commentId: Int) {
@@ -195,7 +192,7 @@ class PostDetailsViewModel @Inject constructor(
                 when(result) {
                     is Resource.Success -> {
                         result.data?.let {
-                            updateStatesForNewComments(listOf(it.comment,it.reply))
+                            //updateStatesForNewComments(listOf(it.comment,it.reply))
 
                             _notificationComment.value = it.comment
                             _notificationReply.value = it.reply
@@ -336,11 +333,20 @@ class PostDetailsViewModel @Inject constructor(
                         handleResource(
                             resource = result,
                             onSuccess = { data ->
-                                val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
-                                _commentLikeStatusMap[event.commentId] = CommentLikeState(
-                                    isLiked = data.isLiked,
-                                    likeCount = currentLikeStatus.likeCount.plus(if(data.isLiked) 1 else -1)
-                                )
+                                val updatedComments = getCommentsState.value.comments.map { comment ->
+                                    if (comment.commentId == event.commentId) {
+                                        comment.toggleLike(isLiked = data.isLiked)
+                                    } else {
+                                        comment
+                                    }
+                                }
+                                _getCommentsState.value = getCommentsState.value.copy(comments = updatedComments)
+
+                                //val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
+                                //_commentLikeStatusMap[event.commentId] = CommentLikeState(
+                                //    isLiked = data.isLiked,
+                                //    likeCount = currentLikeStatus.likeCount.plus(if(data.isLiked) 1 else -1)
+                                //)
                             }
                         )
 
@@ -458,7 +464,7 @@ class PostDetailsViewModel @Inject constructor(
     protected fun resetDialogState() {
         _alertDialogState.value = AlertDialogStateV2()
     }
-    fun updateStatesForNewComments(newComments: List<Comment?>) {
+    /**fun updateStatesForNewComments(newComments: List<Comment?>) {
         newComments.forEach { comment ->
             comment?.commentId?.let { commentId->
                 _commentLikeStatusMap[commentId] = CommentLikeState(
@@ -467,7 +473,7 @@ class PostDetailsViewModel @Inject constructor(
                 )
             }
         }
-    }
+    }**/
     private fun showBottomSheetDialog(myUserId: Int, commentUserId: Int) {
         val options = if (myUserId == commentUserId) {
             listOf(CommentOption.Edit, CommentOption.Delete)

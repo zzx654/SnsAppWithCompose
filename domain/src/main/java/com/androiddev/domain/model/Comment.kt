@@ -20,4 +20,12 @@ data class Comment(
     val likeCount: Int,
     val score:Int=0,
     val commentLiked: Int
-)
+) {
+    fun toggleLike(isLiked: Boolean): Comment {
+        val newCount = if (isLiked) likeCount + 1 else (likeCount - 1).coerceAtLeast(0)
+        return copy(
+            commentLiked = if (isLiked) 1 else 0,
+            likeCount = newCount
+        )
+    }
+}

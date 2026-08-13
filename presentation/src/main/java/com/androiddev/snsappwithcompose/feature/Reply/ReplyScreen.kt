@@ -126,11 +126,11 @@ fun ReplyScreen(
             ) {
                 item {
                     comment?.let {
-                        val commentLikeStatus = viewModel.commentLikeStatusMap[it.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+                        //val commentLikeStatus = viewModel.commentLikeStatusMap[it.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
                         CommentItem(
                             comment = comment,
-                            isLiked = commentLikeStatus.isLiked,
-                            likeCount = commentLikeStatus.likeCount,
+                            //isLiked = commentLikeStatus.isLiked,
+                            ////likeCount = commentLikeStatus.likeCount,
                             imageLoader = imageLoader,
                             onLikeClick = {
                                 it.commentId?.let { commentId ->
@@ -157,12 +157,12 @@ fun ReplyScreen(
                 }
                 items(   getCommentsState.comments
                 ) { comment ->
-                    val commentLikeStatus = viewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+                    //val commentLikeStatus = viewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
 
                     ReplyItem(
                         comment = comment,
-                        isLiked = commentLikeStatus.isLiked,
-                        likeCount = commentLikeStatus.likeCount,
+                        //isLiked = commentLikeStatus.isLiked,
+                        //likeCount = commentLikeStatus.likeCount,
                         imageLoader = imageLoader,
                         onLikeClick = {
                             comment.commentId?.let {
