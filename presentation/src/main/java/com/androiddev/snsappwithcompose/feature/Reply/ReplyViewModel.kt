@@ -46,8 +46,8 @@ class ReplyViewModel @Inject constructor(
     val _postId = mutableStateOf(0)
     val postId: State<Int>
         get() = _postId
-    private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
-    val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
+    //private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
+    //val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
     private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
         CustomBottomSheetDialogState()
     )
@@ -81,7 +81,6 @@ class ReplyViewModel @Inject constructor(
         }, onSuccess = { comments, refresh ->
 
             val newIds = comments.map { it.commentId }.toSet()
-            updateStatesForNewComments(comments)
             _getCommentsState.value = getCommentsState.value.copy(
                 comments = if (refresh) comments else getCommentsState.value.comments.filterNot{ it.commentId in newIds } + comments,
                 endReached = comments.isEmpty() && getCommentsState.value.comments.isNotEmpty()
@@ -90,10 +89,10 @@ class ReplyViewModel @Inject constructor(
     fun initComment(comment:Comment){
         _ref.value = comment.ref
         _postId.value = comment.postId
-        _commentLikeStatusMap[comment.commentId?:0] = CommentLikeState(
-            isLiked = comment.commentLiked==1,
-            likeCount = comment.likeCount
-        )
+        //_commentLikeStatusMap[comment.commentId?:0] = CommentLikeState(
+        //    isLiked = comment.commentLiked==1,
+        //    likeCount = comment.likeCount
+        //)
         viewModelScope.launch {
             commentPaginator.loadNextItems(refresh = true)
         }
@@ -144,11 +143,15 @@ class ReplyViewModel @Inject constructor(
                         handleResource(
                             resource = result,
                             onSuccess = { data ->
-                                val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
-                                _commentLikeStatusMap[event.commentId] = CommentLikeState(
-                                    isLiked = data.isLiked,
-                                    likeCount = currentLikeStatus.likeCount.plus(if(data.isLiked) 1 else -1)
-                                )
+                                val updatedComments = getCommentsState.value.comments.map { comment ->
+                                    if (comment.commentId == event.commentId) {
+                                        comment.toggleLike(isLiked = data.isLiked)
+                                    } else {
+                                        comment
+                                    }
+                                }
+                                _getCommentsState.value = getCommentsState.value.copy(comments = updatedComments)
+
                             }
                         )
 
@@ -159,16 +162,6 @@ class ReplyViewModel @Inject constructor(
         }
 
 
-    }
-    fun updateStatesForNewComments(newComments: List<Comment>) {
-        newComments.forEach { comment ->
-            comment.commentId?.let { commentId->
-                _commentLikeStatusMap[commentId] = CommentLikeState(
-                    isLiked = comment.commentLiked==1,
-                    likeCount = comment.likeCount
-                )
-            }
-        }
     }
 
     private fun showBottomSheetDialog(myUserId:Int,commentUserId:Int) {

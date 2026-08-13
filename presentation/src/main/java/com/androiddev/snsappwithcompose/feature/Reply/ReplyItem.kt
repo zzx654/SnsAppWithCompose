@@ -34,8 +34,8 @@ import com.androiddev.snsappwithcompose.R
 @Composable
 fun ReplyItem(
     comment: Comment,
-    isLiked: Boolean,
-    likeCount: Int,
+    //isLiked: Boolean,
+    //likeCount: Int,
     imageLoader: ImageLoader,
     onLikeClick: ()->Unit,
     onOptionClick: ()->Unit,
@@ -86,13 +86,13 @@ fun ReplyItem(
             Row(modifier = Modifier.padding(horizontal = 97.dp)) {
                 Text(
                     text = getString(context, R.string.like),
-                    fontWeight = if(isLiked) FontWeight.Bold else FontWeight.Normal,
-                    color = if(isLiked) Color.Black else Color.Gray.copy(alpha = 0.8f),
+                    fontWeight = if(comment.commentLiked == 1) FontWeight.Bold else FontWeight.Normal,
+                    color = if(comment.commentLiked == 1) Color.Black else Color.Gray.copy(alpha = 0.8f),
                     modifier = Modifier.clickable { onLikeClick() }
                 )
-                if(likeCount>0) {
+                if(comment.likeCount>0) {
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "$likeCount")
+                    Text(text = "${comment.likeCount}")
                 }
             }
             Spacer(modifier = Modifier.height(15.dp))

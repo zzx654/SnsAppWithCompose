@@ -126,11 +126,17 @@ fun PostDetailScreen(
     postViewModel: PostDetailsViewModel
 ) {
 
-    val post = postViewModel.post.value
+    val post by postViewModel.post.collectAsStateWithLifecycle()
+    val voteState by postViewModel.voteState.collectAsStateWithLifecycle()
+    val anonymousChecked by postViewModel.anonymousChecked.collectAsStateWithLifecycle()
+    val commentText by postViewModel.commentText.collectAsStateWithLifecycle()
+    val isLiked by postViewModel.isLiked.collectAsStateWithLifecycle()
+    val notificationComment by postViewModel.notificationComment.collectAsStateWithLifecycle()
+    val notificationReply by postViewModel.notificationReply.collectAsStateWithLifecycle()
     val alertDialogState by postViewModel.alertDialogState.collectAsStateWithLifecycle()
     val bottomSheetDialogState by postViewModel.bottomSheetDialogState.collectAsStateWithLifecycle()
     val audioUrl = postViewModel.audioUrl
-    val mediaUiState by postViewModel.mediaUiModel.collectAsState()
+    val mediaUiState by postViewModel.mediaUiModel.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -200,7 +206,7 @@ fun PostDetailScreen(
             if (post != null) {
                 audioViewModel.prepareAudio(
                     url = BuildConfig.BASE_URL + it,
-                    nickname = post.anonymousNickname ?: post.nickname
+                    nickname = post?.anonymousNickname ?: post?.nickname?:""
                 )
             }
         }
@@ -280,7 +286,7 @@ fun PostDetailScreen(
             topBar = {
                 //if (post != null) {
                 CenterAlignedTopBar(
-                    title = generateDisplayName(context,post.nickname,post.anonymousNickname),
+                    title = generateDisplayName(context,post?.nickname?:"",post?.anonymousNickname),
                     onBackClick = { navController.popBackStack() },
                     rightAction = {
                         IconButton(onClick = { dropdownMenuExpanded = true }) {
@@ -318,7 +324,7 @@ fun PostDetailScreen(
                     item {
                         Column {
 
-                            post.tags?.let { tags ->
+                            post?.tags?.let { tags ->
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Chips(
                                     modifier = Modifier
@@ -333,7 +339,7 @@ fun PostDetailScreen(
                                     }
                                 )
                             }
-                            Spacer(modifier = Modifier.height(if (post.tags == null) 15.dp else 5.dp))
+                            Spacer(modifier = Modifier.height(if (post?.tags == null) 15.dp else 5.dp))
 
                             Row(
                                 modifier = Modifier
@@ -342,9 +348,9 @@ fun PostDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 ProfileImage(
-                                    profileImage = post.profileImage?:"",
-                                    gender = post.gender?:"",
-                                    anonymous = post.anonymousNickname!=null,
+                                    profileImage = post?.profileImage?:"",
+                                    gender = post?.gender?:"",
+                                    anonymous = post?.anonymousNickname!=null,
                                     context = context,
                                     imageLoader = imageLoader
                                 )
@@ -353,13 +359,13 @@ fun PostDetailScreen(
 
                                 Column {
                                     Text(
-                                        text = generateDisplayName(context,post.nickname,post.anonymousNickname),
+                                        text = generateDisplayName(context,post?.nickname?:"",post?.anonymousNickname),
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "${post.elapsedTime} · ${post.distance ?:0}km ",
+                                        text = "${post?.elapsedTime} · ${post?.distance ?:0}km ",
                                         fontSize = 13.sp,
                                         color = Color.Gray
                                     )
@@ -375,7 +381,7 @@ fun PostDetailScreen(
                             )
                             Spacer(modifier = Modifier.height(15.dp))
                             Text(
-                                text = post.text,
+                                text = post?.text?:"",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 24.dp),
@@ -392,7 +398,7 @@ fun PostDetailScreen(
 
                             //Spacer(modifier = Modifier.height(if (post?.images == null) 0.dp else 15.dp))
                             PollCard(
-                                voteState = postViewModel.voteState.value,
+                                voteState = voteState,
                                 onOptionSelected = { optionId -> postViewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
                                 onVoteClick = {
                                     postViewModel.onVoteEvent(VoteEvent.OnVoteClick)
@@ -442,7 +448,7 @@ fun PostDetailScreen(
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier.padding(vertical = 13.dp)) {
                                     androidx.compose.material3.Icon(
-                                        imageVector = if (postViewModel.isLiked.value) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
+                                        imageVector = if (isLiked) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
                                         contentDescription = null,
                                         tint = Color.DarkGray.copy(0.8f),
                                         modifier = Modifier
@@ -502,7 +508,7 @@ fun PostDetailScreen(
                         }
                     }
                     item {
-                        postViewModel.notificationComment.value?.let  { comment ->
+                        notificationComment?.let  { comment ->
                             CommentRow(
                                 comment = comment,
                                 postViewModel = postViewModel,
@@ -517,7 +523,7 @@ fun PostDetailScreen(
 
                     }
                     item {
-                        postViewModel.notificationReply.value?.let { reply ->
+                        notificationReply?.let { reply ->
                             ReplyRow(
                                 comment = reply,
                                 postViewModel = postViewModel,
@@ -599,13 +605,13 @@ fun PostDetailScreen(
             },
             bottomBar = {
                 CommentInput(
-                    comment = postViewModel.commentText.value,
+                    comment = commentText,
                     onCommentChange = { postViewModel.onCommentEvent(CommentEvent.TypeComment(it)) },
                     onPostClick = {
-                        if(postViewModel.commentText.value.isNotEmpty())
+                        if(commentText.isNotEmpty())
                             postViewModel.onCommentEvent(CommentEvent.PostComment)
                     },
-                    isAnonymous = postViewModel.anonymousChecked.value,
+                    isAnonymous = anonymousChecked,
                     onAnonymousChange = { postViewModel.onCommentEvent(CommentEvent.ToggleAnonymous(it)) }
                 )
             },
@@ -620,11 +626,11 @@ fun PostDetailScreen(
 
 @Composable
 fun CommentRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:ImageLoader, currentUserViewModel: CurrentUserViewModel) {
-    val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+    //val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
     CommentItem(
         comment = comment,
-        isLiked = commentLikeStatus.isLiked,
-        likeCount = commentLikeStatus.likeCount,
+        //isLiked = commentLikeStatus.isLiked,
+        //likeCount = commentLikeStatus.likeCount,
         imageLoader = imageLoader,
         onLikeClick = {
             comment.commentId?.let {
@@ -652,11 +658,11 @@ fun CommentRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader
 }
 @Composable
 fun ReplyRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:ImageLoader, currentUserViewModel: CurrentUserViewModel) {
-    val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
+    //val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
     ReplyItem(
         comment = comment,
-        isLiked = commentLikeStatus.isLiked,
-        likeCount = commentLikeStatus.likeCount,
+        //isLiked = commentLikeStatus.isLiked,
+        //likeCount = commentLikeStatus.likeCount,
         imageLoader = imageLoader,
         onLikeClick = {
             comment.commentId?.let {
