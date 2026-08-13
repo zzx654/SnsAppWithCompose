@@ -59,35 +59,28 @@ class PostDetailsViewModel @Inject constructor(
     private val _bottomSheetDialogState =  MutableStateFlow(BottomSheetDialogState<CommentOption>())
     val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
 
-    private val _voteState: MutableState<VoteState> = mutableStateOf( VoteState())
-    val voteState: State<VoteState>
-        get() = _voteState
+    private val _voteState = MutableStateFlow(VoteState())
+    val voteState: StateFlow<VoteState> = _voteState.asStateFlow()
 
-    val _isLiked = mutableStateOf(false)
-    val isLiked: State<Boolean>
-        get() = _isLiked
-    val _isCommentsEmpty = mutableStateOf(false)
+    private val _isLiked = MutableStateFlow(false)
+    val isLiked: StateFlow<Boolean> = _isLiked
+    private val _isCommentsEmpty = mutableStateOf(false)
     val isCommentsEmpty: State<Boolean>
         get() = _isCommentsEmpty
     private val _getCommentsState = mutableStateOf(GetCommentsState())
     val getCommentsState: State<GetCommentsState>
         get() = _getCommentsState
-    private val _notificationComment:MutableState<Comment?> =  mutableStateOf(null)
-    val notificationComment:State<Comment?>
-        get() = _notificationComment
-    private val _notificationReply:MutableState<Comment?> =  mutableStateOf(null)
-    val notificationReply:State<Comment?>
-        get() = _notificationReply
-    val _commentSortType = mutableStateOf(CommentSortType.OLDEST)
-    val commentSortType: State<CommentSortType>
-        get() = _commentSortType
+    private val _notificationComment:MutableStateFlow<Comment?> =  MutableStateFlow(null)
+    val notificationComment:StateFlow<Comment?> = _notificationComment
+    private val _notificationReply:MutableStateFlow<Comment?> =  MutableStateFlow(null)
+    val notificationReply:StateFlow<Comment?> = _notificationReply
+    private val _commentSortType = MutableStateFlow(CommentSortType.OLDEST)
+    val commentSortType: StateFlow<CommentSortType> = _commentSortType
 
-    val _anonymousChecked = mutableStateOf(false)
-    val anonymousChecked: State<Boolean>
-        get() = _anonymousChecked
-    val _post = mutableStateOf<Post?>(null)
-    val post: State<Post?>
-        get() = _post
+    private val _anonymousChecked = MutableStateFlow(false)
+    val anonymousChecked: StateFlow<Boolean> = _anonymousChecked
+    private val _post = MutableStateFlow<Post?>(null)
+    val post: StateFlow<Post?> = _post
 
     private val _mediaUiModel = MutableStateFlow(MediaUiModel(emptyList(), emptyList()))
     val mediaUiModel: StateFlow<MediaUiModel> = _mediaUiModel
@@ -98,9 +91,8 @@ class PostDetailsViewModel @Inject constructor(
             ?.url
 
 
-    val _commentText = mutableStateOf("")
-    val commentText: State<String>
-        get() = _commentText
+    val _commentText = MutableStateFlow("")
+    val commentText: StateFlow<String> = _commentText
 
 
     init {
