@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -54,7 +53,6 @@ class PostDetailsViewModel @Inject constructor(
     private val postDetailUseCases: PostDetailUseCases,
     private val commentUseCases: CommentUseCases,
     private val voteUseCases: VoteUseCases,
-    locationClient: FusedLocationProviderClient,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel() {
     //로딩처리. 댓글 상단 고정
@@ -67,16 +65,6 @@ class PostDetailsViewModel @Inject constructor(
     private val _voteState: MutableState<VoteState> = mutableStateOf( VoteState())
     val voteState: State<VoteState>
         get() = _voteState
-    private val _uiEvent = MutableSharedFlow<KeyBoardEvent>()
-    val uiEvent = _uiEvent.asSharedFlow()
-    private val _chatList = mutableStateListOf<String>()
-    val chatList: SnapshotStateList<String>
-        get() = _chatList
-    val _isLoad = mutableStateOf(false)
-    val isLoad: State<Boolean>
-        get() = _isLoad
-
-
 
     val _isLiked = mutableStateOf(false)
     val isLiked: State<Boolean>
@@ -97,9 +85,6 @@ class PostDetailsViewModel @Inject constructor(
     val commentSortType: State<CommentSortType>
         get() = _commentSortType
 
-    val _showContainer = mutableStateOf(false)
-    val showContainer: State<Boolean>
-        get() = _showContainer
     val _anonymousChecked = mutableStateOf(false)
     val anonymousChecked: State<Boolean>
         get() = _anonymousChecked
@@ -119,9 +104,7 @@ class PostDetailsViewModel @Inject constructor(
     val _commentText = mutableStateOf("")
     val commentText: State<String>
         get() = _commentText
-    //val _imepadding = mutableStateOf(false)
-    //val imepadding: State<Boolean>
-     //   get() = _imepadding
+
 
     init {
         viewModelScope.launch {
@@ -206,30 +189,6 @@ class PostDetailsViewModel @Inject constructor(
     val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
 
 
-    /**private fun getPost(postId:Int, latitude:Double? = null,longitude:Double? = null) {
-        viewModelScope.launch {
-            postDetailUseCases.GetPost(postid = postId, latitude = latitude, longitude = longitude)
-                .collect { result ->
-                    handleResource(
-                        resource = result,
-                        onSuccess = { data ->
-                            if(data.posts.isEmpty()) {
-                                //setEvent(UiEvent.ShowToast(getString(context,R.string.post_not_exist_alert)))
-                                setEvent(UiEvent.popBackStack)
-                            }
-                            else {
-
-                                loadPostDetails(data.posts[0])
-                                args.notificationCommentId?.let {
-                                    loadCommentByNotification(it)
-                                }
-                            }
-
-                        }
-                    )
-                }
-        }
-    }**/
     private fun loadCommentByNotification(commentId: Int) {
         viewModelScope.launch {
             commentUseCases.GetNotificationComment(commentId).collect { result ->
@@ -471,16 +430,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
     private fun showDeleteAlert() {
-        /**_alertDialogState.value = AlertDialogState(
-            title = getString(context,R.string.delete_post_alert),
-            confirmText = getString(context,R.string.confirm),
-            onClickConfirm = {
-                deletePost(post.value?.postId?:0)
-                resetDialogState()
-            },
-            cancelText = getString(context,R.string.cancel),
-            onClickCancel = { resetDialogState() }
-        )**/
+
         _alertDialogState.value = AlertDialogStateV2(
             title = UiText.StringResource(R.string.delete_post_alert),
             confirmText = UiText.StringResource(R.string.confirm),
@@ -544,34 +494,7 @@ class PostDetailsViewModel @Inject constructor(
             CommentOption.RequestChat -> { resetBottomSheetDialogState() }
         }
     }
-    private fun sshowBottomSheetDialog(myUserId:Int,commentUserId:Int) {
-        /**val items: MutableList<BottomSheetItem> = if(myUserId == commentUserId) {
-            mutableListOf(
-                BottomSheetItem(R.drawable.outline_edit,getString(context,R.string.edit)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_delete,getString(context,R.string.delete)) {
-                    resetBottomSheetDialogState()
-                },
-            )
-        } else {
-            mutableListOf(
-                BottomSheetItem(R.drawable.outline_report,getString(context,R.string.report)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_block,getString(context,R.string.block_user)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_chat,getString(context,R.string.request_chat)) {
-                    resetBottomSheetDialogState()
-                }
-            )
-        }
-        _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
-            showDialog = true,
-            items,
-        ) { resetBottomSheetDialogState() }**/
-    }
+
     private fun resetBottomSheetDialogState() {
         _bottomSheetDialogState.value = BottomSheetDialogState()
     }
