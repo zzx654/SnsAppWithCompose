@@ -1,6 +1,6 @@
 package com.androiddev.domain.repository.postdetail
 
-import com.androiddev.domain.model.Posts
+import com.androiddev.domain.model.Post
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
@@ -9,6 +9,6 @@ interface PostRepository {
     suspend fun getPost(
         postId:Int,
         latitude:Double?,
-        longitude:Double?,
-    ):Flow<Resource<Posts>>
+        longitude:Double?
+    ):Flow<Resource<List<Post>>>
 }

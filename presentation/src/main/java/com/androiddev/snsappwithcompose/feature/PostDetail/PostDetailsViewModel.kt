@@ -1,7 +1,5 @@
 package com.androiddev.snsappwithcompose.feature.PostDetail
 
-import android.Manifest
-import android.content.Context
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.runtime.MutableState
@@ -10,14 +8,14 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.Media
-import com.androiddev.domain.model.PostPreview
+import com.androiddev.domain.model.Post
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
@@ -29,25 +27,24 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteState
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.AlertDialogState
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
-import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
-import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
+
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
-import com.androiddev.snsappwithcompose.common.util.checkPermissions
-import com.androiddev.snsappwithcompose.common.util.fetchLocation
+import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -56,30 +53,18 @@ class PostDetailsViewModel @Inject constructor(
     private val postDetailUseCases: PostDetailUseCases,
     private val commentUseCases: CommentUseCases,
     private val voteUseCases: VoteUseCases,
-    @ApplicationContext context: Context,
-    locationClient: FusedLocationProviderClient,
     savedStateHandle: SavedStateHandle
-) : BaseViewModel(context) {
+) : BaseViewModel() {
     //로딩처리. 댓글 상단 고정
     val args:Screen.PostDetailScreen = savedStateHandle.toRoute<Screen.PostDetailScreen>()
-    private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
-        CustomBottomSheetDialogState()
-    )
-    val customBottomSheetDialogState: State<CustomBottomSheetDialogState>
-        get() = _customBottomSheetDialogState
+    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
+    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+    private val _bottomSheetDialogState =  MutableStateFlow(BottomSheetDialogState<CommentOption>())
+    val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
+
     private val _voteState: MutableState<VoteState> = mutableStateOf( VoteState())
     val voteState: State<VoteState>
         get() = _voteState
-    private val _uiEvent = MutableSharedFlow<KeyBoardEvent>()
-    val uiEvent = _uiEvent.asSharedFlow()
-    private val _chatList = mutableStateListOf<String>()
-    val chatList: SnapshotStateList<String>
-        get() = _chatList
-    val _isLoad = mutableStateOf(false)
-    val isLoad: State<Boolean>
-        get() = _isLoad
-
-
 
     val _isLiked = mutableStateOf(false)
     val isLiked: State<Boolean>
@@ -100,14 +85,11 @@ class PostDetailsViewModel @Inject constructor(
     val commentSortType: State<CommentSortType>
         get() = _commentSortType
 
-    val _showContainer = mutableStateOf(false)
-    val showContainer: State<Boolean>
-        get() = _showContainer
     val _anonymousChecked = mutableStateOf(false)
     val anonymousChecked: State<Boolean>
         get() = _anonymousChecked
-    val _post = mutableStateOf<PostPreview?>(null)
-    val post: State<PostPreview?>
+    val _post = mutableStateOf<Post?>(null)
+    val post: State<Post?>
         get() = _post
 
     private val _mediaUiModel = MutableStateFlow(MediaUiModel(emptyList(), emptyList()))
@@ -122,26 +104,35 @@ class PostDetailsViewModel @Inject constructor(
     val _commentText = mutableStateOf("")
     val commentText: State<String>
         get() = _commentText
-    //val _imepadding = mutableStateOf(false)
-    //val imepadding: State<Boolean>
-     //   get() = _imepadding
+
 
     init {
         viewModelScope.launch {
-            checkPermissions(
-                context = context,
-                permissions = arrayOf( Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION),
-                onGranted = {
-                    fetchLocation(locationClient) { latitude, longitude ->
-                        getPost(args.postId,latitude,longitude)
+            postDetailUseCases.GetPost(
+                postId = args.postId
+            ).collect { result ->
+                result.handle(
+                    onSuccess = { postdata ->
+                        if (postdata.isEmpty()) {
+                            // 1. 서버에서 게시물을 찾을 수 없을 때
+                            emitUiEvent(UiEvent.ShowToast(UiText.StringResource(R.string.post_not_exist_alert)))
+                            emitUiEvent(UiEvent.popBackStack)
+                        } else {
+                            // 2. 게시물 정보 정상 로드
+                            loadPostDetails(postdata[0])
+
+                            // 3. 알림을 통해 들어온 경우 해당 댓글/답글 로드
+                            args.notificationCommentId?.let { commentId ->
+                                loadCommentByNotification(commentId)
+                            }
+                        }
                     }
-                            },
-                onUnGranted = {
-                     getPost(args.postId)
-                }
-            )
+                )
+
+            }
+
         }
+
     }
     val commentPaginator =
         Paginator<Comments, Comment>(loadItems = { handleResult, refresh ->
@@ -197,33 +188,7 @@ class PostDetailsViewModel @Inject constructor(
     private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
     val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
 
-    private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
-    val alertDialogState: State<AlertDialogState>
-        get() = _alertDialogState
-    private fun getPost(postId:Int, latitude:Double? = null,longitude:Double? = null) {
-        viewModelScope.launch {
-            postDetailUseCases.GetPost(postid = postId, latitude = latitude, longitude = longitude)
-                .collect { result ->
-                    handleResource(
-                        resource = result,
-                        onSuccess = { data ->
-                            if(data.posts.isEmpty()) {
-                                //setEvent(UiEvent.ShowToast(getString(context,R.string.post_not_exist_alert)))
-                                setEvent(UiEvent.popBackStack)
-                            }
-                            else {
 
-                                loadPostDetails(data.posts[0])
-                                args.notificationCommentId?.let {
-                                    loadCommentByNotification(it)
-                                }
-                            }
-
-                        }
-                    )
-                }
-        }
-    }
     private fun loadCommentByNotification(commentId: Int) {
         viewModelScope.launch {
             commentUseCases.GetNotificationComment(commentId).collect { result ->
@@ -257,7 +222,7 @@ class PostDetailsViewModel @Inject constructor(
 
 
     }
-    private fun loadPostDetails(post: PostPreview) {
+    private fun loadPostDetails(post: Post) {
         _isLiked.value = post.isliked
         _post.value = post
         _mediaUiModel.value = post.media.toMediaUiModel()
@@ -465,14 +430,15 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
     private fun showDeleteAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(context,R.string.delete_post_alert),
-            confirmText = getString(context,R.string.confirm),
+
+        _alertDialogState.value = AlertDialogStateV2(
+            title = UiText.StringResource(R.string.delete_post_alert),
+            confirmText = UiText.StringResource(R.string.confirm),
+            cancelText = UiText.StringResource(R.string.cancel),
             onClickConfirm = {
-                deletePost(post.value?.postId?:0)
+                deletePost(post.value?.postId ?: 0)
                 resetDialogState()
             },
-            cancelText = getString(context,R.string.cancel),
             onClickCancel = { resetDialogState() }
         )
     }
@@ -490,7 +456,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
     protected fun resetDialogState() {
-        _alertDialogState.value = AlertDialogState()
+        _alertDialogState.value = AlertDialogStateV2()
     }
     fun updateStatesForNewComments(newComments: List<Comment?>) {
         newComments.forEach { comment ->
@@ -502,36 +468,35 @@ class PostDetailsViewModel @Inject constructor(
             }
         }
     }
-    private fun showBottomSheetDialog(myUserId:Int,commentUserId:Int) {
-        val items: MutableList<BottomSheetItem> = if(myUserId == commentUserId) {
-            mutableListOf(
-                BottomSheetItem(R.drawable.outline_edit,getString(context,R.string.edit)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_delete,getString(context,R.string.delete)) {
-                    resetBottomSheetDialogState()
-                },
-            )
+    private fun showBottomSheetDialog(myUserId: Int, commentUserId: Int) {
+        val options = if (myUserId == commentUserId) {
+            listOf(CommentOption.Edit, CommentOption.Delete)
         } else {
-            mutableListOf(
-                BottomSheetItem(R.drawable.outline_report,getString(context,R.string.report)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_block,getString(context,R.string.block_user)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_chat,getString(context,R.string.request_chat)) {
-                    resetBottomSheetDialogState()
-                }
-            )
+            listOf(CommentOption.Report, CommentOption.Block, CommentOption.RequestChat)
         }
-        _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
+
+        _bottomSheetDialogState.value = BottomSheetDialogState(
             showDialog = true,
-            items,
-        ) { resetBottomSheetDialogState() }
+            options = options,
+            onOptionSelected = { option ->
+                resetBottomSheetDialogState()
+                handleCommentOption(option)
+            },
+            onClickCancel = { resetBottomSheetDialogState() }
+        )
     }
+    private fun handleCommentOption(option: CommentOption) {
+        when (option) {
+            CommentOption.Edit -> { resetBottomSheetDialogState() }
+            CommentOption.Delete -> { resetBottomSheetDialogState() }
+            CommentOption.Report -> { resetBottomSheetDialogState() }
+            CommentOption.Block -> { resetBottomSheetDialogState() }
+            CommentOption.RequestChat -> { resetBottomSheetDialogState() }
+        }
+    }
+
     private fun resetBottomSheetDialogState() {
-        _customBottomSheetDialogState.value = CustomBottomSheetDialogState()
+        _bottomSheetDialogState.value = BottomSheetDialogState()
     }
 
 }

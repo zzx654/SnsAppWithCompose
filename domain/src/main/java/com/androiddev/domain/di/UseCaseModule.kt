@@ -147,7 +147,7 @@ object UseCaseModule {
             toggleFavoriteTag = ToggleFavoriteTag(repository)
         )
     }
-    @Provides
+    /**@Provides
     @Singleton
     fun providePostDetailUseCases(
         toggleLikePostRepository: ToggleLikePostRepository,
@@ -158,7 +158,7 @@ object UseCaseModule {
             DeletePost = DeletePost(postRepository),
             GetPost = GetPost(postRepository)
         )
-    }
+    }**/
     @Provides
     @Singleton
     fun provideCommentUseCases(

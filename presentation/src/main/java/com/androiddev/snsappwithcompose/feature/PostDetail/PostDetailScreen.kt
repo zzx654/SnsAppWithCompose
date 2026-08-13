@@ -102,7 +102,11 @@ import com.androiddev.snsappwithcompose.common.model.MenuItem
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androiddev.domain.model.Comment
+import com.androiddev.domain.model.Post
+import com.androiddev.snsappwithcompose.common.component.AlertDialogg
+import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 import com.androiddev.snsappwithcompose.feature.PostDetail.component.MediaGrid
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
@@ -123,6 +127,8 @@ fun PostDetailScreen(
 ) {
 
     val post = postViewModel.post.value
+    val alertDialogState by postViewModel.alertDialogState.collectAsStateWithLifecycle()
+    val bottomSheetDialogState by postViewModel.bottomSheetDialogState.collectAsStateWithLifecycle()
     val audioUrl = postViewModel.audioUrl
     val mediaUiState by postViewModel.mediaUiModel.collectAsState()
     val focusManager = LocalFocusManager.current
@@ -238,7 +244,7 @@ fun PostDetailScreen(
             }
         }
     }
-    val editedPost = navBackStackEntry.savedStateHandle.get<PostPreview>(getString(context,R.string.editedPost))
+    val editedPost = navBackStackEntry.savedStateHandle.get<Post>(getString(context,R.string.editedPost))
     editedPost?.let { post ->
         postViewModel.onPostDetailEvent(PostDetailEvent.LoadEditedPostDetails(post))
         //post.audio?.let {
@@ -249,21 +255,18 @@ fun PostDetailScreen(
        // }
         navBackStackEntry.savedStateHandle.set<PostPreview>(getString(context,R.string.editedPost),null)
     }
-    AlertDialog(
-        title = { postViewModel.alertDialogState.value.title },
-        cancelText = { postViewModel.alertDialogState.value.cancelText },
-        confirmText = { postViewModel.alertDialogState.value.confirmText },
-        onClickConfirm = postViewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = postViewModel.alertDialogState.value.onClickCancel
+    AlertDialogg (
+        title = alertDialogState.title?.asString() ?:"",
+        cancelText = alertDialogState.cancelText?.asString() ?:"",
+        confirmText = alertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = alertDialogState.onClickConfirm,
+        onClickCancel = alertDialogState.onClickCancel
     )
     LoadingDialog {
         postViewModel.isLoading.value && post!=null
     }
-    CustomBottomSheetDialog(
-        { postViewModel.customBottomSheetDialogState.value.showDialog },
-        { postViewModel.customBottomSheetDialogState.value.items },
-        postViewModel.customBottomSheetDialogState.value.onClickCancel
-    )
+    SelectorBottomSheetDialog(bottomSheetDialogState)
+
     if(post == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             androidx.compose.material3.CircularProgressIndicator(color = Color.Gray)

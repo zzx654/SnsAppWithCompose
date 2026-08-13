@@ -1,16 +1,14 @@
 package com.androiddev.snsappwithcompose.common.navigation.component
 import android.os.Bundle
 import androidx.navigation.NavType
-import com.androiddev.domain.model.PostPreview
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
 import kotlin.reflect.typeOf
 import android.net.Uri
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Media
 import com.androiddev.domain.model.MediaPost
-import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
+import com.androiddev.domain.model.Post
 
 sealed interface Screen {
 
@@ -29,7 +27,7 @@ sealed interface Screen {
     @Serializable
     data object NotificationScreen: Screen
     @Serializable
-    data class UploadPostScreen(val post:PostPreview? = null): Screen
+    data class UploadPostScreen(val post: Post? = null): Screen
     @Serializable
     data object InitScreen: Screen
     @Serializable
@@ -96,7 +94,7 @@ inline fun <reified T : Any?> serializableType(
 
     override fun serializeAsValue(value: T): String = json.encodeToString(value)
 }**/
-val postTypeMap = mapOf(typeOf<PostPreview?>() to serializableType<PostPreview?>(isNullableAllowed = true))
+val postTypeMap = mapOf(typeOf<Post?>() to serializableType<Post?>(isNullableAllowed = true))
 val commentTypeMap = mapOf(typeOf<Comment?>() to serializableType<Comment?>(isNullableAllowed = true))
 val mediaTypeMap = mapOf(typeOf<List<Media>?>() to serializableType<List<Media>?>(isNullableAllowed = true))
 val mediaPostsTypeMap = mapOf(typeOf<List<MediaPost>?>() to serializableType<List<MediaPost>?>(isNullableAllowed = true))

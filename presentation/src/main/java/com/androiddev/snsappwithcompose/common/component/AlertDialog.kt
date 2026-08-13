@@ -29,7 +29,127 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Dialog
+@Composable
+fun AlertDialogg(
+    title: String,
+    content: @Composable () -> Unit = {},
+    cancelText:String,
+    confirmText:String,
+    onClickCancel: ()->Unit,
+    onClickConfirm: () -> Unit
+) {
+    if(title.isNotBlank()) {
+        Dialog(
+            onDismissRequest = { onClickCancel() },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+            )
+        ) {
+            Card(
+                shape = RoundedCornerShape(8.dp)
+            )
+            {
+                Column(
+                    modifier = Modifier
+                        .width(300.dp)
+                        .wrapContentHeight()
+                        .background(
+                            color = Color.White,
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
 
+                    Spacer(modifier = Modifier.height(40.dp))
+
+                    Text(
+                        text = title,
+                        modifier = Modifier.padding(horizontal = 15.dp),
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(25.dp))
+                    content()
+                    Spacer(modifier = Modifier.height(25.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(color = Color.LightGray)
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min) // Row의 높이를 내부 컴포넌트에 맞춤
+                    ) {
+                        if(cancelText.isNotBlank()) {
+                            Button(
+                                onClick = { onClickCancel() },
+                                shape = RectangleShape,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.White, // 버튼 배경색상
+                                    contentColor = Color.Black, // 버튼 텍스트 색상
+                                    disabledContainerColor = Color.Gray, // 버튼 비활성화 배경 색상
+                                    disabledContentColor = Color.White, // 버튼 비활성화 텍스트 색상
+                                ),
+
+                                ) {
+                                Text(
+                                    text = cancelText,
+                                    textAlign = TextAlign.Center,
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Normal
+                                    )
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(1.dp)
+                                    .background(color = Color.LightGray)
+                            )
+                        }
+
+
+                        Button(
+                            onClick = { onClickConfirm() },
+                            shape = RectangleShape,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White, // 버튼 배경색상
+                                contentColor = Color.Red, // 버튼 텍스트 색상
+                                disabledContainerColor = Color.Gray, // 버튼 비활성화 배경 색상
+                                disabledContentColor = Color.White, // 버튼 비활성화 텍스트 색상
+                            ),
+                        ) {
+                            Text(
+                                text = confirmText,
+                                textAlign = TextAlign.Center,
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
 @Composable
 fun AlertDialog(
     title: () -> String,

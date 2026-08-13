@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import com.androiddev.data.paging.PostPagingSource
 import com.androiddev.data.paging.createPager
 import com.androiddev.data.remote.api.postlist.GetPostsApi
+import com.androiddev.domain.location.LocationState
 import com.androiddev.domain.location.LocationTracker
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostListType
@@ -15,15 +16,14 @@ import javax.inject.Singleton
 @Singleton
 class PostListRepositoryImpl @Inject constructor(
     private val api:GetPostsApi,
-    private val locationTracker: LocationTracker // Repository에서 수집!
 ) : PostListRepository {
 
-    override fun getPosts(type: PostListType): Flow<PagingData<Post>>
+    override fun getPosts(type: PostListType,location:LocationState): Flow<PagingData<Post>>
      = createPager {
         PostPagingSource(
             api = api,
             type = type,
-            location = locationTracker.currentLocation.value
+            location = location
         )
     }
 

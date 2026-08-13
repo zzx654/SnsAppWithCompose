@@ -2,6 +2,7 @@ package com.androiddev.snsappwithcompose.feature.home.nearbyposts
 
 import android.Manifest
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,7 +67,8 @@ fun NearbypostsScreen(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 itemContent = { post ->
                     PostPreviewItemm(
-                        uiState = post.toUiState()
+                        uiState = post.toUiState(),
+                        modifier = Modifier.clickable{ viewModel.onClickPostItem(post.postId)}
                     )
                               },
                 modifier = Modifier
