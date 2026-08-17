@@ -1,4 +1,4 @@
-package com.androiddev.data.paging
+package com.androiddev.data.paging.pagingsource
 
 
 
@@ -23,6 +23,7 @@ class MediaPostPagingSource(
                     userid = query.userId,
                     type = query.type,
                     mediaid = params.key,
+
                     latitude = query.latitude,
                     longitude = query.longitude
 

@@ -1,19 +1,15 @@
-package com.androiddev.data.paging
+package com.androiddev.data.paging.pagingsource
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.androiddev.data.paging.cursor.PostCursor
 import com.androiddev.data.remote.api.postlist.GetPostsApi
-import com.androiddev.data.remote.dto.toPost
-import com.androiddev.data.remote.dto.toPostPreview
 import com.androiddev.data.remote.dto.toPosts
+import com.androiddev.data.util.PagingConstants.DEFAULT_PAGE_SIZE
 import com.androiddev.data.util.safePagingApiCall
 import com.androiddev.domain.location.LocationState
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostListType
-import com.androiddev.domain.model.PostPreview
-import com.androiddev.domain.model.PostQuery
-import com.androiddev.domain.util.Constants.PAGE_SIZE
 
 class PostPagingSource(
     private val api: GetPostsApi,
@@ -21,13 +17,18 @@ class PostPagingSource(
     private val location: LocationState,
 ): PagingSource<PostCursor, Post>() {
     override suspend fun load(params: LoadParams<PostCursor>): LoadResult<PostCursor, Post> {
+
+        val cursor = params.key
+        val postId = cursor?.postId
+        val postDate = cursor?.postDate
+
         return safePagingApiCall(
             apiCall =  {
                 when(type) {
                     is PostListType.Recent -> {
                         api.getRecentPosts(
-                            postid = params.key?.postId,
-                            postdate = params.key?.postDate,
+                            postid = postId,
+                            postdate = postDate,
                             latitude = location.latitude,
                             longitude = location.longitude
                         )
@@ -36,8 +37,8 @@ class PostPagingSource(
                     is PostListType.User -> {
                         api.getUserPosts(
                             userid = type.userId,
-                            postid = params.key?.postId,
-                            postdate = params.key?.postDate,
+                            postid = postId,
+                            postdate = postDate,
                             latitude = location.latitude,
                             longitude = location.longitude
                         )
@@ -46,8 +47,8 @@ class PostPagingSource(
                     is PostListType.Nearby -> {
 
                         api.getNearbyPosts(
-                            postid = params.key?.postId,
-                            postdate = params.key?.postDate,
+                            postid = postId,
+                            postdate = postDate,
                             distancemax = type.radiusKm,
                             latitude = location.latitude?:0.0,
                             longitude = location.longitude?:0.0
@@ -57,8 +58,8 @@ class PostPagingSource(
                     }
                     is PostListType.TagRecent -> {
                         api.getTagRecentPosts(
-                            postid = params.key?.postId,
-                            postdate = params.key?.postDate,
+                            postid = postId,
+                            postdate = postDate,
                             tagid = type.tagId,
                             latitude = location.latitude,
                             longitude = location.longitude
@@ -73,7 +74,7 @@ class PostPagingSource(
 
             },
             nextKey = { items ->
-                items.lastOrNull()?.takeIf { items.size == PAGE_SIZE }?.let {
+                items.lastOrNull()?.takeIf { items.size == DEFAULT_PAGE_SIZE }?.let {
                     PostCursor(it.postId, it.date)
                 }
 

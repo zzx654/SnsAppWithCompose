@@ -11,8 +11,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.filter
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.domain.model.Comment
+import com.androiddev.domain.model.CommentSortType
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.Media
 import com.androiddev.domain.model.Post
@@ -38,10 +42,14 @@ import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -75,7 +83,7 @@ class PostDetailsViewModel @Inject constructor(
     private val _notificationReply:MutableStateFlow<Comment?> =  MutableStateFlow(null)
     val notificationReply:StateFlow<Comment?> = _notificationReply
     private val _commentSortType = MutableStateFlow(CommentSortType.OLDEST)
-    val commentSortType: StateFlow<CommentSortType> = _commentSortType
+    val commentSortType: StateFlow<CommentSortType> = _commentSortType.asStateFlow()
 
     private val _anonymousChecked = MutableStateFlow(false)
     val anonymousChecked: StateFlow<Boolean> = _anonymousChecked
@@ -123,7 +131,7 @@ class PostDetailsViewModel @Inject constructor(
         }
 
     }
-    val commentPaginator =
+    /**val commentPaginator =
         Paginator<Comments, Comment>(loadItems = { handleResult, refresh ->
             viewModelScope.launch {
                 //등록순인지 인기순인지에 따라 요청하면됨
@@ -172,11 +180,28 @@ class PostDetailsViewModel @Inject constructor(
                 endReached = comments.isEmpty() && getCommentsState.value.comments.isNotEmpty()
             )
 
-        }, extractItems = { response -> response.comments })
+        }, extractItems = { response -> response.comments })**/
 
     //private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
     //val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
+    //@OptIn(ExperimentalCoroutinesApi::class)
+    val pagingCommentStream: Flow<PagingData<Comment>> = combine(
+        _commentSortType,
+        _notificationComment,
+        _notificationReply
+    ) { sort, notiComment, notiReply ->
 
+        val excludeIds = buildSet {
+            notiComment?.commentId?.let { add(it) }
+            notiReply?.commentId?.let { add(it) }
+        }
+        Pair(sort, excludeIds)
+    }.flatMapLatest { (sort, excludeIds) ->
+        commentUseCases.GetComments(postId = args.postId,sortType =  sort)
+            .map { pagingData ->
+                pagingData.filter { comment -> comment.commentId !in excludeIds }
+            }
+    }.cachedIn(viewModelScope)
 
     private fun loadCommentByNotification(commentId: Int) {
         viewModelScope.launch {
@@ -216,7 +241,7 @@ class PostDetailsViewModel @Inject constructor(
         _post.value = post
         _mediaUiModel.value = post.media.toMediaUiModel()
         viewModelScope.launch {
-            commentPaginator.loadNextItems(refresh = true)
+            //commentPaginator.loadNextItems(refresh = true)
         }
         viewModelScope.launch {
             voteUseCases.getVoteInfo(post.postId).collect { result ->
@@ -315,7 +340,7 @@ class PostDetailsViewModel @Inject constructor(
 
             is CommentEvent.LoadNextComments -> {
                 viewModelScope.launch {
-                    commentPaginator.loadNextItems(refresh = false)
+                    //commentPaginator.loadNextItems(refresh = false)
                 }
 
             }
@@ -348,11 +373,6 @@ class PostDetailsViewModel @Inject constructor(
             }
             is CommentEvent.SetCommentSortType -> {
                 _commentSortType.value = event.commentSortType
-                viewModelScope.launch {
-                    _getCommentsState.value = GetCommentsState(comments = listOf())
-                    commentPaginator.loadNextItems(refresh = true)
-                }
-
             }
 
             is CommentEvent.PostComment -> {
@@ -511,9 +531,6 @@ fun List<Media>.toMediaUiModel(): MediaUiModel {
     )
 }
 
-enum class CommentSortType(@StringRes val labelResId: Int) {
-    OLDEST(R.string.sort_by_date), POPULAR(R.string.sort_by_popularity)
-}
 
 sealed class KeyBoardEvent {
     object HideKeyboard : KeyBoardEvent()

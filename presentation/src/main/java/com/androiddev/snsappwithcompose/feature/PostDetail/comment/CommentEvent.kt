@@ -1,6 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.PostDetail.comment
 
-import com.androiddev.snsappwithcompose.feature.PostDetail.CommentSortType
+import com.androiddev.domain.model.CommentSortType
+
 
 sealed class CommentEvent {
     data class TypeComment(val comment: String): CommentEvent()

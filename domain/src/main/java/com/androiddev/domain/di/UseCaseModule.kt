@@ -159,7 +159,7 @@ object UseCaseModule {
             GetPost = GetPost(postRepository)
         )
     }**/
-    @Provides
+    /**@Provides
     @Singleton
     fun provideCommentUseCases(
         commentRepository: CommentRepository
@@ -172,7 +172,7 @@ object UseCaseModule {
             ToggleLikeComment = ToggleLikeComment(commentRepository),
             GetNotificationComment = GetNotificationComment(commentRepository)
         )
-    }
+    }**/
     @Provides
     @Singleton
     fun provideReplyUseCases(

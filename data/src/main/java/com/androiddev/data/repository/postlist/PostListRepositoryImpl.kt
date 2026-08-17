@@ -1,11 +1,10 @@
 package com.androiddev.data.repository.postlist
 
 import androidx.paging.PagingData
-import com.androiddev.data.paging.PostPagingSource
+import com.androiddev.data.paging.pagingsource.PostPagingSource
 import com.androiddev.data.paging.createPager
 import com.androiddev.data.remote.api.postlist.GetPostsApi
 import com.androiddev.domain.location.LocationState
-import com.androiddev.domain.location.LocationTracker
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostListType
 import com.androiddev.domain.repository.postlist.PostListRepository

@@ -212,8 +212,8 @@ fun PostDetailScreen(
         }
     }
     LaunchedEffect(
-        postViewModel.notificationComment.value,
-        postViewModel.notificationReply.value
+        notificationComment,
+        notificationReply
     ) {
         // Compose 레이아웃 계산을 위해 약간 delay
 
@@ -483,7 +483,7 @@ fun PostDetailScreen(
                             Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp,vertical = 10.dp), contentAlignment = Alignment.TopStart) {
                                 Row {
                                     SelectableDotText(
-                                        text = getString(context, CommentSortType.OLDEST.labelResId),
+                                        text = getString(context, R.string.sort_by_date),
                                         selected = postViewModel.commentSortType.value == CommentSortType.OLDEST,
                                         onClick = {//onEvent
                                             postViewModel.onCommentEvent(CommentEvent.SetCommentSortType(
@@ -493,7 +493,7 @@ fun PostDetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(9.dp))
                                     SelectableDotText(
-                                        text = getString(context, CommentSortType.POPULAR.labelResId),
+                                        text = getString(context,R.string.sort_by_popularity),
                                         selected = postViewModel.commentSortType.value == CommentSortType.POPULAR,
                                         onClick = {
                                             postViewModel.onCommentEvent(CommentEvent.SetCommentSortType(
