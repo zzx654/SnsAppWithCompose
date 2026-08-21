@@ -15,6 +15,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import coil3.imageLoader
@@ -41,6 +43,7 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.Com
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentItem
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
+import com.androiddev.snsappwithcompose.feature.PostDetail.component.ReplyRow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 
@@ -67,6 +70,7 @@ fun ReplyScreen(
     val ime = androidx.compose.foundation.layout.WindowInsets.ime
     val localDensity = LocalDensity.current
     val getCommentsState = viewModel.getCommentsState.value
+    val userId by currentUserViewModel.userId.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = Unit) {
         val keyboardFlow = snapshotFlow {
             ime.getBottom(localDensity)
@@ -133,9 +137,8 @@ fun ReplyScreen(
                             ////likeCount = commentLikeStatus.likeCount,
                             imageLoader = imageLoader,
                             onLikeClick = {
-                                it.commentId?.let { commentId ->
-                                    viewModel.onEvent(CommentEvent.ToggleLikeComment(commentId))
-                                }
+                                viewModel.onEvent(CommentEvent.ToggleLikeComment(it))
+
                             },
                             onOptionClick = {
                                 //viewModel.onCommentEvent(CommentEvent.ShowCommentOptions(
@@ -159,22 +162,26 @@ fun ReplyScreen(
                 ) { comment ->
                     //val commentLikeStatus = viewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
 
-                    ReplyItem(
+                    ReplyRow (
                         comment = comment,
                         //isLiked = commentLikeStatus.isLiked,
                         //likeCount = commentLikeStatus.likeCount,
                         imageLoader = imageLoader,
                         onLikeClick = {
-                            comment.commentId?.let {
-                                viewModel.onEvent(CommentEvent.ToggleLikeComment(it))
-                            }
+                            viewModel.onEvent(CommentEvent.ToggleLikeComment(comment))
+
                         },
                         onOptionClick = {
-                            viewModel.onEvent(
+                            userId?.let {
                                 CommentEvent.ShowCommentOptions(
-                                myUserId = currentUserViewModel.userId.value,
-                                commentUserId = comment.userId
-                            ))
+                                    myUserId = it,
+                                    commentUserId = comment.userId
+                                )
+                            }?.let {
+                                viewModel.onEvent(
+                                    it
+                                )
+                            }
                         }
                     )
                     Divider(

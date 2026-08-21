@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun BaseScreen(
     viewModel: UiStateProvider,
-    navController: NavController? = null, // 필요시 내비게이션 처리
+    navController: NavController? = null,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -41,14 +41,21 @@ fun BaseScreen(
                 is UiEvent.popBackStack -> {
                     navController?.popBackStack()
                 }
+                is UiEvent.PopBackStackWithResult<*> -> {
+                    if (navController != null) {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(event.key, event.value)
+                    }
+                    navController?.popBackStack()
+                }
                 else -> null
             }
         }
     }
 
-    // 2. 공통 UI 렌더링 (실제 화면 + 로딩 다이얼로그)
     Box(modifier = Modifier.fillMaxSize()) {
-        content() // 각 화면 고유의 UI가 들어옴
+        content()
 
         LoadingDialog { isLoading }
 

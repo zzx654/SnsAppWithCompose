@@ -22,6 +22,8 @@ import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -86,6 +88,7 @@ class ReplyViewModel @Inject constructor(
                 endReached = comments.isEmpty() && getCommentsState.value.comments.isNotEmpty()
             )
         }, extractItems = { response -> response.comments })
+    private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())
     fun initComment(comment:Comment){
         _ref.value = comment.ref
         _postId.value = comment.postId
@@ -139,18 +142,28 @@ class ReplyViewModel @Inject constructor(
             }
             is CommentEvent.ToggleLikeComment -> {
                 viewModelScope.launch {
-                    commentUseCases.ToggleLikeComment(event.commentId).collect { result ->
+                    val comment = event.comment
+                    val commentId = comment.commentId
+                    val currentIsLiked = comment.commentLiked == 1
+                    val targetIsLiked = !currentIsLiked
+
+                    val updatedComment = comment.toggleLike(isLiked = targetIsLiked)
+                    commentUseCases.ToggleLikeComment(commentId).collect { result ->
+
                         handleResource(
                             resource = result,
                             onSuccess = { data ->
-                                val updatedComments = getCommentsState.value.comments.map { comment ->
+                                _commentStateMap.update { currentMap ->
+                                    currentMap + (commentId to updatedComment)
+                                }
+                                /**val updatedComments = getCommentsState.value.comments.map { comment ->
                                     if (comment.commentId == event.commentId) {
                                         comment.toggleLike(isLiked = data.isLiked)
                                     } else {
                                         comment
                                     }
-                                }
-                                _getCommentsState.value = getCommentsState.value.copy(comments = updatedComments)
+                                }**/
+                               // _getCommentsState.value = getCommentsState.value.copy(comments = updatedComments)
 
                             }
                         )

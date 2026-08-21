@@ -14,6 +14,7 @@ import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import androidx.paging.map
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.CommentSortType
@@ -41,6 +42,7 @@ import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
+import com.androiddev.snsappwithcompose.common.util.toUiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 
@@ -50,6 +52,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -67,17 +70,23 @@ class PostDetailsViewModel @Inject constructor(
     private val _bottomSheetDialogState =  MutableStateFlow(BottomSheetDialogState<CommentOption>())
     val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
 
+    private val _postDetailUiState = MutableStateFlow(PostDetailUiState(isLoading = true))
+    val postDetailUiState: StateFlow<PostDetailUiState> = _postDetailUiState.asStateFlow()
     private val _voteState = MutableStateFlow(VoteState())
     val voteState: StateFlow<VoteState> = _voteState.asStateFlow()
-
-    private val _isLiked = MutableStateFlow(false)
-    val isLiked: StateFlow<Boolean> = _isLiked
+    private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())
     private val _isCommentsEmpty = mutableStateOf(false)
     val isCommentsEmpty: State<Boolean>
         get() = _isCommentsEmpty
-    private val _getCommentsState = mutableStateOf(GetCommentsState())
-    val getCommentsState: State<GetCommentsState>
-        get() = _getCommentsState
+
+    private val _newlyAddedComments = MutableStateFlow<List<Comment>>(emptyList())
+    val newlyAddedComments: StateFlow<List<Comment>> = _newlyAddedComments.asStateFlow()
+
+    private val _deletedComments = MutableStateFlow<List<Comment>>(emptyList())
+    val deletedComments: StateFlow<List<Comment>> = _deletedComments.asStateFlow()
+    //private val _getCommentsState = mutableStateOf(GetCommentsState())
+    //val getCommentsState: State<GetCommentsState>
+     //   get() = _getCommentsState
     private val _notificationComment:MutableStateFlow<Comment?> =  MutableStateFlow(null)
     val notificationComment:StateFlow<Comment?> = _notificationComment
     private val _notificationReply:MutableStateFlow<Comment?> =  MutableStateFlow(null)
@@ -87,42 +96,135 @@ class PostDetailsViewModel @Inject constructor(
 
     private val _anonymousChecked = MutableStateFlow(false)
     val anonymousChecked: StateFlow<Boolean> = _anonymousChecked
-    private val _post = MutableStateFlow<Post?>(null)
-    val post: StateFlow<Post?> = _post
 
-    private val _mediaUiModel = MutableStateFlow(MediaUiModel(emptyList(), emptyList()))
-    val mediaUiModel: StateFlow<MediaUiModel> = _mediaUiModel
 
-    val audioUrl: String?
-        get() = post.value?.media
-            ?.firstOrNull { it.type == "AUDIO" }
-            ?.url
+
 
 
     val _commentText = MutableStateFlow("")
     val commentText: StateFlow<String> = _commentText
 
-
     init {
+        fetchPostDetail()
+        fetchVoteInfo()
+        args.notificationCommentId?.let { commentId ->
+            loadCommentByNotification(commentId)
+        }
+    }
+    val pagingCommentStream: Flow<PagingData<Comment>> = combine(
+        _commentSortType,
+        _notificationComment,
+        _notificationReply,
+        _newlyAddedComments
+    ) { sort, notiComment, notiReply, newlyAdded ->
+        val excludeIds = buildSet {
+            notiComment?.commentId?.let { add(it) }
+            notiReply?.commentId?.let { add(it) }
+            addAll(newlyAdded.mapNotNull { it.commentId })
+        }
+        Pair(sort, excludeIds)
+    }.flatMapLatest { (sort, excludeIds) ->
+
+        combine(
+            commentUseCases.GetComments(postId = args.postId, sortType = sort),
+            _commentStateMap
+        ) { pagingData, updatedComments ->
+            pagingData
+                .filter { comment -> comment.commentId !in excludeIds } // 1. 알림/신규 댓글 중복 제거
+                .map { comment ->
+                    // . _commentStateMap에 토글된 최신 Comment가 있다면 교체, 없으면 기존 comment 사용
+                    val updated = comment.commentId.let { updatedComments[it] }
+                    updated ?: comment
+                }
+        }
+    }.cachedIn(viewModelScope)
+
+    private fun fetchPostDetail() {
         viewModelScope.launch {
-            postDetailUseCases.GetPost(
-                postId = args.postId
-            ).collect { result ->
-                result.handle(
-                    onSuccess = { postdata ->
-                        if (postdata.isEmpty()) {
-                            // 1. 서버에서 게시물을 찾을 수 없을 때
+            postDetailUseCases.GetPost(postId = args.postId).collect { result ->
+                result.handle (
+                    onLoading = {
+                        _postDetailUiState.update { it.copy(isLoading = true) }
+                    },
+                    onSuccess = { post ->
+                        if(post.isEmpty()){
                             emitUiEvent(UiEvent.ShowToast(UiText.StringResource(R.string.post_not_exist_alert)))
                             emitUiEvent(UiEvent.popBackStack)
-                        } else {
-                            // 2. 게시물 정보 정상 로드
-                            loadPostDetails(postdata[0])
+                        }
+                            val fetchedPost = post[0]
 
-                            // 3. 알림을 통해 들어온 경우 해당 댓글/답글 로드
-                            args.notificationCommentId?.let { commentId ->
-                                loadCommentByNotification(commentId)
+                            _postDetailUiState.update { currentState ->
+                                currentState.copy(
+                                    isLoading = false,
+                                    post = fetchedPost,
+                                    isLiked = fetchedPost.isliked
+                                )
+                            }
+
+                    },
+                    onError = {
+                        val errorText = result.error?.toUiText()
+                            ?: result.message?.let { UiText.DynamicString(it) }
+                            ?: UiText.StringResource(R.string.error)
+
+                        _postDetailUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = errorText
+                            )
+                        }
+                    },
+                    onTokenExpired = {
+                        _postDetailUiState.update { it.copy(isLoading = false) }
+                        emitUiEvent(UiEvent.navigate(Screen.SignInScreen))
+                    }
+                )
+            }
+        }
+    }
+    private fun fetchVoteInfo() {
+        viewModelScope.launch {
+            voteUseCases.getVoteInfo(args.postId).collect { result ->
+                result.handle(
+                    onSuccess = { vote ->
+                        if(vote.voteOptions.isNotEmpty()) {
+                            _postDetailUiState.update {
+                                it.copy(
+                                    voteState = it.voteState.copy(
+                                        isMyPost = vote.isMyPost,
+                                        hasVoted = vote.hasVoted,
+                                        selectedChoiceId = vote.selectedChoiceId,
+                                        voteOptions = vote.voteOptions,
+                                        isLoading = false
+                                    )
+                                )
+                            }
+
+                        } else {
+                            _postDetailUiState.update {
+                                it.copy(
+                                    voteState = it.voteState.copy(isLoading = false)
+                                )
                             }
                         }
+                    },
+                    onLoading = {
+                        _postDetailUiState.update {
+                            it.copy( voteState = it.voteState.copy(isLoading = true))
+                        }
+                    },
+                    onError ={
+                        _postDetailUiState.update {
+                            it.copy(
+                                voteState = it.voteState.copy(
+                                    isLoading = false
+                                )
+                            )
+                        }
+                    },
+                    onTokenExpired = {
+                        _postDetailUiState.update { it.copy(isLoading = false) }
+                        emitUiEvent(UiEvent.navigate(Screen.SignInScreen))
                     }
                 )
 
@@ -130,149 +232,18 @@ class PostDetailsViewModel @Inject constructor(
 
         }
 
+
     }
-    /**val commentPaginator =
-        Paginator<Comments, Comment>(loadItems = { handleResult, refresh ->
-            viewModelScope.launch {
-                //등록순인지 인기순인지에 따라 요청하면됨
-                var lastCommentId: Int? = null
-                var lastCommentDate: String? = null
-                var lastCommentScore: Int = 0
-                with(getCommentsState.value.comments) {
-                    if (isNotEmpty() && !refresh) {
-                        lastCommentDate = last().date
-                        lastCommentId = last().commentId
-                        lastCommentScore = last().score
-                    }
-                }
-                if(commentSortType.value == CommentSortType.OLDEST) {
-                    commentUseCases.GetComments(post.value?.postId?:0, lastCommentId, lastCommentDate)
-                        .collect {
-                            handleResult(it)
-                        }
-                } else {
-                    commentUseCases.GetPopularComments(post.value?.postId?:0, lastCommentId, lastCommentScore)
-                        .collect {
-                            handleResult(it)
-                        }
-                }
-
-            }
-        }, onRefreshUpdated = { isRefreshing ->
-            _getCommentsState.value =
-                _getCommentsState.value.copy(isRefreshing = isRefreshing, endReached = false)
-        }, onLoadUpdated = { isLoading ->
-            _getCommentsState.value = _getCommentsState.value.copy(isLoading = isLoading)
-        }, onError = { message ->
-            _getCommentsState.value = getCommentsState.value.copy(error = message)
-        }, onSuccess = { comments, refresh ->
-            _isCommentsEmpty.value =
-                _getCommentsState.value.comments.isEmpty() && comments.isEmpty()
-            val newIds = comments.map { it.commentId }.toSet()
-            //updateStatesForNewComments(comments)
-            _getCommentsState.value = getCommentsState.value.copy(
-                comments = (
-                        if (refresh) comments else getCommentsState.value.comments.filterNot{ it.commentId in newIds } + comments
-                        ).filterNot {
-                        it.commentId == notificationComment.value?.commentId ||
-                                it.commentId == notificationReply.value?.commentId
-                    },
-                endReached = comments.isEmpty() && getCommentsState.value.comments.isNotEmpty()
-            )
-
-        }, extractItems = { response -> response.comments })**/
-
-    //private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
-    //val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
-    //@OptIn(ExperimentalCoroutinesApi::class)
-    val pagingCommentStream: Flow<PagingData<Comment>> = combine(
-        _commentSortType,
-        _notificationComment,
-        _notificationReply
-    ) { sort, notiComment, notiReply ->
-
-        val excludeIds = buildSet {
-            notiComment?.commentId?.let { add(it) }
-            notiReply?.commentId?.let { add(it) }
-        }
-        Pair(sort, excludeIds)
-    }.flatMapLatest { (sort, excludeIds) ->
-        commentUseCases.GetComments(postId = args.postId,sortType =  sort)
-            .map { pagingData ->
-                pagingData.filter { comment -> comment.commentId !in excludeIds }
-            }
-    }.cachedIn(viewModelScope)
-
     private fun loadCommentByNotification(commentId: Int) {
         viewModelScope.launch {
             commentUseCases.GetNotificationComment(commentId).collect { result ->
-                when(result) {
-                    is Resource.Success -> {
-                        result.data?.let {
-                            //updateStatesForNewComments(listOf(it.comment,it.reply))
-
-                            _notificationComment.value = it.comment
-                            _notificationReply.value = it.reply
-                            _getCommentsState.value = getCommentsState.value.copy(
-                                comments = getCommentsState.value.comments.filterNot{ comment ->
-                                    comment.commentId == it.comment.commentId ||
-                                            comment.commentId == it.reply?.commentId
-                                } )
-                        }
-
-                    }
-                    is Resource.Error -> {
-                       // setEvent(
-                        //    UiEvent.ShowToast(result.message ?: getString(
-                            //R.string.error)))
-                    }
-                    else ->{}
-                }
-
-
-            }
-
-        }
-
-
-    }
-    private fun loadPostDetails(post: Post) {
-        _isLiked.value = post.isliked
-        _post.value = post
-        _mediaUiModel.value = post.media.toMediaUiModel()
-        viewModelScope.launch {
-            //commentPaginator.loadNextItems(refresh = true)
-        }
-        viewModelScope.launch {
-            voteUseCases.getVoteInfo(post.postId).collect { result ->
-                when(result) {
-                    is Resource.Success -> {
-                        result.data?.let {
-                            if(it.voteOptions.isNotEmpty()) {
-                                _voteState.value = voteState.value.copy(
-                                    isMyPost = it.isMyPost,
-                                    hasVoted = it.hasVoted,
-                                    selectedChoiceId = it.selectedChoiceId,
-                                    voteOptions = it.voteOptions,
-                                    isLoading = false
-                                )
-                            }
-                        }
-                    }
-                    is Resource.Error -> {
-                        _voteState.value = voteState.value.copy(isLoading = false)
-                       // setEvent(
-                          //  UiEvent.ShowToast(result.message ?: getString(
-                           // R.string.error)))
-                    }
-                    is Resource.Loading -> {
-                        _voteState.value = voteState.value.copy(isLoading = true)
-
-                    }
-
-                    else -> {}
-                }
-
+                result.handle (
+                    onSuccess = { notiComment ->
+                        _notificationComment.value = notiComment.comment
+                        _notificationReply.value = notiComment.reply
+                    },
+                    onLoading = {}
+                )
             }
         }
     }
@@ -282,34 +253,40 @@ class PostDetailsViewModel @Inject constructor(
                 viewModelScope.launch {
                     if(!voteState.value.hasVoted) {
                         voteState.value.selectedChoiceId?.let { optionId ->
-                            voteUseCases.vote(post.value?.postId?:0,optionId).collect { result ->
-                                handleResource(
-                                    resource = result,
-                                    onSuccess = { data ->
-                                        if(data.voteOptions.isNotEmpty()) {
-                                            _voteState.value = voteState.value.copy(
-                                                isMyPost = data.isMyPost,
-                                                hasVoted = data.hasVoted,
-                                                selectedChoiceId = data.selectedChoiceId,
-                                                voteOptions = data.voteOptions
-                                            )
-                                        }
+                            voteUseCases.vote(args.postId,optionId).collect { result ->
+                                result.handle(
+                                    onSuccess = { vote ->
+                                        if(vote.voteOptions.isNotEmpty()) {
+                                            _postDetailUiState.update { currentUiState ->
+                                                currentUiState.copy(
+                                                    voteState = currentUiState.voteState.copy(
+                                                        isMyPost = vote.isMyPost,
+                                                        hasVoted = vote.hasVoted,
+                                                        selectedChoiceId = vote.selectedChoiceId,
+                                                        voteOptions = vote.voteOptions
+                                                    )
+                                                )
 
+                                            }
+                                        }
                                     }
                                 )
-
-
                             }
                         }
                     } else {
-                        voteUseCases.cancelVote(post.value?.postId?:0).collect { result ->
-                            handleResource(
-                                resource = result,
-                                onSuccessUnit = {
-                                    _voteState.value = voteState.value.copy(hasVoted = false, selectedChoiceId = null)
+                        voteUseCases.cancelVote(args.postId).collect { result ->
+                            result.handle(
+                                onSuccess = {
+                                    _postDetailUiState.update{
+                                        it.copy(
+                                            voteState = it.voteState.copy(
+                                                hasVoted = false,
+                                                selectedChoiceId = null
+                                            )
+                                        )
+                                    }
                                 }
                             )
-
                         }
                     }
                 }
@@ -345,31 +322,30 @@ class PostDetailsViewModel @Inject constructor(
 
             }
             is CommentEvent.ToggleLikeComment -> {
-                viewModelScope.launch {
-                    commentUseCases.ToggleLikeComment(event.commentId).collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
-                                val updatedComments = getCommentsState.value.comments.map { comment ->
-                                    if (comment.commentId == event.commentId) {
-                                        comment.toggleLike(isLiked = data.isLiked)
-                                    } else {
-                                        comment
-                                    }
-                                }
-                                _getCommentsState.value = getCommentsState.value.copy(comments = updatedComments)
+                val comment = event.comment
+                val commentId = comment.commentId ?: return
+                val currentIsLiked = comment.commentLiked == 1
+                val targetIsLiked = !currentIsLiked
 
-                                //val currentLikeStatus = _commentLikeStatusMap[event.commentId]?: CommentLikeState()
-                                //_commentLikeStatusMap[event.commentId] = CommentLikeState(
-                                //    isLiked = data.isLiked,
-                                //    likeCount = currentLikeStatus.likeCount.plus(if(data.isLiked) 1 else -1)
-                                //)
+                val updatedComment = comment.toggleLike(isLiked = targetIsLiked)
+
+
+                viewModelScope.launch {
+                    commentUseCases.ToggleLikeComment(commentId).collect { result ->
+                        result.handle(
+                            onSuccess = {
+                                _commentStateMap.update { currentMap ->
+                                    currentMap + (commentId to updatedComment)
+                                }
+                            },
+                            onError = {
+                                _commentStateMap.update { currentMap ->
+                                    currentMap + (commentId to comment) // 원래 상태로 원복
+                                }
                             }
                         )
-
                     }
                 }
-
             }
             is CommentEvent.SetCommentSortType -> {
                 _commentSortType.value = event.commentSortType
@@ -378,32 +354,27 @@ class PostDetailsViewModel @Inject constructor(
             is CommentEvent.PostComment -> {
                 viewModelScope.launch {
                     commentUseCases.PostComment(
-                        postId = post.value?.postId?:0,
+                        postId = args.postId?:0,
                         text = commentText.value,
                         anonymousNick = if(anonymousChecked.value) generateAnonymousNickname() else null
                     ).collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
+                        result.handle(
+                            onSuccess = {
                                 _commentText.value = ""
                                 _isCommentsEmpty.value = false
-                                _getCommentsState.value = getCommentsState.value.copy(
-                                    comments = listOf(data.comments[0])+getCommentsState.value.comments
-                                )
+                                _newlyAddedComments.update { currentList ->
+                                    currentList + it.comments
+                                }
                             }
-
                         )
-
                     }
                 }
-
-
             }
             is CommentEvent.GotoReplyScreen -> {
-
+                /**id만 보내도록 변경하기**/
                 viewModelScope.launch {
                     commentUseCases.GetSelectedComment(
-                        postId = post.value?.postId?:0,
+                        postId = args.postId?:0,
                         commentId = event.commentId
                     ).collect { result ->
                         handleResource(
@@ -427,16 +398,22 @@ class PostDetailsViewModel @Inject constructor(
     fun onPostDetailEvent(event: PostDetailEvent) {
         when (event) {
             is PostDetailEvent.LoadEditedPostDetails -> {
-                loadPostDetails(event.post)
+                //loadPostDetails(event.post)
+                _postDetailUiState.update { currentState ->
+                    currentState.copy(
+                        post = event.post
+                    )
+                }
+                fetchVoteInfo()
             }
 
             is PostDetailEvent.ToggleLikePost -> {
                 viewModelScope.launch {
                     postDetailUseCases.ToggleLikePost(event.postId).collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
-                                _isLiked.value = data.isLiked
+                        result.handle(
+                            onSuccess = {
+                                _postDetailUiState.update { currentUiState ->
+                                    currentUiState.copy(isLiked = it.isLiked) }
                             }
                         )
                     }
@@ -454,7 +431,7 @@ class PostDetailsViewModel @Inject constructor(
             confirmText = UiText.StringResource(R.string.confirm),
             cancelText = UiText.StringResource(R.string.cancel),
             onClickConfirm = {
-                deletePost(post.value?.postId ?: 0)
+                deletePost(args.postId ?: 0)
                 resetDialogState()
             },
             onClickCancel = { resetDialogState() }
@@ -463,29 +440,17 @@ class PostDetailsViewModel @Inject constructor(
     private fun deletePost(postId: Int) {
         viewModelScope.launch {
             postDetailUseCases.DeletePost(postId).collect { result ->
-                handleResource(
-                    resource = result,
-                    onSuccessUnit = {
+                result.handle(
+                    onSuccess = {
                         setEvent(UiEvent.popBackStack)
                     }
                 )
-
             }
         }
     }
     protected fun resetDialogState() {
         _alertDialogState.value = AlertDialogStateV2()
     }
-    /**fun updateStatesForNewComments(newComments: List<Comment?>) {
-        newComments.forEach { comment ->
-            comment?.commentId?.let { commentId->
-                _commentLikeStatusMap[commentId] = CommentLikeState(
-                    isLiked = comment.commentLiked==1,
-                    likeCount = comment.likeCount
-                )
-            }
-        }
-    }**/
     private fun showBottomSheetDialog(myUserId: Int, commentUserId: Int) {
         val options = if (myUserId == commentUserId) {
             listOf(CommentOption.Edit, CommentOption.Delete)
@@ -522,14 +487,6 @@ data class MediaUiModel(
     val visualMedia: List<Media>, // image + video
     val audioMedia: List<Media>
 )
-fun List<Media>.toMediaUiModel(): MediaUiModel {
-    val visual = filter { it.type == MEDIA_TYPE_IMAGE || it.type == MEDIA_TYPE_VIDEO }
-    val audio = filter { it.type == MEDIA_TYPE_AUDIO }
-    return MediaUiModel(
-        visualMedia = visual,
-        audioMedia = audio
-    )
-}
 
 
 sealed class KeyBoardEvent {

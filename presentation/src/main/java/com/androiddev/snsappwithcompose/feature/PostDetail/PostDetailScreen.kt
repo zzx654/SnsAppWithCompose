@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -68,6 +69,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.core.content.ContextCompat.getString
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.imageLoader
@@ -82,17 +84,14 @@ import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioViewModel
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
-import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
 import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteEvent
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
-import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioPlayer
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.component.Chips
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentInput
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentItem
-import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.CustomChip
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.feature.PostDetail.vote.component.PollCard
@@ -101,14 +100,17 @@ import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 import com.androiddev.snsappwithcompose.common.model.MenuItem
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.androiddev.domain.model.Comment
+import com.androiddev.domain.model.CommentSortType
 import com.androiddev.domain.model.Post
+import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 import com.androiddev.snsappwithcompose.feature.PostDetail.component.MediaGrid
+import com.androiddev.snsappwithcompose.feature.PostDetail.component.PostDetailContent
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -122,21 +124,25 @@ fun PostDetailScreen(
     navController: NavController,
     navBackStackEntry: NavBackStackEntry,
     currentUserViewModel: CurrentUserViewModel,
-    audioViewModel: AudioViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    audioViewModel: AudioViewModel = hiltViewModel(),
     postViewModel: PostDetailsViewModel
 ) {
-
-    val post by postViewModel.post.collectAsStateWithLifecycle()
-    val voteState by postViewModel.voteState.collectAsStateWithLifecycle()
+    val postDetailUiState by postViewModel.postDetailUiState.collectAsStateWithLifecycle()
+    val commentItems =  postViewModel.pagingCommentStream.collectAsLazyPagingItems()
+    val newlyAddedComments by postViewModel.newlyAddedComments.collectAsStateWithLifecycle()
+    val userId by currentUserViewModel.userId.collectAsStateWithLifecycle()
+    val commentSortType by postViewModel.commentSortType.collectAsStateWithLifecycle()
+    //val post by postViewModel.post.collectAsStateWithLifecycle()
+    //val voteState by postViewModel.voteState.collectAsStateWithLifecycle()
     val anonymousChecked by postViewModel.anonymousChecked.collectAsStateWithLifecycle()
     val commentText by postViewModel.commentText.collectAsStateWithLifecycle()
-    val isLiked by postViewModel.isLiked.collectAsStateWithLifecycle()
+    //val isLiked by postViewModel.isLiked.collectAsStateWithLifecycle()
     val notificationComment by postViewModel.notificationComment.collectAsStateWithLifecycle()
     val notificationReply by postViewModel.notificationReply.collectAsStateWithLifecycle()
     val alertDialogState by postViewModel.alertDialogState.collectAsStateWithLifecycle()
     val bottomSheetDialogState by postViewModel.bottomSheetDialogState.collectAsStateWithLifecycle()
-    val audioUrl = postViewModel.audioUrl
-    val mediaUiState by postViewModel.mediaUiModel.collectAsStateWithLifecycle()
+    //val audioUrl = postViewModel.audioUrl
+    //val mediaUiState by postViewModel.mediaUiModel.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -147,9 +153,9 @@ fun PostDetailScreen(
             .logger(DebugLogger())
             .build()
     }
-    val dropdownMenuItem = if(post?.userId == currentUserViewModel.userId.value) {
+    val dropdownMenuItem = if(postDetailUiState.post?.userId == currentUserViewModel.userId.value) {
         listOf(
-            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(postViewModel.post.value))},
+            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(postDetailUiState.post))},
             MenuItem(getString(context,R.string.delete)) { postViewModel.onPostDetailEvent(
                 PostDetailEvent.DeletePost
             )}
@@ -171,9 +177,8 @@ fun PostDetailScreen(
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     var imeHeigh = remember { mutableStateOf(0) }
-    val ime = androidx.compose.foundation.layout.WindowInsets.ime
+    val ime = WindowInsets.ime
     val localDensity = LocalDensity.current
-
     LaunchedEffect(key1 = Unit) {
         val keyboardFlow = snapshotFlow {
             ime.getBottom(localDensity)
@@ -188,7 +193,7 @@ fun PostDetailScreen(
         }
     }
 
-    LaunchedEffect(listState) {
+    /**LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .distinctUntilChanged()
             .collect { lastVisibleItemIndex ->
@@ -198,15 +203,15 @@ fun PostDetailScreen(
                     postViewModel.onCommentEvent(CommentEvent.LoadNextComments)
                 }
             }
-    }
-    val getCommentsState = postViewModel.getCommentsState.value
+    }**/
 
-    LaunchedEffect(audioUrl) {
-        audioUrl?.let {
+    LaunchedEffect(postDetailUiState.audioUrl) {
+        val post = postDetailUiState.post
+        postDetailUiState.audioUrl?.let {
             if (post != null) {
                 audioViewModel.prepareAudio(
                     url = BuildConfig.BASE_URL + it,
-                    nickname = post?.anonymousNickname ?: post?.nickname?:""
+                    nickname = post.anonymousNickname ?: post.nickname ?:""
                 )
             }
         }
@@ -218,8 +223,8 @@ fun PostDetailScreen(
         // Compose 레이아웃 계산을 위해 약간 delay
 
         val indexToScroll = when {
-            postViewModel.notificationReply.value != null -> NOTIFICATION_REPLY_INDEX
-            postViewModel.notificationComment.value != null -> NOTIFICATION_COMMENT_INDEX
+            notificationReply != null -> NOTIFICATION_REPLY_INDEX
+            notificationComment != null -> NOTIFICATION_COMMENT_INDEX
             else -> null
         }
 
@@ -230,26 +235,7 @@ fun PostDetailScreen(
             )
         }
     }
-    LaunchedEffect(Unit) {
 
-        postViewModel.eventFlow.collectLatest { event ->
-            when(event){
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
-                }
-                is UiEvent.navigate -> {
-                    navController.navigate(event.screen)
-                }
-                is UiEvent.popBackStack -> {
-                    navController.popBackStack()
-                }
-                else -> null
-            }
-        }
-    }
     val editedPost = navBackStackEntry.savedStateHandle.get<Post>(getString(context,R.string.editedPost))
     editedPost?.let { post ->
         postViewModel.onPostDetailEvent(PostDetailEvent.LoadEditedPostDetails(post))
@@ -268,12 +254,91 @@ fun PostDetailScreen(
         onClickConfirm = alertDialogState.onClickConfirm,
         onClickCancel = alertDialogState.onClickCancel
     )
-    LoadingDialog {
-        postViewModel.isLoading.value && post!=null
-    }
-    SelectorBottomSheetDialog(bottomSheetDialogState)
 
-    if(post == null) {
+    SelectorBottomSheetDialog(bottomSheetDialogState)
+    BaseScreen(
+        viewModel = postViewModel,
+        navController = navController,
+    ) {
+        BaseScaffold(
+            modifier = Modifier.fillMaxWidth(),
+            focusManager = focusManager,
+            scrollState = scrollState,
+            topBar = {
+                postDetailUiState.post?.nickname?.let {
+                    CenterAlignedTopBar(
+                        title = generateDisplayName(context,it,
+                            postDetailUiState.post?.anonymousNickname
+                        ),
+                        onBackClick = { navController.popBackStack() },
+                        rightAction = {
+                            IconButton(onClick = { dropdownMenuExpanded = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "More options"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = dropdownMenuExpanded,
+                                onDismissRequest = { dropdownMenuExpanded = false }
+                            ) {
+                                dropdownMenuItem.forEach { item ->
+                                    DropdownMenuItem(
+                                        text = { Text(item.label) },
+                                        onClick = {
+                                            item.onClick() //  각 항목의 고유한 onClick 실행
+                                            dropdownMenuExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    )
+
+                }
+
+
+            },
+            content = {
+                PostDetailContent(
+                    navController = navController,
+                    userId = userId,
+                    postDetailUiState = postDetailUiState,
+                    onVoteEvent = {
+                        postViewModel.onVoteEvent(it)
+                    },
+                    onPostDetailEvent = {
+                        postViewModel.onPostDetailEvent(it)
+                    },
+                    notificationComment = notificationComment,
+                    notificationReply = notificationReply,
+                    audioViewModel = audioViewModel,
+                    newlyAddedComments = newlyAddedComments,
+                    pagingComments = commentItems,
+                    onCommentEvent = {
+                        postViewModel.onCommentEvent(it)
+                    }
+                )
+
+            },
+            bottomBar = {
+                CommentInput(
+                    comment = commentText,
+                    onCommentChange = { postViewModel.onCommentEvent(CommentEvent.TypeComment(it)) },
+                    onPostClick = {
+                        if(commentText.isNotEmpty())
+                            postViewModel.onCommentEvent(CommentEvent.PostComment)
+                    },
+                    isAnonymous = anonymousChecked,
+                    onAnonymousChange = { postViewModel.onCommentEvent(CommentEvent.ToggleAnonymous(it)) }
+                )
+            },
+            lazyColumnExist = true
+        )
+
+    }
+
+    /**if(post == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             androidx.compose.material3.CircularProgressIndicator(color = Color.Gray)
         }
@@ -494,7 +559,7 @@ fun PostDetailScreen(
                                     Spacer(modifier = Modifier.width(9.dp))
                                     SelectableDotText(
                                         text = getString(context,R.string.sort_by_popularity),
-                                        selected = postViewModel.commentSortType.value == CommentSortType.POPULAR,
+                                        selected = commentSortType == CommentSortType.POPULAR,
                                         onClick = {
                                             postViewModel.onCommentEvent(CommentEvent.SetCommentSortType(
                                                 CommentSortType.POPULAR
@@ -565,10 +630,6 @@ fun PostDetailScreen(
                             color = Color.LightGray,
                             thickness = 1.dp
                         )
-                        Divider(
-                            color = Color.LightGray,
-                            thickness = 1.dp
-                        )
                     }
                     item {
                         if(getCommentsState.isLoading && getCommentsState.comments.isNotEmpty()) {
@@ -618,70 +679,14 @@ fun PostDetailScreen(
             lazyColumnExist = true
         )
 
-    }
+    }**/
 
 
 
 }
 
-@Composable
-fun CommentRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:ImageLoader, currentUserViewModel: CurrentUserViewModel) {
-    //val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
-    CommentItem(
-        comment = comment,
-        //isLiked = commentLikeStatus.isLiked,
-        //likeCount = commentLikeStatus.likeCount,
-        imageLoader = imageLoader,
-        onLikeClick = {
-            comment.commentId?.let {
-                postViewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
-            }
-        },
-        onOptionClick = {
-            postViewModel.onCommentEvent(
-                CommentEvent.ShowCommentOptions(
-                    myUserId = currentUserViewModel.userId.value,
-                    commentUserId = comment.userId
-                ))
-        },
-        onCommentClick = {
-            postViewModel.onCommentEvent(
-                CommentEvent.GotoReplyScreen(
-                    commentId = comment.commentId?:0
-                ))
-        }
-    )
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp
-    )
-}
-@Composable
-fun ReplyRow(comment:Comment, postViewModel: PostDetailsViewModel, imageLoader:ImageLoader, currentUserViewModel: CurrentUserViewModel) {
-    //val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
-    ReplyItem(
-        comment = comment,
-        //isLiked = commentLikeStatus.isLiked,
-        //likeCount = commentLikeStatus.likeCount,
-        imageLoader = imageLoader,
-        onLikeClick = {
-            comment.commentId?.let {
-                postViewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
-            }
-        },
-        onOptionClick = {
-            postViewModel.onCommentEvent(
-                CommentEvent.ShowCommentOptions(
-                    myUserId = currentUserViewModel.userId.value,
-                    commentUserId = comment.userId
-                ))
-        }
-    )
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp
-    )
-}
+
+
 @Composable
 fun ProfileImage(
     modifier:Modifier = Modifier.size(42.dp),

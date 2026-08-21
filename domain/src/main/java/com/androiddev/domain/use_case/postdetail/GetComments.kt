@@ -9,6 +9,6 @@ import javax.inject.Inject
 class GetComments @Inject constructor(
     private val repository: CommentRepository
 ) {
-    suspend operator fun invoke(postId:Int, commentId:Int? = null, commentDate:String? = null): Flow<Resource<Comments>> = repository.getComments(postId,commentId,commentDate)
+   // suspend operator fun invoke(postId:Int, commentId:Int? = null, commentDate:String? = null): Flow<Resource<Comments>> = repository.getComments(postId,commentId,commentDate)
 
 }
