@@ -10,11 +10,12 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteState
 data class PostDetailUiState(
     val isLoading: Boolean = false,
     val post: Post? = null,
-    val mediaUiModel: MediaUiModel = post?.toMediaUiModel() ?: MediaUiModel(emptyList(), emptyList()),
     val voteState: VoteState = VoteState(),
     val isLiked: Boolean = false,
     val errorMessage: UiText? = null
 ) {
+    val mediaUiModel: MediaUiModel
+        get() = post?.toMediaUiModel() ?: MediaUiModel(emptyList(), emptyList())
     val audioUrl: String?
         get() = mediaUiModel.audioMedia.firstOrNull()?.url
 }

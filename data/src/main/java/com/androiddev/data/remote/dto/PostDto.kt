@@ -17,9 +17,9 @@ data class PostDto(
     val tags:String?,
     val date:String,
     val media:List<MediaDto>,
-    var commentcount:Int,
-    var likecount:Int,
-    var isliked:Int?,
+    val commentcount:Int,
+    val likecount:Int,
+    val isliked:Int?,
     val score:Int?,
     val popularityScore:Double?,
     var distance:Double?,
@@ -27,31 +27,26 @@ data class PostDto(
     val votecount:Int?
 
 )
-fun PostDto.toPost(
-
-): Post {
-    //닉네임 거리 태그 이미지 투표 경과시간
-
+fun PostDto.toDomain(): Post {
     return Post(
         postId = postid,
         userId = userid,
         anonymousNickname = anonymous,
-        nickname = nickname?:"",
+        nickname = nickname.orEmpty(),
         profileImage = profileimage,
         gender = gender,
         text = text,
         location = location,
-        media = media.map { it.toMedia() },
-        tags = tags?.split('#'),
+        media = media.map { it.toDomain() },
+        tags = tags?.split('#')?.filter { it.isNotBlank() }, // 빈 문자열 제거
         date = date,
-        elapsedTime = elapsedTime(date),
         voteCount = votecount,
         commentCount = commentcount,
         likecount = likecount,
         isliked = isliked != null,
-        popularityScore = popularityScore?:0.toDouble(),
+        popularityScore = popularityScore ?: 0.0,
         vote = vote,
-        distance = distance?.let{ round(it).toInt()}
+        distance = distance?.let { round(it).toInt() }
     )
 }
 fun PostDto.toPostPreview(
@@ -68,7 +63,7 @@ fun PostDto.toPostPreview(
         gender = gender,
         text = text,
         location = location,
-        media = media.map { it.toMedia() },
+        media = media.map { it.toDomain() },
         tags = tags?.split('#'),
         date = date,
         elapsedTime = elapsedTime(date),

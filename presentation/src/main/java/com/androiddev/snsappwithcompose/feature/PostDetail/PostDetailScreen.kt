@@ -134,6 +134,7 @@ fun PostDetailScreen(
     val commentSortType by postViewModel.commentSortType.collectAsStateWithLifecycle()
     //val post by postViewModel.post.collectAsStateWithLifecycle()
     //val voteState by postViewModel.voteState.collectAsStateWithLifecycle()
+    val commentStateMap by postViewModel.commentStateMap.collectAsStateWithLifecycle()
     val anonymousChecked by postViewModel.anonymousChecked.collectAsStateWithLifecycle()
     val commentText by postViewModel.commentText.collectAsStateWithLifecycle()
     //val isLiked by postViewModel.isLiked.collectAsStateWithLifecycle()
@@ -304,6 +305,7 @@ fun PostDetailScreen(
                     navController = navController,
                     userId = userId,
                     postDetailUiState = postDetailUiState,
+                    commentSortType = commentSortType,
                     onVoteEvent = {
                         postViewModel.onVoteEvent(it)
                     },
@@ -317,7 +319,8 @@ fun PostDetailScreen(
                     pagingComments = commentItems,
                     onCommentEvent = {
                         postViewModel.onCommentEvent(it)
-                    }
+                    },
+                    commentStateMap = commentStateMap
                 )
 
             },

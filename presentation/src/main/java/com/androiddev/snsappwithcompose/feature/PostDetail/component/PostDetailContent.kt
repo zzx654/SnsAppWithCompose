@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -24,6 +23,7 @@ import androidx.compose.material.icons.filled.ThumbUpAlt
 import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +42,7 @@ import coil3.imageLoader
 import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.androiddev.domain.model.Comment
+import com.androiddev.domain.model.CommentSortType
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.Chips
 import com.androiddev.snsappwithcompose.common.component.CustomChip
@@ -51,19 +52,20 @@ import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailUiState
 import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
+import com.androiddev.snsappwithcompose.feature.PostDetail.SelectableDotText
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioPlayer
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioViewModel
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
-import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentItem
 import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.vote.component.PollCard
-import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PostDetailContent(
     navController: NavController,
+    commentStateMap: Map<Int, Comment>,
     userId:Int?,
+    commentSortType: CommentSortType,
     postDetailUiState: PostDetailUiState,
     onPostDetailEvent:(PostDetailEvent)->Unit,
     onVoteEvent:(VoteEvent) -> Unit,
@@ -157,7 +159,7 @@ fun PostDetailContent(
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
                     )
-                    Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     post?.text?.let {
                         Text(
                             text = it,
@@ -167,7 +169,7 @@ fun PostDetailContent(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     val postMedia = postDetailUiState.mediaUiModel
 
                     if(postMedia.visualMedia.isNotEmpty()) {
@@ -264,36 +266,92 @@ fun PostDetailContent(
                 }
 
         }
-        notificationComment?.let {
-            item {
-                CommentRow(
-                    comment = it,
-                    imageLoader = imageLoader,
-                    onLikeClick = {},
-                    onCommentClick = {},
-                    onOptionClick = {}
+        item {
+            val refreshState = pagingComments.loadState.refresh
+            val currentItemCount = pagingComments.itemCount
 
-                )
+            val hasEverLoadedComments = remember { mutableStateOf(false) }
+
+            // 댓글이 1개 이상 들어오면 true로 변경
+            if (currentItemCount > 0) {
+                hasEverLoadedComments.value = true
+            }
+            // 로딩이 완전히 끝났는데(NotLoading) 진짜 0개인 경우에만 false로 리셋
+            else if (refreshState is LoadState.NotLoading && currentItemCount == 0) {
+                hasEverLoadedComments.value = false
+            }
+
+            //3. 정렬 전환 중(Loading)에는 이전 상태(hasEverLoadedComments)를 계속 유지하므로 안 사라짐!
+            if (hasEverLoadedComments.value) {
+
+                Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp,vertical = 10.dp), contentAlignment = Alignment.TopStart) {
+                    Row {
+                        SelectableDotText(
+                            text = getString(context, R.string.sort_by_date),
+                            selected = commentSortType == CommentSortType.OLDEST,
+                            onClick = {//onEvent
+                                onCommentEvent(CommentEvent.SetCommentSortType(
+                                    CommentSortType.OLDEST
+                                ))
+                            },
+                        )
+                        Spacer(modifier = Modifier.width(9.dp))
+                        SelectableDotText(
+                            text = getString(context,R.string.sort_by_popularity),
+                            selected = commentSortType == CommentSortType.POPULAR,
+                            onClick = {
+                                onCommentEvent(CommentEvent.SetCommentSortType(
+                                    CommentSortType.POPULAR
+                                ))
+                            },
+                        )
+                    }
+                }
 
             }
         }
+        notificationComment?.let { comment ->
+            item {
+                BoundCommentRow(
+                    comment = comment,
+                    commentStateMap = commentStateMap,
+                    userId = userId,
+                    imageLoader = imageLoader,
+                    onCommentEvent = onCommentEvent
+                )
+                HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
+            }
+        }
         notificationReply?.let {
+            val updatedComment = commentStateMap[it.commentId] ?: it
             item {
                 ReplyRow(
                     comment = it,
                     imageLoader = imageLoader,
-                    onLikeClick = {},
-                    onOptionClick = {}
+                    onLikeClick = { onCommentEvent(CommentEvent.ToggleLikeComment(updatedComment)) },
+                    onOptionClick = {
+                        userId?.let { my ->
+                            CommentEvent.ShowCommentOptions(
+                                myUserId = my,
+                                commentUserId = updatedComment.userId
+                            )
+                        }
+                    }
                 )
+                HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
             }
         }
         item {
+
             val refreshState = pagingComments.loadState.refresh
+
 
             when {
                 // 1. 첫 로딩 중
                 refreshState is LoadState.Loading && pagingComments.itemCount == 0 -> {
-                    CircularProgressIndicator()
+                    androidx.compose.material3.CircularProgressIndicator(
+                        modifier = Modifier.padding(top = 50.dp,bottom = 50.dp), color = Color.Gray
+                    )
                 }
 
                 // 2. 데이터 로딩 완료 되었으나 개수가 0개일 때 (진짜 비어있는 상태)
@@ -305,114 +363,37 @@ fun PostDetailContent(
                     DefaultEmptyView(emptyMessage = getString(context, R.string.comment_empty))
                 }
 
-                // 3. 로딩 에러 발생 시
-                //refreshState is LoadState.Error -> {
-                //   DefaultErrorView(...)
-                //}
-
             }
         }
-
-
-        //  방금 작성된 댓글 목록 (최신순일 때 최상단에 배치)
         items(
             items = newlyAddedComments,
-            key = { it.commentId } // 고유 ID 지정
+            key = { it.commentId }
         ) { comment ->
-            CommentRow(
+            BoundCommentRow(
                 comment = comment,
+                commentStateMap = commentStateMap,
+                userId = userId,
                 imageLoader = imageLoader,
-                onLikeClick = {},
-                onCommentClick = {},
-                onOptionClick = {}
-
+                onCommentEvent = onCommentEvent
             )
             HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
         }
 
-        // 3. 기존 Paging3 댓글 목록
         items(
             count = pagingComments.itemCount,
             key = pagingComments.itemKey { it.commentId }
         ) { index ->
             val comment = pagingComments[index]
             if (comment != null) {
-                CommentRow(
+                BoundCommentRow(
                     comment = comment,
+                    commentStateMap = commentStateMap,
+                    userId = userId,
                     imageLoader = imageLoader,
-                    onLikeClick = {},
-                    onCommentClick = {},
-                    onOptionClick = {}
-
+                    onCommentEvent = onCommentEvent
                 )
                 HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
             }
         }
     }
-}
-@Composable
-fun ReplyRow(
-    comment: Comment,
-    imageLoader: ImageLoader,
-    onLikeClick:()->Unit,
-    onOptionClick:() ->Unit
-){
-    //val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
-    ReplyItem(
-        comment = comment,
-        //isLiked = commentLikeStatus.isLiked,
-        //likeCount = commentLikeStatus.likeCount,
-        imageLoader = imageLoader,
-        onLikeClick = onLikeClick,
-        onOptionClick = onOptionClick
-    )
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp
-    )
-}
-@Composable
-fun CommentRow(
-    comment:Comment,
-    imageLoader: ImageLoader,
-    onLikeClick:()->Unit,
-    onCommentClick:() ->Unit,
-    onOptionClick:() ->Unit
-) {
-    //val commentLikeStatus = postViewModel.commentLikeStatusMap[comment.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
-    CommentItem(
-        comment = comment,
-        //isLiked = commentLikeStatus.isLiked,
-        //likeCount = commentLikeStatus.likeCount,
-        imageLoader = imageLoader,
-        onLikeClick = onLikeClick,
-        //{
-        // comment.commentId?.let {
-        //    postViewModel.onCommentEvent(CommentEvent.ToggleLikeComment(it))
-        //}
-        //},
-        onOptionClick = onOptionClick
-        /**{
-        postViewModel.onCommentEvent(
-        CommentEvent.ShowCommentOptions(
-        myUserId = userId,
-        commentUserId = comment.userId
-        ))
-        }**/,
-        onCommentClick = onCommentClick
-        /**{
-        comment.commentId?.let {
-        postViewModel.onCommentEvent(
-        CommentEvent.GotoReplyScreen(
-        commentId = it
-        ))
-
-        }
-
-        }**/
-    )
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp
-    )
 }

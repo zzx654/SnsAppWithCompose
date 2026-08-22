@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -188,8 +189,8 @@ fun DefaultErrorView(
 
 // 기본 빈 화면 뷰
 @Composable
-fun DefaultEmptyView(emptyMessage:String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+fun DefaultEmptyView(emptyMessage:String,modifier:Modifier = Modifier) {
+    Box(modifier = Modifier.fillMaxSize().height(100.dp), contentAlignment = Alignment.Center) {
         Text(text = emptyMessage)
     }
 }

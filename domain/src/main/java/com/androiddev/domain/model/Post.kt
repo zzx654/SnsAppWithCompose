@@ -1,6 +1,7 @@
 package com.androiddev.domain.model
 
 import android.os.Parcelable
+import com.androiddev.domain.util.elapsedTime
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -25,5 +26,7 @@ data class Post(
     var distance:Int?,
     val vote:String?,
     val voteCount:Int?,
-    val elapsedTime:String,
-): Parcelable
+): Parcelable {
+    val elapsedTime: String
+        get() = elapsedTime(date)
+}

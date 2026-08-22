@@ -75,6 +75,7 @@ class PostDetailsViewModel @Inject constructor(
     private val _voteState = MutableStateFlow(VoteState())
     val voteState: StateFlow<VoteState> = _voteState.asStateFlow()
     private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())
+    val commentStateMap: StateFlow<Map<Int,Comment>> = _commentStateMap
     private val _isCommentsEmpty = mutableStateOf(false)
     val isCommentsEmpty: State<Boolean>
         get() = _isCommentsEmpty
@@ -125,18 +126,10 @@ class PostDetailsViewModel @Inject constructor(
         Pair(sort, excludeIds)
     }.flatMapLatest { (sort, excludeIds) ->
 
-        combine(
-            commentUseCases.GetComments(postId = args.postId, sortType = sort),
-            _commentStateMap
-        ) { pagingData, updatedComments ->
-            pagingData
-                .filter { comment -> comment.commentId !in excludeIds } // 1. 알림/신규 댓글 중복 제거
-                .map { comment ->
-                    // . _commentStateMap에 토글된 최신 Comment가 있다면 교체, 없으면 기존 comment 사용
-                    val updated = comment.commentId.let { updatedComments[it] }
-                    updated ?: comment
-                }
-        }
+        commentUseCases.GetComments(postId = args.postId, sortType = sort)
+            .map { pagingData ->
+                pagingData.filter { comment -> comment.commentId !in excludeIds }
+            }
     }.cachedIn(viewModelScope)
 
     private fun fetchPostDetail() {
@@ -155,28 +148,14 @@ class PostDetailsViewModel @Inject constructor(
 
                             _postDetailUiState.update { currentState ->
                                 currentState.copy(
-                                    isLoading = false,
                                     post = fetchedPost,
                                     isLiked = fetchedPost.isliked
                                 )
                             }
 
                     },
-                    onError = {
-                        val errorText = result.error?.toUiText()
-                            ?: result.message?.let { UiText.DynamicString(it) }
-                            ?: UiText.StringResource(R.string.error)
-
-                        _postDetailUiState.update {
-                            it.copy(
-                                isLoading = false,
-                                errorMessage = errorText
-                            )
-                        }
-                    },
-                    onTokenExpired = {
-                        _postDetailUiState.update { it.copy(isLoading = false) }
-                        emitUiEvent(UiEvent.navigate(Screen.SignInScreen))
+                    onFinally = {
+                        _postDetailUiState.update{ it.copy(isLoading = false)}
                     }
                 )
             }
@@ -200,12 +179,6 @@ class PostDetailsViewModel @Inject constructor(
                                 )
                             }
 
-                        } else {
-                            _postDetailUiState.update {
-                                it.copy(
-                                    voteState = it.voteState.copy(isLoading = false)
-                                )
-                            }
                         }
                     },
                     onLoading = {
@@ -213,18 +186,12 @@ class PostDetailsViewModel @Inject constructor(
                             it.copy( voteState = it.voteState.copy(isLoading = true))
                         }
                     },
-                    onError ={
+                    onFinally = {
                         _postDetailUiState.update {
                             it.copy(
-                                voteState = it.voteState.copy(
-                                    isLoading = false
-                                )
+                                voteState = it.voteState.copy(isLoading = false)
                             )
                         }
-                    },
-                    onTokenExpired = {
-                        _postDetailUiState.update { it.copy(isLoading = false) }
-                        emitUiEvent(UiEvent.navigate(Screen.SignInScreen))
                     }
                 )
 
