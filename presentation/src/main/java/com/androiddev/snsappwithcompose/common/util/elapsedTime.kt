@@ -1,4 +1,4 @@
-package com.androiddev.domain.util
+package com.androiddev.snsappwithcompose.common.util
 
 import java.text.SimpleDateFormat
 
@@ -11,7 +11,7 @@ fun elapsedTime(
     val curTime=System.currentTimeMillis()
     var diffTime=(curTime-postedmillis)/1000
     var diffstr="방금 전"
-    if(diffTime>=TimeValue.SEC.value){
+    if(diffTime>= TimeValue.SEC.value){
         for(i in TimeValue.values()){
             diffTime/=i.value
             if(diffTime<i.maximum){

@@ -2,7 +2,6 @@ package com.androiddev.data.remote.dto
 
 import com.androiddev.domain.model.NotificationExtra
 import com.androiddev.domain.model.NotificationItem
-import com.androiddev.domain.util.elapsedTime
 
 data class NotificationDto (
     val id: Long,
@@ -21,7 +20,6 @@ fun NotificationDto.toNotificationItem(
         content = content,
         extrajson = extrajson,
         isRead = isread == 1,
-        date = date,
-        elapsedTime = elapsedTime(date)
+        date = date
     )
 }

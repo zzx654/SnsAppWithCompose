@@ -57,6 +57,7 @@
     <string name="upload_post">글 작성하기</string>
     <string name="searchtag_hint">태그를 검색해 보세요</string>
     <string name="anonymous">익명</string>
+    <string name="anonymous_with_code">익명 [%1$s]</string>
     <string name="uploadtext_hint">자신의 생각을 말해보세요!</string>
     <string name="anonymous_on">익명이 활성화 되었습니다</string>
     <string name="anonymous_off">익명이 비활성화 되었습니다</string>

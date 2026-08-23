@@ -139,21 +139,19 @@ fun PostDetailContent(
                         Spacer(modifier = Modifier.width(10.dp))
 
                         Column {
-                            post?.nickname?.let {
-                                Text(
-                                    text = generateDisplayName(context, it, post.anonymousNickname),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                            Text(
+                                text = postDetailUiState.displayUserName.asString(),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
                             Spacer(modifier = Modifier.height(2.dp))
-                            if (post?.elapsedTime != null && post.distance != null) {
                                 Text(
-                                    text = "${post.elapsedTime} · ${post.distance ?: 0}km ",
+                                    text = "${postDetailUiState.elapsedTime} · ${post?.distance ?: 0}km ",
                                     fontSize = 13.sp,
                                     color = Color.Gray
                                 )
-                            }
+
 
                         }
                     }

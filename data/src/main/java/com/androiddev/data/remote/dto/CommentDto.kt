@@ -1,7 +1,6 @@
 package com.androiddev.data.remote.dto
 
 import com.androiddev.domain.model.Comment
-import com.androiddev.domain.util.elapsedTime
 
 data class CommentDto (
     val postid: Int,
@@ -38,8 +37,7 @@ fun CommentDto.toDomain(
         replyCount = replycount,
         likeCount = likecount,
         score = score,
-        commentLiked = commentliked,
-        elapsedTime = elapsedTime(date)
+        commentLiked = commentliked
     )
 }
 fun CommentDto.toComment(
@@ -59,7 +57,6 @@ fun CommentDto.toComment(
         replyCount = replycount,
         likeCount = likecount,
         score = score,
-        commentLiked = commentliked,
-        elapsedTime = elapsedTime(date)
+        commentLiked = commentliked
     )
 }

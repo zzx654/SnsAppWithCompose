@@ -1,6 +1,8 @@
 package com.androiddev.snsappwithcompose.feature.PostDetail
 
 import com.androiddev.domain.model.Post
+import com.androiddev.snsappwithcompose.common.util.elapsedTime
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
@@ -14,6 +16,20 @@ data class PostDetailUiState(
     val isLiked: Boolean = false,
     val errorMessage: UiText? = null
 ) {
+    val displayUserName: UiText
+        get() {
+            val currentPost = post ?: return UiText.DynamicString("")
+
+            return currentPost.anonymousNickname?.let { anonymous ->
+                UiText.StringResource(R.string.anonymous_with_code, anonymous)
+            } ?: UiText.DynamicString(currentPost.nickname)
+        }
+
+    val tags: List<String>?
+        get() = post?.tags?.split('#')?.filter { it.isNotBlank() }
+
+    val elapsedTime: String
+        get() = post?.date?.let { elapsedTime(it) } ?: ""
     val mediaUiModel: MediaUiModel
         get() = post?.toMediaUiModel() ?: MediaUiModel(emptyList(), emptyList())
     val audioUrl: String?

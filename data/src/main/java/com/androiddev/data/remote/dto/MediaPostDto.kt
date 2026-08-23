@@ -1,7 +1,6 @@
 package com.androiddev.data.remote.dto
 
 import com.androiddev.domain.model.MediaPost
-import com.androiddev.domain.util.elapsedTime
 import kotlin.math.round
 
 data class MediaPostDto (

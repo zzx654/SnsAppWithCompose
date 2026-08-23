@@ -26,14 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import coil3.ImageLoader
-import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.mapper.CommentUiState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReplyItem(
-    comment: Comment,
+    commentUiState: CommentUiState,
     //isLiked: Boolean,
     //likeCount: Int,
     imageLoader: ImageLoader,
@@ -42,6 +42,7 @@ fun ReplyItem(
 
 ) {
     val context = LocalContext.current
+    val comment = commentUiState.comment
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
     ) {
@@ -67,13 +68,13 @@ fun ReplyItem(
 
                 Column {
                     Text(
-                        comment.nickname,
+                        text = commentUiState.displayUserName.asString(),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = comment.elapsedTime,
+                        text = commentUiState.elapsedTime,
                         fontSize = 13.sp,
                         color = Color.Gray
                     )

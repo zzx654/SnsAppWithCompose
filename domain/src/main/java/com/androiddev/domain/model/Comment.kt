@@ -11,7 +11,6 @@ data class Comment(
     val ref: Int,
     val date:String,
     val gender:String,
-    val elapsedTime:String,
     val depth: Int,
     val anonymousNickname:String?,
     val nickname: String,

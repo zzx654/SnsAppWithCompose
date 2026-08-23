@@ -43,6 +43,7 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.Com
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentItem
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
+import com.androiddev.snsappwithcompose.common.mapper.toUiState
 import com.androiddev.snsappwithcompose.feature.PostDetail.component.ReplyRow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -132,7 +133,7 @@ fun ReplyScreen(
                     comment?.let {
                         //val commentLikeStatus = viewModel.commentLikeStatusMap[it.commentId]?: CommentLikeState(isLiked = false,likeCount = 0)
                         CommentItem(
-                            comment = comment,
+                            commentUiState = comment.toUiState(),
                             //isLiked = commentLikeStatus.isLiked,
                             ////likeCount = commentLikeStatus.likeCount,
                             imageLoader = imageLoader,

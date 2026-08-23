@@ -29,19 +29,21 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
 import androidx.core.content.ContextCompat.getString
 import coil3.ImageLoader
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.mapper.CommentUiState
 import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CommentItem(
-    comment: Comment,
+    commentUiState: CommentUiState,
     imageLoader: ImageLoader,
     onLikeClick: ()->Unit,
     onOptionClick: ()->Unit,
     onCommentClick: ()->Unit
 ) {
     val context = LocalContext.current
+    val comment = commentUiState.comment
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).clickable { onCommentClick() }
     ) {
@@ -67,13 +69,13 @@ fun CommentItem(
 
                 Column {
                     Text(
-                        generateDisplayName(LocalContext.current,comment.nickname,comment.anonymousNickname),
+                        text = commentUiState.displayUserName.asString(),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = comment.elapsedTime,
+                        text = commentUiState.elapsedTime,
                         fontSize = 13.sp,
                         color = Color.Gray
                     )

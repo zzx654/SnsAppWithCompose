@@ -121,7 +121,8 @@ class UploadPostViewModel @Inject constructor(
         if (!isInitialized) {
             postMode = PostMode.EDIT
             postId = post.postId
-            post.tags?.let {
+            val tags = post.tags?.split('#')?.filter { it.isNotBlank() }
+            tags?.let {
                 _addedTags.addAll(it)
             }
             _anonymous.value = post.anonymousNickname!=null

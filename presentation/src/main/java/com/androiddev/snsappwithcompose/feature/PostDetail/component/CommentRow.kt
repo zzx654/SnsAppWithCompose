@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import com.androiddev.domain.model.Comment
+import com.androiddev.snsappwithcompose.common.mapper.toUiState
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentItem
 import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
@@ -48,7 +49,7 @@ fun ReplyRow(
     onOptionClick:() ->Unit
 ){
     ReplyItem(
-        comment = comment,
+        commentUiState = comment.toUiState(),
         imageLoader = imageLoader,
         onLikeClick = onLikeClick,
         onOptionClick = onOptionClick
@@ -67,7 +68,7 @@ fun CommentRow(
     onOptionClick:() ->Unit
 ) {
     CommentItem(
-        comment = comment,
+        commentUiState = comment.toUiState(),
         imageLoader = imageLoader,
         onLikeClick = onLikeClick,
 

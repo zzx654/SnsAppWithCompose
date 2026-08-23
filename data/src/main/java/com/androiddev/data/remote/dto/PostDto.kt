@@ -2,7 +2,6 @@ package com.androiddev.data.remote.dto
 
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostPreview
-import com.androiddev.domain.util.elapsedTime
 import kotlin.math.round
 
 data class PostDto(
@@ -38,7 +37,7 @@ fun PostDto.toDomain(): Post {
         text = text,
         location = location,
         media = media.map { it.toDomain() },
-        tags = tags?.split('#')?.filter { it.isNotBlank() }, // 빈 문자열 제거
+        tags = tags, // 빈 문자열 제거
         date = date,
         voteCount = votecount,
         commentCount = commentcount,
@@ -66,7 +65,7 @@ fun PostDto.toPostPreview(
         media = media.map { it.toDomain() },
         tags = tags?.split('#'),
         date = date,
-        elapsedTime = elapsedTime(date),
+        elapsedTime = "com.androiddev.snsappwithcompose.common.util.elapsedTime(date)",
         voteCount = votecount,
         commentCount = commentcount,
         likecount = likecount,
