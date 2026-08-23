@@ -93,7 +93,7 @@ fun ReplyScreen(
                 val totalItemsCount = listState.layoutInfo.totalItemsCount
                 if (lastVisibleItemIndex != null && lastVisibleItemIndex >= totalItemsCount - 1&&imeHeigh.value == 0&&totalItemsCount>=10) {
 
-                    viewModel.onEvent(CommentEvent.LoadNextComments)
+                    //viewModel.onEvent(CommentEvent.LoadNextComments)
                 }
             }
     }

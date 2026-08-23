@@ -107,7 +107,6 @@ class PostDetailsViewModel @Inject constructor(
 
     init {
         fetchPostDetail()
-        fetchVoteInfo()
         args.notificationCommentId?.let { commentId ->
             loadCommentByNotification(commentId)
         }
@@ -140,19 +139,28 @@ class PostDetailsViewModel @Inject constructor(
                         _postDetailUiState.update { it.copy(isLoading = true) }
                     },
                     onSuccess = { post ->
-                        if(post.isEmpty()){
+                        if (post.isEmpty()) {
                             emitUiEvent(UiEvent.ShowToast(UiText.StringResource(R.string.post_not_exist_alert)))
                             emitUiEvent(UiEvent.popBackStack)
-                        }
+                        } else {
                             val fetchedPost = post[0]
+                            val hasNoVote = fetchedPost.vote == null
 
                             _postDetailUiState.update { currentState ->
                                 currentState.copy(
                                     post = fetchedPost,
-                                    isLiked = fetchedPost.isliked
+                                    isLiked = fetchedPost.isliked,
+                                    voteState = if (hasNoVote) {
+                                        currentState.voteState.copy(isLoading = false)
+                                    } else {
+                                        currentState.voteState
+                                    }
                                 )
                             }
-
+                            if (!hasNoVote) {
+                                fetchVoteInfo()
+                            }
+                        }
                     },
                     onFinally = {
                         _postDetailUiState.update{ it.copy(isLoading = false)}
@@ -281,13 +289,6 @@ class PostDetailsViewModel @Inject constructor(
             is CommentEvent.ToggleAnonymous -> {
                 _anonymousChecked.value = event.checked
             }
-
-            is CommentEvent.LoadNextComments -> {
-                viewModelScope.launch {
-                    //commentPaginator.loadNextItems(refresh = false)
-                }
-
-            }
             is CommentEvent.ToggleLikeComment -> {
                 val comment = event.comment
                 val commentId = comment.commentId ?: return
@@ -365,7 +366,6 @@ class PostDetailsViewModel @Inject constructor(
     fun onPostDetailEvent(event: PostDetailEvent) {
         when (event) {
             is PostDetailEvent.LoadEditedPostDetails -> {
-                //loadPostDetails(event.post)
                 _postDetailUiState.update { currentState ->
                     currentState.copy(
                         post = event.post

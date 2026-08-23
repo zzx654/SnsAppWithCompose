@@ -115,11 +115,11 @@ class ReplyViewModel @Inject constructor(
             is CommentEvent.ToggleAnonymous -> {
                 _anonymousChecked.value = event.checked
             }
-            is CommentEvent.LoadNextComments -> {
+            /**is CommentEvent.LoadNextComments -> {
                 viewModelScope.launch {
                     commentPaginator.loadNextItems(refresh = false)
                 }
-            }
+            }**/
             is CommentEvent.PostReply -> {
                 viewModelScope.launch {
                     replyUseCases.PostReply(

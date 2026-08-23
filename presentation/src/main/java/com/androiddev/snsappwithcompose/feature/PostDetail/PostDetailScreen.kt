@@ -132,29 +132,21 @@ fun PostDetailScreen(
     val newlyAddedComments by postViewModel.newlyAddedComments.collectAsStateWithLifecycle()
     val userId by currentUserViewModel.userId.collectAsStateWithLifecycle()
     val commentSortType by postViewModel.commentSortType.collectAsStateWithLifecycle()
-    //val post by postViewModel.post.collectAsStateWithLifecycle()
-    //val voteState by postViewModel.voteState.collectAsStateWithLifecycle()
     val commentStateMap by postViewModel.commentStateMap.collectAsStateWithLifecycle()
     val anonymousChecked by postViewModel.anonymousChecked.collectAsStateWithLifecycle()
     val commentText by postViewModel.commentText.collectAsStateWithLifecycle()
-    //val isLiked by postViewModel.isLiked.collectAsStateWithLifecycle()
+
     val notificationComment by postViewModel.notificationComment.collectAsStateWithLifecycle()
     val notificationReply by postViewModel.notificationReply.collectAsStateWithLifecycle()
     val alertDialogState by postViewModel.alertDialogState.collectAsStateWithLifecycle()
     val bottomSheetDialogState by postViewModel.bottomSheetDialogState.collectAsStateWithLifecycle()
-    //val audioUrl = postViewModel.audioUrl
-    //val mediaUiState by postViewModel.mediaUiModel.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
-    val imageLoader = remember {
-        context.imageLoader.newBuilder()
-            .crossfade(false)
-            .logger(DebugLogger())
-            .build()
-    }
-    val dropdownMenuItem = if(postDetailUiState.post?.userId == currentUserViewModel.userId.value) {
+
+    val dropdownMenuItem = if(postDetailUiState.post?.userId == userId) {
         listOf(
             MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(postDetailUiState.post))},
             MenuItem(getString(context,R.string.delete)) { postViewModel.onPostDetailEvent(
@@ -169,11 +161,6 @@ fun PostDetailScreen(
             MenuItem(getString(context,R.string.request_chat)) {}
         )
     }
-
-    //val pagerState = rememberPagerState(
-    //    initialPage = 0,
-     //   pageCount = { post?.imageSize ?: 0 }
-    //)
     var pendingScrollByCount by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
@@ -193,18 +180,6 @@ fun PostDetailScreen(
             imeHeigh.value = keyboardHeight
         }
     }
-
-    /**LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
-            .distinctUntilChanged()
-            .collect { lastVisibleItemIndex ->
-                val totalItemsCount = listState.layoutInfo.totalItemsCount
-                if (lastVisibleItemIndex != null && lastVisibleItemIndex >= totalItemsCount - 1&&imeHeigh.value == 0&&totalItemsCount>=10) {
-
-                    postViewModel.onCommentEvent(CommentEvent.LoadNextComments)
-                }
-            }
-    }**/
 
     LaunchedEffect(postDetailUiState.audioUrl) {
         val post = postDetailUiState.post
@@ -266,13 +241,22 @@ fun PostDetailScreen(
             focusManager = focusManager,
             scrollState = scrollState,
             topBar = {
-                postDetailUiState.post?.nickname?.let {
-                    CenterAlignedTopBar(
-                        title = generateDisplayName(context,it,
-                            postDetailUiState.post?.anonymousNickname
-                        ),
-                        onBackClick = { navController.popBackStack() },
-                        rightAction = {
+                val post = postDetailUiState.post
+                val titleText = if (post?.nickname != null) {
+                    generateDisplayName(
+                        context,
+                        post.nickname,
+                        post.anonymousNickname
+                    )
+                } else {
+                    ""
+                }
+                CenterAlignedTopBar(
+                    title = titleText,
+                    onBackClick = { navController.popBackStack() },
+                    rightAction = {
+                        // post가 있을 때만 우측 옵션 메뉴 표시
+                        if (postDetailUiState.post != null) {
                             IconButton(onClick = { dropdownMenuExpanded = true }) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
@@ -287,18 +271,15 @@ fun PostDetailScreen(
                                     DropdownMenuItem(
                                         text = { Text(item.label) },
                                         onClick = {
-                                            item.onClick() //  각 항목의 고유한 onClick 실행
+                                            item.onClick()
                                             dropdownMenuExpanded = false
                                         }
                                     )
                                 }
                             }
                         }
-                    )
-
-                }
-
-
+                    }
+                )
             },
             content = {
                 PostDetailContent(
@@ -338,354 +319,7 @@ fun PostDetailScreen(
             },
             lazyColumnExist = true
         )
-
     }
-
-    /**if(post == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            androidx.compose.material3.CircularProgressIndicator(color = Color.Gray)
-        }
-    }
-    else {
-        BaseScaffold(
-            modifier = Modifier.fillMaxWidth(),
-            focusManager = focusManager,
-            scrollState = scrollState,
-            topBar = {
-                //if (post != null) {
-                CenterAlignedTopBar(
-                    title = generateDisplayName(context,post?.nickname?:"",post?.anonymousNickname),
-                    onBackClick = { navController.popBackStack() },
-                    rightAction = {
-                        IconButton(onClick = { dropdownMenuExpanded = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More options"
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = dropdownMenuExpanded,
-                            onDismissRequest = { dropdownMenuExpanded = false }
-                        ) {
-                            dropdownMenuItem.forEach { item ->
-                                DropdownMenuItem(
-                                    text = { Text(item.label) },
-                                    onClick = {
-                                        item.onClick() //  각 항목의 고유한 onClick 실행
-                                        dropdownMenuExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                )
-                //}
-
-            },
-            content = {
-                LazyColumn(
-                    state = listState,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-
-                    item {
-                        Column {
-
-                            post?.tags?.let { tags ->
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Chips(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 24.dp),
-                                    list = tags.map{"#$it"},
-                                    chip = { data: String, index: Int ->
-                                        CustomChip(
-                                            backgroundColor = Color.Gray,
-                                            text = data,
-                                        )
-                                    }
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(if (post?.tags == null) 15.dp else 5.dp))
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                ProfileImage(
-                                    profileImage = post?.profileImage?:"",
-                                    gender = post?.gender?:"",
-                                    anonymous = post?.anonymousNickname!=null,
-                                    context = context,
-                                    imageLoader = imageLoader
-                                )
-
-                                Spacer(modifier = Modifier.width(10.dp))
-
-                                Column {
-                                    Text(
-                                        text = generateDisplayName(context,post?.nickname?:"",post?.anonymousNickname),
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = "${post?.elapsedTime} · ${post?.distance ?:0}km ",
-                                        fontSize = 13.sp,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Divider(
-                                color = Color.LightGray,
-                                thickness = 1.dp, // 또는 0.5.dp 등
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp)
-                            )
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Text(
-                                text = post?.text?:"",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp),
-                            )
-                            Spacer(modifier = Modifier.height(15.dp))
-
-                            if(mediaUiState.visualMedia.isNotEmpty()) {
-                                MediaGrid(
-                                    mediaList = mediaUiState.visualMedia,
-                                    onClick = { navController.navigate(Screen.MediaScreen(mediaUiState.visualMedia))}
-                                )
-
-                            }
-
-                            //Spacer(modifier = Modifier.height(if (post?.images == null) 0.dp else 15.dp))
-                            PollCard(
-                                voteState = voteState,
-                                onOptionSelected = { optionId -> postViewModel.onVoteEvent(VoteEvent.SelectOption(optionId))},
-                                onVoteClick = {
-                                    postViewModel.onVoteEvent(VoteEvent.OnVoteClick)
-                                }
-                            )
-                            Box(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                AudioPlayer(
-                                    modifier = Modifier
-                                        .align(Alignment.CenterEnd) // 오른쪽 끝
-                                        .padding(end = 8.dp,top = 10.dp),
-                                    viewModel = audioViewModel,
-                                    url = audioUrl
-                                )
-                            }
-
-
-                            Divider(
-                                color = Color.LightGray,
-                                thickness = 1.dp, // 또는 0.5.dp 등
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceAround
-
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier.padding(vertical = 13.dp)) {
-                                    androidx.compose.material3.Icon(
-                                        imageVector = if (postViewModel.isLiked.value) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
-                                        contentDescription = null,
-                                        tint = Color.DarkGray.copy(0.8f),
-                                        modifier = Modifier
-                                            .clickable {
-                                                //viewModel.onEvent(
-                                                //    PostDetailEvent.ToggleLikePost(post.postId)
-                                                //)
-                                                coroutineScope.launch {
-                                                    listState.scrollToItem(100)  // reverseLayout=true 이므로 0번이 가장 아래임
-                                                }
-                                            }
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(text = getString(context,R.string.like), color = Color.DarkGray.copy(0.8f))
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier.padding(vertical = 13.dp)) {
-                                    androidx.compose.material3.Icon(
-                                        imageVector = if (isLiked) Icons.Filled.ThumbUpAlt else Icons.Outlined.ThumbUpAlt,
-                                        contentDescription = null,
-                                        tint = Color.DarkGray.copy(0.8f),
-                                        modifier = Modifier
-                                            .clickable {
-                                                postViewModel.onPostDetailEvent(
-                                                    PostDetailEvent.ToggleLikePost(
-                                                        post?.postId ?: 0
-                                                    )
-                                                )
-                                            }
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(text = getString(context,R.string.like),color = Color.DarkGray.copy(0.8f))
-                                }
-
-                            }
-                            Divider(
-                                color = Color.LightGray,
-                                thickness = 1.dp, // 또는 0.5.dp 등
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-
-
-                        }
-
-
-
-                    }
-                    item {
-                        if(!postViewModel.isCommentsEmpty.value) {
-                            Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp,vertical = 10.dp), contentAlignment = Alignment.TopStart) {
-                                Row {
-                                    SelectableDotText(
-                                        text = getString(context, R.string.sort_by_date),
-                                        selected = postViewModel.commentSortType.value == CommentSortType.OLDEST,
-                                        onClick = {//onEvent
-                                            postViewModel.onCommentEvent(CommentEvent.SetCommentSortType(
-                                                CommentSortType.OLDEST
-                                            ))
-                                        },
-                                    )
-                                    Spacer(modifier = Modifier.width(9.dp))
-                                    SelectableDotText(
-                                        text = getString(context,R.string.sort_by_popularity),
-                                        selected = commentSortType == CommentSortType.POPULAR,
-                                        onClick = {
-                                            postViewModel.onCommentEvent(CommentEvent.SetCommentSortType(
-                                                CommentSortType.POPULAR
-                                            ))
-                                        },
-                                    )
-                                }
-                            }
-
-
-                        }
-                    }
-                    item {
-                        notificationComment?.let  { comment ->
-                            CommentRow(
-                                comment = comment,
-                                postViewModel = postViewModel,
-                                imageLoader = imageLoader,
-                                currentUserViewModel = currentUserViewModel
-                            )
-                            Divider(
-                                color = Color.LightGray,
-                                thickness = 1.dp
-                            )
-                        }
-
-                    }
-                    item {
-                        notificationReply?.let { reply ->
-                            ReplyRow(
-                                comment = reply,
-                                postViewModel = postViewModel,
-                                imageLoader = imageLoader,
-                                currentUserViewModel = currentUserViewModel
-                            )
-                            Divider(
-                                color = Color.LightGray,
-                                thickness = 1.dp
-                            )
-
-
-                        }
-
-                    }
-                    item {
-                        if(getCommentsState.isRefreshing) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(150.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
-
-                    items(
-                        getCommentsState.comments
-                    ) { comment ->
-                        CommentRow(
-                            comment = comment,
-                            postViewModel = postViewModel,
-                            imageLoader = imageLoader,
-                            currentUserViewModel = currentUserViewModel
-                        )
-                        Divider(
-                            color = Color.LightGray,
-                            thickness = 1.dp
-                        )
-                    }
-                    item {
-                        if(getCommentsState.isLoading && getCommentsState.comments.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
-                    //로딩중이 아닐때, comment가 없는상태에서 불러온결과 없을때
-                    item {
-                        if(!getCommentsState.isLoading&&postViewModel.isCommentsEmpty.value) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(150.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = getString(context,R.string.comment_empty),
-                                    color = Color.Gray,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-
-                }
-
-            },
-            bottomBar = {
-                CommentInput(
-                    comment = commentText,
-                    onCommentChange = { postViewModel.onCommentEvent(CommentEvent.TypeComment(it)) },
-                    onPostClick = {
-                        if(commentText.isNotEmpty())
-                            postViewModel.onCommentEvent(CommentEvent.PostComment)
-                    },
-                    isAnonymous = anonymousChecked,
-                    onAnonymousChange = { postViewModel.onCommentEvent(CommentEvent.ToggleAnonymous(it)) }
-                )
-            },
-            lazyColumnExist = true
-        )
-
-    }**/
-
-
-
 }
 
 

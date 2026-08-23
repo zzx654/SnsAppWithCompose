@@ -18,6 +18,18 @@ data class PostDetailUiState(
         get() = post?.toMediaUiModel() ?: MediaUiModel(emptyList(), emptyList())
     val audioUrl: String?
         get() = mediaUiModel.audioMedia.firstOrNull()?.url
+
+    val isHeaderLoading: Boolean
+        get() {
+            // 게시글 자체가 아직 안 들어왔으면 로딩 중
+            if (post == null) return true
+
+            // 투표가 존재하는 게시글인데 투표 데이터 로딩 중이면 계속 로딩 중
+            // 투표가 없는 일반 게시글이라면 post != null인 시점에 바로 false
+            if (post.vote != null && voteState.isLoading) return true
+
+            return false
+        }
 }
 fun Post.toMediaUiModel(): MediaUiModel {
     val grouped = media.groupBy { media ->
