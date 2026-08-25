@@ -5,7 +5,6 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Parcelize
 data class Post(
     val postId:Int,
     val userId:Int,
@@ -25,4 +24,4 @@ data class Post(
     var distance:Int?,
     val vote:String?,
     val voteCount:Int?,
-): Parcelable
+)
