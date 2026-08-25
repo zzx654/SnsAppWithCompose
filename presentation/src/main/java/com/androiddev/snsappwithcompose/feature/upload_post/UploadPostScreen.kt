@@ -47,6 +47,7 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
@@ -74,7 +75,6 @@ import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteViewM
 @Composable
 fun UploadPostScreen(
     navController: NavController,
-    post: Post?,
     viewModel: UploadPostViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     recordViewModel: RecordViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
     createVoteViewModel: CreateVoteViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
@@ -84,7 +84,14 @@ fun UploadPostScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
+    val postMode by viewModel.postMode.collectAsStateWithLifecycle()
     val contentTextFieldState = rememberTextFieldState()
+
+    val cachedText by viewModel.cachedText.collectAsStateWithLifecycle()
+
+    val cachedVote by viewModel.cachedVote.collectAsStateWithLifecycle()
+
+    val cachedAudio by viewModel.cachedAudio.collectAsStateWithLifecycle()
 
 
     //val formattedTime = "%02d:%02d".format(elapsed / 60, elapsed % 60)
@@ -103,29 +110,24 @@ fun UploadPostScreen(
         text = getString(context,R.string.uploading_alert),
         isLoading = { viewModel.isLoading.value}
     )
-    LaunchedEffect(Unit) {
+    LaunchedEffect(cachedVote) {
 
-        post?.let {
-            viewModel.initPost(
-                post = it
-            )
-            it.vote?.let {
-                createVoteViewModel.initVoteState()
-            }
-            it.media.firstOrNull { it.type == MEDIA_TYPE_AUDIO }?.let { media ->
+        if(cachedVote!=null)
+            createVoteViewModel.initVoteState()
 
-                recordViewModel.initRecordState(remotePath = media.url)
-            }
-
-            //it.audio?.let{ remotePath ->
-             //   recordViewModel.initRecordState(remotePath = remotePath)
-            //}
-
+    }
+    LaunchedEffect(cachedText) {
+        if(cachedText.isNotEmpty()) {
             contentTextFieldState.edit {
-                replace(0, contentTextFieldState.text.toString().length, it.text)
+                replace(0, contentTextFieldState.text.toString().length, cachedText)
             }
 
+        }
 
+    }
+    LaunchedEffect(cachedAudio) {
+        cachedAudio?.let {
+            recordViewModel.initRecordState(remotePath = it)
         }
     }
     LaunchedEffect(true) {
@@ -300,7 +302,7 @@ fun UploadPostScreen(
 
                     IconButton(
                         modifier = Modifier.size(58.dp),
-                        onClick = { createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteClick(postMode = viewModel.postMode?: PostMode.CREATE))}
+                        onClick = { createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteClick(postMode = postMode))}
                     ) {
                         UploadVoteIcon(createVoteViewModel.saved.value) { }
                     }

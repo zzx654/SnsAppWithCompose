@@ -1,7 +1,7 @@
 package com.androiddev.data.remote.api.uploadpost
 
 import com.androiddev.data.remote.BaseApiResponse
-import com.androiddev.data.remote.dto.GetPostsDto
+import com.androiddev.data.remote.dto.PostsDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -36,6 +36,6 @@ interface UploadPostApi {
         @Part ("mediaTypes")mediaTypes: List<@JvmSuppressWildcards RequestBody>?,
         @Part ("deletedAudio") deletedAudio: RequestBody?,
         @Part ("text") text: RequestBody
-    ): Response<BaseApiResponse<GetPostsDto>>
+    ): Response<BaseApiResponse<PostsDto>>
 
 }

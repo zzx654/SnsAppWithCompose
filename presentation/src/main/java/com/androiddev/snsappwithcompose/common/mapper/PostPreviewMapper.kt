@@ -26,7 +26,7 @@ fun PostPreview.toUiState(): PostUiState {
     )
 }
 fun Post.toUiState(): PostPreviewUiState {
-    val displayUserName = anonymousNickname?.let { nonNullAnonymous ->
+    val displayUserNameUiText = anonymousNickname?.let { nonNullAnonymous ->
     UiText.StringResource(R.string.anonymous_with_code, nonNullAnonymous)
 } ?: UiText.DynamicString(nickname)
     return PostPreviewUiState(
@@ -40,7 +40,7 @@ fun Post.toUiState(): PostPreviewUiState {
 
         hasAudio = media.any { it.type == MEDIA_TYPE_AUDIO },
 
-        displayUserName = displayUserName,
+        displayUserName = displayUserNameUiText,
         elapsedTime = elapsedTime(this.date)
     )
 }

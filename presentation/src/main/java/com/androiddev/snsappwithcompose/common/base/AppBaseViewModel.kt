@@ -85,6 +85,7 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
     protected inline fun <T> Resource<T>.handle(
         onLoading: () -> Unit = { setLoading(true) },
         onSuccess: (T) -> Unit = {},
+        onSuccessUnit:() -> Unit ={},
         onError: (UiText) -> Unit = { uiText -> emitUiEvent(UiEvent.ShowToast(uiText)) },
         onTokenExpired: () -> Unit = { emitUiEvent(UiEvent.navigate(screen = Screen.SignInScreen)) },
         onFinally: () -> Unit = { setLoading(false) }
@@ -94,7 +95,9 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
             is Resource.Loading -> onLoading()
             is Resource.Success -> {
                 onFinally() //
-                data?.let(onSuccess)
+                data?.let {
+                    onSuccess(it)
+                }?:onSuccessUnit()
             }
             is Resource.Error -> {
                 onFinally() //

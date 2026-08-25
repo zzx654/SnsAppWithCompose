@@ -99,10 +99,10 @@ fun PostDetailContent(
             } else {
                 // isHeaderLoading이 false인 시점에는 post가 절대 null일 수 없으므로 안전하게 접근 가능
                 val post = postDetailUiState.post
+                val tags = postDetailUiState.tags
 
                 Column {
-
-                    post?.tags?.let { tags ->
+                    tags?.let { tags ->
                         Spacer(modifier = Modifier.height(10.dp))
                         Chips(
                             modifier = Modifier
@@ -198,7 +198,7 @@ fun PostDetailContent(
                         AudioPlayer(
                             modifier = Modifier
                                 .align(Alignment.CenterEnd) // 오른쪽 끝
-                                .padding(end = 8.dp, top = 10.dp),
+                                .padding(end = 8.dp, top = 10.dp,bottom = 10.dp),
                             viewModel = audioViewModel,
                             url = postDetailUiState.audioUrl
                         )

@@ -151,9 +151,7 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
             startDestination = Screen.UploadPostScreen::class.qualifiedName!!
         ) {
 
-            composable<Screen.UploadPostScreen>(
-                typeMap = postTypeMap
-            ) {
+            composable<Screen.UploadPostScreen> {
                 val parentEntry = remember {
                     navController.getBackStackEntry(UPLOAD_FLOW)
                 }
@@ -161,12 +159,9 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 val uploadViewModel: UploadPostViewModel =
                     androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(parentEntry)
 
-                val post = it.toRoute<Screen.UploadPostScreen>().post
-
                 BackHandler(true) {}
 
                 UploadPostScreen(
-                    post = post,
                     navController = navController,
                     viewModel = uploadViewModel
                 )

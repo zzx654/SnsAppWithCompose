@@ -148,7 +148,7 @@ fun PostDetailScreen(
 
     val dropdownMenuItem = if(postDetailUiState.post?.userId == userId) {
         listOf(
-            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(postDetailUiState.post))},
+            MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(postDetailUiState.post?.postId))},
             MenuItem(getString(context,R.string.delete)) { postViewModel.onPostDetailEvent(
                 PostDetailEvent.DeletePost
             )}

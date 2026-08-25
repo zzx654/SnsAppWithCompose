@@ -72,10 +72,8 @@ class PostDetailsViewModel @Inject constructor(
 
     private val _postDetailUiState = MutableStateFlow(PostDetailUiState(isLoading = true))
     val postDetailUiState: StateFlow<PostDetailUiState> = _postDetailUiState.asStateFlow()
-    private val _voteState = MutableStateFlow(VoteState())
-    val voteState: StateFlow<VoteState> = _voteState.asStateFlow()
     private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())
-    val commentStateMap: StateFlow<Map<Int,Comment>> = _commentStateMap
+    val commentStateMap: StateFlow<Map<Int,Comment>> = _commentStateMap.asStateFlow()
     private val _isCommentsEmpty = mutableStateOf(false)
     val isCommentsEmpty: State<Boolean>
         get() = _isCommentsEmpty
@@ -89,15 +87,17 @@ class PostDetailsViewModel @Inject constructor(
     //val getCommentsState: State<GetCommentsState>
      //   get() = _getCommentsState
     private val _notificationComment:MutableStateFlow<Comment?> =  MutableStateFlow(null)
-    val notificationComment:StateFlow<Comment?> = _notificationComment
+    val notificationComment:StateFlow<Comment?> = _notificationComment.asStateFlow()
     private val _notificationReply:MutableStateFlow<Comment?> =  MutableStateFlow(null)
-    val notificationReply:StateFlow<Comment?> = _notificationReply
+    val notificationReply:StateFlow<Comment?> = _notificationReply.asStateFlow()
     private val _commentSortType = MutableStateFlow(CommentSortType.OLDEST)
     val commentSortType: StateFlow<CommentSortType> = _commentSortType.asStateFlow()
 
     private val _anonymousChecked = MutableStateFlow(false)
-    val anonymousChecked: StateFlow<Boolean> = _anonymousChecked
+    val anonymousChecked: StateFlow<Boolean> = _anonymousChecked.asStateFlow()
 
+    private val voteState:VoteState
+        get() = postDetailUiState.value.voteState
 
 
 
@@ -107,6 +107,7 @@ class PostDetailsViewModel @Inject constructor(
 
     init {
         fetchPostDetail()
+        observePostDetailState()
         args.notificationCommentId?.let { commentId ->
             loadCommentByNotification(commentId)
         }
@@ -209,6 +210,20 @@ class PostDetailsViewModel @Inject constructor(
 
 
     }
+    private fun observePostDetailState() {
+        viewModelScope.launch {
+            postDetailUseCases.GetPostDetailFlow().collect { updatedPost ->
+                if (updatedPost != null && updatedPost.postId == args.postId) {
+                    _postDetailUiState.update { currentState ->
+                        currentState.copy(
+                            post = updatedPost,
+                            isLiked = updatedPost.isliked
+                        )
+                    }
+                }
+            }
+        }
+    }
     private fun loadCommentByNotification(commentId: Int) {
         viewModelScope.launch {
             commentUseCases.GetNotificationComment(commentId).collect { result ->
@@ -226,8 +241,8 @@ class PostDetailsViewModel @Inject constructor(
         when(event) {
             is VoteEvent.OnVoteClick -> {
                 viewModelScope.launch {
-                    if(!voteState.value.hasVoted) {
-                        voteState.value.selectedChoiceId?.let { optionId ->
+                    if(!voteState.hasVoted) {
+                        voteState.selectedChoiceId?.let { optionId ->
                             voteUseCases.vote(args.postId,optionId).collect { result ->
                                 result.handle(
                                     onSuccess = { vote ->
@@ -251,7 +266,7 @@ class PostDetailsViewModel @Inject constructor(
                     } else {
                         voteUseCases.cancelVote(args.postId).collect { result ->
                             result.handle(
-                                onSuccess = {
+                                onSuccessUnit = {
                                     _postDetailUiState.update{
                                         it.copy(
                                             voteState = it.voteState.copy(
@@ -267,9 +282,15 @@ class PostDetailsViewModel @Inject constructor(
                 }
             }
             is VoteEvent.SelectOption -> {
-                _voteState.value = voteState.value.copy(
-                    selectedChoiceId = event.optionId
-                )
+                _postDetailUiState.update {
+                    it.copy(
+                        voteState = it.voteState.copy(
+                            selectedChoiceId = event.optionId
+                        )
+                    )
+
+                }
+
             }
         }
 
