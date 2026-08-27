@@ -252,16 +252,11 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
             }
             VideoViewerScreen(navController = navController)
         }
-        composable<Screen.ReplyScreen>(
-            typeMap = commentTypeMap
-        ) {
-            val comment = it.toRoute<Screen.ReplyScreen>().comment
+        composable<Screen.ReplyScreen> {
             BackHandler(true) {
             }
             ReplyScreen(
-                comment = comment,
                 navController = navController,
-                navBackStackEntry = it,
                 currentUserViewModel = currentUserViewModel
             )
             PendingNotificationHandler(notificationViewModel)

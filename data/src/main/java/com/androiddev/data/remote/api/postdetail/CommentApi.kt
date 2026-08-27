@@ -28,7 +28,6 @@ interface CommentApi {
     @FormUrlEncoded
     @POST("comment/getSelectedComment")
     suspend fun getSelectedComment(
-        @Field("postid")postid: Int,
         @Field("commentid")commentid: Int?,
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded

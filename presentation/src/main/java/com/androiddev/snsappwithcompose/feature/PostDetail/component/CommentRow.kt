@@ -12,34 +12,58 @@ import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
 @Composable
 fun BoundCommentRow(
+    showReplyCount:Boolean = true,
     comment: Comment,
     commentStateMap: Map<Int, Comment>,
     userId: Int?,
     imageLoader: ImageLoader,
-    onCommentEvent: (CommentEvent) -> Unit
+    onCommentEvent: (CommentEvent) -> Unit = {}
 ) {
     val updatedComment = commentStateMap[comment.commentId] ?: comment
 
-    CommentRow(
-        comment = updatedComment,
-        imageLoader = imageLoader,
-        onLikeClick = {
-            onCommentEvent(CommentEvent.ToggleLikeComment(updatedComment))
-        },
-        onCommentClick = {
-            onCommentEvent(CommentEvent.GotoReplyScreen(updatedComment.commentId))
-        },
-        onOptionClick = {
-            userId?.let { my ->
-                onCommentEvent(
-                    CommentEvent.ShowCommentOptions(
-                        myUserId = my,
-                        commentUserId = updatedComment.userId
+    if(comment.depth == 0) {
+        CommentRow(
+            comment = updatedComment,
+            imageLoader = imageLoader,
+            onLikeClick = {
+                onCommentEvent(CommentEvent.ToggleLikeComment(updatedComment))
+            },
+            onCommentClick = {
+                onCommentEvent(CommentEvent.GotoReplyScreen(updatedComment.commentId))
+            },
+            onOptionClick = {
+                userId?.let { my ->
+                    onCommentEvent(
+                        CommentEvent.ShowCommentOptions(
+                            myUserId = my,
+                            commentUserId = updatedComment.userId
+                        )
                     )
-                )
+                }
+            },
+            showReplyCount = showReplyCount
+        )
+
+    } else {
+        ReplyRow(
+            comment = updatedComment,
+            imageLoader = imageLoader,
+            onLikeClick = {
+                onCommentEvent(CommentEvent.ToggleLikeComment(updatedComment))
+            },
+            onOptionClick = {
+                userId?.let { my ->
+                    onCommentEvent(
+                        CommentEvent.ShowCommentOptions(
+                            myUserId = my,
+                            commentUserId = updatedComment.userId
+                        )
+                    )
+                }
             }
-        }
-    )
+        )
+    }
+
 }
 @Composable
 fun ReplyRow(
@@ -65,7 +89,8 @@ fun CommentRow(
     imageLoader: ImageLoader,
     onLikeClick:()->Unit,
     onCommentClick:() ->Unit,
-    onOptionClick:() ->Unit
+    onOptionClick:() ->Unit,
+    showReplyCount: Boolean
 ) {
     CommentItem(
         commentUiState = comment.toUiState(),
@@ -73,7 +98,8 @@ fun CommentRow(
         onLikeClick = onLikeClick,
 
         onOptionClick = onOptionClick,
-        onCommentClick = onCommentClick
+        onCommentClick = onCommentClick,
+        showReplyCount = showReplyCount
     )
     Divider(
         color = Color.LightGray,

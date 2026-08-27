@@ -21,16 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.androiddev.domain.model.Comment
 import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
 import androidx.core.content.ContextCompat.getString
 import coil3.ImageLoader
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.mapper.CommentUiState
-import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -40,7 +39,8 @@ fun CommentItem(
     imageLoader: ImageLoader,
     onLikeClick: ()->Unit,
     onOptionClick: ()->Unit,
-    onCommentClick: ()->Unit
+    onCommentClick: ()->Unit,
+    showReplyCount: Boolean
 ) {
     val context = LocalContext.current
     val comment = commentUiState.comment
@@ -82,7 +82,7 @@ fun CommentItem(
                 }
 
             }
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(text = comment.text,modifier = Modifier.padding(horizontal = 50.dp))
             Spacer(modifier = Modifier.height(15.dp))
             Row(modifier = Modifier.padding(horizontal = 50.dp)) {
@@ -101,6 +101,15 @@ fun CommentItem(
                 Spacer(modifier = Modifier.width(11.dp))
                 Text(text = getString(context, R.string.write_reply))
             }
+            if(comment.replyCount>0 && showReplyCount) {
+                Spacer(modifier = Modifier.height(37.dp))
+                Text(
+                    text = stringResource(R.string.reply_count,comment.replyCount),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 50.dp).clickable{ onCommentClick() }
+                )
+            }
+
             Spacer(modifier = Modifier.height(15.dp))
         }
         CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {

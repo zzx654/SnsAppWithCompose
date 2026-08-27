@@ -23,8 +23,10 @@ import androidx.compose.material.icons.filled.ThumbUpAlt
 import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +39,6 @@ import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
-import coil3.ImageLoader
 import coil3.imageLoader
 import coil3.request.crossfade
 import coil3.util.DebugLogger
@@ -47,8 +48,8 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.Chips
 import com.androiddev.snsappwithcompose.common.component.CustomChip
 import com.androiddev.snsappwithcompose.common.component.paging.DefaultEmptyView
+import com.androiddev.snsappwithcompose.common.component.paging.pagingAppendItems
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.PostDetailUiState
 import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
@@ -75,6 +76,7 @@ fun PostDetailContent(
     newlyAddedComments: List<Comment>, // StateFlow에서 collectAsStateWithLifecycle()로 받아온 값
     pagingComments: LazyPagingItems<Comment>,
     onCommentEvent:(CommentEvent) -> Unit,
+    onPagingRefreshComplete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
@@ -84,6 +86,14 @@ fun PostDetailContent(
             .crossfade(false)
             .logger(DebugLogger())
             .build()
+    }
+    LaunchedEffect(pagingComments) {
+        snapshotFlow { pagingComments.loadState.refresh }
+            .collect { refreshState ->
+                if (refreshState !is LoadState.Loading) {
+                    onPagingRefreshComplete()
+                }
+            }
     }
     LazyColumn(
         modifier = modifier.fillMaxSize()
@@ -326,6 +336,37 @@ fun PostDetailContent(
 
                 }
             }
+
+            item {
+                val refreshState = pagingComments.loadState.refresh
+
+                when {
+                    // 첫 로딩 로딩바 출력
+                    refreshState is LoadState.Loading && pagingComments.itemCount == 0-> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 50.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                color = Color.Gray
+                            )
+                        }
+                    }
+
+                    // 데이터 로딩 완료 되었으나 개수가 0개일 때 (진짜 비어있는 상태)
+                    refreshState is LoadState.NotLoading
+                            && pagingComments.itemCount == 0
+                            && newlyAddedComments.isEmpty()
+                            && notificationComment == null
+                            && notificationReply == null -> {
+                        DefaultEmptyView(emptyMessage = getString(context, R.string.comment_empty))
+                    }
+                }
+            }
+
+
             notificationComment?.let { comment ->
                 item {
                     BoundCommentRow(
@@ -339,46 +380,15 @@ fun PostDetailContent(
                 }
             }
             notificationReply?.let {
-                val updatedComment = commentStateMap[it.commentId] ?: it
                 item {
-                    ReplyRow(
+                    BoundCommentRow(
                         comment = it,
+                        commentStateMap = commentStateMap,
+                        userId = userId,
                         imageLoader = imageLoader,
-                        onLikeClick = { onCommentEvent(CommentEvent.ToggleLikeComment(updatedComment)) },
-                        onOptionClick = {
-                            userId?.let { my ->
-                                CommentEvent.ShowCommentOptions(
-                                    myUserId = my,
-                                    commentUserId = updatedComment.userId
-                                )
-                            }
-                        }
+                        onCommentEvent = onCommentEvent
                     )
                     HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
-                }
-            }
-            item {
-
-                val refreshState = pagingComments.loadState.refresh
-
-
-                when {
-                    // 1. 첫 로딩 중
-                    refreshState is LoadState.Loading && pagingComments.itemCount == 0 -> {
-                        androidx.compose.material3.CircularProgressIndicator(
-                            modifier = Modifier.padding(top = 50.dp,bottom = 50.dp), color = Color.Gray
-                        )
-                    }
-
-                    // 2. 데이터 로딩 완료 되었으나 개수가 0개일 때 (진짜 비어있는 상태)
-                    refreshState is LoadState.NotLoading
-                            && pagingComments.itemCount == 0
-                            && newlyAddedComments.isEmpty()
-                            && notificationComment == null
-                            && notificationReply == null -> {
-                        DefaultEmptyView(emptyMessage = getString(context, R.string.comment_empty))
-                    }
-
                 }
             }
             items(
@@ -394,7 +404,6 @@ fun PostDetailContent(
                 )
                 HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
             }
-
             items(
                 count = pagingComments.itemCount,
                 key = pagingComments.itemKey { it.commentId }
@@ -411,6 +420,15 @@ fun PostDetailContent(
                     HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
                 }
             }
+
+            pagingAppendItems(
+                items = pagingComments,
+                context = context
+            )
+
+
+
+
 
         }
 

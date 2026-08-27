@@ -4,8 +4,6 @@ package com.androiddev.snsappwithcompose.feature.PostDetail
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.view.Gravity
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,17 +13,13 @@ import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -53,11 +47,8 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.ThumbUpAlt
-import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
@@ -67,53 +58,35 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.core.content.ContextCompat.getString
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.error
 import coil3.request.placeholder
 import coil3.size.Scale
-import coil3.util.DebugLogger
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioViewModel
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
-import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteEvent
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
-import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioPlayer
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
-import com.androiddev.snsappwithcompose.common.component.Chips
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentInput
-import com.androiddev.snsappwithcompose.feature.PostDetail.comment.component.CommentItem
-import com.androiddev.snsappwithcompose.common.component.CustomChip
-import com.androiddev.snsappwithcompose.common.component.LoadingDialog
-import com.androiddev.snsappwithcompose.feature.PostDetail.vote.component.PollCard
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.ui.theme.profileBorder
 import com.androiddev.snsappwithcompose.common.model.MenuItem
-import com.androiddev.snsappwithcompose.common.base.UiEvent
-import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.androiddev.domain.model.Comment
-import com.androiddev.domain.model.CommentSortType
 import com.androiddev.domain.model.Post
 import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.util.generateDisplayName
-import com.androiddev.snsappwithcompose.feature.PostDetail.component.MediaGrid
 import com.androiddev.snsappwithcompose.feature.PostDetail.component.PostDetailContent
-import com.androiddev.snsappwithcompose.feature.Reply.ReplyItem
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 private const val NOTIFICATION_COMMENT_INDEX = 2
 private const val NOTIFICATION_REPLY_INDEX = 3
@@ -134,7 +107,6 @@ fun PostDetailScreen(
     val commentSortType by postViewModel.commentSortType.collectAsStateWithLifecycle()
     val commentStateMap by postViewModel.commentStateMap.collectAsStateWithLifecycle()
     val anonymousChecked by postViewModel.anonymousChecked.collectAsStateWithLifecycle()
-    val commentText by postViewModel.commentText.collectAsStateWithLifecycle()
 
     val notificationComment by postViewModel.notificationComment.collectAsStateWithLifecycle()
     val notificationReply by postViewModel.notificationReply.collectAsStateWithLifecycle()
@@ -298,6 +270,7 @@ fun PostDetailScreen(
                     audioViewModel = audioViewModel,
                     newlyAddedComments = newlyAddedComments,
                     pagingComments = commentItems,
+                    onPagingRefreshComplete = { postViewModel.setLoading(false) },
                     onCommentEvent = {
                         postViewModel.onCommentEvent(it)
                     },
@@ -307,10 +280,10 @@ fun PostDetailScreen(
             },
             bottomBar = {
                 CommentInput(
-                    comment = commentText,
+                    comment = { postViewModel.commentText.value },
                     onCommentChange = { postViewModel.onCommentEvent(CommentEvent.TypeComment(it)) },
                     onPostClick = {
-                        if(commentText.isNotEmpty())
+                        if(postViewModel.commentText.value.isNotEmpty())
                             postViewModel.onCommentEvent(CommentEvent.PostComment)
                     },
                     isAnonymous = anonymousChecked,

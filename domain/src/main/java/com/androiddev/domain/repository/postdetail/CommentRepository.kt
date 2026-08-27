@@ -15,14 +15,11 @@ interface CommentRepository {
         commentId:Int
     ): Flow<Resource<NotificationComment>>
     suspend fun getReplies(
-        ref: Int,
-        commentId: Int?,
-        commentDate: String?
-    ): Flow<Resource<Comments>>
+        ref: Int
+    ): Flow<PagingData<Comment>>
     suspend fun getSelectedComment(
-        postId:Int,
         commentId:Int
-    ): Flow<Resource<Comments>>
+    ): Flow<Resource<List<Comment>>>
     suspend fun getComments(
         postId: Int,
         sortType: CommentSortType
@@ -32,13 +29,13 @@ interface CommentRepository {
         postId:Int,
         text: String,
         anonymousNick:String?
-    ): Flow<Resource<Comments>>
+    ): Flow<Resource<List<Comment>>>
     suspend fun postReply(
         postId: Int,
         ref: Int,
         text: String,
         anonymousNick: String?
-    ): Flow<Resource<Comments>>
+    ): Flow<Resource<List<Comment>>>
 
     suspend fun toggleLikeComment(commentId:Int) : Flow<Resource<ToggleLikeResult>>
 }

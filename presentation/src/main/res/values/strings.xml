@@ -124,7 +124,7 @@
     <string name="video_not_exist">영상 게시물이 없습니다</string>
     <string name="post_not_exist">게시물이 없습니다</string>
     <string name="data_load_failed">데이터를 불러오지 못했습니다.</string>
-    <string name="failed_to_loadmore">추가 로딩 실패</string>
+    <string name="failed_to_loadmore">로딩 실패\n탭하여 다시시도</string>
     <string name="nodata_to_display">표시할 데이터가 없습니다</string>
 
     <string name="button_text_add_media">+ 추가하기</string>
@@ -132,6 +132,7 @@
     <string name="user_profile_stats">
     팔로워 %1$d · 게시물 %2$d개
 </string>
+    <string name="reply_count"> 답글 %d개</string>
 
 
 

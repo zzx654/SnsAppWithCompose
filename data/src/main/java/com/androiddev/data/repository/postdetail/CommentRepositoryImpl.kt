@@ -5,9 +5,9 @@ import androidx.paging.PagingData
 import com.androiddev.data.paging.createPager
 import com.androiddev.data.paging.pagingsource.GenericPagingSource
 import com.androiddev.data.paging.pagingstrategy.OldestCommentStrategy
+import com.androiddev.data.paging.pagingstrategy.OldestReplyStrategy
 import com.androiddev.data.paging.pagingstrategy.PopularCommentStrategy
 import com.androiddev.data.remote.api.postdetail.CommentApi
-import com.androiddev.data.remote.dto.toComments
 import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.remote.dto.toNotificationComment
 import com.androiddev.data.util.safeApiCall
@@ -36,26 +36,18 @@ class CommentRepositoryImpl @Inject constructor(
             }
         )
     override suspend fun getReplies(
-        ref: Int,
-        commentId: Int?,
-        commentDate: String?
-    ): Flow<Resource<Comments>> = safeApiCall(
-        context = context,
-        apiCall = { api.getReplies(ref, commentId, commentDate) },
-        mapToResource = {
-            it.toComments()
-        }
-
-    )
+        ref: Int
+    ): Flow<PagingData<Comment>> = createPager {
+        GenericPagingSource(OldestReplyStrategy(api,ref))
+    }
 
     override suspend fun getSelectedComment(
-        postId: Int,
         commentId: Int
-    ): Flow<Resource<Comments>> = safeApiCall(
+    ): Flow<Resource<List<Comment>>> = safeApiCall(
         context = context,
-        apiCall = { api.getSelectedComment(postId, commentId) },
+        apiCall = { api.getSelectedComment(commentId) },
         mapToResource = {
-            it.toComments()
+            it.toDomain()
         }
     )
 
@@ -74,11 +66,11 @@ class CommentRepositoryImpl @Inject constructor(
         postId: Int,
         text: String,
         anonymousNick: String?
-    ): Flow<Resource<Comments>> = safeApiCall(
+    ): Flow<Resource<List<Comment>>> = safeApiCall(
         context = context,
         apiCall = { api.postComments(postId, text, anonymousNick) },
         mapToResource = {
-            it.toComments()
+            it.toDomain()
         }
     )
 
@@ -87,11 +79,11 @@ class CommentRepositoryImpl @Inject constructor(
         ref: Int,
         text: String,
         anonymousNick: String?
-    ): Flow<Resource<Comments>> = safeApiCall(
+    ): Flow<Resource<List<Comment>>> = safeApiCall(
         context = context,
         apiCall = { api.postReply(postId, ref, text, anonymousNick) },
         mapToResource = {
-            it.toComments()
+            it.toDomain()
         }
     )
 

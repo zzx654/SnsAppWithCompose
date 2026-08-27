@@ -1,48 +1,31 @@
 package com.androiddev.snsappwithcompose.feature.PostDetail
 
-import android.util.Log
-import androidx.annotation.StringRes
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
-import androidx.paging.map
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.CommentSortType
-import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.Media
-import com.androiddev.domain.model.Post
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
-import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
-import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
-import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.GetCommentsState
 import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteEvent
 import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteState
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.util.Paginator
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
 import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
 
-import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
-import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
-import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
-import com.androiddev.snsappwithcompose.common.util.toUiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 
@@ -74,18 +57,13 @@ class PostDetailsViewModel @Inject constructor(
     val postDetailUiState: StateFlow<PostDetailUiState> = _postDetailUiState.asStateFlow()
     private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())
     val commentStateMap: StateFlow<Map<Int,Comment>> = _commentStateMap.asStateFlow()
-    private val _isCommentsEmpty = mutableStateOf(false)
-    val isCommentsEmpty: State<Boolean>
-        get() = _isCommentsEmpty
+
 
     private val _newlyAddedComments = MutableStateFlow<List<Comment>>(emptyList())
     val newlyAddedComments: StateFlow<List<Comment>> = _newlyAddedComments.asStateFlow()
 
     private val _deletedComments = MutableStateFlow<List<Comment>>(emptyList())
     val deletedComments: StateFlow<List<Comment>> = _deletedComments.asStateFlow()
-    //private val _getCommentsState = mutableStateOf(GetCommentsState())
-    //val getCommentsState: State<GetCommentsState>
-     //   get() = _getCommentsState
     private val _notificationComment:MutableStateFlow<Comment?> =  MutableStateFlow(null)
     val notificationComment:StateFlow<Comment?> = _notificationComment.asStateFlow()
     private val _notificationReply:MutableStateFlow<Comment?> =  MutableStateFlow(null)
@@ -102,8 +80,8 @@ class PostDetailsViewModel @Inject constructor(
 
 
 
-    val _commentText = MutableStateFlow("")
-    val commentText: StateFlow<String> = _commentText
+    private val _commentText = mutableStateOf("")
+    val commentText: State<String> = _commentText
 
     init {
         fetchPostDetail()
@@ -337,6 +315,7 @@ class PostDetailsViewModel @Inject constructor(
                 }
             }
             is CommentEvent.SetCommentSortType -> {
+                setLoading(true)
                 _commentSortType.value = event.commentSortType
             }
 
@@ -350,9 +329,8 @@ class PostDetailsViewModel @Inject constructor(
                         result.handle(
                             onSuccess = {
                                 _commentText.value = ""
-                                _isCommentsEmpty.value = false
                                 _newlyAddedComments.update { currentList ->
-                                    currentList + it.comments
+                                    currentList + it
                                 }
                             }
                         )
@@ -362,23 +340,11 @@ class PostDetailsViewModel @Inject constructor(
             is CommentEvent.GotoReplyScreen -> {
                 /**id만 보내도록 변경하기**/
                 viewModelScope.launch {
-                    commentUseCases.GetSelectedComment(
-                        postId = args.postId?:0,
-                        commentId = event.commentId
-                    ).collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
-                                setEvent(
-                                    UiEvent.navigate(
-                                        Screen.ReplyScreen(data.comments[0])
-                                    )
-                                )
-                                Log.d("comment","${data.comments[0]}")
-
-                            }
+                    setEvent(
+                        UiEvent.navigate(
+                            Screen.ReplyScreen(event.commentId)
                         )
-                    }
+                    )
                 }
             }
             else-> null

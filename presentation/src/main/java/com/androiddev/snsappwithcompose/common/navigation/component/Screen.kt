@@ -35,7 +35,7 @@ sealed interface Screen {
     @Serializable
     data class PostDetailScreen(val postId:Int,val notificationCommentId:Int? = null): Screen
     @Serializable
-    data class ReplyScreen(val comment: Comment?): Screen
+    data class ReplyScreen(val commentId:Int): Screen
     @Serializable
     data class TagPostsScreen(val tagId:Int): Screen
     @Serializable
@@ -94,6 +94,5 @@ inline fun <reified T : Any?> serializableType(
 
     override fun serializeAsValue(value: T): String = json.encodeToString(value)
 }**/
-val commentTypeMap = mapOf(typeOf<Comment?>() to serializableType<Comment?>(isNullableAllowed = true))
 val mediaTypeMap = mapOf(typeOf<List<Media>?>() to serializableType<List<Media>?>(isNullableAllowed = true))
 val mediaPostsTypeMap = mapOf(typeOf<List<MediaPost>?>() to serializableType<List<MediaPost>?>(isNullableAllowed = true))

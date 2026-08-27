@@ -1,6 +1,9 @@
 package com.androiddev.domain.use_case.reply
 
-data class ReplyUseCases(
-    val GetReplies: GetReplies,
-    val PostReply: PostReply
+import javax.inject.Inject
+
+data class ReplyUseCases @Inject constructor(
+    val GetSelectedComment: GetSelectedCommentUseCase,
+    val GetReplies: GetRepliesUseCase,
+    val PostReply: PostReplyUseCase
 )
