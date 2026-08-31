@@ -50,7 +50,7 @@ fun <T : Any> PagingGridContent(
         DefaultEmptyView(getString(LocalContext.current, R.string.nodata_to_display))
     },
     canRefresh:Boolean = true,
-    onRefreshExtra: (() -> Unit)? = null // 💡 프로필 UI 정보 등 추가 refresh가 필요한 경우
+    onRefreshExtra: (() -> Unit)? = null //  프로필 UI 정보 등 추가 refresh가 필요한 경우
 ) {
     val context = LocalContext.current
     var isManualRefreshing by remember { mutableStateOf(false) }

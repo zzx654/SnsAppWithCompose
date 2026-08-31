@@ -50,6 +50,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.draw.clip
@@ -117,7 +118,7 @@ fun PostDetailScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
-
+    val pullToRefreshState = rememberPullToRefreshState()
     val dropdownMenuItem = if(postDetailUiState.post?.userId == userId) {
         listOf(
             MenuItem(getString(context,R.string.edit)){ navController.navigate(Screen.UploadPostScreen(postDetailUiState.post?.postId))},
@@ -139,6 +140,8 @@ fun PostDetailScreen(
     var imeHeigh = remember { mutableStateOf(0) }
     val ime = WindowInsets.ime
     val localDensity = LocalDensity.current
+
+
     LaunchedEffect(key1 = Unit) {
         val keyboardFlow = snapshotFlow {
             ime.getBottom(localDensity)
@@ -274,6 +277,7 @@ fun PostDetailScreen(
                     onCommentEvent = {
                         postViewModel.onCommentEvent(it)
                     },
+                    onRefresh = { postViewModel.fetchPostDetail() },
                     commentStateMap = commentStateMap
                 )
 

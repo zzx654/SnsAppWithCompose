@@ -86,9 +86,7 @@ class PostDetailsViewModel @Inject constructor(
     init {
         fetchPostDetail()
         observePostDetailState()
-        args.notificationCommentId?.let { commentId ->
-            loadCommentByNotification(commentId)
-        }
+
     }
     val pagingCommentStream: Flow<PagingData<Comment>> = combine(
         _commentSortType,
@@ -110,7 +108,7 @@ class PostDetailsViewModel @Inject constructor(
             }
     }.cachedIn(viewModelScope)
 
-    private fun fetchPostDetail() {
+    fun fetchPostDetail() {
         viewModelScope.launch {
             postDetailUseCases.GetPost(postId = args.postId).collect { result ->
                 result.handle (
@@ -146,6 +144,9 @@ class PostDetailsViewModel @Inject constructor(
                     }
                 )
             }
+        }
+        args.notificationCommentId?.let { commentId ->
+            loadCommentByNotification(commentId)
         }
     }
     private fun fetchVoteInfo() {

@@ -11,11 +11,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,6 +93,21 @@ fun ReplyScreen(
             imeHeigh.value = keyboardHeight
         }
     }
+    val pullToRefreshState = rememberPullToRefreshState()
+    var isManualRefreshing by remember { mutableStateOf(false) }
+
+    val isRefreshing = isManualRefreshing && (
+            replyItems.loadState.refresh is LoadState.Loading || originalCommentUiState.isLoading
+            )
+
+    LaunchedEffect(replyItems.loadState.refresh) {
+        //pullRefresh 처리
+        if (isManualRefreshing &&
+            replyItems.loadState.refresh is LoadState.NotLoading && !originalCommentUiState.isLoading
+        ) {
+            isManualRefreshing = false
+        }
+    }
     SelectorBottomSheetDialog(bottomSheetDialogState)
     BaseScreen(
         viewModel = viewModel,
@@ -105,55 +124,52 @@ fun ReplyScreen(
 
             },
             content = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullToRefresh(
+                            state = pullToRefreshState,
+                            isRefreshing = isRefreshing,
+                            onRefresh = {
+                                isManualRefreshing = true
+                                viewModel.fetchComment()
+                                replyItems.refresh()
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    val comment = originalCommentUiState.comment
-                    if(isLoadingCommentAndReplies) {
-                        item {
-                            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                                androidx.compose.material3.CircularProgressIndicator(
-                                    color = Color.Gray
-                                )
                             }
-                        }
-                    } else {
-                        comment?.let {
+                        )
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        val comment = originalCommentUiState.comment
+                        if(isLoadingCommentAndReplies && !isManualRefreshing) {
                             item {
+                                Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                                    androidx.compose.material3.CircularProgressIndicator(
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        } else {
+                            comment?.let {
+                                item {
+                                    BoundCommentRow(
+                                        comment = comment,
+                                        commentStateMap = commentStateMap,
+                                        userId = userId,
+                                        imageLoader = imageLoader,
+                                        onCommentEvent = { viewModel.onEvent(it) },
+                                        showReplyCount = false
+                                    )
+                                    HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
+                                }
+                            }
+                            items(
+                                items = newlyAddedComments,
+                                key = { it.commentId }
+                            ) { comment ->
                                 BoundCommentRow(
                                     comment = comment,
-                                    commentStateMap = commentStateMap,
-                                    userId = userId,
-                                    imageLoader = imageLoader,
-                                    onCommentEvent = { viewModel.onEvent(it) },
-                                    showReplyCount = false
-                                )
-                                HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
-                            }
-                        }
-                        items(
-                            items = newlyAddedComments,
-                            key = { it.commentId }
-                        ) { comment ->
-                            BoundCommentRow(
-                                comment = comment,
-                                commentStateMap = commentStateMap,
-                                userId = userId,
-                                imageLoader = imageLoader,
-                                onCommentEvent = { viewModel.onEvent(it) }
-                            )
-                            HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
-                        }
-
-                        items(
-                            count = replyItems.itemCount,
-                            key = replyItems.itemKey { it.commentId }
-                        ) { index ->
-                            val item = replyItems[index]
-                            if (item != null && item.commentId !in newlyAddedIds) {
-                                BoundCommentRow(
-                                    comment = item,
                                     commentStateMap = commentStateMap,
                                     userId = userId,
                                     imageLoader = imageLoader,
@@ -161,19 +177,44 @@ fun ReplyScreen(
                                 )
                                 HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
                             }
+
+                            items(
+                                count = replyItems.itemCount,
+                                key = replyItems.itemKey { it.commentId }
+                            ) { index ->
+                                val item = replyItems[index]
+                                if (item != null && item.commentId !in newlyAddedIds) {
+                                    BoundCommentRow(
+                                        comment = item,
+                                        commentStateMap = commentStateMap,
+                                        userId = userId,
+                                        imageLoader = imageLoader,
+                                        onCommentEvent = { viewModel.onEvent(it) }
+                                    )
+                                    HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(0.2f))
+                                }
+                            }
+
+
+
+                            pagingAppendItems(
+                                items = replyItems,
+                                context = context
+                            )
+
                         }
 
 
-
-                        pagingAppendItems(
-                            items = replyItems,
-                            context = context
-                        )
-
                     }
-
+                    PullToRefreshDefaults.Indicator(
+                        state = pullToRefreshState,
+                        isRefreshing = isRefreshing,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
 
                 }
+
+
 
             },
             bottomBar = {
