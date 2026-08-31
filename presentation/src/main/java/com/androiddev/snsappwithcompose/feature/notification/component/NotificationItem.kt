@@ -64,7 +64,8 @@ fun NotificationItem(
             )
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = notification.elapsedTime,
+                text = "",
+                //text = notification.elapsedTime,
                 modifier = Modifier
                     .align(Alignment.Start),
                     //.padding(top = 4.dp,start = 40.dp),

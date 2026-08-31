@@ -4,7 +4,7 @@ import android.content.Context
 import com.androiddev.data.remote.api.uploadpost.UploadPostApi
 import com.androiddev.data.remote.dto.toPosts
 import com.androiddev.data.util.safeApiCall
-import com.androiddev.domain.model.Posts
+import com.androiddev.domain.model.Post
 import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -44,7 +44,7 @@ class UploadPostRepositoryImpl @Inject constructor(
         deletedVisualMedia: RequestBody?,
         deletedAudio: RequestBody?,
         text: RequestBody
-    ): Flow<Resource<Posts>> = safeApiCall(
+    ): Flow<Resource<List<Post>>> = safeApiCall(
         context = context,
         apiCall = {
             api.editPost(

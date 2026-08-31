@@ -1,5 +1,6 @@
 package com.androiddev.domain.use_case.postdetail
 
+import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.repository.postdetail.CommentRepository
 import com.androiddev.domain.util.Resource
@@ -9,5 +10,5 @@ import javax.inject.Inject
 class PostComment @Inject constructor(
     private val repository: CommentRepository
 ) {
-    suspend operator fun invoke(postId:Int,text:String,anonymousNick:String? = null): Flow<Resource<Comments>> = repository.postComment(postId,text,anonymousNick)
+    suspend operator fun invoke(postId:Int,text:String,anonymousNick:String? = null): Flow<Resource<List<Comment>>> = repository.postComment(postId,text,anonymousNick)
 }

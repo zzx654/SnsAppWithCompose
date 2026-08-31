@@ -8,16 +8,17 @@ import javax.inject.Inject
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class CurrentUserViewModel @Inject constructor(): ViewModel() {
-    private val _userId: MutableState<Int> = mutableStateOf(0)
+    private val _userId: MutableStateFlow<Int?> = MutableStateFlow(null)
+    val userId: StateFlow<Int?> = _userId.asStateFlow()
     // 로그인 완료 여부
     private val _isSignedIn = MutableStateFlow(false)
     val isSignedIn: StateFlow<Boolean> = _isSignedIn
     var isProfileWritten: Boolean = false
-    val userId: State<Int>
-        get() = _userId
+
 
     fun setUserId(id: Int){
         _userId.value = id

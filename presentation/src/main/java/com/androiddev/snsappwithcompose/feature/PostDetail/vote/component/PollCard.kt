@@ -48,6 +48,7 @@ fun PollCard(
 ) {
     val context = LocalContext.current
     if(voteState.voteOptions.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(10.dp))
         Card(
             modifier = Modifier
                 .padding(16.dp)
@@ -146,6 +147,7 @@ fun PollCard(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(10.dp))
     }
 
 

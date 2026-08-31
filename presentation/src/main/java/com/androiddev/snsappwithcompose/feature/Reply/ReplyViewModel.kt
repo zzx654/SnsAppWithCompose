@@ -1,27 +1,33 @@
 package com.androiddev.snsappwithcompose.feature.Reply
 
-import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.androiddev.domain.model.Comment
-import com.androiddev.domain.model.Comments
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.reply.ReplyUseCases
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
-import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.CommentLikeState
-import com.androiddev.snsappwithcompose.feature.PostDetail.comment.state.GetCommentsState
-import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
-import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
-import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
-import com.androiddev.snsappwithcompose.common.util.Paginator
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
+import com.androiddev.snsappwithcompose.common.navigation.component.Screen
+import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
+import com.androiddev.snsappwithcompose.feature.PostDetail.CommentOption
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,74 +35,69 @@ import javax.inject.Inject
 class ReplyViewModel @Inject constructor(
     private val commentUseCases: CommentUseCases,
     private val replyUseCases: ReplyUseCases,
-    @ApplicationContext context: Context,
-): BaseViewModel(context) {
-    val _commentText = mutableStateOf("")
-    val commentText: State<String>
-        get() = _commentText
-    private val _getCommentsState = mutableStateOf(GetCommentsState())
-    val getCommentsState: State<GetCommentsState>
-        get() = _getCommentsState
-    val _anonymousChecked = mutableStateOf(false)
-    val anonymousChecked: State<Boolean>
-        get() = _anonymousChecked
-    val _ref = mutableStateOf(0)
-    val ref: State<Int>
-        get() = _ref
-    val _postId = mutableStateOf(0)
-    val postId: State<Int>
-        get() = _postId
-    //private val _commentLikeStatusMap = mutableStateMapOf<Int, CommentLikeState>()
-    //val commentLikeStatusMap: Map<Int, CommentLikeState> get() = _commentLikeStatusMap
-    private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
-        CustomBottomSheetDialogState()
-    )
-    val customBottomSheetDialogState: State<CustomBottomSheetDialogState>
-        get() = _customBottomSheetDialogState
-    val commentPaginator =
-        Paginator<Comments, Comment>(loadItems = { handleResult, refresh ->
-            viewModelScope.launch {
-                //등록순인지 인기순인지에 따라 요청하면됨
-                var lastCommentId: Int? = null
-                var lastCommentDate: String? = null
-                with(getCommentsState.value.comments) {
-                    if (isNotEmpty() && !refresh) {
-                        lastCommentDate = last().date
-                        lastCommentId = last().commentId
-                    }
-                }
-                replyUseCases.GetReplies(ref.value,lastCommentId,lastCommentDate)
-                    .collect {
-                        handleResult(it)
-                    }
+    savedStateHandle: SavedStateHandle
+): BaseViewModel() {
 
-            }
-        }, onRefreshUpdated = { isRefreshing ->
-            _getCommentsState.value =
-                _getCommentsState.value.copy(isRefreshing = isRefreshing, endReached = false)
-        }, onLoadUpdated = { isLoading ->
-            _getCommentsState.value = _getCommentsState.value.copy(isLoading = isLoading)
-        }, onError = { message ->
-            _getCommentsState.value = getCommentsState.value.copy(error = message)
-        }, onSuccess = { comments, refresh ->
+    val args: Screen.ReplyScreen = savedStateHandle.toRoute<Screen.ReplyScreen>()
+    private val _originalCommentUiState: MutableStateFlow<OrigianlCommentUiState> = MutableStateFlow(OrigianlCommentUiState())
+    val originalCommentUiState:StateFlow<OrigianlCommentUiState> = _originalCommentUiState.asStateFlow()
+    private val _commentText: MutableState<String> = mutableStateOf("")
+    val commentText: State<String> = _commentText
 
-            val newIds = comments.map { it.commentId }.toSet()
-            _getCommentsState.value = getCommentsState.value.copy(
-                comments = if (refresh) comments else getCommentsState.value.comments.filterNot{ it.commentId in newIds } + comments,
-                endReached = comments.isEmpty() && getCommentsState.value.comments.isNotEmpty()
-            )
-        }, extractItems = { response -> response.comments })
-    fun initComment(comment:Comment){
-        _ref.value = comment.ref
-        _postId.value = comment.postId
-        //_commentLikeStatusMap[comment.commentId?:0] = CommentLikeState(
-        //    isLiked = comment.commentLiked==1,
-        //    likeCount = comment.likeCount
-        //)
-        viewModelScope.launch {
-            commentPaginator.loadNextItems(refresh = true)
+    private val _anonymousChecked = MutableStateFlow(false)
+    val anonymousChecked: StateFlow<Boolean> = _anonymousChecked.asStateFlow()
+
+    private val _newlyAddedComments = MutableStateFlow<List<Comment>>(emptyList())
+    val newlyAddedComments: StateFlow<List<Comment>> = _newlyAddedComments.asStateFlow()
+    val pagingDataStream: Flow<PagingData<Comment>> = originalCommentUiState
+        .map { it.comment }
+        .filterNotNull()
+        .distinctUntilChangedBy{ it.commentId }
+        .flatMapLatest { comment ->
+            replyUseCases.GetReplies(comment.ref)
         }
+        .cachedIn(viewModelScope)
+
+
+
+    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
+    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+    private val _bottomSheetDialogState =  MutableStateFlow(BottomSheetDialogState<CommentOption>())
+    val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
+    private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())
+    val commentStateMap: StateFlow<Map<Int,Comment>> = _commentStateMap.asStateFlow()
+
+    init {
+        fetchComment()
     }
+
+    fun fetchComment() {
+        viewModelScope.launch {
+            replyUseCases.GetSelectedComment(
+                commentId = args.commentId
+            ).collect { result ->
+                result.handle(
+                    onLoading = {
+                        _originalCommentUiState.update {
+                            it.copy(isLoading = true)
+                        }
+                    },
+                    onSuccess = {
+                        _originalCommentUiState.update {
+                            it.copy(comment = result.data?.firstOrNull())
+                        }
+                    },
+                    onFinally = {
+                        _originalCommentUiState.update {
+                            it.copy(isLoading = false)
+                        }
+                    }
+                )
+            }
+        }
+
+    }
+
     fun onEvent(event: CommentEvent) {
         when(event) {
             is CommentEvent.ShowCommentOptions -> {
@@ -112,49 +113,50 @@ class ReplyViewModel @Inject constructor(
             is CommentEvent.ToggleAnonymous -> {
                 _anonymousChecked.value = event.checked
             }
-            is CommentEvent.LoadNextComments -> {
-                viewModelScope.launch {
-                    commentPaginator.loadNextItems(refresh = false)
-                }
-            }
             is CommentEvent.PostReply -> {
                 viewModelScope.launch {
-                    replyUseCases.PostReply(
-                        postId = postId.value,
-                        ref = ref.value,
-                        text = commentText.value,
-                        anonymousNick = if(anonymousChecked.value) generateAnonymousNickname() else null
-                    ).collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
-                                _commentText.value = ""
-                                _getCommentsState.value = getCommentsState.value.copy(comments = listOf(data.comments[0])+getCommentsState.value.comments)
-                            }
-                        )
-                    }
-                }
-
-
-            }
-            is CommentEvent.ToggleLikeComment -> {
-                viewModelScope.launch {
-                    commentUseCases.ToggleLikeComment(event.commentId).collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
-                                val updatedComments = getCommentsState.value.comments.map { comment ->
-                                    if (comment.commentId == event.commentId) {
-                                        comment.toggleLike(isLiked = data.isLiked)
-                                    } else {
-                                        comment
+                    originalCommentUiState.value.comment?.let {
+                        replyUseCases.PostReply(
+                            postId = it.postId,
+                            ref = it.ref,
+                            text = commentText.value,
+                            anonymousNick = if(anonymousChecked.value) generateAnonymousNickname() else null
+                        ).collect { result ->
+                            result.handle(
+                                onSuccess = {
+                                    _commentText.value = ""
+                                    _newlyAddedComments.update { currentList ->
+                                        currentList + it
                                     }
                                 }
-                                _getCommentsState.value = getCommentsState.value.copy(comments = updatedComments)
+                            )
+                        }
+                    }
+                }
+            }
+            is CommentEvent.ToggleLikeComment -> {
+                val comment = event.comment
+                val commentId = comment.commentId ?: return
+                val currentIsLiked = comment.commentLiked == 1
+                val targetIsLiked = !currentIsLiked
 
+                val updatedComment = comment.toggleLike(isLiked = targetIsLiked)
+
+
+                viewModelScope.launch {
+                    commentUseCases.ToggleLikeComment(commentId).collect { result ->
+                        result.handle(
+                            onSuccess = {
+                                _commentStateMap.update { currentMap ->
+                                    currentMap + (commentId to updatedComment)
+                                }
+                            },
+                            onError = {
+                                _commentStateMap.update { currentMap ->
+                                    currentMap + (commentId to comment) // 원래 상태로 원복
+                                }
                             }
                         )
-
                     }
                 }
             }
@@ -164,41 +166,36 @@ class ReplyViewModel @Inject constructor(
 
     }
 
-    private fun showBottomSheetDialog(myUserId:Int,commentUserId:Int) {
-        val items: MutableList<BottomSheetItem> = if(myUserId == commentUserId) {
-            mutableListOf(
-                BottomSheetItem(R.drawable.outline_edit, getString(context, R.string.edit)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_delete, getString(context, R.string.delete)) {
-                    resetBottomSheetDialogState()
-                },
-            )
+    private fun showBottomSheetDialog(myUserId: Int, commentUserId: Int) {
+        val options = if (myUserId == commentUserId) {
+            listOf(CommentOption.Edit, CommentOption.Delete)
         } else {
-            mutableListOf(
-                BottomSheetItem(R.drawable.outline_report, getString(context, R.string.report)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_block, getString(context, R.string.block_user)) {
-                    resetBottomSheetDialogState()
-                },
-                BottomSheetItem(R.drawable.outline_chat, getString(context, R.string.request_chat)) {
-                    resetBottomSheetDialogState()
-                }
-            )
+            listOf(CommentOption.Report, CommentOption.Block, CommentOption.RequestChat)
         }
 
-
-
-
-
-
-        _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
+        _bottomSheetDialogState.value = BottomSheetDialogState(
             showDialog = true,
-            items,
-        ) { resetBottomSheetDialogState() }
+            options = options,
+            onOptionSelected = { option ->
+                resetBottomSheetDialogState()
+                handleCommentOption(option)
+            },
+            onClickCancel = { resetBottomSheetDialogState() }
+        )
     }
+    private fun handleCommentOption(option: CommentOption) {
+        when (option) {
+            CommentOption.Edit -> { resetBottomSheetDialogState() }
+            CommentOption.Delete -> { resetBottomSheetDialogState() }
+            CommentOption.Report -> { resetBottomSheetDialogState() }
+            CommentOption.Block -> { resetBottomSheetDialogState() }
+            CommentOption.RequestChat -> { resetBottomSheetDialogState() }
+        }
+    }
+
     private fun resetBottomSheetDialogState() {
-        _customBottomSheetDialogState.value = CustomBottomSheetDialogState()
+        _bottomSheetDialogState.value = BottomSheetDialogState()
     }
+
+
 }

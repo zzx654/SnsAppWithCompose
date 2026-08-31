@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.androiddev.data.paging.MediaPostPagingSource
+import com.androiddev.data.paging.pagingsource.MediaPostPagingSource
 import com.androiddev.data.remote.api.user.UserApi
 import com.androiddev.data.remote.dto.toToggleFollowResult
 import com.androiddev.data.remote.dto.toUsers

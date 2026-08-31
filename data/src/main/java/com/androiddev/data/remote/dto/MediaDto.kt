@@ -9,5 +9,5 @@ data class MediaDto(
     val type: String,
     val thumbnailurl: String?
 )
-fun MediaDto.toMedia(
+fun MediaDto.toDomain(
 ) = Media(id = id,url = url,type= type, thumbnailUrl = thumbnailurl)

@@ -7,5 +7,5 @@ data class PostsDto (
     val posts:List<PostDto>
 )
 fun PostsDto.toPosts(): List<Post> {
-    return posts.map { it.toPost() }
+    return posts.map { it.toDomain() }
 }

@@ -11,7 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.androiddev.domain.model.NotificationExtra
 import com.androiddev.domain.model.NotificationItem
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
-import com.androiddev.domain.util.elapsedTime
+import com.androiddev.snsappwithcompose.common.util.elapsedTime
 import com.androiddev.snsappwithcompose.MainActivity
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_COMMENT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_FOLLOW
@@ -19,9 +19,6 @@ import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNE
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_COMMENT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_FOLLOW
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_LIKE
-import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_COMMENT
-import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_FOLLOW
-import com.androiddev.snsappwithcompose.common.util.NotificationConstants.NOTIFICATION_ID_LIKE
 import com.androiddev.snsappwithcompose.common.util.NotificationHelper
 import com.androiddev.snsappwithcompose.common.util.isAppInForeground
 import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
@@ -81,8 +78,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 content = content,
                 extrajson = extra,
                 isRead = false,
-                date = date,
-                elapsedTime = elapsedTime(date)
+                date = date
             )
 
             // EventBus로 전달

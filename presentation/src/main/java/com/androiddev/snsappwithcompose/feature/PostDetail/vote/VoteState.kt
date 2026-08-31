@@ -7,5 +7,5 @@ data class VoteState(
     val hasVoted: Boolean = false,
     val selectedChoiceId: Int? = null,
     val voteOptions: List<VoteOptionInfo> = listOf(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = true
 )

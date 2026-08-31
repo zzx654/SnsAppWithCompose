@@ -8,7 +8,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.Tag
 import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
@@ -22,8 +24,12 @@ import com.androiddev.data.util.getMultipartBody
 import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.Posts
+import com.androiddev.domain.repository.postdetail.PostRepository
+import com.androiddev.snsappwithcompose.common.navigation.component.Screen
+import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
+import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.EditableImage
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.androiddev.snsappwithcompose.feature.upload_post.util.getVideoThumbnail
@@ -33,6 +39,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -45,9 +54,12 @@ import javax.inject.Inject
 @HiltViewModel
 class UploadPostViewModel @Inject constructor(
     private val uploadPostUseCases: UploadPostUseCases,
+    private val postRepository: PostRepository,
+    savedStateHandle: SavedStateHandle,
     @ApplicationContext context: Context,
 ): BaseViewModel(context) {
 
+    val args: Screen.UploadPostScreen = savedStateHandle.toRoute<Screen.UploadPostScreen>()
     //이미지,거리,음성녹음,투표,
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
@@ -72,14 +84,22 @@ class UploadPostViewModel @Inject constructor(
     private val _locationOnOff = mutableStateOf(false)
     val locationOnOff: State<Boolean>
         get() = _locationOnOff
-    var postMode: PostMode? = PostMode.CREATE
-        private set
-    var postId: Int? = null
+    //var postId: Int? = null
     var isInitialized = false
         private set
+    private val _postMode = MutableStateFlow(PostMode.CREATE)
+    val postMode: StateFlow<PostMode>
+        get() = _postMode
+    private val _cachedVote:MutableStateFlow<String?> =  MutableStateFlow(null)
+    val cachedVote = _cachedVote.asStateFlow()
+    private val _cachedAudio:MutableStateFlow<String?> = MutableStateFlow(null)
+    val cachedAudio:StateFlow<String?> = _cachedAudio.asStateFlow()
+
+    private val _cachedText:MutableStateFlow<String> = MutableStateFlow("")
+    val cachedText:StateFlow<String> = _cachedText.asStateFlow()
 
     init {
-        if (postMode == PostMode.CREATE) {
+        if (postMode.value == PostMode.CREATE) {
             checkPermissions(
                 context = context,
                 permissions = arrayOf(
@@ -90,6 +110,7 @@ class UploadPostViewModel @Inject constructor(
                 onUnGranted = { _locationOnOff.value = false }
             )
         }
+        loadCachedPost()
 
     }
     private fun addMedia(context: Context,uriList: List<Uri>) {
@@ -116,46 +137,52 @@ class UploadPostViewModel @Inject constructor(
 
         }
     }
+    private fun loadCachedPost() {
+        args.postId?.let {
+            val cachedPost = postRepository.getCachedPost(it)
+            if (cachedPost != null) {
+                _postMode.value = PostMode.EDIT
+                val tags = cachedPost.tags?.split('#')?.filter { it.isNotBlank() }
+                tags?.let {
+                    _addedTags.addAll(it)
+                }
+                _anonymous.value = cachedPost.anonymousNickname!=null
+                _locationOnOff.value = cachedPost.location != null
+                _cachedVote.value = cachedPost.vote
+                _cachedText.value = cachedPost.text
 
-    fun initPost(post: Post) {
-        if (!isInitialized) {
-            postMode = PostMode.EDIT
-            postId = post.postId
-            post.tags?.let {
-                _addedTags.addAll(it)
-            }
-            _anonymous.value = post.anonymousNickname!=null
-            _locationOnOff.value = post.location != null
-            val visualMedia = post.media.filter{ it.type == MEDIA_TYPE_IMAGE || it.type == MEDIA_TYPE_VIDEO }
-            if(visualMedia.isNotEmpty()) {
+                _cachedAudio.value = cachedPost.media.firstOrNull { it.type == MEDIA_TYPE_AUDIO }?.url
+                val visualMedia = cachedPost.media.filter{ it.type == MEDIA_TYPE_IMAGE || it.type == MEDIA_TYPE_VIDEO }
+                if(visualMedia.isNotEmpty()) {
 
-                _selectedMediaItems.clear()
-                _selectedMediaItems.addAll(
-                    visualMedia.map { media ->
-                        if (media.type == MEDIA_TYPE_VIDEO) {
+                    _selectedMediaItems.clear()
+                    _selectedMediaItems.addAll(
+                        visualMedia.map { media ->
+                            if (media.type == MEDIA_TYPE_VIDEO) {
 
-                            MediaItem(
-                                type = MediaType.VIDEO,
-                                remotePath = media.url,
-                                remoteThumbnailPath = media.thumbnailUrl,
-                                isNew = false
-                            )
-                        } else {
-                            MediaItem(
-                                type = MediaType.IMAGE,
-                                remotePath = media.url
-                                ,isNew = false)
+                                MediaItem(
+                                    type = MediaType.VIDEO,
+                                    remotePath = media.url,
+                                    remoteThumbnailPath = media.thumbnailUrl,
+                                    isNew = false
+                                )
+                            } else {
+                                MediaItem(
+                                    type = MediaType.IMAGE,
+                                    remotePath = media.url
+                                    ,isNew = false)
+                            }
                         }
-                    }
-                )
+                    )
+
+                }
 
             }
-
-            isInitialized = true
         }
 
 
     }
+
 
     fun onEvent(event: UploadPostEvent) {
         when (event) {
@@ -254,7 +281,7 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is UploadPostEvent.ToggleLocationOnOff -> {
-                if (postMode == PostMode.CREATE) {
+                if (postMode.value == PostMode.CREATE) {
                     val message = if (event.onOff) getString(
                         context,
                         R.string.location_on
@@ -269,11 +296,11 @@ class UploadPostViewModel @Inject constructor(
                     }
                 } else {
                     viewModelScope.launch {
-                     //   setEvent(
-                     //       UiEvent.ShowToast(
-                     //           getString(context, R.string.unable_to_change_location)
-                     //       )
-                    //    )
+                        setEvent(
+                            UiEvent.ShowToast(
+                                UiText.StringResource(R.string.unable_to_change_location)
+                            )
+                        )
 
                     }
                 }
@@ -299,7 +326,7 @@ class UploadPostViewModel @Inject constructor(
     private fun handleUploadPost(event: UploadPostEvent.UploadPost) {
         viewModelScope.launch {
             val requestBodies = buildRequestBodies(event)
-            when (postMode) {
+            when (postMode.value) {
                 PostMode.CREATE -> uploadNewPost(requestBodies, event)
                 PostMode.EDIT -> editExistingPost(requestBodies, event)
                 else -> null
@@ -386,21 +413,25 @@ class UploadPostViewModel @Inject constructor(
         val deletedVisualMediaJson = Gson().toJson(deletedVisualMedia)
         val deletedVisualMediaBody =
             deletedVisualMediaJson.toRequestBody("application/json".toMediaTypeOrNull())
+        args.postId?.let { postId ->
+            uploadPostUseCases.editPost(
+                postid = MultipartBody.Part.createFormData("postid", postId.toString()),
+                latitude = data.latitude,
+                longitude = data.longitude,
+                anonymousNick = if (anonymous.value)
+                    generateAnonymousNickname().toRequestBody("text/plain".toMediaTypeOrNull())
+                else null,
+                deletedVisualMedia = deletedVisualMediaBody,
+                tags = data.tags,
+                media = data.media,
+                mediaTypes = data.mediaTypes,
+                deletedAudio = event.deleteAudio?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                text = data.text
+            ).collect { handleResult(it) }
 
-        uploadPostUseCases.editPost(
-            postid = MultipartBody.Part.createFormData("postid", postId.toString()),
-            latitude = data.latitude,
-            longitude = data.longitude,
-            anonymousNick = if (anonymous.value)
-                generateAnonymousNickname().toRequestBody("text/plain".toMediaTypeOrNull())
-            else null,
-            deletedVisualMedia = deletedVisualMediaBody,
-            tags = data.tags,
-            media = data.media,
-            mediaTypes = data.mediaTypes,
-            deletedAudio = event.deleteAudio?.toRequestBody("text/plain".toMediaTypeOrNull()),
-            text = data.text
-        ).collect { handleResult(it) }
+        }
+
+
     }
 
     private suspend fun <T> handleResult(
@@ -412,13 +443,11 @@ class UploadPostViewModel @Inject constructor(
                 setEvent(UiEvent.popBackStack)
             },
             onSuccess = { data ->
-                if (result.data is Posts) {
-                    val data = result.data as Posts
+                if (result.data is List<*>) {
+                    val data = result.data as List<Post>
+                    postRepository.updateCachedPost(data.first())
                     setEvent(
-                        UiEvent.PopBackStackWithResult(
-                            getString(context, R.string.editedPost),
-                            data.posts.first()
-                        )
+                        UiEvent.popBackStack
                     )
                 }
             }

@@ -28,7 +28,6 @@ interface CommentApi {
     @FormUrlEncoded
     @POST("comment/getSelectedComment")
     suspend fun getSelectedComment(
-        @Field("postid")postid: Int,
         @Field("commentid")commentid: Int?,
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
@@ -43,7 +42,7 @@ interface CommentApi {
     suspend fun getPopularComments(
         @Field("postid")postid: Int,
         @Field("commentid")commentid: Int?,
-        @Field("score")score : Int
+        @Field("score")score : Int?
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
     @POST("comment/postComment")

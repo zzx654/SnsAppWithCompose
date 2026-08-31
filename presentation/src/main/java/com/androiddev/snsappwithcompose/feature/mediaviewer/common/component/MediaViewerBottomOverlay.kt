@@ -31,7 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androiddev.domain.model.MediaPost
-import com.androiddev.domain.util.elapsedTime
+import com.androiddev.snsappwithcompose.common.util.elapsedTime
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.component.VideoSeekBar
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.text.SpanStyle

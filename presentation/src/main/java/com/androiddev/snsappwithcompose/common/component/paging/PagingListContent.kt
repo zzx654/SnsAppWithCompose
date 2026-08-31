@@ -1,6 +1,7 @@
 package com.androiddev.snsappwithcompose.common.component.paging
 
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -8,16 +9,21 @@ import androidx.paging.compose.LazyPagingItems
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -29,7 +35,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.paging.LoadState
 import androidx.paging.compose.itemKey
@@ -178,18 +186,32 @@ fun DefaultErrorView(
     modifier: Modifier = Modifier,
     context: Context
 ) {
-    Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {
-        Text(text = message)
-        Button(onClick = onRetry, modifier = Modifier.padding(top = 8.dp)) {
-            Text(text = getString(context, R.string.retry))
+    Box(modifier = modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Error,
+                contentDescription = null,
+                tint = Color.DarkGray.copy(0.8f),
+            )
+            Text(
+                text = message,
+                fontSize = 14.sp,
+                modifier = Modifier.clickable { onRetry() }.padding(top= 5.dp),
+                textAlign = TextAlign.Center
+            )
+
         }
+
     }
 }
 
 // 기본 빈 화면 뷰
 @Composable
-fun DefaultEmptyView(emptyMessage:String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+fun DefaultEmptyView(emptyMessage:String,modifier:Modifier = Modifier) {
+    Box(modifier = Modifier.fillMaxSize().height(100.dp), contentAlignment = Alignment.Center) {
         Text(text = emptyMessage)
     }
 }

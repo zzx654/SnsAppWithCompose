@@ -65,7 +65,7 @@ fun PostPreviewItemm(
         modifier = modifier.fillMaxWidth().background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        uiState.post.tags?.let { tags ->
+        uiState.tags?.let { tags ->
             Chips(
                 modifier = Modifier.fillMaxWidth(0.9f).padding(top = 10.dp),
                 list = tags.map{"#$it"},
@@ -143,7 +143,7 @@ fun PostPreviewItemm(
         ) {
 
 
-            Text(text = "${generateDisplayName(LocalContext.current,uiState.post.nickname,uiState.post.anonymousNickname)} · ${uiState.post.elapsedTime}", fontSize = 14.sp,color = Color.Gray)
+            Text(text = "${uiState.displayUserName.asString()} · ${uiState.elapsedTime}", fontSize = 14.sp,color = Color.Gray)
         }
 
         Spacer(modifier = Modifier.height(7.dp))

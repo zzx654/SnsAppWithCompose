@@ -31,13 +31,13 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
 
 
 
-    protected fun emitUiEvent(event: UiEvent) {
+    fun emitUiEvent(event: UiEvent) {
         viewModelScope.launch {
             _eventFlow.emit(event)
         }
     }
 
-    protected fun setLoading(loading: Boolean) {
+    fun setLoading(loading: Boolean) {
         _isLoading.value = loading
     }
     suspend fun setEvent(event: UiEvent) = withContext(Dispatchers.Main) {
@@ -48,11 +48,12 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
         onSuccess: suspend (T) -> Unit = {},
         onSuccessUnit: suspend () -> Unit = {},
         onError: (suspend () -> Unit)? = null,
-        onTokenExpired: (suspend () -> Unit)? = null
+        onTokenExpired: (suspend () -> Unit)? = null,
+        onFinally: () -> Unit = { setLoading(false) }
     ) {
         when (resource) {
             is Resource.Success -> {
-                setLoading(false)
+                onFinally()
                 resource.data?.let {
                     onSuccess(it)
                 } ?: run {
@@ -61,7 +62,7 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
             }
             is Resource.Loading -> setLoading(true)
             is Resource.Error -> {
-                setLoading(false)
+                onFinally()
                 onError?.invoke()
                 //  ?: setEvent(
                 //     UiEvent.ShowToast(resource.message ?: getString(
@@ -71,7 +72,7 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
             }
             is Resource.TokenExpired -> {
                 // 토큰 만료 시 공통 처리
-                setLoading(false)
+                onFinally()
                 onTokenExpired?.invoke()?:   setEvent(
                     UiEvent.navigate(
                         screen = Screen.SignInScreen
@@ -82,47 +83,37 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
     }
 
     protected inline fun <T> Resource<T>.handle(
-
+        onLoading: () -> Unit = { setLoading(true) },
         onSuccess: (T) -> Unit = {},
-        onError: (UiText) -> Unit = { uiText ->
-            emitUiEvent(UiEvent.ShowToast(uiText)) },
-        onTokenExpired: () -> Unit = {
-
-// 기본 토큰 만료 처리
-
-            emitUiEvent(UiEvent.navigate(
-
-                screen = Screen.SignInScreen
-
-            ))
-
-        }
-
+        onSuccessUnit:() -> Unit ={},
+        onError: (UiText) -> Unit = { uiText -> emitUiEvent(UiEvent.ShowToast(uiText)) },
+        onTokenExpired: () -> Unit = { emitUiEvent(UiEvent.navigate(screen = Screen.SignInScreen)) },
+        onFinally: () -> Unit = { setLoading(false) }
     ): Resource<T> {
 
-
-        setLoading(this is Resource.Loading)
-
-
         when (this) {
-            is Resource.Success -> data?.let(onSuccess)
+            is Resource.Loading -> onLoading()
+            is Resource.Success -> {
+                onFinally() //
+                data?.let {
+                    onSuccess(it)
+                }?:onSuccessUnit()
+            }
             is Resource.Error -> {
-
-                //DataError가 들어왔으면 toUiText() 매퍼 실행
-                //기존 String message만 넘어온 레거시 코드면 DynamicString으로 처리 (호환성 유지)
-                //둘 다 없으면 기본 알 수 없는 에러 문자열 사용
+                onFinally() //
                 val errorUiText = error?.toUiText()
                     ?: message?.let { UiText.DynamicString(it) }
                     ?: UiText.StringResource(R.string.error)
 
                 onError(errorUiText)
             }
-            is Resource.TokenExpired -> onTokenExpired()
-            is Resource.Loading -> { /* setLoading으로 처리 완료 */ }
+            is Resource.TokenExpired -> {
+                onFinally() //
+                onTokenExpired()
+            }
         }
 
         return this
-
     }
 
 }

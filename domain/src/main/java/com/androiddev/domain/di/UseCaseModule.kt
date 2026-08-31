@@ -7,10 +7,8 @@ import com.androiddev.domain.repository.createprofile.CreateProfileRepository
 import com.androiddev.domain.repository.fcm.FcmRepository
 import com.androiddev.domain.repository.notification.NotificationRepository
 import com.androiddev.domain.repository.postlist.GetPostsRepository
-import com.androiddev.domain.repository.postdetail.PostRepository
 import com.androiddev.domain.repository.signin.SigninRepository
 import com.androiddev.domain.repository.signup.SignupRepository
-import com.androiddev.domain.repository.postdetail.ToggleLikePostRepository
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.repository.postdetail.VoteRepository
@@ -19,7 +17,6 @@ import com.androiddev.domain.use_case.signup.authphone.AuthPhoneUseCases
 import com.androiddev.domain.use_case.signup.authphone.AuthenticateCode
 import com.androiddev.domain.use_case.postdetail.CancelVote
 import com.androiddev.domain.use_case.createprofile.CheckNickname
-import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.createprofile.CreateProfile
 import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
@@ -28,27 +25,16 @@ import com.androiddev.domain.use_case.notification.GetNotifications
 import com.androiddev.domain.use_case.notification.NotificationUseCases
 import com.androiddev.domain.use_case.notification.ReadAllNotifications
 import com.androiddev.domain.use_case.notification.ReadNotification
-import com.androiddev.domain.use_case.postdetail.DeletePost
 import com.androiddev.domain.use_case.uploadpost.EditPost
 import com.androiddev.domain.use_case.signin.EmailSignIn
 import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUp
 import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUpUseCases
-import com.androiddev.domain.use_case.postdetail.GetComments
-import com.androiddev.domain.use_case.postdetail.GetNotificationComment
 import com.androiddev.domain.use_case.postlist.GetNearPosts
-import com.androiddev.domain.use_case.postdetail.GetPopularComments
-import com.androiddev.domain.use_case.postdetail.GetPost
 import com.androiddev.domain.use_case.postlist.GetNewPosts
 import com.androiddev.domain.use_case.postlist.GetNewTagPosts
 import com.androiddev.domain.use_case.postlist.GetPopularTagPosts
 import com.androiddev.domain.use_case.postlist.GetPostsUseCases
-import com.androiddev.domain.use_case.reply.GetReplies
-import com.androiddev.domain.use_case.postdetail.GetSelectedComment
 import com.androiddev.domain.use_case.postdetail.GetVoteInfo
-import com.androiddev.domain.use_case.postdetail.PostComment
-import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
-import com.androiddev.domain.use_case.reply.PostReply
-import com.androiddev.domain.use_case.reply.ReplyUseCases
 import com.androiddev.domain.use_case.tag.GetTags
 import com.androiddev.domain.use_case.signup.emailsignup.RequestEmailAuthCode
 import com.androiddev.domain.use_case.signup.authphone.RequestPhoneAuthCode
@@ -57,8 +43,6 @@ import com.androiddev.domain.use_case.signin.SignInUseCases
 import com.androiddev.domain.use_case.signin.SignInWithToken
 import com.androiddev.domain.use_case.signin.SocialSignIn
 import com.androiddev.domain.use_case.signup.socialsignup.SocialSignUpUseCase
-import com.androiddev.domain.use_case.postdetail.ToggleLikeComment
-import com.androiddev.domain.use_case.postdetail.ToggleLikePost
 import com.androiddev.domain.use_case.tag.TagUseCases
 import com.androiddev.domain.use_case.tag.ToggleFavoriteTag
 import com.androiddev.domain.use_case.uploadpost.UploadPost
@@ -159,7 +143,7 @@ object UseCaseModule {
             GetPost = GetPost(postRepository)
         )
     }**/
-    @Provides
+    /**@Provides
     @Singleton
     fun provideCommentUseCases(
         commentRepository: CommentRepository
@@ -172,17 +156,7 @@ object UseCaseModule {
             ToggleLikeComment = ToggleLikeComment(commentRepository),
             GetNotificationComment = GetNotificationComment(commentRepository)
         )
-    }
-    @Provides
-    @Singleton
-    fun provideReplyUseCases(
-        commentRepository: CommentRepository
-    ): ReplyUseCases {
-        return ReplyUseCases(
-            GetReplies = GetReplies(commentRepository),
-            PostReply = PostReply(commentRepository)
-        )
-    }
+    }**/
     @Provides
     @Singleton
     fun provideVoteUseCases(

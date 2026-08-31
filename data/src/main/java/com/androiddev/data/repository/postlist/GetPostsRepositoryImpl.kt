@@ -2,16 +2,9 @@ package com.androiddev.data.repository.postlist
 
 import com.androiddev.data.util.safeApiCall
 import android.content.Context
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.PagingSourceFactory
-import com.androiddev.data.paging.PostPagingSource
 import com.androiddev.data.remote.api.postlist.GetPostsApi
 import com.androiddev.data.remote.dto.toPostPreview
 import com.androiddev.data.remote.dto.toPosts
-import com.androiddev.domain.model.PostPreview
-import com.androiddev.domain.model.PostQuery
 import com.androiddev.domain.model.Posts
 import com.androiddev.domain.repository.postlist.GetPostsRepository
 import com.androiddev.domain.util.Resource

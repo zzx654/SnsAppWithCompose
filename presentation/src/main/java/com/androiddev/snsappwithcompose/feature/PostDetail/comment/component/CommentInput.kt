@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CommentInput(
-    comment: String,
+    comment: () -> String,
     onCommentChange: (String) -> Unit,
     onPostClick: () -> Unit,
     isAnonymous: Boolean,
@@ -96,7 +96,7 @@ fun CommentInput(
                     .padding(8.dp)
             ) {
                 BasicTextField(
-                    value = comment,
+                    value = comment(),
                     onValueChange = {
                         onCommentChange(it)
 
@@ -120,7 +120,7 @@ fun CommentInput(
                         textLayoutResult = layoutResult
                     },
                     decorationBox = { innerTextField ->
-                        if (comment.isEmpty()) {
+                        if (comment().isEmpty()) {
                             Text(getString(LocalContext.current, R.string.input_comment), color = Color.Gray)
                         }
                         innerTextField()
@@ -137,7 +137,7 @@ fun CommentInput(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "게시",
-                        tint = if (comment.isEmpty()) Color.LightGray else Color.Black
+                        tint = if (comment().isEmpty()) Color.LightGray else Color.Black
                     )
                 }
             }

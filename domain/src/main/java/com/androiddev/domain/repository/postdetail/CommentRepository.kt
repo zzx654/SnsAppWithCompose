@@ -1,6 +1,9 @@
 package com.androiddev.domain.repository.postdetail
 
 
+import androidx.paging.PagingData
+import com.androiddev.domain.model.Comment
+import com.androiddev.domain.model.CommentSortType
 import com.androiddev.domain.model.Comments
 import com.androiddev.domain.model.NotificationComment
 import com.androiddev.domain.model.ToggleLikeResult
@@ -12,36 +15,27 @@ interface CommentRepository {
         commentId:Int
     ): Flow<Resource<NotificationComment>>
     suspend fun getReplies(
-        ref: Int,
-        commentId: Int?,
-        commentDate: String?
-    ): Flow<Resource<Comments>>
+        ref: Int
+    ): Flow<PagingData<Comment>>
     suspend fun getSelectedComment(
-        postId:Int,
         commentId:Int
-    ): Flow<Resource<Comments>>
+    ): Flow<Resource<List<Comment>>>
     suspend fun getComments(
         postId: Int,
-        commentId: Int?,
-        commentDate: String?
-    ): Flow<Resource<Comments>>
+        sortType: CommentSortType
+    ): Flow<PagingData<Comment>>
 
-    suspend fun getPopularComments(
-        postId: Int,
-        commentId: Int?,
-        score: Int,
-    ): Flow<Resource<Comments>>
     suspend fun postComment(
         postId:Int,
         text: String,
         anonymousNick:String?
-    ): Flow<Resource<Comments>>
+    ): Flow<Resource<List<Comment>>>
     suspend fun postReply(
         postId: Int,
         ref: Int,
         text: String,
         anonymousNick: String?
-    ): Flow<Resource<Comments>>
+    ): Flow<Resource<List<Comment>>>
 
     suspend fun toggleLikeComment(commentId:Int) : Flow<Resource<ToggleLikeResult>>
 }
