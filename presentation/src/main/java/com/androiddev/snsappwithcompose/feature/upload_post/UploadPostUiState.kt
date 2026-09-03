@@ -6,6 +6,5 @@ data class UploadPostUiState(
     val contentText: String = "",
     val isAnonymous: Boolean = false,
     val selectedMediaItems: List<MediaItem> = emptyList(),
-    val isLocationOn: Boolean = false,
-    val isLoading: Boolean = false
+    val isLocationOn: Boolean = false
 )

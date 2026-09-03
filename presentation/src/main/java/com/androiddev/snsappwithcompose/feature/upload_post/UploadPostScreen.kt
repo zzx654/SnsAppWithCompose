@@ -55,6 +55,7 @@ import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
+import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.MediaItemFactory
@@ -108,6 +109,8 @@ fun UploadPostScreen(
 
     val searchTagUiState by viewModel.searchTagUiState.collectAsStateWithLifecycle()
 
+    val voteUiState by createVoteViewModel.uiState.collectAsStateWithLifecycle()
+    val manageVoteDialogState by createVoteViewModel.manageVoteDialogState.collectAsStateWithLifecycle()
     val mediaItemFactory = remember(context) { MediaItemFactory(context) }
     val launchMediaPicker = rememberMediaPicker { uris ->
         scope.launch {
@@ -179,11 +182,8 @@ fun UploadPostScreen(
     LaunchedEffect(contentTextFieldState.text) {
         viewModel.onEvent(UploadPostEvent.TypeContent(contentTextFieldState.text.toString()))
     }
-    CustomBottomSheetDialog(
-        { createVoteViewModel.manageVoteDialogState.value.showDialog },
-        { createVoteViewModel.manageVoteDialogState.value.items },
-        createVoteViewModel.manageVoteDialogState.value.onClickCancel
-    )
+
+    SelectorBottomSheetDialog(manageVoteDialogState)
     BottomRecorder(
       showDialog = { recordViewModel.bottomRecordDialogState.value.showDialog },
       onClickCancel = recordViewModel.bottomRecordDialogState.value.onClickCancel,
@@ -194,7 +194,8 @@ fun UploadPostScreen(
       viewModel = recordViewModel
     )
     BottomVoteOptions(
-        createVoteViewModel
+        uiState = voteUiState,
+        onVoteEvent = { createVoteViewModel.onEvent(it) }
     )
     AlertDialog(
         title = { recordViewModel.recordingAlertDialogState.value.title },
@@ -223,7 +224,7 @@ fun UploadPostScreen(
                         IconButton(onClick = {
                             viewModel.onEvent(UploadPostEvent.UploadPost(
                                 audioFilePath = recordViewModel.recordedFilePath.value,
-                                voteOptions = createVoteViewModel.savedVoteOptions,
+                                voteOptions = voteUiState.savedVoteOptions,
                                 deletedAudio = recordViewModel.deletedAudio
                             ))
 
@@ -283,7 +284,7 @@ fun UploadPostScreen(
                             modifier = Modifier.size(58.dp),
                             onClick = { createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteClick(postMode = postMode))}
                         ) {
-                            UploadVoteIcon(createVoteViewModel.saved.value) { }
+                            UploadVoteIcon(voteUiState.saved) { }
                         }
                         IconButton(
                             modifier = Modifier.size(58.dp),
