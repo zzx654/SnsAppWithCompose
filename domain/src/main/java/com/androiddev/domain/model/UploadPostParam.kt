@@ -9,8 +9,6 @@ data class UploadPostParam(
     val tags: List<String> = emptyList(),
     val mediaItems: List<MediaParam> = emptyList(), // 로컬 Uri/Path 정보
     val audioPath: String? = null,
-    val deleteAudio: String? = null,
-    val deletedVisualMedia: List<String> = emptyList(),
     val isAnonymous: Boolean = false,
     val isLocationEnabled: Boolean = false,
     val voteOptions: List<String> = emptyList()

@@ -48,25 +48,34 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostPreview
+import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
+import com.androiddev.snsappwithcompose.common.util.MediaItemFactory
 import com.androiddev.snsappwithcompose.common.util.rememberMediaPicker
 import com.androiddev.snsappwithcompose.feature.upload_post.component.CheckBoxWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.ContentTextField
+import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedMediaCards
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadRecordIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadVoteIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.record.BottomRecorder
 import com.androiddev.snsappwithcompose.feature.upload_post.record.RecordEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.record.RecordViewModel
+import com.androiddev.snsappwithcompose.feature.upload_post.util.getVideoThumbnail
+import com.androiddev.snsappwithcompose.feature.upload_post.util.isVideo
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.BottomVoteOptions
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "RestrictedApi", "SuspiciousIndentation",
@@ -82,6 +91,7 @@ fun UploadPostScreen(
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
     val postMode by viewModel.postMode.collectAsStateWithLifecycle()
@@ -94,66 +104,50 @@ fun UploadPostScreen(
     val cachedAudio by viewModel.cachedAudio.collectAsStateWithLifecycle()
 
 
-    //val formattedTime = "%02d:%02d".format(elapsed / 60, elapsed % 60)
-    val fusedLocationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
-    val launchMediaPicker = rememberMediaPicker { uriList ->
-        viewModel.onEvent(UploadPostEvent.AddMedia(uriList))
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val searchTagUiState by viewModel.searchTagUiState.collectAsStateWithLifecycle()
+
+    val mediaItemFactory = remember(context) { MediaItemFactory(context) }
+    val launchMediaPicker = rememberMediaPicker { uris ->
+        scope.launch {
+            val mediaItems = mediaItemFactory.createMediaItems(uris)
+            viewModel.onEvent(UploadPostEvent.AddMedia(mediaItems))
+        }
     }
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
         //val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
     }
-    LoadingDialogWithText(
-        text = getString(context,R.string.uploading_alert),
-        isLoading = { viewModel.isLoading.value}
-    )
-    LaunchedEffect(cachedVote) {
 
+    LaunchedEffect(Unit) {
+        if(postMode == PostMode.CREATE) {
+            checkPermissions(
+                context = context,
+                permissions = arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ),
+                onGranted = { viewModel.setLocationOnOff(true) },
+                onUnGranted = { viewModel.setLocationOnOff(false) }
+            )
+        }
+    }
+    LaunchedEffect(cachedVote) {
         if(cachedVote!=null)
             createVoteViewModel.initVoteState()
-
     }
     LaunchedEffect(cachedText) {
         if(cachedText.isNotEmpty()) {
             contentTextFieldState.edit {
                 replace(0, contentTextFieldState.text.toString().length, cachedText)
             }
-
         }
-
     }
     LaunchedEffect(cachedAudio) {
         cachedAudio?.let {
             recordViewModel.initRecordState(remotePath = it)
-        }
-    }
-    LaunchedEffect(true) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
-                }
-
-                is UiEvent.navigate -> {
-                    navController.navigate(event.screen)
-                }
-
-                UiEvent.popBackStack -> {
-                    navController.popBackStack()
-                }
-                is UiEvent.PopBackStackWithResult<*> -> {
-                    navController.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(event.key, event.value)
-                    navController.popBackStack()
-                }
-            }
         }
     }
     LaunchedEffect(true) {
@@ -209,211 +203,188 @@ fun UploadPostScreen(
         onClickConfirm = recordViewModel.recordingAlertDialogState.value.onClickConfirm,
         onClickCancel = recordViewModel.recordingAlertDialogState.value.onClickCancel
     )
-    BaseScaffold(
-        focusManager = focusManager,
-        topBar = {
-            CenterAlignedTopBar(
-                title = stringResource(R.string.upload_post),
-                onBackClick = { navController.popBackStack() },
-                rightAction = {
-                    IconButton(onClick = {
-                        if (viewModel.locationOnOff.value) {
-                            checkPermissions(
-                                context = context,
-                                permissions = arrayOf(
-                                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                                    Manifest.permission.ACCESS_FINE_LOCATION
-                                ),
-                                onGranted = {
-                                    fetchLocation(fusedLocationClient) { latitude, longitude ->
-                                        viewModel.onEvent(
-                                            UploadPostEvent.UploadPost(
-                                                lat = latitude,
-                                                long = longitude,
-                                                audioFilePath = recordViewModel.recordedFilePath.value,
-                                                deleteAudio = recordViewModel.deletedAudio,
-                                                voteOptions = createVoteViewModel.savedVoteOptions
+    BaseScreen(
+        viewModel = viewModel,
+        navController = navController,
+        loadingContent = {
+            LoadingDialogWithText(
+                text = stringResource(R.string.uploading_alert),
+                isLoading = { viewModel.isLoading.value }
+            )
+        }
+    ) {
+        BaseScaffold(
+            focusManager = focusManager,
+            topBar = {
+                CenterAlignedTopBar(
+                    title = stringResource(R.string.upload_post),
+                    onBackClick = { navController.popBackStack() },
+                    rightAction = {
+                        IconButton(onClick = {
+                            viewModel.onEvent(UploadPostEvent.UploadPost(
+                                audioFilePath = recordViewModel.recordedFilePath.value,
+                                voteOptions = createVoteViewModel.savedVoteOptions,
+                                deletedAudio = recordViewModel.deletedAudio
+                            ))
+
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                )
+            },
+            bottomBar = {
+                Surface(shadowElevation = 10.dp) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.DarkGray.copy(0.35f)),
+                    ) {
+                        Spacer(modifier = Modifier.width(5.dp))
+                        IconButton(
+                            modifier = Modifier.size(58.dp),
+                            onClick = launchMediaPicker
+                        ) {
+                            Icon(
+                                Icons.Default.Photo,
+                                contentDescription = null,
+                            )
+                        }
+
+                        IconButton(
+                            modifier = Modifier.size(58.dp),
+                            onClick = {
+                                checkPermissions(
+                                    context = context,
+                                    permissions = arrayOf(
+                                        Manifest.permission.RECORD_AUDIO
+                                    ),
+                                    onGranted = {
+                                        recordViewModel.onEvent(RecordEvent.OnAddRecordClick)
+                                    },
+                                    onUnGranted = {
+                                        launcherMultiplePermissions.launch(
+                                            arrayOf(
+                                                Manifest.permission.RECORD_AUDIO
                                             )
                                         )
                                     }
-                                },
-                                onUnGranted = {
-                                    //viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))
-                                }
-                            )
-                        } else {
-                            viewModel.onEvent(UploadPostEvent.UploadPost(
-                                audioFilePath = recordViewModel.recordedFilePath.value,
-                                voteOptions = createVoteViewModel.savedVoteOptions
-                            ))
+                                )
+                            },
+
+                            ) {
+                            UploadRecordIcon(recordViewModel.recorded.value) { }
                         }
 
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null
-                        )
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            Surface(shadowElevation = 10.dp) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.DarkGray.copy(0.35f)),
-                ) {
-                    Spacer(modifier = Modifier.width(5.dp))
-                    IconButton(
-                        modifier = Modifier.size(58.dp),
-                        onClick = launchMediaPicker
-                    ) {
-                        Icon(
-                            Icons.Default.Photo,
-                            contentDescription = null,
-                        )
-                    }
-
-                    IconButton(
-                        modifier = Modifier.size(58.dp),
-                        onClick = {
-                            checkPermissions(
-                                context = context,
-                                permissions = arrayOf(
-                                    Manifest.permission.RECORD_AUDIO
-                                ),
-                                onGranted = {
-                                    recordViewModel.onEvent(RecordEvent.OnAddRecordClick)
-                                },
-                                onUnGranted = {
-                                    launcherMultiplePermissions.launch(
-                                        arrayOf(
-                                            Manifest.permission.RECORD_AUDIO
+                        IconButton(
+                            modifier = Modifier.size(58.dp),
+                            onClick = { createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteClick(postMode = postMode))}
+                        ) {
+                            UploadVoteIcon(createVoteViewModel.saved.value) { }
+                        }
+                        IconButton(
+                            modifier = Modifier.size(58.dp),
+                            onClick = {
+                                checkPermissions(
+                                    context = context,
+                                    permissions = arrayOf(
+                                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        Manifest.permission.ACCESS_FINE_LOCATION
+                                    ),
+                                    onGranted = {
+                                        viewModel.onEvent(
+                                            UploadPostEvent.ToggleLocationOnOff
                                         )
-                                    )
-                                }
-                            )
-                        },
-
-                    ) {
-                        UploadRecordIcon(recordViewModel.recorded.value) { }
-                    }
-
-                    IconButton(
-                        modifier = Modifier.size(58.dp),
-                        onClick = { createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteClick(postMode = postMode))}
-                    ) {
-                        UploadVoteIcon(createVoteViewModel.saved.value) { }
-                    }
-                    IconButton(
-                        modifier = Modifier.size(58.dp),
-                        onClick = {
-                            checkPermissions(
-                                context = context,
-                                permissions = arrayOf(
-                                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                                    Manifest.permission.ACCESS_FINE_LOCATION
-                                ),
-                                onGranted = {
-                                    viewModel.onEvent(
-                                        UploadPostEvent.ToggleLocationOnOff(
-                                            !viewModel.locationOnOff.value
+                                    },
+                                    onUnGranted = {
+                                        launcherMultiplePermissions.launch(
+                                            arrayOf(
+                                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                                Manifest.permission.ACCESS_FINE_LOCATION
+                                            )
                                         )
-                                    )
-                                },
-                                onUnGranted = {
-                                    launcherMultiplePermissions.launch(
-                                        arrayOf(
-                                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                                            Manifest.permission.ACCESS_FINE_LOCATION
-                                        )
-                                    )
-                                    viewModel.onEvent(UploadPostEvent.SetLocationOnOff(false))
-                                }
+                                        viewModel.setLocationOnOff(false)
+                                    }
+                                )
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (uiState.isLocationOn) Icons.Default.LocationOn else Icons.Default.LocationOff,
+                                contentDescription = null,
                             )
                         }
-                    ) {
-                        Icon(
-                            imageVector = if (viewModel.locationOnOff.value) Icons.Default.LocationOn else Icons.Default.LocationOff,
-                            contentDescription = null,
-                        )
                     }
                 }
-            }
-        },
-        scrollState = scrollState,
-        content = {
-            Spacer(modifier = Modifier.height(30.dp))
-            Chips(
-                modifier = Modifier.fillMaxWidth(),
-                list = viewModel.addedTags.map{ "#"+it },
-                chip = { data: String, index: Int ->
-                    CustomChip(
-                        backgroundColor = Color.Gray,
-                        text = data,
-                        onDeleteClick = {
-                            viewModel.onEvent(UploadPostEvent.DeleteTag(data))
-                                        },
-                        border = true
+            },
+            scrollState = scrollState,
+            content = {
+                Spacer(modifier = Modifier.height(30.dp))
+                Chips(
+                    modifier = Modifier.fillMaxWidth(),
+                    list = searchTagUiState.addedTags.map { "#$it" },
+                    chip = { data: String, _: Int ->
+                        CustomChip(
+                            backgroundColor = Color.Gray,
+                            text = data,
+                            onDeleteClick = {
+                                viewModel.onEvent(UploadPostEvent.DeleteTag(data))
+                            },
+                            border = true
+                        )
+                    }
+                )
+                SearchTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = { searchTagUiState.tagText },
+                    onTextChange = { viewModel.onEvent(UploadPostEvent.TypeTag(it)) },
+                    hint = getString(context, R.string.searchtag_hint)
+                )
+
+                Chips(
+                    modifier = Modifier.fillMaxWidth(),
+                    list = searchTagUiState.searchedTags.map { "${it.tagname}(${it.tagcount})" },
+                    chip = { data: String, index: Int ->
+                        CustomChip(
+                            backgroundColor = Color.Gray,
+                            text = data,
+                            onChipClicked = { viewModel.onEvent(UploadPostEvent.AddTag(index)) },
+                            border = true
+                        )
+                    }
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+
+                ContentTextField(
+                    state = contentTextFieldState,
+                    scrollState = scrollState,
+                    hint = getString(context, R.string.uploadtext_hint)
+
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(modifier = Modifier.fillMaxWidth(),contentAlignment = Alignment.TopStart){
+                    CheckBoxWithText(
+                        text = stringResource(R.string.anonymous),
+                        checked = { uiState.isAnonymous },
+                        onCheckedChange = { viewModel.onEvent(UploadPostEvent.ToggleCheckBox(it)) }
                     )
                 }
-            )
-            SearchTextField(
-                modifier = Modifier.fillMaxWidth(),
-                text = { viewModel.tagTextField.value },
-                onTextChange = { viewModel.onEvent(UploadPostEvent.TypeTag(it)) },
-                hint = getString(context, R.string.searchtag_hint)
-            )
 
-            Chips(
-                modifier = Modifier.fillMaxWidth(),
-                list = viewModel.searchedTags.map { "${it.tagname}(${it.tagcount})" },
-                chip = { data: String, index: Int ->
-                    CustomChip(
-                        backgroundColor = Color.Gray,
-                        text = data,
-                        onChipClicked = { viewModel.onEvent(UploadPostEvent.AddTag(index)) },
-                        border = true
-                    )
-                }
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-
-            ContentTextField(
-                state = contentTextFieldState,
-                scrollState = scrollState,
-                hint = getString(context, R.string.uploadtext_hint)
-
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Box(modifier = Modifier.fillMaxWidth(),contentAlignment = Alignment.TopStart){
-                CheckBoxWithText(
-                    text = getString(context, R.string.anonymous),
-                    checked = { viewModel.anonymous.value },
-                    onCheckedChange = { viewModel.onEvent(UploadPostEvent.ToggleCheckBox(it)) }
+                Spacer(modifier = Modifier.height(10.dp))
+                SelectedMediaCards(
+                    selectedMedia = {
+                        uiState.selectedMediaItems
+                    },
+                    onClickItem = { navController.navigate(Screen.MediaEditScreen)},
+                    onDeleteClick = {
+                        viewModel.onEvent(UploadPostEvent.DeleteMedia(it))
+                    }
                 )
             }
+        )
 
-            Spacer(modifier = Modifier.height(10.dp))
-            SelectedMediaCards(
-                selectedMedia = {
-                    viewModel.selectedMediaItems
-                },
-                onClickItem = { navController.navigate(Screen.MediaEditScreen)},
-                onDeleteClick = {
-                    viewModel.onEvent(UploadPostEvent.DeleteMedia(it))
-                }
-            )
+    }
 
-            /**SelectedImageCards(
-                selectedImages = {
-                    viewModel.selectedImages
-                },
-                onDeleteClick = {
-                    viewModel.onEvent(UploadPostEvent.DeleteImage(it))
-                }
-            )**/
-        }
-    )
 }

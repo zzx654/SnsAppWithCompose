@@ -12,16 +12,7 @@ interface UploadPostRepository {
 
 
     suspend fun uploadPost(
-        param: UploadPostParam,
-        location: LocationState
-        /**anonymousNick: RequestBody?,
-        tags: RequestBody?,
-        media:List<MultipartBody.Part>?,
-        mediaTypes:List<RequestBody>?,
-        voteOptions:RequestBody?,
-        text: RequestBody,
-        latitude: MultipartBody.Part?,
-        longitude: MultipartBody.Part?**/
+        param: UploadPostParam
     ): Flow<Resource<Unit>>
     suspend fun editPost(
         postid:Int,

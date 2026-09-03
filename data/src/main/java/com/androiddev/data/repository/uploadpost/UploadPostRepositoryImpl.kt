@@ -8,6 +8,7 @@ import com.androiddev.data.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.location.LocationState
+import com.androiddev.domain.location.LocationTracker
 import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.UploadPostParam
@@ -25,32 +26,26 @@ import javax.inject.Inject
 
 class UploadPostRepositoryImpl @Inject constructor(
     private val api: UploadPostApi,
+    private val locationTracker: LocationTracker,
     private val context: Context
 ): UploadPostRepository {
 
 
     override suspend fun uploadPost(
-        param: UploadPostParam,
-        location: LocationState,
-        /**anonymousNick: RequestBody?,
-        tags: RequestBody?,
-        media: List<MultipartBody.Part>?,
-        mediaTypes:List<RequestBody>?,
-        voteOptions:RequestBody?,
-        text: RequestBody,
-        latitude: MultipartBody.Part?,
-        longitude: MultipartBody.Part?**/
+        param: UploadPostParam
     ): Flow<Resource<Unit>> = safeApiCall (
         context = context,
         apiCall= {
+            locationTracker.updateLocation()
+            val location = locationTracker.currentLocation.value
             val voteOptionsJson = param.voteOptions.takeIf { it.isNotEmpty() }?.let {
                 val json = Gson().toJson(it.map { VoteOptionData(voteoption = it) })
                 json.toRequestBody("application/json".toMediaType())
             }
             val body = buildRequestBodies(
                 param = param,
-                lat = location.latitude,
-                lon = location.longitude
+                lat = if(param.isLocationEnabled) location.latitude else null,
+                lon = if(param.isLocationEnabled) location.longitude else null
             )
             api.uploadPost(
                 anonymousNick = if(param.isAnonymous)
@@ -76,15 +71,6 @@ class UploadPostRepositoryImpl @Inject constructor(
         param: UploadPostParam,
         deletedVisualMedia:List<String>,
         deletedAudio:String?
-        //latitude: MultipartBody.Part?,
-        //longitude: MultipartBody.Part?,
-        //anonymousNick: RequestBody?,
-        //tags: RequestBody?,
-        //media: List<MultipartBody.Part>?,
-        //mediaTypes:List<RequestBody>?,
-        //deletedVisualMedia: RequestBody?,
-        //deletedAudio: RequestBody?,
-        //text: RequestBody
     ): Flow<Resource<List<Post>>> = safeApiCall(
         context = context,
         apiCall = {

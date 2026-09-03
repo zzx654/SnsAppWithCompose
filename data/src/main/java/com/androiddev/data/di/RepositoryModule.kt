@@ -62,6 +62,11 @@ abstract class RepositoryModule {
     abstract fun bindPostsRepository(
         postListRepositoryImpl: PostListRepositoryImpl
     ): PostListRepository
+    @Binds
+    @Singleton
+    abstract fun bindUploadPostRepository(
+        uploadPostRepositoryImpl: UploadPostRepositoryImpl
+    ): UploadPostRepository
     companion object {
 
         @Provides
@@ -88,11 +93,6 @@ abstract class RepositoryModule {
             return CreateProfileRepositoryImpl(api, context)
         }
 
-        @Provides
-        @Singleton
-        fun provideUploadPostRepository(api: UploadPostApi, @ApplicationContext context: Context): UploadPostRepository {
-            return UploadPostRepositoryImpl(api, context)
-        }
 
         @Provides
         @Singleton
