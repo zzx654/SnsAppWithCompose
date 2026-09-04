@@ -2,6 +2,7 @@ package com.androiddev.snsappwithcompose.feature.upload_post
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -47,18 +48,21 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
+import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
 import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.MediaItemFactory
+import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.rememberMediaPicker
 import com.androiddev.snsappwithcompose.feature.upload_post.component.CheckBoxWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.ContentTextField
@@ -74,6 +78,8 @@ import com.androiddev.snsappwithcompose.feature.upload_post.util.isVideo
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.BottomVoteOptions
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteViewModel
+import com.androiddev.snsappwithcompose.service.record.RecordIntentKeys
+import com.androiddev.snsappwithcompose.service.record.RecordService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -110,6 +116,10 @@ fun UploadPostScreen(
     val searchTagUiState by viewModel.searchTagUiState.collectAsStateWithLifecycle()
 
     val voteUiState by createVoteViewModel.uiState.collectAsStateWithLifecycle()
+
+    val recordUiState by recordViewModel.uiState.collectAsStateWithLifecycle()
+
+    val recordAlertDialogState by recordViewModel.alertDialogState.collectAsStateWithLifecycle()
     val manageVoteDialogState by createVoteViewModel.manageVoteDialogState.collectAsStateWithLifecycle()
     val mediaItemFactory = remember(context) { MediaItemFactory(context) }
     val launchMediaPicker = rememberMediaPicker { uris ->
@@ -153,16 +163,35 @@ fun UploadPostScreen(
             recordViewModel.initRecordState(remotePath = it)
         }
     }
-    LaunchedEffect(true) {
-        recordViewModel.eventFlow.collectLatest { event ->
+    LaunchedEffect(Unit) {
+        recordViewModel.eventFlow.collect { event ->
             when (event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
+                is UiEvent.RecordUiEvent.StartRecordService -> {
+                    NotificationPermissionUtils.checkNotificationPermission(
+                        context = context,
+                        onGranted = {
+                            val intent = Intent(context, RecordService::class.java).apply {
+                                action = event.action
+                            }
+                            if (event.action == RecordService.ACTION_START_RECORD) {
+                                ContextCompat.startForegroundService(context, intent)
+                            } else {
+                                context.startService(intent)
+                            }
+                        }
+                    )
                 }
-                else -> null
+                is UiEvent.RecordUiEvent.SendStatusBroadcast -> {
+                    val intent = Intent(RecordService.ACTION_RECORD_STATUS).apply {
+                        putExtra(RecordIntentKeys.STATE, event.stateStr)
+                        putExtra(RecordIntentKeys.FORMATTED_TIME, event.formattedTime)
+                    }
+                    context.sendBroadcast(intent)
+                }
+                is UiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).show()
+                }
+                else -> Unit
             }
         }
     }
@@ -185,8 +214,8 @@ fun UploadPostScreen(
 
     SelectorBottomSheetDialog(manageVoteDialogState)
     BottomRecorder(
-      showDialog = { recordViewModel.bottomRecordDialogState.value.showDialog },
-      onClickCancel = recordViewModel.bottomRecordDialogState.value.onClickCancel,
+      showDialog = { recordUiState.bottomRecordDialogState.showDialog },
+      onClickCancel = recordUiState.bottomRecordDialogState.onClickCancel,
       onClickSave = {
           recordViewModel.onEvent(RecordEvent.SaveRecording)
 
@@ -197,12 +226,12 @@ fun UploadPostScreen(
         uiState = voteUiState,
         onVoteEvent = { createVoteViewModel.onEvent(it) }
     )
-    AlertDialog(
-        title = { recordViewModel.recordingAlertDialogState.value.title },
-        cancelText = { recordViewModel.recordingAlertDialogState.value.cancelText },
-        confirmText = { recordViewModel.recordingAlertDialogState.value.confirmText },
-        onClickConfirm = recordViewModel.recordingAlertDialogState.value.onClickConfirm,
-        onClickCancel = recordViewModel.recordingAlertDialogState.value.onClickCancel
+    AlertDialogg (
+        title = recordAlertDialogState.title?.asString() ?:"",
+        cancelText = recordAlertDialogState.cancelText?.asString() ?:"",
+        confirmText = recordAlertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = recordAlertDialogState.onClickConfirm,
+        onClickCancel = recordAlertDialogState.onClickCancel
     )
     BaseScreen(
         viewModel = viewModel,
@@ -223,7 +252,7 @@ fun UploadPostScreen(
                     rightAction = {
                         IconButton(onClick = {
                             viewModel.onEvent(UploadPostEvent.UploadPost(
-                                audioFilePath = recordViewModel.recordedFilePath.value,
+                                audioFilePath = recordUiState.recordedFilePath,
                                 voteOptions = voteUiState.savedVoteOptions,
                                 deletedAudio = recordViewModel.deletedAudio
                             ))
@@ -277,7 +306,7 @@ fun UploadPostScreen(
                             },
 
                             ) {
-                            UploadRecordIcon(recordViewModel.recorded.value) { }
+                            UploadRecordIcon(recordUiState.recorded) { }
                         }
 
                         IconButton(
