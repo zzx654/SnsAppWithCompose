@@ -10,10 +10,8 @@ sealed class UploadPostEvent {
     data class DeleteTag(val tag: String) : UploadPostEvent()
     data class TypeContent(val text: String) : UploadPostEvent()
     data class ToggleCheckBox(val isChecked: Boolean) : UploadPostEvent()
-    data class AddImages(val images: List<Uri>) : UploadPostEvent()
-    data class AddMedia(val uris: List<Uri>): UploadPostEvent()
+    data class AddMedia(val items:List<MediaItem>): UploadPostEvent()
     data class DeleteMedia(val media: MediaItem): UploadPostEvent()
-    data class SetLocationOnOff(val onOff: Boolean): UploadPostEvent()
-    data class ToggleLocationOnOff(val onOff: Boolean): UploadPostEvent()
-    data class UploadPost(val lat:Double? = null, val long:Double? = null, val audioFilePath:String? = null,val deleteAudio:String? = null, val voteOptions:List<String>): UploadPostEvent()
+    data object ToggleLocationOnOff: UploadPostEvent()
+    data class UploadPost(val audioFilePath:String? = null,val deletedAudio:String? = null, val voteOptions:List<String>): UploadPostEvent()
 }

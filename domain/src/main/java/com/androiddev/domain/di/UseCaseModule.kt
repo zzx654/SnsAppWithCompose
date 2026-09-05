@@ -105,15 +105,6 @@ object UseCaseModule {
     }
     @Provides
     @Singleton
-    fun provideUploadPostUseCases(uploadRepository: UploadPostRepository, tagRepository: TagRepository): UploadPostUseCases {
-        return UploadPostUseCases(
-            searchTag = SearchTag(tagRepository),
-            uploadPost = UploadPost(uploadRepository),
-            editPost = EditPost(uploadRepository)
-        )
-    }
-    @Provides
-    @Singleton
     fun provideGetPostsUseCases(repository: GetPostsRepository): GetPostsUseCases {
         return GetPostsUseCases(
             getNearPosts = GetNearPosts(repository),

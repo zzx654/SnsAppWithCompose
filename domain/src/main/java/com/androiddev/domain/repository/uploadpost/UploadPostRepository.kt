@@ -1,6 +1,8 @@
 package com.androiddev.domain.repository.uploadpost
 
+import com.androiddev.domain.location.LocationState
 import com.androiddev.domain.model.Post
+import com.androiddev.domain.model.UploadPostParam
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
@@ -10,26 +12,13 @@ interface UploadPostRepository {
 
 
     suspend fun uploadPost(
-        anonymousNick: RequestBody?,
-        tags: RequestBody?,
-        media:List<MultipartBody.Part>?,
-        mediaTypes:List<RequestBody>?,
-        voteOptions:RequestBody?,
-        text: RequestBody,
-        latitude: MultipartBody.Part?,
-        longitude: MultipartBody.Part?
+        param: UploadPostParam
     ): Flow<Resource<Unit>>
     suspend fun editPost(
-        postid: MultipartBody.Part,
-        latitude: MultipartBody.Part?,
-        longitude: MultipartBody.Part?,
-        anonymousNick: RequestBody?,
-        tags: RequestBody?,
-        media:List<MultipartBody.Part>?,
-        mediaTypes:List<RequestBody>?,
-        deletedVisualMedia:RequestBody?,
-        deletedAudio:RequestBody?,
-        text: RequestBody
+        postid:Int,
+        param: UploadPostParam,
+        deletedVisualMedia: List<String>,
+        deletedAudio: String?,
     ): Flow<Resource<List<Post>>>
 
 }
