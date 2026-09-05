@@ -1,31 +1,26 @@
 package com.androiddev.snsappwithcompose.feature.upload_post.record
 
-import android.content.Context
-import android.content.Intent
-import android.media.MediaPlayer
-import android.media.MediaRecorder
+
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewModelScope
-import com.androiddev.snsappwithcompose.service.record.RecordService
 import com.androiddev.data.util.Constants.DEFAULT_ELAPSED_TIME
 import com.androiddev.data.util.Constants.DEFAULT_PROGRESS
 import com.androiddev.data.util.Constants.MAX_DURATION_MILLIS
-import com.androiddev.data.util.FileUtil
+import com.androiddev.domain.audio.AudioFileManager
+import com.androiddev.domain.audio.AudioPlayer
+import com.androiddev.domain.audio.AudioRecorder
+import com.androiddev.domain.audio.RecordServiceController
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
-import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.UiText
-import com.androiddev.snsappwithcompose.service.record.RecordIntentKeys
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_IDLE
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_PLAYING
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_RECORDED
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_RECORDING
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,12 +34,14 @@ import javax.inject.Inject
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class RecordViewModel @Inject constructor(
-    @ApplicationContext context: Context,
-) : BaseViewModel(context) {
+
+    private val audioRecorder: AudioRecorder,
+    private val audioPlayer: AudioPlayer,
+    private val recordServiceController: RecordServiceController,
+    private val audioFileManager: AudioFileManager
+) : BaseViewModel() {
 
     var currentOutputFile: File? = null
-    private var mediaRecorder: MediaRecorder? = null
-    private var mediaPlayer: MediaPlayer? = null
     private var timerJob: Job? = null
 
     private var startTime: Long = 0L
@@ -104,21 +101,14 @@ class RecordViewModel @Inject constructor(
     }
 
     private fun startRecording() {
-        val file = FileUtil.generateFile(context)
+        val file = audioFileManager.generateRecordFile()
         currentOutputFile = file
 
         runCatching {
-            mediaRecorder = createMediaRecorder().apply {
-                setAudioSource(MediaRecorder.AudioSource.MIC)
-                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                setOutputFile(file.absolutePath)
-                prepare()
-                start()
-            }
+            audioRecorder.start(file)
         }.onSuccess {
             startTime = System.currentTimeMillis()
-            sendCommand(RecordService.ACTION_START_RECORD)
+            recordServiceController.startRecordService()
             startTimerLoop(STATE_RECORDING)
         }.onFailure { e ->
             Log.e("RecordViewModel", "녹음 시작 실패", e)
@@ -126,18 +116,8 @@ class RecordViewModel @Inject constructor(
         }
     }
 
-    @Suppress("DEPRECATION")
-    private fun createMediaRecorder(): MediaRecorder {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            MediaRecorder(context)
-        } else {
-            MediaRecorder()
-        }
-    }
-
     private fun startTimerLoop(stateStr: String) {
         timerJob?.cancel()
-        // viewModelScope를 사용하여 코루틴 생명주기를 ViewModel에 바인딩
         timerJob = viewModelScope.launch {
             var lastUpdateSecond = -1L
             while (isActive) {
@@ -148,11 +128,7 @@ class RecordViewModel @Inject constructor(
                 if (currentSecond != lastUpdateSecond) {
                     val formattedTimeStr = elapsed.toFormattedTime()
 
-                    val intent = Intent(RecordService.ACTION_RECORD_STATUS).apply {
-                        putExtra(RecordIntentKeys.STATE, stateStr)
-                        putExtra(RecordIntentKeys.FORMATTED_TIME, formattedTimeStr)
-                    }
-                    context.sendBroadcast(intent)
+                    recordServiceController.sendStatusBroadcast(stateStr, formattedTimeStr)
                     updateState(
                         state = stateStr,
                         elapsedMillis = elapsed,
@@ -198,17 +174,8 @@ class RecordViewModel @Inject constructor(
         timerJob?.cancel()
         timerJob = null
 
-        mediaRecorder?.runCatching {
-            stop()
-            release()
-        }
-        mediaRecorder = null
-
-        mediaPlayer?.runCatching {
-            stop()
-            release()
-        }
-        mediaPlayer = null
+        audioRecorder.stop()
+        audioPlayer.stop()
     }
 
     private fun stopRecording() {
@@ -219,22 +186,22 @@ class RecordViewModel @Inject constructor(
             formattedTime = UiText.StringResource(R.string.default_formatted_time),
             filePath = currentOutputFile?.absolutePath
         )
-        sendCommand(RecordService.ACTION_FINISH_RECORD)
+        recordServiceController.finishRecordService()
     }
 
     private fun startPlayback() {
         val file = currentOutputFile?.takeIf { it.exists() } ?: return
-        sendCommand(RecordService.ACTION_START_PLAY)
+        recordServiceController.startPlayService()
 
         runCatching {
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(file.absolutePath)
-                prepare()
-                start()
-                maxDurationMillis = duration.toLong()
-                setOnCompletionListener { stopPlayback() }
+            audioPlayer.start(file) {
+                viewModelScope.launch {
+                    stopPlayback()
+                }
+
             }
-        }.onSuccess {
+        }.onSuccess { duration ->
+            maxDurationMillis = duration
             startTime = System.currentTimeMillis()
             startTimerLoop(STATE_PLAYING)
         }.onFailure { e ->
@@ -244,7 +211,7 @@ class RecordViewModel @Inject constructor(
     }
 
     private fun stopPlayback() {
-        sendCommand(RecordService.ACTION_STOP_PLAY)
+        recordServiceController.stopPlayService()
         stopEverything()
         updateState(
             state = STATE_RECORDED,
@@ -260,7 +227,7 @@ class RecordViewModel @Inject constructor(
                 recorded = false
             )
         }
-        sendCommand(RecordService.ACTION_CANCEL_RECORD)
+        recordServiceController.cancelRecordService()
         stopEverything()
         updateState(
             state = STATE_IDLE,
@@ -275,28 +242,12 @@ class RecordViewModel @Inject constructor(
             return
         }
         _saveResult.value = true
-        sendCommand(RecordService.ACTION_SAVE_RECORDING)
+        recordServiceController.saveRecordService()
         stopEverything()
         updateState(
             state = STATE_IDLE,
             elapsedMillis = DEFAULT_ELAPSED_TIME,
             formattedTime = UiText.StringResource(R.string.default_formatted_time)
-        )
-    }
-
-    private fun sendCommand(action: String) {
-        NotificationPermissionUtils.checkNotificationPermission(
-            context = context,
-            onGranted = {
-                val intent = Intent(context, RecordService::class.java).apply {
-                    this.action = action
-                }
-                if (action == RecordService.ACTION_START_RECORD) {
-                    ContextCompat.startForegroundService(context, intent)
-                } else {
-                    context.startService(intent)
-                }
-            }
         )
     }
 
@@ -349,7 +300,6 @@ class RecordViewModel @Inject constructor(
     }
 }
 
-// 시간 포맷팅 헬퍼 함수
 private fun Long.toFormattedTime(): String {
     val seconds = (this / 1000).toInt()
     val minutes = seconds / 60
