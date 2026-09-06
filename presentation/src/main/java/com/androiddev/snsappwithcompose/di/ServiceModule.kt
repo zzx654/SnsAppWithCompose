@@ -1,6 +1,8 @@
 package com.androiddev.snsappwithcompose.di
 
+import com.androiddev.domain.audio.AudioServiceController
 import com.androiddev.domain.audio.RecordServiceController
+import com.androiddev.snsappwithcompose.service.audio.AudioServiceControllerImpl
 import com.androiddev.snsappwithcompose.service.audio.RecordServiceControllerImpl
 import dagger.Binds
 import dagger.Module
@@ -17,4 +19,10 @@ abstract class ServiceModule {
     abstract fun bindRecordServiceController(
         impl: RecordServiceControllerImpl
     ): RecordServiceController
+
+    @Binds
+    @Singleton
+    abstract fun bindAudioServiceController(
+        impl: AudioServiceControllerImpl
+    ): AudioServiceController
 }
