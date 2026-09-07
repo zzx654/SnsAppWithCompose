@@ -6,7 +6,7 @@ data class NotificationExtra(
     val followerId: Int? = null
 )
 
-data class NotificationItem(
+data class Notification(
     val id: Long,
     val type: String,
     val content: String,

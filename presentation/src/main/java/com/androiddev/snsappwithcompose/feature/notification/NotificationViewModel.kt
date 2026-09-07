@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.DeleteReason
+import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.NotificationActionResult
 import com.androiddev.domain.model.NotificationExtra
 import com.androiddev.domain.model.NotificationItem
@@ -36,11 +37,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 object NotificationEventBus {
-    private val _events = MutableSharedFlow<NotificationItem>()
-    val events: SharedFlow<NotificationItem> = _events
+    private val _events = MutableSharedFlow<Notification>()
+    val events: SharedFlow<Notification> = _events
 
 
-    fun emit(item: NotificationItem) {
+    fun emit(item: Notification) {
         Log.d("emittest", "emit success: $item")
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -139,12 +140,12 @@ class NotificationViewModel @Inject constructor(
         }
     }
     /** FCM 도착 시 호출 */
-    fun addNotification(notification:NotificationItem) {
+    fun addNotification(notification: Notification) {
         if(getNotificationsState.value.notifications.none{ it.id == notification.id }) {
             _getNotificationsState.value = _getNotificationsState.value.copy(
                 notifications = listOf(notification) + _getNotificationsState.value.notifications
             )
-        }
+        }//상단에 알림추가
         _hasNewNotification.value = true
     }
     fun onEvent(event:NotificationEvent) {
@@ -189,10 +190,10 @@ class NotificationViewModel @Inject constructor(
                                     notification
                                 }
                             }
-                        )
+                        )//read 업데이트
                         result.unreadCount?.let {
                             if(it == 0) _hasNewNotification.value = false
-                        }
+                        } // 배지 업데이트
                         when(result.notificationActionResult) {
                             is NotificationActionResult.Navigate -> {
                                 val commentId = extraJson.commentId
@@ -244,7 +245,7 @@ class NotificationViewModel @Inject constructor(
                                 //))
 
                             }
-                        }
+                        } // 읽고난후의 행동 처리
                         //navigate(post(게시물,댓글),reply,profile)
                     }
                 )
@@ -295,6 +296,8 @@ class NotificationViewModel @Inject constructor(
                         handleResource(
                             resource = result,
                             onSuccess = { data ->
+                                //여기서 전부 없애는걸 수행하고
+                                //그다음 상단영역에서 조사한다음 unread처리
                                 _hasNewNotification.value = data.unreadCount>0
                                 _getNotificationsState.value = getNotificationsState.value.copy(
                                     notifications = data.notifications

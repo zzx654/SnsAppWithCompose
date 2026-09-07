@@ -1,6 +1,8 @@
 package com.androiddev.domain.use_case.notification
 
-data class NotificationUseCases(
+import javax.inject.Inject
+
+data class NotificationUseCases @Inject constructor(
     val getNotifications: GetNotifications,
     val readAllNotifications: ReadAllNotifications,
     val deleteNotifications: DeleteNotifications,

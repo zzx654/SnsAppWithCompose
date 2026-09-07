@@ -6,11 +6,11 @@ data class NotificationsDto(
     val notifications: List<NotificationDto>,
     val unreadCount:Int
 )
-fun NotificationsDto.toNotifications(
+fun NotificationsDto.toDomain(
 ): Notifications {
     return Notifications(
         notifications = notifications.map{
-            it.toNotificationItem(
+            it.toDomain(
             )
         },
         unreadCount = unreadCount

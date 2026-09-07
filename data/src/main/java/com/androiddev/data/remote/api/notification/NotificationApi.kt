@@ -17,7 +17,7 @@ interface NotificationApi {
     ):Response<BaseApiResponse<NotificationsDto>>
 
     @POST("notification/readAllNotifications")
-    suspend fun readAllNotifications():Response<BaseApiResponse<NotificationsDto>>
+    suspend fun readAllNotifications():Response<BaseApiResponse<Unit>>
 
     @FormUrlEncoded
     @POST("notification/readNotification")
@@ -26,5 +26,5 @@ interface NotificationApi {
     ):Response<BaseApiResponse<ReadNotificationDto>>
 
     @POST("notification/deleteNotifications")
-    suspend fun deleteNotifications():Response<BaseApiResponse<NotificationsDto>>
+    suspend fun deleteNotifications():Response<BaseApiResponse<Unit>>
 }
