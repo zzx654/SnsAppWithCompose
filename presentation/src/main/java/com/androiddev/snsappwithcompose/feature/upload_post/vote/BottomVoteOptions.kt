@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import com.androiddev.snsappwithcompose.R
@@ -51,13 +52,13 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomVoteOptions(
-    createVoteViewModel: CreateVoteViewModel
+    uiState: CreateVoteUiState,
+    onVoteEvent:(CreateVoteEvent) -> Unit
 
 ) {
 
     val context = LocalContext.current
-    val voteOptions = createVoteViewModel.voteOptions
-    if(createVoteViewModel.showBottomVoteDialog.value) {
+    if(uiState.showBottomVoteDialog) {
 
         var allowHide by remember { mutableStateOf(false) }
         val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true,
@@ -89,10 +90,11 @@ fun BottomVoteOptions(
                     ) {
                         CenterAlignedTopBar(
                             title = getString(context, R.string.vote_title),
-                            onBackClick = { createVoteViewModel.onEvent(CreateVoteEvent.onCancelClick) },
+                            onBackClick = {
+                                onVoteEvent(CreateVoteEvent.onCancelClick) },
                             rightAction = {
                                 IconButton(onClick = {
-                                    createVoteViewModel.onEvent(CreateVoteEvent.SaveVoteOptions)
+                                    onVoteEvent(CreateVoteEvent.SaveVoteOptions)
 
 
                                 }) {
@@ -133,12 +135,12 @@ fun BottomVoteOptions(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
-                        itemsIndexed(voteOptions) { index, text ->
+                        itemsIndexed(uiState.voteOptions) { index, text ->
                             Spacer(modifier = Modifier.height(10.dp))
                             ThinBorderTextField(
                                 value = text,
                                 onValueChange = { newValue ->
-                                    createVoteViewModel.onEvent(CreateVoteEvent.TypeVoteOption(index,newValue))
+                                    onVoteEvent(CreateVoteEvent.TypeVoteOption(index,newValue))
 
 
                                 },
@@ -157,9 +159,9 @@ fun BottomVoteOptions(
                                 onClick = {
                                     //focusManager.clearFocus() // 키보드 내림
                                    // voteOptions = voteOptions + ""
-                                    createVoteViewModel.onEvent(CreateVoteEvent.OnAddVoteOptionClick)
+                                    onVoteEvent(CreateVoteEvent.OnAddVoteOptionClick)
                                     coroutineScope.launch {
-                                        listState.animateScrollToItem(voteOptions.size)
+                                        listState.animateScrollToItem(uiState.voteOptions.size)
                                     }
                                 },
                                 colors = ButtonDefaults.outlinedButtonColors(
@@ -169,7 +171,7 @@ fun BottomVoteOptions(
 
                             ) {
                                 Text(
-                                    "${getString(context,R.string.option)} ${getString(context,R.string.add)}",
+                                    "${stringResource(R.string.option)} ${stringResource(R.string.add)}",
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }

@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun BaseScreen(
     viewModel: UiStateProvider,
     navController: NavController? = null,
+    loadingContent: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -57,7 +58,13 @@ fun BaseScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         content()
 
-        LoadingDialog { isLoading }
+        if (isLoading) {
+            if (loadingContent != null) {
+                loadingContent()
+            } else {
+                LoadingDialog { true }
+            }
+        }
 
     }
 }

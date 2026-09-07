@@ -45,7 +45,7 @@ import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItemView
 
 
-@Composable
+/**@Composable
 fun MediaPreviewScreen(
     navController:NavController,
     viewModel: UploadPostViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
@@ -142,4 +142,4 @@ fun MediaPreviewScreen(
     }
 
 
-}
+}**/

@@ -115,7 +115,7 @@ fun BottomRecorder(
 
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(text = recordState.formattedTime, fontWeight = FontWeight.Bold,fontSize = 20.sp,color = Color.Black)
+                    Text(text = recordState.formattedTime.asString(), fontWeight = FontWeight.Bold,fontSize = 20.sp,color = Color.Black)
                 }
                 Icon(Icons.Default.Check, contentDescription = "Save", tint = Color.Black,    modifier = Modifier
                     .align(Alignment.CenterEnd).padding(horizontal = 30.dp)

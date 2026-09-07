@@ -1,6 +1,7 @@
 package com.androiddev.domain.use_case.uploadpost
 
 import com.androiddev.domain.model.Post
+import com.androiddev.domain.model.UploadPostParam
 import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -12,27 +13,15 @@ class EditPost @Inject constructor(
     private val repository: UploadPostRepository
 ) {
     suspend operator fun invoke(
-        postid: MultipartBody.Part,
-        latitude: MultipartBody.Part?,
-        longitude: MultipartBody.Part?,
-        anonymousNick: RequestBody?,
-        deletedVisualMedia: RequestBody?,
-        tags: RequestBody?,
-        media:List<MultipartBody.Part>?,
-        mediaTypes:List<RequestBody>?,
-        deletedAudio:RequestBody?,
-        text: RequestBody
+        postid: Int,
+        param:UploadPostParam,
+        deletedAudio:String?,
+        deletedVisualMedia:List<String>
     ): Flow<Resource<List<Post>>> = repository.editPost(
         postid = postid,
-        latitude = latitude,
-        longitude = longitude,
-        anonymousNick = anonymousNick,
+        param = param,
         deletedVisualMedia = deletedVisualMedia,
-        tags = tags,
-        media = media,
-        mediaTypes = mediaTypes,
-        deletedAudio = deletedAudio,
-        text = text
+        deletedAudio = deletedAudio
     )
 
 }
