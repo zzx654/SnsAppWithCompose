@@ -1,14 +1,12 @@
 package com.androiddev.domain.use_case.notification
 
-import androidx.paging.PagingData
-import com.androiddev.domain.model.Notification
 import com.androiddev.domain.repository.notification.NotificationRepository
+import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetNotifications @Inject constructor(
+class GetUnreadNotificationCount @Inject constructor(
     private val repository: NotificationRepository
 ) {
-     operator fun invoke(): Flow<PagingData<Notification>>
-    = repository.getNotifications()
+    suspend operator fun invoke(): Flow<Resource<Int>> = repository.getUnreadNotificationCount()
 }

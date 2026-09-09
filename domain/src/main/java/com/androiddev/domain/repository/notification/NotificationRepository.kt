@@ -8,7 +8,8 @@ import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface NotificationRepository {
-    suspend fun getNotifications(onUnreadCountUpdated:(Int)->Unit): Flow<PagingData<Notification>>
+    fun getNotifications(): Flow<PagingData<Notification>>
+    suspend fun getUnreadNotificationCount(): Flow<Resource<Int>>
     suspend fun readAllNotifications(): Flow<Resource<Unit>>
     suspend fun deleteNotifications(): Flow<Resource<Unit>>
     suspend fun readNotification(notificationId: Long): Flow<Resource<ReadNotificationResult>>

@@ -1,29 +1,27 @@
 package com.androiddev.snsappwithcompose.feature.notification
 
-import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.filter
+import androidx.paging.insertHeaderItem
+import androidx.paging.map
 import com.androiddev.domain.model.DeleteReason
 import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.NotificationActionResult
 import com.androiddev.domain.model.NotificationExtra
-import com.androiddev.domain.model.NotificationItem
-import com.androiddev.domain.model.Notifications
 import com.androiddev.domain.use_case.notification.NotificationUseCases
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.util.Paginator
+import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.COMMENT
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.FOLLOW
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKECOMMENT
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,8 +31,14 @@ import javax.inject.Inject
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKEPOST
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.REPLY
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 object NotificationEventBus {
     private val _events = MutableSharedFlow<Notification>()
@@ -54,81 +58,86 @@ object NotificationEventBus {
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
     private val notificationUseCases: NotificationUseCases,
-    @ApplicationContext context: Context,
-) : BaseViewModel(context) {
+) : BaseViewModel() {
+
     private val _pending = MutableStateFlow<PendingNotification?>(null)
-    val pending: StateFlow<PendingNotification?> = _pending
-    private val _getNotificationsState = mutableStateOf(GetNotificationsState())
-    val getNotificationsState: State<GetNotificationsState>
-        get() = _getNotificationsState
-    private val _hasNewNotification = mutableStateOf(false)
-    val hasNewNotification:State<Boolean>
-        get() = _hasNewNotification
-    private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
-    val alertDialogState: State<AlertDialogState>
-        get() = _alertDialogState
-    val notificationPaginator =
-        Paginator<Notifications,NotificationItem>(
-            loadItems = { handleResult, refresh ->
-                viewModelScope.launch {
-                    var lastNotificationId: Long? = null
-                    var lastNotificationDate: String? = null
-                    with(getNotificationsState.value.notifications) {
-                        if (isNotEmpty() && !refresh) {
-                            lastNotificationDate = last().date
-                            lastNotificationId = last().id
-                        }
-                    }
-                    notificationUseCases.getNotifications(lastNotificationId,lastNotificationDate)
-                        .collect {
+    val pending: StateFlow<PendingNotification?> = _pending.asStateFlow()
+    private val _isUserRefreshing = MutableStateFlow(false)
+    val isUserRefreshing = _isUserRefreshing.asStateFlow()
+    // 서버에서 내려준 최근 안 읽은 알림 수 (독립 init/API 연동)
+    private val _serverUnreadCount = MutableStateFlow(0)
+    val serverUnreadCount: StateFlow<Int> = _serverUnreadCount.asStateFlow()
 
-                            it.data?.let { notificationsInfo ->
-                                if(notificationsInfo.notifications.isNotEmpty())
-                                    _hasNewNotification.value = notificationsInfo.unreadCount>0
-                            }
-                            handleResult(it)
-                        }
-                }
-            },
-            onRefreshUpdated = { isRefreshing ->
-                _getNotificationsState.value =
-                    _getNotificationsState.value.copy(isRefreshing = isRefreshing, endReached = false)
-            },
-            onLoadUpdated = { isLoading ->
-                _getNotificationsState.value = _getNotificationsState.value.copy(isLoading = isLoading)
+    // 앱 실행 중 FCM으로 들어온 실시간 알림 목록
+    private val _fcmNotifications = MutableStateFlow<List<Notification>>(emptyList())
+    val fcmNotifications: StateFlow<List<Notification>> = _fcmNotifications.asStateFlow()
 
-            },
-            onError = { message ->
-                _getNotificationsState.value = getNotificationsState.value.copy(error = message)
+    // 단일 항목 읽음 처리 ID 세트
+    private val _readIds = MutableStateFlow<Set<Long>>(emptySet())
+    val readIds: StateFlow<Set<Long>> = _readIds.asStateFlow()
 
-            },
-            onSuccess = { notifications, refresh ->
+    // 전체 읽음 / 삭제 기준 Max ID
+    private val _lastReadMaxId = MutableStateFlow(0L)
+    val lastReadMaxId: StateFlow<Long> = _lastReadMaxId.asStateFlow()
 
-                val newIds = notifications.map { it.id }.toSet()
-                _getNotificationsState.value = getNotificationsState.value.copy(
-                    notifications = if (refresh) notifications else getNotificationsState.value.notifications.filterNot{ it.id in newIds } + notifications,
-                    endReached = notifications.isEmpty() && getNotificationsState.value.notifications.isNotEmpty()
-                )
+    private val _lastDeletedMaxId = MutableStateFlow(0L)
+    val lastDeletedMaxId: StateFlow<Long> = _lastDeletedMaxId.asStateFlow()
 
-            },
-            extractItems = { response -> response.notifications }
-        )
+    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
+    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+
+    // PagingData 스트림을 가장 가볍고 순수하게 유지 (UI단 State Binding 방식)
+    val pagingDataStream: Flow<PagingData<Notification>> =
+        notificationUseCases.getNotifications().cachedIn(viewModelScope)
+
+    // hasUnreadNotification 계산 시 deletedMaxId까지 포함하여 보완
+    val hasUnreadNotification: StateFlow<Boolean> = combine(
+        _serverUnreadCount,
+        _fcmNotifications,
+        _readIds,
+        _lastReadMaxId,
+        _lastDeletedMaxId
+    ) { serverUnread, fcmList, readIds, readMaxId, deletedMaxId ->
+        // FCM 수신 알림 중 안 읽었고 삭제되지 않은 알림 존재 여부
+        val hasUnreadFcm = fcmList.any { fcm ->
+            fcm.id > deletedMaxId && fcm.id > readMaxId && fcm.id !in readIds
+        }
+
+        // 서버 unreadCount가 남아있거나 안 읽은 FCM이 있으면 true
+        (serverUnread > 0) || hasUnreadFcm
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
 
     init {
+        fetchUnreadCount()
         viewModelScope.launch {
             NotificationEventBus.events.collect {
                 addNotification(it)
             }
         }
+    }
+
+    private fun fetchUnreadCount() {
         viewModelScope.launch {
-            notificationPaginator.loadNextItems(refresh = true)
+            notificationUseCases.getUnreadNotificationCount().collect { result ->
+                result.handle(
+                    onLoading = {},
+                    onSuccess = { count ->
+                        _serverUnreadCount.value = count
+                    }
+                )
+            }
         }
     }
-    // Pending 알림 저장
+
+    // Pending 알림 저장 및 소비
     fun setPending(pendingNotification: PendingNotification) {
         _pending.value = pendingNotification
     }
-    // Pending 알림 소비 (navigate 완료 후)
+
     fun consumePending() {
         pending.value?.let { pend ->
             readNotification(
@@ -139,32 +148,42 @@ class NotificationViewModel @Inject constructor(
             _pending.value = null
         }
     }
+
     /** FCM 도착 시 호출 */
     fun addNotification(notification: Notification) {
-        if(getNotificationsState.value.notifications.none{ it.id == notification.id }) {
-            _getNotificationsState.value = _getNotificationsState.value.copy(
-                notifications = listOf(notification) + _getNotificationsState.value.notifications
-            )
-        }//상단에 알림추가
-        _hasNewNotification.value = true
+        _fcmNotifications.update { currentList ->
+            // 중복 방지 후 최신순 추가
+            if (currentList.none { it.id == notification.id }) {
+                listOf(notification) + currentList
+            } else currentList
+        }
     }
-    fun onEvent(event:NotificationEvent) {
-        when(event) {
-            is NotificationEvent.LoadNextNotifications -> {
-                viewModelScope.launch {
-                    notificationPaginator.loadNextItems(refresh = false)
-                }
-            }
-            is NotificationEvent.RefreshNotifictions -> {
-                viewModelScope.launch {
-                    notificationPaginator.loadNextItems(refresh = true)
-                }
-            }
+
+    /** 당겨서 새로고침(Refresh) 성공 시 UI/Paging3 단에서 호출 */
+    fun onRefreshSuccess() {
+        if (_isUserRefreshing.value) {
+            _fcmNotifications.value = emptyList()
+            _readIds.value = emptySet()
+            _lastReadMaxId.value = 0L
+            _lastDeletedMaxId.value = 0L
+
+            _isUserRefreshing.value = false // 플래그 리셋
+        }
+    }
+
+
+    fun onRefreshStart() {
+        fetchUnreadCount()
+        _isUserRefreshing.value = true
+    }
+
+    fun onEvent(event: NotificationEvent) {
+        when (event) {
             is NotificationEvent.ReadAllNotifications -> {
-                showReadAllNotificationAlert()
+                showReadAllNotificationAlert(event.targetMaxId)
             }
             is NotificationEvent.DeleteNotifications -> {
-                showDeleteNotificationAlert()
+                showDeleteNotificationAlert(event.targetMaxId)
             }
             is NotificationEvent.ReadNotification -> {
                 readNotification(
@@ -175,49 +194,40 @@ class NotificationViewModel @Inject constructor(
             }
         }
     }
-    private fun readNotification(notificationId:Long,type:String,extraJson:NotificationExtra) {
+
+    private fun readNotification(notificationId: Long, type: String, extraJson: NotificationExtra) {
         viewModelScope.launch {
             notificationUseCases.readNotification(notificationId).collect { result ->
+                result.handle(
+                    onSuccess = { data ->
+                        _readIds.update { it + notificationId }
+                        val isFcmItem = _fcmNotifications.value.any { it.id == notificationId }
 
-                handleResource(
-                    resource = result,
-                    onSuccess = { result ->
-                        _getNotificationsState.value = getNotificationsState.value.copy(
-                            notifications = getNotificationsState.value.notifications.map { notification ->
-                                if(notification.id == notificationId) {
-                                    notification.copy(isRead = true)
-                                } else {
-                                    notification
-                                }
-                            }
-                        )//read 업데이트
-                        result.unreadCount?.let {
-                            if(it == 0) _hasNewNotification.value = false
-                        } // 배지 업데이트
-                        when(result.notificationActionResult) {
+                        if (!isFcmItem) {
+                            // 서버에서 로드된 알림을 읽었을 때만 serverUnreadCount 차감
+                            _serverUnreadCount.update { count -> maxOf(0, count - 1) }
+                        }
+                        when (data.notificationActionResult) {
                             is NotificationActionResult.Navigate -> {
                                 val commentId = extraJson.commentId
                                 val postId = extraJson.postId
                                 val followerId = extraJson.followerId
-                                when(type) {
-                                    LIKEPOST-> { //게시물 페이지
+                                when (type) {
+                                    LIKEPOST -> {
                                         postId?.let { id ->
-                                            Screen.PostDetailScreen(
-                                                id
-                                            )
-                                        }?.let { screen -> UiEvent.navigate(screen) }
-                                            ?.let { setEvent(it) }
-
+                                            setEvent(UiEvent.navigate(Screen.PostDetailScreen(id)))
+                                        }
                                     }
-                                    COMMENT,REPLY,LIKECOMMENT -> { //게시물페이지
-                                        if(postId!=null&&commentId!=null) {
+                                    COMMENT, REPLY, LIKECOMMENT -> {
+                                        if (postId != null && commentId != null) {
                                             setEvent(
                                                 UiEvent.navigate(
-                                                Screen.PostDetailScreen(
-                                                    postId = postId,
-                                                    notificationCommentId = commentId
+                                                    Screen.PostDetailScreen(
+                                                        postId = postId,
+                                                        notificationCommentId = commentId
+                                                    )
                                                 )
-                                            ))
+                                            )
                                         }
                                     }
                                     FOLLOW -> {
@@ -228,89 +238,77 @@ class NotificationViewModel @Inject constructor(
                                                 )
                                             )
                                         }
-
                                     }
                                 }
-
                             }
                             is NotificationActionResult.TargetDeleted -> {
-                               // setEvent(
-                                //    UiEvent.ShowToast(
-                                 //   when ((result.notificationActionResult as NotificationActionResult.TargetDeleted).reason) {
-                                  //      DeleteReason.POST_DELETED -> "삭제된 게시물입니다"
-                                   //     DeleteReason.COMMENT_DELETED -> "삭제된 댓글입니다"
-                                    //    DeleteReason.REPLY_DELETED -> "삭제된 답글입니다"
-                                     //   else -> "이미 삭제된 알림입니다"
-                                    //}
-                                //))
-
+                                setEvent(
+                                    UiEvent.ShowToast(
+                                        when ((data.notificationActionResult as NotificationActionResult.TargetDeleted).reason) {
+                                            DeleteReason.POST_DELETED -> UiText.StringResource(R.string.alert_deleted_post)
+                                            DeleteReason.COMMENT_DELETED -> UiText.StringResource(R.string.alert_deleted_comment)
+                                            DeleteReason.REPLY_DELETED -> UiText.StringResource(R.string.alert_deleted_reply)
+                                            else -> UiText.StringResource(R.string.alert_deleted_notification)
+                                        }
+                                    )
+                                )
                             }
-                        } // 읽고난후의 행동 처리
-                        //navigate(post(게시물,댓글),reply,profile)
+                        }
                     }
                 )
-
             }
         }
-
-
     }
-    private fun showReadAllNotificationAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(R.string.read_all_notification),
-            cancelText = getString(R.string.cancel),
-            confirmText = getString(R.string.confirm),
-            onClickCancel = {
-                resetDialogState()
-            },
-            onClickConfirm = {
-                resetDialogState()
-                viewModelScope.launch {
-                    notificationUseCases.readAllNotifications().collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
-                                _hasNewNotification.value = data.unreadCount>0
-                                _getNotificationsState.value = getNotificationsState.value.copy(
-                                    notifications = getNotificationsState.value.notifications.map{ it.copy(isRead = true)}
-                                )
-                            }
-                        )
+
+    private fun showReadAllNotificationAlert(targetMaxId: Long?) {
+        targetMaxId?.let { targetId ->
+            _alertDialogState.value = AlertDialogStateV2(
+                title = UiText.StringResource(R.string.read_all_notification),
+                cancelText = UiText.StringResource(R.string.cancel),
+                confirmText = UiText.StringResource(R.string.confirm),
+                onClickCancel = { resetDialogState() },
+                onClickConfirm = {
+                    resetDialogState()
+                    viewModelScope.launch {
+                        notificationUseCases.readAllNotifications().collect { result ->
+                            result.handle(
+                                onSuccessUnit = {
+                                    _lastReadMaxId.update { maxOf(it, targetId) }
+                                    _serverUnreadCount.value = 0
+                                }
+                            )
+                        }
                     }
                 }
-            }
-        )
+            )
+        }
     }
-    private fun showDeleteNotificationAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(R.string.delete_notifications),
-            cancelText = getString(R.string.cancel),
-            confirmText = getString(R.string.confirm),
-            onClickCancel = {
-                resetDialogState()
-            },
-            onClickConfirm = {
-                resetDialogState()
-                viewModelScope.launch {
-                    notificationUseCases.deleteNotifications().collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
-                                //여기서 전부 없애는걸 수행하고
-                                //그다음 상단영역에서 조사한다음 unread처리
-                                _hasNewNotification.value = data.unreadCount>0
-                                _getNotificationsState.value = getNotificationsState.value.copy(
-                                    notifications = data.notifications
-                                )
-                            }
-                        )
-                    }
 
+    private fun showDeleteNotificationAlert(targetMaxId: Long?) {
+        targetMaxId?.let { targetId ->
+            _alertDialogState.value = AlertDialogStateV2(
+                title = UiText.StringResource(R.string.delete_notifications),
+                cancelText = UiText.StringResource(R.string.cancel),
+                confirmText = UiText.StringResource(R.string.confirm),
+                onClickCancel = { resetDialogState() },
+                onClickConfirm = {
+                    resetDialogState()
+                    viewModelScope.launch {
+                        notificationUseCases.deleteNotifications().collect { result ->
+                            result.handle(
+                                onSuccessUnit = {
+                                    _lastDeletedMaxId.update { maxOf(it, targetId) }
+                                    _serverUnreadCount.value = 0
+                                }
+                            )
+                        }
+                    }
                 }
-            }
-        )
+            )
+        }
     }
+
     private fun resetDialogState() {
-        _alertDialogState.value = AlertDialogState()
+        _alertDialogState.value = AlertDialogStateV2()
     }
 }

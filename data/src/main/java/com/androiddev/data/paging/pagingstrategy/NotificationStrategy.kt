@@ -11,7 +11,6 @@ import retrofit2.Response
 
 class NotificationStrategy (
     private val api: NotificationApi,
-    private val onUnreadCountUpdated: (Int) -> Unit
 ): PagingStrategy<NotificationsDto, Notification, NotificationCursor> {
     override suspend fun fetch(cursor: NotificationCursor?): Response<BaseApiResponse<NotificationsDto>> {
         return api.getNotifications(
@@ -21,10 +20,8 @@ class NotificationStrategy (
     }
 
     override fun mapToDomain(data: NotificationsDto): List<Notification> {
-        val result = data.toDomain()
-        onUnreadCountUpdated(result.unreadCount)
 
-        return result.notifications
+        return data.toDomain()
     }
 
     override fun extractNextCursor(items: List<Notification>, pageSize: Int): NotificationCursor? {

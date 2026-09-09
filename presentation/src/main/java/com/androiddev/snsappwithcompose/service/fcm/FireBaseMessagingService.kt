@@ -8,10 +8,9 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.NotificationExtra
-import com.androiddev.domain.model.NotificationItem
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
-import com.androiddev.snsappwithcompose.common.util.elapsedTime
 import com.androiddev.snsappwithcompose.MainActivity
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_COMMENT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_FOLLOW
@@ -72,7 +71,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             if(!isAppInForeground())
                 showNotification(id.toInt(),title, body, type, pendingIntent)
 
-            val notificationItem = NotificationItem(
+            val notificationItem = Notification(
                 id = id,
                 type = type,
                 content = content,

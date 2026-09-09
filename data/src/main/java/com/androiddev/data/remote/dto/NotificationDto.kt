@@ -2,7 +2,6 @@ package com.androiddev.data.remote.dto
 
 import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.NotificationExtra
-import com.androiddev.domain.model.NotificationItem
 
 data class NotificationDto (
     val id: Long,

@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androiddev.snsappwithcompose.common.util.MainScreenPendingHandler
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
@@ -44,10 +45,11 @@ fun MainScaffold(
     startTab: Screen = Screen.HomeScreen,
     tagViewModel: TagViewModel,
     userViewModel: UserViewModel,
-    notificationViewModel: NotificationViewModel
+    notificationViewModel: NotificationViewModel,
+    onHomeReadyChange: (Boolean) -> Unit
 ) {
     val tabNavController = rememberNavController()
-    val hasNewNoti by notificationViewModel.hasNewNotification
+    val hasNewNoti by notificationViewModel.hasUnreadNotification.collectAsStateWithLifecycle()
     var isHomeReady by remember { mutableStateOf(false) }
     MainScreenPendingHandler(
         notificationViewModel = notificationViewModel,
@@ -98,7 +100,7 @@ fun MainScaffold(
                     navController = rootNavController,
                     tagViewModel = tagViewModel,
                     userViewModel = userViewModel,
-                    onHomeReady = { isHomeReady = it }
+                    onHomeReady = { onHomeReadyChange(it) }
                 )
             }
             composable<Screen.NotificationScreen> {

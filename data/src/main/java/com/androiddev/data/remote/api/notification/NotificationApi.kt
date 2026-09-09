@@ -3,6 +3,7 @@ package com.androiddev.data.remote.api.notification
 import com.androiddev.data.remote.BaseApiResponse
 import com.androiddev.data.remote.dto.NotificationsDto
 import com.androiddev.data.remote.dto.ReadNotificationDto
+import com.androiddev.data.remote.dto.UnreadNotificationCountDto
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 import retrofit2.Response
@@ -15,6 +16,12 @@ interface NotificationApi {
         @Field("notificationid")notificationid: Long?,
         @Field("notificationdate")notificationdate : String?
     ):Response<BaseApiResponse<NotificationsDto>>
+
+    @POST("notification/getUnreadNotificationCount")
+    suspend fun getUnreadNotificationCount(
+    ):Response<BaseApiResponse<UnreadNotificationCountDto>>
+
+
 
     @POST("notification/readAllNotifications")
     suspend fun readAllNotifications():Response<BaseApiResponse<Unit>>

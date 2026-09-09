@@ -1,19 +1,14 @@
 package com.androiddev.data.remote.dto
 
-import com.androiddev.domain.model.Notifications
+import com.androiddev.domain.model.Notification
 
 data class NotificationsDto(
-    val notifications: List<NotificationDto>,
-    val unreadCount:Int
+    val notifications: List<NotificationDto>
 )
 fun NotificationsDto.toDomain(
-): Notifications {
-    return Notifications(
-        notifications = notifications.map{
+): List<Notification> {
+    return notifications.map{
             it.toDomain(
             )
-        },
-        unreadCount = unreadCount
-    )
-
+        }
 }

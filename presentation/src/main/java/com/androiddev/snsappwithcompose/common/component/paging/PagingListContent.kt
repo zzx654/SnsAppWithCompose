@@ -60,6 +60,7 @@ fun <T : Any> PagingListContent(
             color = Color.LightGray.copy(0.25f)
         )
     },
+    onRefresh: () -> Unit = {},
     emptyContent: @Composable () -> Unit = { DefaultEmptyView(getString(LocalContext.current,R.string.nodata_to_display)) },
     canRefresh:Boolean = true,
     additionalHeader: @Composable (() -> Unit)? = null
@@ -91,6 +92,7 @@ fun <T : Any> PagingListContent(
                 isRefreshing = isRefreshing,
                 onRefresh = {
                     isManualRefreshing = true
+                    onRefresh()
                     items.refresh()
                 },
                 enabled = canRefresh

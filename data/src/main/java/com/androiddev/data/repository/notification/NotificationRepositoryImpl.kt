@@ -6,6 +6,7 @@ import com.androiddev.data.paging.createPager
 import com.androiddev.data.paging.pagingsource.GenericPagingSource
 import com.androiddev.data.paging.pagingstrategy.NotificationStrategy
 import com.androiddev.data.remote.api.notification.NotificationApi
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.remote.dto.toReadNotificationResult
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.Notification
@@ -19,16 +20,20 @@ class NotificationRepositoryImpl @Inject constructor(
     private val context: Context,
     private val api:NotificationApi
 ):NotificationRepository {
-    override suspend fun getNotifications(
-        onUnreadCountUpdated: (Int) -> Unit
+    override fun getNotifications(
     ): Flow<PagingData<Notification>> = createPager {
         GenericPagingSource(
             NotificationStrategy(
-                api = api,
-                onUnreadCountUpdated = onUnreadCountUpdated
+                api = api
             )
         )
     }
+
+    override suspend fun getUnreadNotificationCount(): Flow<Resource<Int>>
+    = safeApiCall(
+        apiCall = { api.getUnreadNotificationCount() },
+        mapToResource = { it.toDomain() }
+    )
 
 
     override suspend fun readAllNotifications(): Flow<Resource<Unit>>
