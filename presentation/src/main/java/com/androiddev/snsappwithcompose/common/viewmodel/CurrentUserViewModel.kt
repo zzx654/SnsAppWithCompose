@@ -22,5 +22,6 @@ class CurrentUserViewModel @Inject constructor(): ViewModel() {
 
     fun setUserId(id: Int){
         _userId.value = id
+        _isSignedIn.value = true
     }
 }

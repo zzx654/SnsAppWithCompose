@@ -63,7 +63,6 @@ class NotificationViewModel @Inject constructor(
     private val _pending = MutableStateFlow<PendingNotification?>(null)
     val pending: StateFlow<PendingNotification?> = _pending.asStateFlow()
     private val _isUserRefreshing = MutableStateFlow(false)
-    val isUserRefreshing = _isUserRefreshing.asStateFlow()
     // 서버에서 내려준 최근 안 읽은 알림 수 (독립 init/API 연동)
     private val _serverUnreadCount = MutableStateFlow(0)
     val serverUnreadCount: StateFlow<Int> = _serverUnreadCount.asStateFlow()
@@ -85,7 +84,7 @@ class NotificationViewModel @Inject constructor(
 
     private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
     val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
-
+    private var refreshStartMaxFcmId: Long = 0L
     // PagingData 스트림을 가장 가볍고 순수하게 유지 (UI단 State Binding 방식)
     val pagingDataStream: Flow<PagingData<Notification>> =
         notificationUseCases.getNotifications().cachedIn(viewModelScope)
@@ -102,6 +101,7 @@ class NotificationViewModel @Inject constructor(
         val hasUnreadFcm = fcmList.any { fcm ->
             fcm.id > deletedMaxId && fcm.id > readMaxId && fcm.id !in readIds
         }
+        Log.d("unread확인", "hasUnreadFcm: ${hasUnreadFcm}, serverunread: ${serverUnread}")
 
         // 서버 unreadCount가 남아있거나 안 읽은 FCM이 있으면 true
         (serverUnread > 0) || hasUnreadFcm
@@ -151,28 +151,39 @@ class NotificationViewModel @Inject constructor(
 
     /** FCM 도착 시 호출 */
     fun addNotification(notification: Notification) {
+        Log.d("FcmDebug", "FCM 추가 전 개수: ${_fcmNotifications.value.size}")
         _fcmNotifications.update { currentList ->
             // 중복 방지 후 최신순 추가
             if (currentList.none { it.id == notification.id }) {
                 listOf(notification) + currentList
             } else currentList
         }
+        Log.d("fcm객체","FcmNotification:${notification},FcmList:${_fcmNotifications.value}")
+
+        Log.d("FcmDebug", "FCM 추가 후 개수: ${_fcmNotifications.value.size}")
     }
 
     /** 당겨서 새로고침(Refresh) 성공 시 UI/Paging3 단에서 호출 */
     fun onRefreshSuccess() {
+
         if (_isUserRefreshing.value) {
-            _fcmNotifications.value = emptyList()
-            _readIds.value = emptySet()
+            //_readIds.value = emptySet()
+
+            _fcmNotifications.update { currentList ->
+                currentList.filter { fcm -> fcm.id > refreshStartMaxFcmId }
+            }
             _lastReadMaxId.value = 0L
             _lastDeletedMaxId.value = 0L
 
             _isUserRefreshing.value = false // 플래그 리셋
+            refreshStartMaxFcmId = 0L // 스냅샷 초기화
         }
     }
 
 
     fun onRefreshStart() {
+        Log.d("FcmDebug", ">>> onRefreshStart() 호출됨!")
+        refreshStartMaxFcmId = _fcmNotifications.value.maxOfOrNull { it.id } ?: 0L
         fetchUnreadCount()
         _isUserRefreshing.value = true
     }

@@ -50,11 +50,7 @@ fun MainScaffold(
 ) {
     val tabNavController = rememberNavController()
     val hasNewNoti by notificationViewModel.hasUnreadNotification.collectAsStateWithLifecycle()
-    var isHomeReady by remember { mutableStateOf(false) }
-    MainScreenPendingHandler(
-        notificationViewModel = notificationViewModel,
-        isPostsLoaded = isHomeReady
-    )
+
     Scaffold(
         bottomBar = {
             Column {

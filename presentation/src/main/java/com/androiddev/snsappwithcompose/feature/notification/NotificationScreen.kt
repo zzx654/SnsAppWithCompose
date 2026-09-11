@@ -1,56 +1,48 @@
 package com.androiddev.snsappwithcompose.feature.notification
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
-import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
-import com.androiddev.domain.util.Constants.PAGE_SIZE
-import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import com.androiddev.snsappwithcompose.common.component.paging.PagingListContent
-import com.androiddev.snsappwithcompose.common.mapper.toUiState
-import com.androiddev.snsappwithcompose.feature.home.component.PostPreviewItemm
 import com.androiddev.snsappwithcompose.feature.notification.component.NotificationItem
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NotificationScreen(
     navController: NavController,
@@ -58,11 +50,14 @@ fun NotificationScreen(
 ) {
     val notificationItems = viewModel.pagingDataStream.collectAsLazyPagingItems()
     val fcmList by viewModel.fcmNotifications.collectAsStateWithLifecycle()
+
+    var isInitialLoadCompleted by remember { mutableStateOf(false) }
     val readIds by viewModel.readIds.collectAsStateWithLifecycle()
     val lastReadMaxId by viewModel.lastReadMaxId.collectAsStateWithLifecycle()
     val lastDeletedMaxId by viewModel.lastDeletedMaxId.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
+    val listState = rememberLazyListState()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
     LaunchedEffect(notificationItems.loadState.refresh) {
@@ -70,7 +65,53 @@ fun NotificationScreen(
 
 
         if (refreshState is LoadState.NotLoading) {
+            if (!isInitialLoadCompleted) {
+                isInitialLoadCompleted = true
+            }
             viewModel.onRefreshSuccess()
+        }
+    }
+    val uniqueFcmList by remember(fcmList, notificationItems.itemSnapshotList) {
+        derivedStateOf {
+            // 현재 페이징에 로드된 모든 아이템의 ID를 HashSet으로 변환
+            val loadedPagingIds = notificationItems.itemSnapshotList.items
+                .mapTo(HashSet()) { it.id }
+
+            // HashSet을 이용해 FCM 목록 중 중복 항목을 O(1)로 빠르게 제거
+            fcmList.filterNot { it.id in loadedPagingIds }
+        }
+    }
+    var lastObservedFcmSize by rememberSaveable { mutableIntStateOf(uniqueFcmList.size) }
+    LaunchedEffect(uniqueFcmList.size) {
+        val currentSize = uniqueFcmList.size
+
+        if (currentSize > lastObservedFcmSize && currentSize > 0) {
+            listState.scrollToItem(0)
+        }
+
+        lastObservedFcmSize = currentSize
+    }
+
+// [백그라운드/다른 탭 복귀] 복귀 시점에 '이전보다 알림 개수가 늘어났을 때만' 최상단 스크롤
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // 다른 탭/화면에서 돌아왔을 때 신규 알림이 실제로 늘어난 경우에만 최상단 이동
+                if (uniqueFcmList.size > lastObservedFcmSize && uniqueFcmList.isNotEmpty()) {
+                    coroutineScope.launch {
+                        listState.scrollToItem(0)
+                    }
+                    lastObservedFcmSize = uniqueFcmList.size
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
     AlertDialogg (
@@ -118,34 +159,35 @@ fun NotificationScreen(
             content = {
                 PagingListContent(
                     items = notificationItems,
+                    listState = listState,
                     keyExtractor = { it.id },
 
                     // 1. FCM 실시간 알림 목록
                     additionalHeader = {
-                        if (fcmList.isNotEmpty()) {
-                            Column {
-                                fcmList.forEach { fcmItem ->
-                                    if (fcmItem.id > lastDeletedMaxId) {
-                                        val isRead = fcmItem.isRead ||
-                                                (fcmItem.id in readIds) ||
-                                                (fcmItem.id <= lastReadMaxId)
-
-                                        NotificationItem(
-                                            notification = fcmItem.copy(isRead = isRead),
-                                            onNotificationClick = {
-                                                viewModel.onEvent(NotificationEvent.ReadNotification(fcmItem))
-                                            }
-                                        )
-
-                                        HorizontalDivider(
-                                            thickness = 4.dp,
-                                            color = Color.LightGray.copy(0.25f)
-                                        )
-                                    }
+                    if (isInitialLoadCompleted && uniqueFcmList.isNotEmpty()) {
+                        Column {
+                            uniqueFcmList.forEach { fcmItem ->
+                                android.util.Log.d("FcmUiDebug", "fcmItem ID: ${fcmItem.id} | 조건 통과 여부: ${fcmItem.id > lastDeletedMaxId}")
+                                if (fcmItem.id > lastDeletedMaxId) {
+                                    val isRead = fcmItem.isRead ||
+                                            (fcmItem.id in readIds) || (fcmItem.id <= lastReadMaxId)
+                                    NotificationItem(
+                                        notification = fcmItem.copy(isRead = isRead),
+                                        onNotificationClick = {
+                                            viewModel.onEvent(NotificationEvent.ReadNotification(fcmItem))
+                                        }
+                                    )
+                                    HorizontalDivider(
+                                        thickness = 4.dp,
+                                        color = Color.LightGray.copy(0.25f)
+                                    )
                                 }
                             }
                         }
-                    },
+                     }
+                                       },
+
+
 
                     itemContent = { item ->
                         if (item.id > lastDeletedMaxId) {
@@ -183,3 +225,4 @@ fun NotificationScreen(
 
 
 }
+
