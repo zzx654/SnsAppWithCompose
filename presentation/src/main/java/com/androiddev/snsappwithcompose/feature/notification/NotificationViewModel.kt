@@ -176,6 +176,8 @@ class NotificationViewModel @Inject constructor(
     /** FCM 도착 시 호출 */
     fun addNotification(notification: Notification) {
         Log.d("FcmDebug", "FCM 추가 전 개수: ${_fcmNotifications.value.size}")
+
+        if (notification.id <= _lastDeletedMaxId.value) return
         _fcmNotifications.update { currentList ->
             // 중복 방지 후 최신순 추가
             if (currentList.none { it.id == notification.id }) {

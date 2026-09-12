@@ -43,7 +43,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun NotificationScreen(
-    navController: NavController,
     viewModel: NotificationViewModel
 ) {
 
