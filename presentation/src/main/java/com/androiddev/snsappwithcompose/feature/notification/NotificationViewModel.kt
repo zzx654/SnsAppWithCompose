@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
@@ -85,9 +87,30 @@ class NotificationViewModel @Inject constructor(
     private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
     val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
     private var refreshStartMaxFcmId: Long = 0L
-    // PagingData 스트림을 가장 가볍고 순수하게 유지 (UI단 State Binding 방식)
-    val pagingDataStream: Flow<PagingData<Notification>> =
+    private val basePagingFlow: Flow<PagingData<Notification>> =
         notificationUseCases.getNotifications().cachedIn(viewModelScope)
+    val pagingDataStream: Flow<PagingData<Notification>> = combine(
+        basePagingFlow,
+        _fcmNotifications
+    ) { pagingData, fcmList ->
+        if (fcmList.isEmpty()) {
+            pagingData
+        } else {
+            val fcmIds = fcmList.map { it.id }.toSet()
+
+            // 1. PagingData 내에서 FCM 아이템과 중복되는 ID 제거
+            var resultPagingData = pagingData.filter { notification ->
+                notification.id !in fcmIds
+            }
+
+            // 2. FCM 아이템들을 상단에 순차적으로 삽입 (최신순)
+            fcmList.reversed().forEach { fcmItem ->
+                resultPagingData = resultPagingData.insertHeaderItem(item = fcmItem)
+            }
+
+            resultPagingData
+        }
+    }.cachedIn(viewModelScope)
 
     // hasUnreadNotification 계산 시 deletedMaxId까지 포함하여 보완
     val hasUnreadNotification: StateFlow<Boolean> = combine(
@@ -119,6 +142,26 @@ class NotificationViewModel @Inject constructor(
             }
         }
     }
+    private val _loadedPagingIds = MutableStateFlow<Set<Long>>(emptySet())
+
+    //  ViewModel에서 직접 계산하는 uniqueFcmList (UI 스냅샷 의존성 제거!)
+    val uniqueFcmList: StateFlow<List<Notification>> = combine(
+        _fcmNotifications,
+        _loadedPagingIds
+    ) { fcm, pagingIds ->
+        fcm.filterNot { it.id in pagingIds }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    // PagingData에서 아이템들이 로드될 때 ID 등록
+    fun updateLoadedPagingIds(ids: List<Long>) {
+        if (ids.isEmpty()) return
+        _loadedPagingIds.update { current -> current + ids }
+    }
+
 
     private fun fetchUnreadCount() {
         viewModelScope.launch {

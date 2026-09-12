@@ -1,8 +1,10 @@
 package com.androiddev.snsappwithcompose.feature.notification
 
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -48,6 +50,7 @@ fun NotificationScreen(
     navController: NavController,
     viewModel: NotificationViewModel
 ) {
+
     val notificationItems = viewModel.pagingDataStream.collectAsLazyPagingItems()
     val fcmList by viewModel.fcmNotifications.collectAsStateWithLifecycle()
 
@@ -71,7 +74,7 @@ fun NotificationScreen(
             viewModel.onRefreshSuccess()
         }
     }
-    val uniqueFcmList by remember(fcmList, notificationItems.itemSnapshotList) {
+    /**val uniqueFcmList by remember(fcmList, notificationItems.itemSnapshotList) {
         derivedStateOf {
             // 현재 페이징에 로드된 모든 아이템의 ID를 HashSet으로 변환
             val loadedPagingIds = notificationItems.itemSnapshotList.items
@@ -80,10 +83,42 @@ fun NotificationScreen(
             // HashSet을 이용해 FCM 목록 중 중복 항목을 O(1)로 빠르게 제거
             fcmList.filterNot { it.id in loadedPagingIds }
         }
-    }
-    var lastObservedFcmSize by rememberSaveable { mutableIntStateOf(uniqueFcmList.size) }
-    LaunchedEffect(uniqueFcmList.size) {
-        val currentSize = uniqueFcmList.size
+    }**/
+    //val uniqueFcmList by viewModel.uniqueFcmList.collectAsStateWithLifecycle()
+
+    /**LaunchedEffect(notificationItems.itemSnapshotList.items) {
+        val ids = notificationItems.itemSnapshotList.items.map { it.id }
+        viewModel.updateLoadedPagingIds(ids)
+    }**/
+
+// 알림 탭 복귀 시 예약된 스크롤이 있을 때만 딱 1번 이동
+   /** DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            Log.d("ScrollDebug", "================ ON_RESUME 발생 ================")
+            Log.d("ScrollDebug", "현재 보이는 첫 아이템 Index: ${listState.firstVisibleItemIndex}")
+            Log.d("ScrollDebug", "현재 보이는 첫 아이템 Offset: ${listState.firstVisibleItemScrollOffset}")
+            Log.d("ScrollDebug", "uniqueFcmList 크기: ${uniqueFcmList.size}")
+            Log.d("ScrollDebug", "================================================")
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (hasPendingScrollToTop) {
+                    Log.d("ScrollDebug", ">>> FCM 영역 근처 진입 확인 -> scrollToItem(0) 실행!")
+                    coroutineScope.launch {
+                        listState.scrollToItem(0)
+                    }
+                    viewModel.onScrollToTopHandled() // 예약 해제
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }**/
+
+   var lastObservedFcmSize by rememberSaveable { mutableIntStateOf(fcmList.size) }
+    LaunchedEffect(fcmList.size) {
+        val currentSize = fcmList.size
 
         if (currentSize > lastObservedFcmSize && currentSize > 0) {
             listState.scrollToItem(0)
@@ -100,11 +135,11 @@ fun NotificationScreen(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 // 다른 탭/화면에서 돌아왔을 때 신규 알림이 실제로 늘어난 경우에만 최상단 이동
-                if (uniqueFcmList.size > lastObservedFcmSize && uniqueFcmList.isNotEmpty()) {
+                if (fcmList.size > lastObservedFcmSize && fcmList.isNotEmpty()) {
                     coroutineScope.launch {
                         listState.scrollToItem(0)
                     }
-                    lastObservedFcmSize = uniqueFcmList.size
+                    lastObservedFcmSize = fcmList.size
                 }
             }
         }
@@ -162,30 +197,7 @@ fun NotificationScreen(
                     listState = listState,
                     keyExtractor = { it.id },
 
-                    // 1. FCM 실시간 알림 목록
-                    additionalHeader = {
-                    if (isInitialLoadCompleted && uniqueFcmList.isNotEmpty()) {
-                        Column {
-                            uniqueFcmList.forEach { fcmItem ->
-                                android.util.Log.d("FcmUiDebug", "fcmItem ID: ${fcmItem.id} | 조건 통과 여부: ${fcmItem.id > lastDeletedMaxId}")
-                                if (fcmItem.id > lastDeletedMaxId) {
-                                    val isRead = fcmItem.isRead ||
-                                            (fcmItem.id in readIds) || (fcmItem.id <= lastReadMaxId)
-                                    NotificationItem(
-                                        notification = fcmItem.copy(isRead = isRead),
-                                        onNotificationClick = {
-                                            viewModel.onEvent(NotificationEvent.ReadNotification(fcmItem))
-                                        }
-                                    )
-                                    HorizontalDivider(
-                                        thickness = 4.dp,
-                                        color = Color.LightGray.copy(0.25f)
-                                    )
-                                }
-                            }
-                        }
-                     }
-                                       },
+
 
 
 

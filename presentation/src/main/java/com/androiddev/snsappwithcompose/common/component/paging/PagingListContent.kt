@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Text
@@ -63,7 +64,8 @@ fun <T : Any> PagingListContent(
     onRefresh: () -> Unit = {},
     emptyContent: @Composable () -> Unit = { DefaultEmptyView(getString(LocalContext.current,R.string.nodata_to_display)) },
     canRefresh:Boolean = true,
-    additionalHeader: @Composable (() -> Unit)? = null
+    additionalHeader: @Composable (() -> Unit)? = null,
+    headerScope: (LazyListScope.() -> Unit)? = null
 ) {
     val context = LocalContext.current
     var isManualRefreshing by remember { mutableStateOf(false) }
@@ -125,9 +127,12 @@ fun <T : Any> PagingListContent(
                 verticalArrangement = verticalArrangement,
                 modifier = Modifier.fillMaxSize()
             ) {
-                item {
-                    additionalHeader?.invoke()
+                if (additionalHeader != null) {
+                    item {
+                        additionalHeader()
+                    }
                 }
+                headerScope?.invoke(this)
                 items(
                     count = items.itemCount,
                     key = items.itemKey { item ->
