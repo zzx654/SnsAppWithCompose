@@ -8,17 +8,18 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import com.androiddev.data.notification.NotificationHelper
 import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.NotificationExtra
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
 import com.androiddev.snsappwithcompose.MainActivity
+import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_COMMENT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_FOLLOW
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_LIKE
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_COMMENT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_FOLLOW
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_LIKE
-import com.androiddev.snsappwithcompose.common.util.NotificationHelper
 import com.androiddev.snsappwithcompose.common.util.isAppInForeground
 import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType
@@ -32,7 +33,8 @@ import javax.inject.Inject
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var sendFcmTokenUseCase: FcmTokenUseCase
-
+    @Inject
+    lateinit var notificationHelper: NotificationHelper
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         sendFcmTokenUseCase.invoke(token)
@@ -98,7 +100,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
         ) return
-        val notificationHelper = NotificationHelper(this)
+
 
         val channelId = when(type) {
             NotificationType.LIKEPOST,NotificationType.LIKECOMMENT -> CHANNEL_ID_LIKE
@@ -122,7 +124,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             channelId = channelId,
             contentTitle = title,
             contentText = messageBody,
-            contentIntent = pendingIntent
+            contentIntent = pendingIntent,
+            smallIcon = R.drawable.dog
         )
         NotificationManagerCompat.from(this).notify(id,notification)
 

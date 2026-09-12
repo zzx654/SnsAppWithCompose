@@ -54,7 +54,7 @@ fun <T : Any> PagingListContent(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showDivider:Boolean = true,
-    dividerContent: @Composable () -> Unit = {
+    dividerContent: @Composable (T) -> Unit = {
         HorizontalDivider(
             //modifier = Modifier.padding(horizontal = 16.dp),
             thickness = 4.dp,
@@ -144,7 +144,7 @@ fun <T : Any> PagingListContent(
                         itemContent(item)
 
                         if (showDivider && index < items.itemCount - 1) {
-                            dividerContent()
+                            dividerContent(item)
                         }
                     }
                 }

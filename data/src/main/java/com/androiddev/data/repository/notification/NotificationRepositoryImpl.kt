@@ -2,6 +2,7 @@ package com.androiddev.data.repository.notification
 
 import android.content.Context
 import androidx.paging.PagingData
+import com.androiddev.data.notification.NotificationHelper
 import com.androiddev.data.paging.createPager
 import com.androiddev.data.paging.pagingsource.GenericPagingSource
 import com.androiddev.data.paging.pagingstrategy.NotificationStrategy
@@ -18,7 +19,8 @@ import javax.inject.Inject
 
 class NotificationRepositoryImpl @Inject constructor(
     private val context: Context,
-    private val api:NotificationApi
+    private val api:NotificationApi,
+    private val notificationHelper: NotificationHelper
 ):NotificationRepository {
     override fun getNotifications(
     ): Flow<PagingData<Notification>> = createPager {
@@ -39,19 +41,24 @@ class NotificationRepositoryImpl @Inject constructor(
     override suspend fun readAllNotifications(): Flow<Resource<Unit>>
     = safeApiCall(
         apiCall = { api.readAllNotifications() },
-        mapToResource = {}
+        mapToResource = {
+            notificationHelper.cancelAllNotifications()
+        }
     )
 
     override suspend fun deleteNotifications(): Flow<Resource<Unit>>
     = safeApiCall(
         apiCall = { api.deleteNotifications() },
-        mapToResource = {}
+        mapToResource = {
+            notificationHelper.cancelAllNotifications()
+        }
     )
 
     override suspend fun readNotification(notificationId:Long): Flow<Resource<ReadNotificationResult>> = safeApiCall(
         context = context,
         apiCall = { api.readNotification(notificationId) },
         mapToResource = {
+            notificationHelper.cancelNotification(notificationId)
             it.toReadNotificationResult(
             )
         }

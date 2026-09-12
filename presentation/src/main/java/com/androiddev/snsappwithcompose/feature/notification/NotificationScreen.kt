@@ -1,10 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.notification
 
 
-import android.util.Log
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -16,7 +13,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -74,47 +70,6 @@ fun NotificationScreen(
             viewModel.onRefreshSuccess()
         }
     }
-    /**val uniqueFcmList by remember(fcmList, notificationItems.itemSnapshotList) {
-        derivedStateOf {
-            // 현재 페이징에 로드된 모든 아이템의 ID를 HashSet으로 변환
-            val loadedPagingIds = notificationItems.itemSnapshotList.items
-                .mapTo(HashSet()) { it.id }
-
-            // HashSet을 이용해 FCM 목록 중 중복 항목을 O(1)로 빠르게 제거
-            fcmList.filterNot { it.id in loadedPagingIds }
-        }
-    }**/
-    //val uniqueFcmList by viewModel.uniqueFcmList.collectAsStateWithLifecycle()
-
-    /**LaunchedEffect(notificationItems.itemSnapshotList.items) {
-        val ids = notificationItems.itemSnapshotList.items.map { it.id }
-        viewModel.updateLoadedPagingIds(ids)
-    }**/
-
-// 알림 탭 복귀 시 예약된 스크롤이 있을 때만 딱 1번 이동
-   /** DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            Log.d("ScrollDebug", "================ ON_RESUME 발생 ================")
-            Log.d("ScrollDebug", "현재 보이는 첫 아이템 Index: ${listState.firstVisibleItemIndex}")
-            Log.d("ScrollDebug", "현재 보이는 첫 아이템 Offset: ${listState.firstVisibleItemScrollOffset}")
-            Log.d("ScrollDebug", "uniqueFcmList 크기: ${uniqueFcmList.size}")
-            Log.d("ScrollDebug", "================================================")
-            if (event == Lifecycle.Event.ON_RESUME) {
-                if (hasPendingScrollToTop) {
-                    Log.d("ScrollDebug", ">>> FCM 영역 근처 진입 확인 -> scrollToItem(0) 실행!")
-                    coroutineScope.launch {
-                        listState.scrollToItem(0)
-                    }
-                    viewModel.onScrollToTopHandled() // 예약 해제
-                }
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }**/
 
    var lastObservedFcmSize by rememberSaveable { mutableIntStateOf(fcmList.size) }
     LaunchedEffect(fcmList.size) {
@@ -196,27 +151,25 @@ fun NotificationScreen(
                     items = notificationItems,
                     listState = listState,
                     keyExtractor = { it.id },
-
-
-
-
-
                     itemContent = { item ->
                         if (item.id > lastDeletedMaxId) {
                             val isRead = item.isRead ||
                                     (item.id in readIds) ||
                                     (item.id <= lastReadMaxId)
 
-                            android.util.Log.d(
-                                "ReadCheck",
-                                "아이템ID: ${item.id} | readIds내용: $readIds | readIds에 있음?: ${item.id in readIds} | 최종isRead: $isRead"
-                            )
-
                             NotificationItem(
                                 notification = item.copy(isRead = isRead),
                                 onNotificationClick = {
                                     viewModel.onEvent(NotificationEvent.ReadNotification(item))
                                 }
+                            )
+                        }
+                    },
+                    dividerContent = { item ->
+                        if (item.id > lastDeletedMaxId) {
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = Color.LightGray
                             )
                         }
                     },
@@ -232,9 +185,5 @@ fun NotificationScreen(
             },
             lazyColumnExist = true
         )
-
-
-
-
 }
 

@@ -35,27 +35,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 object NotificationEventBus {
-    private val _events = MutableSharedFlow<Notification>()
-    val events: SharedFlow<Notification> = _events
-
+    private val _events = MutableSharedFlow<Notification>(
+        extraBufferCapacity = 64 // 코루틴 없이 tryEmit을 쓰기 위한 버퍼 용량
+    )
+    val events: SharedFlow<Notification> = _events.asSharedFlow()
 
     fun emit(item: Notification) {
         Log.d("emittest", "emit success: $item")
-        CoroutineScope(Dispatchers.IO).launch {
-
-
-          _events.emit(item)
-         }
+        // CoroutineScope 생성 없이 즉시 방출! (구독 중인 ViewModel이 있으면 수신, 없으면 안전하게 통과)
+        _events.tryEmit(item)
     }
-
 }
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
@@ -144,23 +140,8 @@ class NotificationViewModel @Inject constructor(
     }
     private val _loadedPagingIds = MutableStateFlow<Set<Long>>(emptySet())
 
-    //  ViewModel에서 직접 계산하는 uniqueFcmList (UI 스냅샷 의존성 제거!)
-    val uniqueFcmList: StateFlow<List<Notification>> = combine(
-        _fcmNotifications,
-        _loadedPagingIds
-    ) { fcm, pagingIds ->
-        fcm.filterNot { it.id in pagingIds }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
 
-    // PagingData에서 아이템들이 로드될 때 ID 등록
-    fun updateLoadedPagingIds(ids: List<Long>) {
-        if (ids.isEmpty()) return
-        _loadedPagingIds.update { current -> current + ids }
-    }
+
 
 
     private fun fetchUnreadCount() {
@@ -353,7 +334,7 @@ class NotificationViewModel @Inject constructor(
                                 onSuccessUnit = {
                                     _lastDeletedMaxId.update { maxOf(it, targetId) }
                                     _serverUnreadCount.value = 0
-                                }
+                                },
                             )
                         }
                     }
