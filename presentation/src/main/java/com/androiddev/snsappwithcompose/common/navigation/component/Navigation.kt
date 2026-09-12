@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,6 +61,13 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
     val pending by notificationViewModel.pending.collectAsState()
     val isSignedIn by currentUserViewModel.isSignedIn.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var isHomeReady by remember { mutableStateOf(false) }
+
+    PendingNotificationHandler(
+        notificationViewModel = notificationViewModel,
+        isSignedIn = isSignedIn,
+        isHomeReady = isHomeReady
+    )
     LaunchedEffect(Unit) {
         notificationViewModel.eventFlow.collectLatest { event ->
             when(event){
@@ -69,7 +78,9 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                     }
                 }
                 is UiEvent.navigate -> {
-                    navController.navigate(event.screen)
+                    navController.navigate(event.screen) {
+                        launchSingleTop = true
+                    }
                 }
                 is UiEvent.popBackStack -> {
                     navController.popBackStack()
@@ -100,7 +111,10 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 startTab = Screen.HomeScreen,
                 tagViewModel = tagViewModel,
                 userViewModel = userViewModel,
-                notificationViewModel = notificationViewModel
+                notificationViewModel = notificationViewModel,
+                onHomeReadyChange = {
+                    isHomeReady = it
+                }
             )
 
         }
@@ -166,7 +180,6 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                     viewModel = uploadViewModel
                 )
 
-                PendingNotificationHandler(notificationViewModel)
             }
 
             composable<Screen.MediaEditScreen> {
@@ -222,7 +235,6 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 navController = navController,
                 navBackStackEntry = it,
             )
-            PendingNotificationHandler(notificationViewModel)
         }
         composable<Screen.UserProfileScreen> {
             val parentEntry = remember { navController.getBackStackEntry(Screen.MainScreen) }
@@ -236,7 +248,6 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 navController = navController,
                 navBackStackEntry = it,
             )
-            PendingNotificationHandler(notificationViewModel)
 
         }
         composable<Screen.ImageViewerScreen> {
@@ -259,7 +270,6 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 navController = navController,
                 currentUserViewModel = currentUserViewModel
             )
-            PendingNotificationHandler(notificationViewModel)
         }
         composable<Screen.TagPostsScreen> {
             val parentEntry = remember { navController.getBackStackEntry(Screen.MainScreen) }
@@ -271,7 +281,6 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 navBackStackEntry = it,
                 viewModel = tagViewModel
             )
-            PendingNotificationHandler(notificationViewModel)
         }
 
 

@@ -134,6 +134,12 @@
 </string>
     <string name="reply_count"> 답글 %d개</string>
 
+    <string name="alert_deleted_post"> 삭제된 게시물입니다</string>
+    <string name="alert_deleted_comment"> 삭제된 댓글입니다</string>
+    <string name="alert_deleted_reply"> 삭제된 답글입니다</string>
+    <string name="alert_deleted_notification"> 삭제된 알림입니다</string>
+
+
 
 
 

@@ -1,7 +1,7 @@
 package com.androiddev.data.remote.dto
 
+import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.NotificationExtra
-import com.androiddev.domain.model.NotificationItem
 
 data class NotificationDto (
     val id: Long,
@@ -11,10 +11,10 @@ data class NotificationDto (
     val isread: Int,
     val date: String
 )
-fun NotificationDto.toNotificationItem(
-):NotificationItem {
+fun NotificationDto.toDomain(
+): Notification {
 
-    return NotificationItem(
+    return Notification(
         id = id,
         type = type,
         content = content,

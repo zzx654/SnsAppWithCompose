@@ -1,11 +1,16 @@
 package com.androiddev.data.repository.notification
 
 import android.content.Context
+import androidx.paging.PagingData
+import com.androiddev.data.notification.NotificationHelper
+import com.androiddev.data.paging.createPager
+import com.androiddev.data.paging.pagingsource.GenericPagingSource
+import com.androiddev.data.paging.pagingstrategy.NotificationStrategy
 import com.androiddev.data.remote.api.notification.NotificationApi
-import com.androiddev.data.remote.dto.toNotifications
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.remote.dto.toReadNotificationResult
 import com.androiddev.data.util.safeApiCall
-import com.androiddev.domain.model.Notifications
+import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.ReadNotificationResult
 import com.androiddev.domain.repository.notification.NotificationRepository
 import com.androiddev.domain.util.Resource
@@ -14,35 +19,46 @@ import javax.inject.Inject
 
 class NotificationRepositoryImpl @Inject constructor(
     private val context: Context,
-    private val api:NotificationApi
+    private val api:NotificationApi,
+    private val notificationHelper: NotificationHelper
 ):NotificationRepository {
-    override suspend fun getNotifications(
-        notificationId: Long?,
-        notificationDate: String?
-    ): Flow<Resource<Notifications>> = safeApiCall(
-        context = context,
-        apiCall = { api.getNotifications(notificationId,notificationDate) },
-        mapToResource = { it.toNotifications() }
+    override fun getNotifications(
+    ): Flow<PagingData<Notification>> = createPager {
+        GenericPagingSource(
+            NotificationStrategy(
+                api = api
+            )
+        )
+    }
+
+    override suspend fun getUnreadNotificationCount(): Flow<Resource<Int>>
+    = safeApiCall(
+        apiCall = { api.getUnreadNotificationCount() },
+        mapToResource = { it.toDomain() }
     )
 
-    override suspend fun readAllNotifications(): Flow<Resource<Notifications>>
+
+    override suspend fun readAllNotifications(): Flow<Resource<Unit>>
     = safeApiCall(
-        context = context,
         apiCall = { api.readAllNotifications() },
-        mapToResource = { it.toNotifications()}
+        mapToResource = {
+            notificationHelper.cancelAllNotifications()
+        }
     )
 
-    override suspend fun deleteNotifications(): Flow<Resource<Notifications>>
+    override suspend fun deleteNotifications(): Flow<Resource<Unit>>
     = safeApiCall(
-        context = context,
         apiCall = { api.deleteNotifications() },
-        mapToResource = { it.toNotifications()}
+        mapToResource = {
+            notificationHelper.cancelAllNotifications()
+        }
     )
 
     override suspend fun readNotification(notificationId:Long): Flow<Resource<ReadNotificationResult>> = safeApiCall(
         context = context,
         apiCall = { api.readNotification(notificationId) },
         mapToResource = {
+            notificationHelper.cancelNotification(notificationId)
             it.toReadNotificationResult(
             )
         }

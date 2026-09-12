@@ -1,11 +1,10 @@
 package com.androiddev.snsappwithcompose.feature.notification
 
-import com.androiddev.domain.model.NotificationItem
+import com.androiddev.domain.model.Notification
+
 
 sealed class NotificationEvent {
-    data object LoadNextNotifications: NotificationEvent()
-    data object RefreshNotifictions: NotificationEvent()
-    data object DeleteNotifications: NotificationEvent()
-    data object ReadAllNotifications: NotificationEvent()
-    data class ReadNotification(val notification: NotificationItem): NotificationEvent()
+    data class DeleteNotifications(val targetMaxId: Long? = null): NotificationEvent()
+    data class ReadAllNotifications(val targetMaxId:Long? = null): NotificationEvent()
+    data class ReadNotification(val notification: Notification): NotificationEvent()
 }
