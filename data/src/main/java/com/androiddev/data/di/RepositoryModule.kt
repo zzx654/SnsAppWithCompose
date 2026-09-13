@@ -67,6 +67,12 @@ abstract class RepositoryModule {
     abstract fun bindUploadPostRepository(
         uploadPostRepositoryImpl: UploadPostRepositoryImpl
     ): UploadPostRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(
+        notificationRepositoryImpl: NotificationRepositoryImpl
+    ): NotificationRepository
     companion object {
 
         @Provides
@@ -130,11 +136,11 @@ abstract class RepositoryModule {
             return FcmRepositoryImpl(api = api, userPreferences = userPreferences)
         }
 
-        @Provides
-        @Singleton
-        fun provideNotificationRepository(api: NotificationApi, @ApplicationContext context: Context): NotificationRepository {
-            return NotificationRepositoryImpl(api = api, context = context)
-        }
+        //@Provides
+        //@Singleton
+        //fun provideNotificationRepository(api: NotificationApi, @ApplicationContext context: Context): NotificationRepository {
+        //    return NotificationRepositoryImpl(api = api, context = context)
+        //}
 
         @Provides
         @Singleton

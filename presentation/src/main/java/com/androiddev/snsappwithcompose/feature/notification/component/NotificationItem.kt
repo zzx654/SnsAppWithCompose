@@ -13,18 +13,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.androiddev.domain.model.NotificationItem
+import com.androiddev.domain.model.Notification
+import com.androiddev.snsappwithcompose.common.util.elapsedTime
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType
 
 @Composable
 fun NotificationItem(
     modifier: Modifier = Modifier,
-    notification: NotificationItem,
+    notification: Notification,
     onNotificationClick: () -> Unit
 ) {
     Row(
@@ -60,12 +58,11 @@ fun NotificationItem(
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
-                    //.padding(end = 46.dp) // 🔹 elapsedTime 영역 확보
+                    //.padding(end = 46.dp) //  elapsedTime 영역 확보
             )
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "",
-                //text = notification.elapsedTime,
+                text = elapsedTime(notification.date),
                 modifier = Modifier
                     .align(Alignment.Start),
                     //.padding(top = 4.dp,start = 40.dp),

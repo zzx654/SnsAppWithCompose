@@ -166,7 +166,7 @@ object UseCaseModule {
     ): FcmTokenUseCase {
         return FcmTokenUseCase(fcmRepository)
     }
-    @Provides
+    /**@Provides
     @Singleton
     fun provideNotificationUseCases(
         notificationRepository: NotificationRepository
@@ -177,7 +177,7 @@ object UseCaseModule {
             deleteNotifications = DeleteNotifications(notificationRepository),
             readNotification = ReadNotification(notificationRepository)
         )
-    }
+    }**/
     @Provides
     @Singleton
     fun provideUserUseCases(
