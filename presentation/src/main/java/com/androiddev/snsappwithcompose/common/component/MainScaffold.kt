@@ -102,7 +102,7 @@ fun MainScaffold(
             composable<Screen.NotificationScreen> {
                 BackHandler(true) {
                 }
-                NotificationScreen(navController = rootNavController,viewModel = notificationViewModel)
+                NotificationScreen(viewModel = notificationViewModel)
             }
         }
 

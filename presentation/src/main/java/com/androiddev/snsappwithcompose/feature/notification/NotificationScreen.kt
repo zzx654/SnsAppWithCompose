@@ -59,15 +59,20 @@ fun NotificationScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
     LaunchedEffect(notificationItems.loadState.refresh) {
-        val refreshState = notificationItems.loadState.refresh
-
-
-        if (refreshState is LoadState.NotLoading) {
-            if (!isInitialLoadCompleted) {
-                isInitialLoadCompleted = true
+        when (val refreshState = notificationItems.loadState.refresh) {
+            is LoadState.NotLoading -> {
+                if (!isInitialLoadCompleted) {
+                    isInitialLoadCompleted = true
+                }
+                viewModel.onRefreshSuccess()
             }
-            viewModel.onRefreshSuccess()
+            is LoadState.Error -> {
+                // 당겨서 새로고침 실패 시 스냅샷 및 플래그 원복!
+                viewModel.onRefreshFailure()
+            }
+            else -> {}
         }
+
     }
 
    var lastObservedFcmSize by rememberSaveable { mutableIntStateOf(fcmList.size) }
