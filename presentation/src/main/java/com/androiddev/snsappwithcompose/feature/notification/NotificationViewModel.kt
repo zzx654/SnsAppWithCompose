@@ -22,8 +22,6 @@ import com.androiddev.snsappwithcompose.feature.notification.NotificationType.CO
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.FOLLOW
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKECOMMENT
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -138,7 +136,6 @@ class NotificationViewModel @Inject constructor(
             }
         }
     }
-    private val _loadedPagingIds = MutableStateFlow<Set<Long>>(emptySet())
 
 
 
@@ -212,6 +209,13 @@ class NotificationViewModel @Inject constructor(
         refreshStartMaxFcmId = _fcmNotifications.value.maxOfOrNull { it.id } ?: 0L
         fetchUnreadCount()
         _isUserRefreshing.value = true
+    }
+
+    fun onRefreshFailure() {
+        if (_isUserRefreshing.value) {
+            _isUserRefreshing.value = false
+            refreshStartMaxFcmId = 0L // 스냅샷 초기화
+        }
     }
 
     fun onEvent(event: NotificationEvent) {
