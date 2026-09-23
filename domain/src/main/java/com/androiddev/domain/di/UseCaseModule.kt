@@ -105,16 +105,6 @@ object UseCaseModule {
     }
     @Provides
     @Singleton
-    fun provideGetPostsUseCases(repository: GetPostsRepository): GetPostsUseCases {
-        return GetPostsUseCases(
-            getNearPosts = GetNearPosts(repository),
-            getNewPosts = GetNewPosts(repository),
-            getPopularTagPosts = GetPopularTagPosts(repository),
-            getNewTagPosts = GetNewTagPosts(repository),
-        )
-    }
-    @Provides
-    @Singleton
     fun provideTagUseCases(repository: TagRepository): TagUseCases {
         return TagUseCases(
             getTags = GetTags(repository),

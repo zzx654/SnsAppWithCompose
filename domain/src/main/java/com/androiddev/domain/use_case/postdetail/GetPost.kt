@@ -15,9 +15,8 @@ class GetPost @Inject constructor(
 ) {
     suspend operator fun invoke(postId: Int): Flow<Resource<List<Post>>> {
 
-        locationTracker.updateLocation()
+        val location = locationTracker.updateLocation()
 
-        val location = locationTracker.currentLocation.value
 
         return repository.getPost(
             postId = postId,
