@@ -35,7 +35,7 @@ import com.androiddev.snsappwithcompose.feature.auth.signup.authphone.AuthPhoneS
 import com.androiddev.snsappwithcompose.feature.auth.signup.emailsignup.EmailSignUpScreen
 import com.androiddev.snsappwithcompose.feature.createprofile.CreateProfileScreen
 import com.androiddev.snsappwithcompose.feature.createprofile.component.CropScreen
-import com.androiddev.snsappwithcompose.feature.home.tagposts.TagPostScreen
+import com.androiddev.snsappwithcompose.feature.home.postlist.tagposts.TagPostScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel

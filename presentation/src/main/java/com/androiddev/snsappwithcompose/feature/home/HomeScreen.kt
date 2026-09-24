@@ -21,15 +21,12 @@ import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.component.TabPager
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
-import com.androiddev.snsappwithcompose.feature.home.RecentPosts.RecentPostsScreen
-import com.androiddev.snsappwithcompose.feature.home.nearbyposts.NearbypostsScreen
-import com.androiddev.snsappwithcompose.feature.home.nearposts.NearPostsScreen
-import com.androiddev.snsappwithcompose.feature.home.newPosts.NewPostsScreen
+import com.androiddev.snsappwithcompose.feature.home.postlist.recentposts.RecentPostsScreen
+import com.androiddev.snsappwithcompose.feature.home.postlist.nearbyposts.NearbypostsScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagScreen
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.SearchUserScreen
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
-import com.androiddev.snsappwithcompose.feature.upload_post.record.RecordEvent
 
 @Composable
 fun HomeScreen(

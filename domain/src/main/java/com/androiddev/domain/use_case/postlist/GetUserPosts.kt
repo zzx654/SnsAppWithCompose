@@ -11,6 +11,8 @@ import com.androiddev.domain.repository.postlist.PostListRepository
 import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 /**class GetUserPosts @Inject constructor(
@@ -31,8 +33,8 @@ class GetUserPosts @Inject constructor(
     private val repository: PostListRepository,
     private val locationTracker: LocationTracker
 ) {
-    suspend operator fun invoke(userId:Int):Flow<PagingData<Post>> {
+    suspend operator fun invoke(userId:Int):Flow<PagingData<Post>> = flow{
         val locationState = locationTracker.updateLocation()
-        return repository.getUserPosts(userId = userId,locationState = locationState)
+        emitAll(repository.getUserPosts(userId = userId,locationState = locationState))
     }
 }

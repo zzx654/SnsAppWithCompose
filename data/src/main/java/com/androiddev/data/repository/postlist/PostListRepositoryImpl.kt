@@ -19,49 +19,24 @@ import javax.inject.Singleton
 
 @Singleton
 class PostListRepositoryImpl @Inject constructor(
-    private val api:GetPostsApi,
+    private val api: GetPostsApi,
 ) : PostListRepository {
 
-    /**override fun getPosts(type: PostListType,location:LocationState): Flow<PagingData<Post>>
-     = createPager {
-        PostPagingSource(
-            api = api,
-            type = type,
-            location = location
-        )
-    }**/
 
-
-    /**{
-    return Pager(
-    config = PagingConfig(pageSize = 20),
-    pagingSourceFactory = {
-    // 호출하는 시점의 최신 위치를 가져와 PagingSource에 주입
-    val location = locationTracker.currentLocation.value
-    PostPagingSource(
-    apiService = apiService,
-    type = type,
-    latitude = location.latitude,
-    longitude = location.longitude
-    )
-    }
-    ).flow
-    }**/
-    override fun getTagRecentPosts(
-        tagId: Int,
+    override fun getRecentPosts(
+        tagId: Int?,
         locationState: LocationState
     ): Flow<PagingData<Post>> = createPager {
-        val strategy = RecentPostStrategy(api = api,tagId = tagId,locationState = locationState)
+        val strategy = RecentPostStrategy(api = api, tagId = tagId, locationState = locationState)
         GenericPagingSource(strategy)
     }
 
-    override fun getRecentPosts(locationState: LocationState): Flow<PagingData<Post>> = createPager {
-        val strategy = RecentPostStrategy(api = api,locationState = locationState)
-        GenericPagingSource(strategy)
-    }
 
-    override fun getTagPopularPosts(locationState: LocationState): Flow<PagingData<Post>>  = createPager {
-        val strategy = PopularPostStrategy(api = api,locationState = locationState)
+    override fun getPopularPosts(
+        tagId: Int?,
+        locationState: LocationState
+    ): Flow<PagingData<Post>> = createPager {
+        val strategy = PopularPostStrategy(api = api, tagId = tagId, locationState = locationState)
         GenericPagingSource(strategy)
     }
 
@@ -77,8 +52,11 @@ class PostListRepositoryImpl @Inject constructor(
         GenericPagingSource(strategy)
     }
 
-    override fun getUserPosts(userId:Int,locationState: LocationState): Flow<PagingData<Post>> = createPager {
-        val strategy = UserPostStrategy(api = api,userId = userId,locationState = locationState)
+    override fun getUserPosts(
+        userId: Int,
+        locationState: LocationState
+    ): Flow<PagingData<Post>> = createPager {
+        val strategy = UserPostStrategy(api = api, userId = userId, locationState = locationState)
         GenericPagingSource(strategy)
     }
 }
