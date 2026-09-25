@@ -1,4 +1,5 @@
-package com.androiddev.snsappwithcompose.feature.home.postlist.recentposts
+package com.androiddev.snsappwithcompose.feature.home.postlist.popularposts
+
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 @HiltViewModel
-class RecentPostsViewModel @Inject constructor(
+class PopularPostsViewModel @Inject constructor(
     private val getPostsUseCases:GetPostsUseCases,
     savedStateHandle: SavedStateHandle
 ) : BasePostsViewModel() {
@@ -21,6 +22,6 @@ class RecentPostsViewModel @Inject constructor(
     private val tagId: Int? = savedStateHandle.get<Int>("tagId")
 
     val pagingDataStream: Flow<PagingData<Post>> =
-        getPostsUseCases.getRecentPosts(tagId).cachedIn(viewModelScope)
+        getPostsUseCases.getRecentPosts(tagId).cachedIn(viewModelScope)//
 
 }

@@ -36,8 +36,8 @@ class UploadPostRepositoryImpl @Inject constructor(
     ): Flow<Resource<Unit>> = safeApiCall (
         context = context,
         apiCall= {
-            locationTracker.updateLocation()
-            val location = locationTracker.currentLocation.value
+
+            val location = locationTracker.updateLocation()
             val voteOptionsJson = param.voteOptions.takeIf { it.isNotEmpty() }?.let {
                 val json = Gson().toJson(it.map { VoteOptionData(voteoption = it) })
                 json.toRequestBody("application/json".toMediaType())

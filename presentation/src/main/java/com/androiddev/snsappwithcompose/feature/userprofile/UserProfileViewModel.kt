@@ -34,41 +34,34 @@ class UserProfileViewModel @Inject constructor(
         UserContent.IMAGE,
         UserContent.VIDEO
     )
-
-
-    // 선택된 값 (State)
-    private val currentTab =
-        MutableStateFlow(UserContent.HOME)
-
-    val selectedTab =
-        currentTab.asStateFlow()
-
-    fun selectTab(
-        tab: UserContent
-    ) {
-
-        currentTab.value = tab
-
+    val homePostsDataStream
+        = getPostsUseCases.getUserPosts(args.userId).cachedIn(viewModelScope)
+    private val imagePostsDataStream: Flow<PagingData<MediaPost>> by lazy {
+        userUseCases.getMediaPosts(
+            userId = args.userId,
+            type = UserContent.IMAGE.name
+        ).cachedIn(viewModelScope)
     }
-    /**@OptIn(ExperimentalCoroutinesApi::class)
-    val homePosts =
-        location
-            .filterNotNull()
-            .flatMapLatest { location ->
 
-                getPostsUseCases.getUserPosts(
-                    userId = args.userId,
-                    latitude = location.latitude,
-                    longitude = location.longitude
-                )
+    private val videoPostsDataStream: Flow<PagingData<MediaPost>> by lazy {
+        userUseCases.getMediaPosts(
+            userId = args.userId,
+            type = UserContent.VIDEO.name
+        ).cachedIn(viewModelScope)
+    }
 
-            }
-            .cachedIn(viewModelScope)**/
-    private val mediaPagerCache =
+    fun getMediaPosts(tab: UserContent): Flow<PagingData<MediaPost>> {
+        return when (tab) {
+            UserContent.IMAGE -> imagePostsDataStream
+            UserContent.VIDEO -> videoPostsDataStream
+            UserContent.HOME -> error("HOME 탭은 MediaPosts를 지원하지 않습니다.")
+        }
+    }
+    /**private val mediaPagerCache =
         mutableMapOf<
                 UserContent,
                 Flow<PagingData<MediaPost>>
-                >()
+                >()**/
 
 
     fun onEvent(event:UserProfileEvent) {
@@ -78,71 +71,20 @@ class UserProfileViewModel @Inject constructor(
                 }
             }
         }
-
     }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMediaPosts(
+    /**fun getMediaPosts(
         tab: UserContent
     ): Flow<PagingData<MediaPost>> {
 
         require(tab != UserContent.HOME)
 
         return mediaPagerCache.getOrPut(tab) {
-
             userUseCases.getMediaPosts(
                 userId = args.userId,
                 type = tab.name,
-                latitude = location.latitude,
-                longitude = location.longitude
-            )
-                .cachedIn(viewModelScope)
-
+            ).cachedIn(viewModelScope)
         }
-    }
-
-    /**@OptIn(ExperimentalCoroutinesApi::class)
-    val media =
-        currentTab
-            .filter { it != UserContent.HOME }
-            .flatMapLatest { tab ->
-
-                pagerCache.getOrPut(tab) {
-
-                    userUseCases.getMediaPosts(
-                        userId = args.userId,
-                        type = tab.name,
-                        latitude = getLatitude(),
-                        longitude = getLongitude()
-                    ).cachedIn(viewModelScope)
-
-                }
-            }**/
-
-    /**@OptIn(ExperimentalCoroutinesApi::class)
-    val media =
-
-        currentTab.flatMapLatest { tab ->
-
-            pagerCache.getOrPut(tab) {
-
-                userUseCases.getMediaPosts(
-
-
-                    userId = args.userId,
-
-                    type = tab.name,
-                    latitude = getLatitude(),
-                    longitude = getLongitude()
-                ).cachedIn(viewModelScope)
-
-            }
-
-        }**/
-
-
-
-
+    }**/
 }
 enum class UserContent {
     HOME,IMAGE,VIDEO

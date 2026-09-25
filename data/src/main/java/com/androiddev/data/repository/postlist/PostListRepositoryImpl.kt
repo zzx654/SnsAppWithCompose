@@ -1,7 +1,6 @@
 package com.androiddev.data.repository.postlist
 
 import androidx.paging.PagingData
-import com.androiddev.data.paging.pagingsource.PostPagingSource
 import com.androiddev.data.paging.createPager
 import com.androiddev.data.paging.pagingsource.GenericPagingSource
 import com.androiddev.data.paging.pagingstrategy.NearbyPostStrategy
@@ -11,13 +10,12 @@ import com.androiddev.data.paging.pagingstrategy.UserPostStrategy
 import com.androiddev.data.remote.api.postlist.GetPostsApi
 import com.androiddev.domain.location.LocationState
 import com.androiddev.domain.model.Post
-import com.androiddev.domain.model.PostListType
 import com.androiddev.domain.repository.postlist.PostListRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+
 class PostListRepositoryImpl @Inject constructor(
     private val api: GetPostsApi,
 ) : PostListRepository {

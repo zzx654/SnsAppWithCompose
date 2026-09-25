@@ -6,7 +6,6 @@ import javax.inject.Inject
 data class GetPostsUseCases @Inject constructor(
     val getNearbyPosts: GetNearbyPosts,
     val getRecentPosts: GetRecentPosts,
-    val getTagPopularPosts: GetTagPopularPosts,
-    val getTagRecentPosts: GetTagRecentPosts,
-    val getUserPosts: GetUserPosts
+    val getUserPosts: GetUserPosts,
+    val getPopularPosts: GetPopularPosts
 )

@@ -2,15 +2,11 @@ package com.androiddev.domain.di
 
 import android.content.Context
 import com.androiddev.domain.repository.signup.AuthPhoneRepository
-import com.androiddev.domain.repository.postdetail.CommentRepository
 import com.androiddev.domain.repository.createprofile.CreateProfileRepository
 import com.androiddev.domain.repository.fcm.FcmRepository
-import com.androiddev.domain.repository.notification.NotificationRepository
-import com.androiddev.domain.repository.postlist.GetPostsRepository
 import com.androiddev.domain.repository.signin.SigninRepository
 import com.androiddev.domain.repository.signup.SignupRepository
 import com.androiddev.domain.repository.tag.TagRepository
-import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.repository.postdetail.VoteRepository
 import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.use_case.signup.authphone.AuthPhoneUseCases
@@ -20,20 +16,9 @@ import com.androiddev.domain.use_case.createprofile.CheckNickname
 import com.androiddev.domain.use_case.createprofile.CreateProfile
 import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
-import com.androiddev.domain.use_case.notification.DeleteNotifications
-import com.androiddev.domain.use_case.notification.GetNotifications
-import com.androiddev.domain.use_case.notification.NotificationUseCases
-import com.androiddev.domain.use_case.notification.ReadAllNotifications
-import com.androiddev.domain.use_case.notification.ReadNotification
-import com.androiddev.domain.use_case.uploadpost.EditPost
 import com.androiddev.domain.use_case.signin.EmailSignIn
 import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUp
 import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUpUseCases
-import com.androiddev.domain.use_case.postlist.GetNearPosts
-import com.androiddev.domain.use_case.postlist.GetNewPosts
-import com.androiddev.domain.use_case.postlist.GetNewTagPosts
-import com.androiddev.domain.use_case.postlist.GetPopularTagPosts
-import com.androiddev.domain.use_case.postlist.GetPostsUseCases
 import com.androiddev.domain.use_case.postdetail.GetVoteInfo
 import com.androiddev.domain.use_case.tag.GetTags
 import com.androiddev.domain.use_case.signup.emailsignup.RequestEmailAuthCode
@@ -45,8 +30,6 @@ import com.androiddev.domain.use_case.signin.SocialSignIn
 import com.androiddev.domain.use_case.signup.socialsignup.SocialSignUpUseCase
 import com.androiddev.domain.use_case.tag.TagUseCases
 import com.androiddev.domain.use_case.tag.ToggleFavoriteTag
-import com.androiddev.domain.use_case.uploadpost.UploadPost
-import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
 import com.androiddev.domain.use_case.postdetail.Vote
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
 
@@ -168,7 +151,7 @@ object UseCaseModule {
             readNotification = ReadNotification(notificationRepository)
         )
     }**/
-    @Provides
+    /**@Provides
     @Singleton
     fun provideUserUseCases(
         userRepository: UserRepository
@@ -179,5 +162,5 @@ object UseCaseModule {
             getUserInfo = GetUserInfo(userRepository),
             getMediaPosts = GetMediaPosts(userRepository)
         )
-    }
+    }**/
 }
