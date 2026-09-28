@@ -15,17 +15,13 @@ class LocationTrackerImpl @Inject constructor(
 ) : LocationTracker {
 
     // 앱 전역에서 공유되는 위치 Flow (StateFlow로 유지)
-    private val _currentLocation = MutableStateFlow(LocationState(null, null))
-    override val currentLocation: StateFlow<LocationState> = _currentLocation.asStateFlow()
+    //private val _currentLocation = MutableStateFlow(LocationState(null, null))
+    //override val currentLocation: StateFlow<LocationState> = _currentLocation.asStateFlow()
 
-    override suspend fun updateLocation() {
-        runCatching {
+    override suspend fun updateLocation(): LocationState {
+        return runCatching {
             locationProvider.getCurrentLocation()
-        }.onSuccess { freshLocation ->
-            _currentLocation.value = freshLocation
-        }.onFailure {
-            _currentLocation.value = LocationState(latitude = null, longitude = null)
-        }
+        }.getOrDefault(LocationState(null, null))
     }
 
 }

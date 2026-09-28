@@ -20,13 +20,13 @@ interface GetPostsApi {
     ): Response<BaseApiResponse<PostsDto>>
     @FormUrlEncoded
     @POST("postlist/getPopularTagPosts")
-    suspend fun getPopularTagPosts(
+    suspend fun getTagPopularPosts(
         @Field("postid")postid: Int?,
         @Field("tagid")tagid: Int,
         @Field("score")score : Double?,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
-    ): Response<BaseApiResponse<GetPostsDto>>
+    ): Response<BaseApiResponse<PostsDto>>
     @FormUrlEncoded
     @POST("postlist/getNearPosts")
     suspend fun getNearbyPosts(

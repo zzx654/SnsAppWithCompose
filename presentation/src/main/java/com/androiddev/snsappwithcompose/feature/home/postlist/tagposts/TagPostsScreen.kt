@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.home.tagposts
+package com.androiddev.snsappwithcompose.feature.home.postlist.tagposts
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
@@ -8,7 +8,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -21,12 +20,9 @@ import com.androiddev.snsappwithcompose.common.component.TabPager
 import com.androiddev.snsappwithcompose.feature.home.tags.TagEvent
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.feature.home.tagposts.newtagposts.NewTagPostsScreen
-import com.androiddev.snsappwithcompose.feature.home.tagposts.newtagposts.TagRecentPostsScreen
-import com.androiddev.snsappwithcompose.feature.home.tagposts.populartagposts.PopularTagPostsScreen
+
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagPostScreen(
     navController: NavController,
@@ -40,7 +36,7 @@ fun TagPostScreen(
         { TagRecentPostsScreen(navController, args.tagId) }
     }
     val popularTagPostsScreen: @Composable () -> Unit = remember(args.tagId) {
-        { PopularTagPostsScreen(navController, args.tagId) }
+        { TagPopularPostsScreen(navController, args.tagId) }
     }
 
     val tabs = listOf("새로운", "인기")

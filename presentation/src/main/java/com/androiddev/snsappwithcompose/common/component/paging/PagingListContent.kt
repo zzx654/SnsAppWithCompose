@@ -218,7 +218,7 @@ fun DefaultErrorView(
 // 기본 빈 화면 뷰
 @Composable
 fun DefaultEmptyView(emptyMessage:String,modifier:Modifier = Modifier) {
-    Box(modifier = Modifier.fillMaxSize().height(100.dp), contentAlignment = Alignment.Center) {
-        Text(text = emptyMessage)
+    Box(modifier = Modifier.fillMaxSize().height(100.dp), contentAlignment = Alignment.TopCenter) {
+        Text(text = emptyMessage,modifier = Modifier.padding(top = 50.dp))
     }
 }

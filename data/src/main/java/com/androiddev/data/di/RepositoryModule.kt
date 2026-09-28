@@ -6,14 +6,11 @@ import com.androiddev.data.remote.api.signup.AuthPhoneApi
 import com.androiddev.data.remote.api.postdetail.CommentApi
 import com.androiddev.data.remote.api.createprofile.CreateProfileApi
 import com.androiddev.data.remote.api.fcm.FcmApi
-import com.androiddev.data.remote.api.notification.NotificationApi
-import com.androiddev.data.remote.api.postlist.GetPostsApi
 import com.androiddev.data.remote.api.postdetail.PostApi
 import com.androiddev.data.remote.api.signin.SignInApi
 import com.androiddev.data.remote.api.signup.SignUpApi
 import com.androiddev.data.remote.api.postdetail.ToggleLikePostApi
 import com.androiddev.data.remote.api.tag.TagApi
-import com.androiddev.data.remote.api.uploadpost.UploadPostApi
 import com.androiddev.data.remote.api.postdetail.VoteApi
 import com.androiddev.data.remote.api.user.UserApi
 import com.androiddev.data.repository.signup.AuthPhoneRepositoryImpl
@@ -28,7 +25,6 @@ import com.androiddev.data.repository.postdetail.ToggleLikePostRepositoryImpl
 import com.androiddev.data.repository.tag.TagRepositoryImpl
 import com.androiddev.data.repository.uploadpost.UploadPostRepositoryImpl
 import com.androiddev.data.repository.postdetail.VoteRepositoryImpl
-import com.androiddev.data.repository.postlist.GetPostsRepositoryImpl
 import com.androiddev.data.repository.postlist.PostListRepositoryImpl
 import com.androiddev.data.repository.user.UserRepositoryImpl
 import com.androiddev.domain.repository.signup.AuthPhoneRepository
@@ -36,7 +32,6 @@ import com.androiddev.domain.repository.createprofile.CreateProfileRepository
 import com.androiddev.domain.repository.fcm.FcmRepository
 import com.androiddev.domain.repository.notification.NotificationRepository
 import com.androiddev.domain.repository.postdetail.CommentRepository
-import com.androiddev.domain.repository.postlist.GetPostsRepository
 import com.androiddev.domain.repository.postdetail.PostRepository
 import com.androiddev.domain.repository.signin.SigninRepository
 import com.androiddev.domain.repository.signup.SignupRepository
@@ -57,11 +52,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-    @Binds
-    @Singleton
-    abstract fun bindPostsRepository(
-        postListRepositoryImpl: PostListRepositoryImpl
-    ): PostListRepository
+
     @Binds
     @Singleton
     abstract fun bindUploadPostRepository(
@@ -73,6 +64,11 @@ abstract class RepositoryModule {
     abstract fun bindNotificationRepository(
         notificationRepositoryImpl: NotificationRepositoryImpl
     ): NotificationRepository
+    @Binds
+    @Singleton
+    abstract fun bindPostListRepository(
+        postListRepositoryImpl: PostListRepositoryImpl
+    ): PostListRepository
     companion object {
 
         @Provides
@@ -146,11 +142,6 @@ abstract class RepositoryModule {
         @Singleton
         fun provideUserRepository(api: UserApi, @ApplicationContext context: Context): UserRepository {
             return UserRepositoryImpl(api = api, context = context)
-        }
-        @Provides
-        @Singleton
-        fun provideGetPostsRepository(api: GetPostsApi, @ApplicationContext context: Context): GetPostsRepository {
-            return GetPostsRepositoryImpl(api,context)
         }
     }
 }

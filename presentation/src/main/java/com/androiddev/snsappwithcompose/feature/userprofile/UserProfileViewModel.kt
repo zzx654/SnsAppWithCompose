@@ -6,19 +6,17 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.androiddev.domain.location.LocationProvider
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.use_case.postlist.GetPostsUseCases
 import com.androiddev.domain.use_case.user.UserUseCases
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BasePagingViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
+import com.androiddev.snsappwithcompose.feature.home.BasePostsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,50 +26,42 @@ class UserProfileViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val userUseCases: UserUseCases,
     private val getPostsUseCases: GetPostsUseCases,
-    locationProvider: LocationProvider,
     savedStateHandle: SavedStateHandle
-) : BasePagingViewModel(context,locationProvider) {
+) :BasePostsViewModel() {
     val args: Screen.UserProfileScreen = savedStateHandle.toRoute<Screen.UserProfileScreen>()
     val tabs = listOf(
         UserContent.HOME,
         UserContent.IMAGE,
         UserContent.VIDEO
     )
-
-
-    // 선택된 값 (State)
-    private val currentTab =
-        MutableStateFlow(UserContent.HOME)
-
-    val selectedTab =
-        currentTab.asStateFlow()
-
-    fun selectTab(
-        tab: UserContent
-    ) {
-
-        currentTab.value = tab
-
+    val homePostsDataStream
+        = getPostsUseCases.getUserPosts(args.userId).cachedIn(viewModelScope)
+    private val imagePostsDataStream: Flow<PagingData<MediaPost>> by lazy {
+        userUseCases.getMediaPosts(
+            userId = args.userId,
+            type = UserContent.IMAGE.name
+        ).cachedIn(viewModelScope)
     }
-    /**@OptIn(ExperimentalCoroutinesApi::class)
-    val homePosts =
-        location
-            .filterNotNull()
-            .flatMapLatest { location ->
 
-                getPostsUseCases.getUserPosts(
-                    userId = args.userId,
-                    latitude = location.latitude,
-                    longitude = location.longitude
-                )
+    private val videoPostsDataStream: Flow<PagingData<MediaPost>> by lazy {
+        userUseCases.getMediaPosts(
+            userId = args.userId,
+            type = UserContent.VIDEO.name
+        ).cachedIn(viewModelScope)
+    }
 
-            }
-            .cachedIn(viewModelScope)**/
-    private val mediaPagerCache =
+    fun getMediaPosts(tab: UserContent): Flow<PagingData<MediaPost>> {
+        return when (tab) {
+            UserContent.IMAGE -> imagePostsDataStream
+            UserContent.VIDEO -> videoPostsDataStream
+            UserContent.HOME -> error("HOME 탭은 MediaPosts를 지원하지 않습니다.")
+        }
+    }
+    /**private val mediaPagerCache =
         mutableMapOf<
                 UserContent,
                 Flow<PagingData<MediaPost>>
-                >()
+                >()**/
 
 
     fun onEvent(event:UserProfileEvent) {
@@ -81,76 +71,20 @@ class UserProfileViewModel @Inject constructor(
                 }
             }
         }
-
     }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMediaPosts(
+    /**fun getMediaPosts(
         tab: UserContent
     ): Flow<PagingData<MediaPost>> {
 
         require(tab != UserContent.HOME)
 
         return mediaPagerCache.getOrPut(tab) {
-
-            location
-                .flatMapLatest { location ->
-
-                    userUseCases.getMediaPosts(
-                        userId = args.userId,
-                        type = tab.name,
-                        latitude = location.latitude,
-                        longitude = location.longitude
-                    )
-
-                }
-                .cachedIn(viewModelScope)
-
+            userUseCases.getMediaPosts(
+                userId = args.userId,
+                type = tab.name,
+            ).cachedIn(viewModelScope)
         }
-    }
-
-    /**@OptIn(ExperimentalCoroutinesApi::class)
-    val media =
-        currentTab
-            .filter { it != UserContent.HOME }
-            .flatMapLatest { tab ->
-
-                pagerCache.getOrPut(tab) {
-
-                    userUseCases.getMediaPosts(
-                        userId = args.userId,
-                        type = tab.name,
-                        latitude = getLatitude(),
-                        longitude = getLongitude()
-                    ).cachedIn(viewModelScope)
-
-                }
-            }**/
-
-    /**@OptIn(ExperimentalCoroutinesApi::class)
-    val media =
-
-        currentTab.flatMapLatest { tab ->
-
-            pagerCache.getOrPut(tab) {
-
-                userUseCases.getMediaPosts(
-
-
-                    userId = args.userId,
-
-                    type = tab.name,
-                    latitude = getLatitude(),
-                    longitude = getLongitude()
-                ).cachedIn(viewModelScope)
-
-            }
-
-        }**/
-
-
-
-
+    }**/
 }
 enum class UserContent {
     HOME,IMAGE,VIDEO
