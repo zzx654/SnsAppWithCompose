@@ -4,11 +4,14 @@ import android.content.Context
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.androiddev.data.paging.pagingsource.MediaPostPagingSource
+import com.androiddev.data.paging.createPager
+import com.androiddev.data.paging.pagingsource.GenericPagingSource
+import com.androiddev.data.paging.pagingstrategy.MediaPostStrategy
 import com.androiddev.data.remote.api.user.UserApi
 import com.androiddev.data.remote.dto.toToggleFollowResult
 import com.androiddev.data.remote.dto.toUsers
 import com.androiddev.data.util.safeApiCall
+import com.androiddev.domain.location.LocationState
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.model.MediaPostQuery
 import com.androiddev.domain.model.ToggleFollowResult
@@ -49,9 +52,13 @@ class UserRepositoryImpl @Inject constructor(
     override fun getMediaPosts(
         userId: Int,
         type: String,
-        latitude: Double?,
-        longitude: Double?
-    ): Flow<PagingData<MediaPost>> {
+        locationState:LocationState
+    ): Flow<PagingData<MediaPost>> = createPager{
+        val strategy = MediaPostStrategy(api = api,userId = userId,type = type,locationState = locationState)
+        GenericPagingSource(strategy)
+    }
+
+    /**{
         return Pager(
             config = PagingConfig(
                 pageSize = 20,
@@ -70,5 +77,5 @@ class UserRepositoryImpl @Inject constructor(
                 )
             }
         ).flow
-    }
+    }**/
 }

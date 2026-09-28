@@ -18,7 +18,7 @@ data class MediaPostDto (
     val distance: Double?
 )
 
-fun MediaPostDto.toMediaPost(
+fun MediaPostDto.toDomain(
 
 ): MediaPost {
     return MediaPost(

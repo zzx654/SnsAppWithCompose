@@ -21,8 +21,7 @@ class GetMediaPosts @Inject constructor(
          emitAll(repository.getMediaPosts(
              userId = userId,
              type = type,
-             latitude = locationState.latitude,
-             longitude = locationState.longitude
+             locationState = locationState
          ))
 
      }
