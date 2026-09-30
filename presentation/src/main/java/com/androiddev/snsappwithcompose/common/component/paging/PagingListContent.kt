@@ -48,6 +48,7 @@ import com.androiddev.snsappwithcompose.R
 fun <T : Any> PagingListContent(
     items: LazyPagingItems<T>,
     itemContent: @Composable (T) -> Unit,
+    isInitialState: Boolean = false,
     modifier: Modifier = Modifier,
     keyExtractor: ((T) -> Any)? = null, // Key 지정으로 리컴포지션 최적화
     listState: LazyListState = rememberLazyListState(),
@@ -100,8 +101,11 @@ fun <T : Any> PagingListContent(
                 enabled = canRefresh
             )
     ) {
+        if(isInitialState) {
+
+        }
         //첫 페이지 로딩 중일 때
-        if (items.loadState.refresh is LoadState.Loading && items.itemCount == 0) {
+        else if (items.loadState.refresh is LoadState.Loading && items.itemCount == 0) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.TopCenter).padding(top = 100.dp),color = Color.Gray)
         }
         //첫 페이지 로딩 실패했을 때

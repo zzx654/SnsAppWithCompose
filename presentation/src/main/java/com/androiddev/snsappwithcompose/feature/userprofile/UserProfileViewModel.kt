@@ -23,7 +23,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
-    @ApplicationContext context: Context,
     private val userUseCases: UserUseCases,
     private val getPostsUseCases: GetPostsUseCases,
     savedStateHandle: SavedStateHandle
