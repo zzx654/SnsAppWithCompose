@@ -9,7 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.common.component.VisualMediaContent
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.util.MediaItemFactory
+
 import com.androiddev.snsappwithcompose.common.util.rememberMediaPicker
 import kotlinx.coroutines.launch
 
@@ -20,11 +20,9 @@ fun VisualMediaEditScreen(
 {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val mediaItemFactory = remember(context) { MediaItemFactory(context) }
     val launchMediaPicker = rememberMediaPicker { uris ->
         scope.launch {
-            val mediaItems = mediaItemFactory.createMediaItems(uris)
-            viewModel.onEvent(UploadPostEvent.AddMedia(mediaItems))
+            viewModel.onEvent(UploadPostEvent.AddMedia(uris))
         }
     }
 

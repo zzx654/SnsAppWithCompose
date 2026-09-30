@@ -43,46 +43,33 @@ import androidx.core.content.ContextCompat.getString
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
-import com.androiddev.snsappwithcompose.common.util.fetchLocation
-import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.androiddev.domain.model.MediaType
-import com.androiddev.domain.model.Post
-import com.androiddev.domain.model.PostPreview
 import com.androiddev.snsappwithcompose.common.base.BaseScreen
-import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.AlertDialogg
-import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
 import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
-import com.androiddev.snsappwithcompose.common.util.MediaItemFactory
 import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.rememberMediaPicker
 import com.androiddev.snsappwithcompose.feature.upload_post.component.CheckBoxWithText
 import com.androiddev.snsappwithcompose.feature.upload_post.component.ContentTextField
-import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
 import com.androiddev.snsappwithcompose.feature.upload_post.component.SelectedMediaCards
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadRecordIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.component.UploadVoteIcon
 import com.androiddev.snsappwithcompose.feature.upload_post.record.BottomRecorder
 import com.androiddev.snsappwithcompose.feature.upload_post.record.RecordEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.record.RecordViewModel
-import com.androiddev.snsappwithcompose.feature.upload_post.util.getVideoThumbnail
-import com.androiddev.snsappwithcompose.feature.upload_post.util.isVideo
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.BottomVoteOptions
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteEvent
 import com.androiddev.snsappwithcompose.feature.upload_post.vote.CreateVoteViewModel
 import com.androiddev.snsappwithcompose.service.record.RecordIntentKeys
 import com.androiddev.snsappwithcompose.service.record.RecordService
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "RestrictedApi", "SuspiciousIndentation",
@@ -121,11 +108,10 @@ fun UploadPostScreen(
 
     val recordAlertDialogState by recordViewModel.alertDialogState.collectAsStateWithLifecycle()
     val manageVoteDialogState by createVoteViewModel.manageVoteDialogState.collectAsStateWithLifecycle()
-    val mediaItemFactory = remember(context) { MediaItemFactory(context) }
+
     val launchMediaPicker = rememberMediaPicker { uris ->
         scope.launch {
-            val mediaItems = mediaItemFactory.createMediaItems(uris)
-            viewModel.onEvent(UploadPostEvent.AddMedia(mediaItems))
+            viewModel.onEvent(UploadPostEvent.AddMedia(uris))
         }
     }
     val launcherMultiplePermissions = rememberLauncherForActivityResult(

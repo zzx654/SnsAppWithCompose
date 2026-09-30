@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.androiddev.domain.model.Tag
 import com.androiddev.domain.use_case.uploadpost.UploadPostUseCases
-import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.domain.model.MediaType
@@ -18,8 +17,9 @@ import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_AUDIO
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_VIDEO
 import com.androiddev.snsappwithcompose.common.util.UiText
-import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
-import com.androiddev.snsappwithcompose.feature.upload_post.component.toParam
+import com.androiddev.data.MediaItem.MediaItem
+import com.androiddev.data.MediaItem.MediaItemFactory
+import com.androiddev.data.MediaItem.toParam
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +33,7 @@ import javax.inject.Inject
 class UploadPostViewModel @Inject constructor(
     private val uploadPostUseCases: UploadPostUseCases,
     private val postRepository: PostRepository,
+    private val mediaItemFactory: MediaItemFactory,
     savedStateHandle: SavedStateHandle,
 ): BaseViewModel() {
 
@@ -223,10 +224,9 @@ class UploadPostViewModel @Inject constructor(
             }
 
             is UploadPostEvent.AddMedia -> {
-                _uiState.update {
-                    it.copy(
-                        selectedMediaItems = it.selectedMediaItems + event.items
-                    )
+                viewModelScope.launch {
+                    val mediaItems = mediaItemFactory.createMediaItems(event.uris)
+                    _uiState.update { it.copy(selectedMediaItems = it.selectedMediaItems + mediaItems) }
                 }
             }
 
@@ -314,7 +314,7 @@ class UploadPostViewModel @Inject constructor(
                     )
                 }
                 if (!event.media.isNew && event.media.remotePath != null) {
-                    deletedVisualMedia.add(event.media.remotePath)
+                    deletedVisualMedia.add(event.media.remotePath!!)
                 }
             }
         }
