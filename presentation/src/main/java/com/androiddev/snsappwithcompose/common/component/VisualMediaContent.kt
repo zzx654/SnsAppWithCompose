@@ -89,7 +89,7 @@ fun VisualMediaContent(
                         onClick = {
                             if(item.type== MediaType.VIDEO) {
                                 val source = item.uri?.toString()
-                                    ?: (BuildConfig.BASE_URL + item.remotePath)
+                                    ?: item.remotePath
 
                                 val encoded = Uri.encode(source)
                                 onVideoClick(encoded)

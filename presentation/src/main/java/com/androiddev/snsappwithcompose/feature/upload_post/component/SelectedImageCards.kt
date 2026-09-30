@@ -50,7 +50,7 @@ fun SelectedImageCards(
 
             ) {
                 AsyncImage(
-                    model = image.uri ?: (BuildConfig.BASE_URL + image.remotePath),
+                    model = image.uri ?: image.remotePath,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(100.dp)

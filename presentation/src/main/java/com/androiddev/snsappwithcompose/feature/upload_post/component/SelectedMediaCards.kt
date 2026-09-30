@@ -67,7 +67,7 @@ fun SelectedMediaCards(
 
                     media.remoteThumbnailPath?.let {
                         AsyncImage(
-                            model = BuildConfig.BASE_URL + it,
+                            model = it,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -94,7 +94,7 @@ fun SelectedMediaCards(
                 } else {
                     // 기존 이미지 그대로
                     AsyncImage(
-                        model = media.uri ?: (BuildConfig.BASE_URL + media.remotePath),
+                        model = media.uri ?: media.remotePath,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(100.dp)

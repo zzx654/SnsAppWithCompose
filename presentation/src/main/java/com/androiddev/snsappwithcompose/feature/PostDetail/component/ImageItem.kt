@@ -11,7 +11,7 @@ import com.androiddev.snsappwithcompose.BuildConfig
 @Composable
 fun ImageItem(mediaUrl: String, modifier: Modifier = Modifier) {
     AsyncImage(
-        model = BuildConfig.BASE_URL+ mediaUrl,
+        model = mediaUrl,
         contentDescription = null,
         modifier = modifier.fillMaxSize(),
         contentScale = ContentScale.Crop

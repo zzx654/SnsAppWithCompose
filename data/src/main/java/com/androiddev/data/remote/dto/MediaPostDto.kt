@@ -1,5 +1,6 @@
 package com.androiddev.data.remote.dto
 
+import com.androiddev.data.util.formatFullUrl
 import com.androiddev.domain.model.MediaPost
 import kotlin.math.round
 
@@ -31,8 +32,8 @@ fun MediaPostDto.toDomain(
         distance = distance?.let{ round(it).toInt()},
         commentCount = commentcount,
         likecount = likecount,
-        url = url,
-        thumbnailUrl = thumbnailurl,
+        url = formatFullUrl(url),
+        thumbnailUrl = thumbnailurl?.let { formatFullUrl(it) },
         type = type
     )
 

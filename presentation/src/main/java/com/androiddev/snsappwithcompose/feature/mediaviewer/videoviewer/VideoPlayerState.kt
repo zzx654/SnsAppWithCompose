@@ -16,9 +16,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class VideoPlayerState(
-    context: Context
+class VideoPlayerState @Inject constructor (
+    val player: ExoPlayer
 ) {
     var currentPosition by mutableStateOf(0L)
         private set
@@ -30,9 +31,6 @@ class VideoPlayerState(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     var isBuffering by mutableStateOf(false)
         private set
-    val player = ExoPlayer.Builder(context).build().apply {
-        repeatMode = Player.REPEAT_MODE_ONE
-    }
     // 새로운 영상을 준비 중인지 여부 (이전 영상 잔상 방지용)
     var isPreparingNewVideo by mutableStateOf(false)
     private val listener =
@@ -72,10 +70,9 @@ class VideoPlayerState(
                 ?.toString()
 
 
-        val newUrl = BuildConfig.BASE_URL + url
 
 
-        if(currentUrl != newUrl){
+        if(currentUrl != url){
 
             // 새 영상을 로딩하기 시작했으므로 true로 변경
             isPreparingNewVideo = true
@@ -83,7 +80,7 @@ class VideoPlayerState(
             duration = 0L
 
             player.setMediaItem(
-                MediaItem.fromUri(newUrl)
+                MediaItem.fromUri(url)
             )
 
             player.prepare()

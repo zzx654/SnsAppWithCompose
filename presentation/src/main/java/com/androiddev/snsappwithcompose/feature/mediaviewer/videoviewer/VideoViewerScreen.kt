@@ -41,11 +41,10 @@ fun VideoViewerScreen(
     navController:NavController
 ) {
 
-
-    val context = LocalContext.current
-    val previousEntry = navController.previousBackStackEntry
     val lifecycleOwner = LocalLifecycleOwner.current
-
+    val previousEntry = remember(navController) {
+        navController.previousBackStackEntry
+    }
     val videoPosts =
         previousEntry
             ?.savedStateHandle
@@ -57,19 +56,16 @@ fun VideoViewerScreen(
             ?.savedStateHandle
             ?.get<Int>(MediaViewerArgs.CLICKED_INDEX)
 
+    val playerState = viewModel.playerState
 
-
-
-    if (videoPosts == null || index == null) {
+    if (index == null || videoPosts.isEmpty()) {
         LaunchedEffect(Unit) {
             navController.popBackStack()
         }
         return
     }
 
-    val playerState = remember {
-        VideoPlayerState(context)
-    }
+
 
     DisposableEffect(lifecycleOwner) {
 

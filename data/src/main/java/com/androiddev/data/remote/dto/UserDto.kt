@@ -1,5 +1,6 @@
 package com.androiddev.data.remote.dto
 
+import com.androiddev.data.util.formatFullUrl
 import com.androiddev.domain.model.User
 
 data class UserDto(
@@ -18,7 +19,7 @@ fun UserDto.toDomain(
         userId = userid,
         nickname = nickname,
         gender = gender,
-        profileImage = profileimage,
+        profileImage = profileimage?.let { formatFullUrl(it) },
         following = following,
         followerCount = followercount?:0,
         postCount = postcount

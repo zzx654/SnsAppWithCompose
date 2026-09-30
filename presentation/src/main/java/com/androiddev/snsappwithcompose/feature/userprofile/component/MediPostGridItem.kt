@@ -36,7 +36,7 @@ fun MediaPostGridItem(
             }
     ) {
         AsyncImage(
-            model = BuildConfig.BASE_URL + post.previewUrl,
+            model = post.previewUrl,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
