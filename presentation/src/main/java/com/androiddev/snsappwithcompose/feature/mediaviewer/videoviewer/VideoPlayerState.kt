@@ -70,10 +70,9 @@ class VideoPlayerState @Inject constructor (
                 ?.toString()
 
 
-        val newUrl = BuildConfig.BASE_URL + url
 
 
-        if(currentUrl != newUrl){
+        if(currentUrl != url){
 
             // 새 영상을 로딩하기 시작했으므로 true로 변경
             isPreparingNewVideo = true
@@ -81,7 +80,7 @@ class VideoPlayerState @Inject constructor (
             duration = 0L
 
             player.setMediaItem(
-                MediaItem.fromUri(newUrl)
+                MediaItem.fromUri(url)
             )
 
             player.prepare()

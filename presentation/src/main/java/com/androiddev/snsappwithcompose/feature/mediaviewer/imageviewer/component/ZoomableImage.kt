@@ -48,7 +48,7 @@ fun ZoomableImage(
             contentAlignment = Alignment.Center
         ) {
             SubcomposeAsyncImage(
-                model = BuildConfig.BASE_URL+image.url,
+                model = image.url,
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().graphicsLayer {
                     scaleX = scale

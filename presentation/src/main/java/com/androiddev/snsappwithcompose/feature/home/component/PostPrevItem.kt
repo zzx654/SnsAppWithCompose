@@ -104,7 +104,7 @@ fun PostPrevItem(
                         .build()
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(BuildConfig.BASE_URL+ image.first())
+                            .data(image.first())
                             .build(),
                         imageLoader = imageLoader,
                         modifier = Modifier

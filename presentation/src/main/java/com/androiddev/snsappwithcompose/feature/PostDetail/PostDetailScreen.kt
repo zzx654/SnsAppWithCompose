@@ -161,7 +161,7 @@ fun PostDetailScreen(
         postDetailUiState.audioUrl?.let {
             if (post != null) {
                 audioViewModel.prepareAudio(
-                    url = BuildConfig.BASE_URL + it,
+                    url = it,
                     nickname = post.anonymousNickname ?: post.nickname ?:""
                 )
             }
@@ -190,12 +190,7 @@ fun PostDetailScreen(
     val editedPost = navBackStackEntry.savedStateHandle.get<Post>(getString(context,R.string.editedPost))
     editedPost?.let { post ->
         postViewModel.onPostDetailEvent(PostDetailEvent.LoadEditedPostDetails(post))
-        //post.audio?.let {
-         //   audioViewModel.prepareAudio(
-          //      url = BuildConfig.BASE_URL+it,
-           //     nickname = post.nickname
-            //)
-       // }
+
         navBackStackEntry.savedStateHandle.set<PostPreview>(getString(context,R.string.editedPost),null)
     }
     AlertDialogg (
@@ -323,7 +318,7 @@ fun ProfileImage(
     } else {
         val imageRequest = remember(profileImage) {
             ImageRequest.Builder(context)
-                .data(BuildConfig.BASE_URL + profileImage)
+                .data(profileImage)
                 .size(sizePx)
                 .scale(Scale.FILL)
                 .crossfade(true)

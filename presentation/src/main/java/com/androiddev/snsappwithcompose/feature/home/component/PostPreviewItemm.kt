@@ -103,7 +103,7 @@ fun PostPreviewItemm(
                         .build()
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(BuildConfig.BASE_URL+ uiState.imageUrls.first())
+                            .data(uiState.imageUrls.first())
                             .build(),
                         imageLoader = imageLoader,
                         modifier = Modifier

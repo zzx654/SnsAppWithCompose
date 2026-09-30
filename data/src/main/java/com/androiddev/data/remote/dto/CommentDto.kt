@@ -1,5 +1,6 @@
 package com.androiddev.data.remote.dto
 
+import com.androiddev.data.util.formatFullUrl
 import com.androiddev.domain.model.Comment
 
 data class CommentDto (
@@ -33,7 +34,7 @@ fun CommentDto.toDomain(
         anonymousNickname = anonymous,
         nickname = nickname?:"",
         gender = gender,
-        profileImage = profileimage,
+        profileImage = profileimage?.let { formatFullUrl(it) },
         replyCount = replycount,
         likeCount = likecount,
         score = score,

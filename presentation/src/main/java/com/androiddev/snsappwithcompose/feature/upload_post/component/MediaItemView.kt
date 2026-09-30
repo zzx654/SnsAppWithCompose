@@ -41,7 +41,7 @@ fun MediaItemView(
 
             MediaType.IMAGE -> {
                 AsyncImage(
-                    model = item.uri ?: (BuildConfig.BASE_URL + item.remotePath),
+                    model = item.uri ?: item.remotePath,
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.Fit
@@ -61,7 +61,7 @@ fun MediaItemView(
 
                     item.remoteThumbnailPath?.let {
                         AsyncImage(
-                            model = BuildConfig.BASE_URL + it,
+                            model = it,
                             contentDescription = null,
                             modifier = Modifier.fillMaxWidth(),
                             contentScale = ContentScale.Crop

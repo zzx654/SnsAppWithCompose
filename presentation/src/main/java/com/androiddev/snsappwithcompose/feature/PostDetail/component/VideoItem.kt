@@ -12,7 +12,7 @@ import com.androiddev.snsappwithcompose.BuildConfig
 fun VideoItem(thumbnailUrl: String, modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
         AsyncImage(
-            model = BuildConfig.BASE_URL + thumbnailUrl,
+            model = thumbnailUrl,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop

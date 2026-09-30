@@ -23,7 +23,7 @@ data class MediaPost (
 ):Parcelable {
     val previewUrl: String
         get() = if (type == MediaType.IMAGE.name) {
-            url.orEmpty()
+            url
         } else {
             thumbnailUrl.orEmpty()
         }
