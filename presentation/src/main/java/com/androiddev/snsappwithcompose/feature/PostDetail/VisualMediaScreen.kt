@@ -4,12 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
-import com.androiddev.domain.model.Media
 import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.common.component.VisualMediaContent
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.util.Constants.MEDIA_TYPE_IMAGE
-import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
+import com.androiddev.data.MediaItem.MediaItem
 
 @Composable
 fun VisualMediaScreen(

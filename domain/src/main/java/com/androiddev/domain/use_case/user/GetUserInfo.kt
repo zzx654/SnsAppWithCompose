@@ -12,5 +12,5 @@ class GetUserInfo @Inject constructor(
 ) {
     suspend operator fun invoke(
         userId:Int
-    ): Flow<Resource<Users>> = repository.getUserInfo(userId)
+    ): Flow<Resource<List<User>>> = repository.getUserInfo(userId)
 }

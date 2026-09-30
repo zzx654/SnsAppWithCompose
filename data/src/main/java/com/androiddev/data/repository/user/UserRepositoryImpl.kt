@@ -1,20 +1,19 @@
 package com.androiddev.data.repository.user
 
 import android.content.Context
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.androiddev.data.paging.createPager
 import com.androiddev.data.paging.pagingsource.GenericPagingSource
 import com.androiddev.data.paging.pagingstrategy.MediaPostStrategy
+import com.androiddev.data.paging.pagingstrategy.UserStrategy
 import com.androiddev.data.remote.api.user.UserApi
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.remote.dto.toToggleFollowResult
-import com.androiddev.data.remote.dto.toUsers
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.location.LocationState
 import com.androiddev.domain.model.MediaPost
-import com.androiddev.domain.model.MediaPostQuery
 import com.androiddev.domain.model.ToggleFollowResult
+import com.androiddev.domain.model.User
 import com.androiddev.domain.model.Users
 import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.util.Resource
@@ -25,14 +24,12 @@ class UserRepositoryImpl @Inject constructor(
     private val api:UserApi,
     private val context:Context
 ): UserRepository {
-    override suspend fun getSearchedUsers(
-        nickname: String,
-        lastUserId: Int?
-    ): Flow<Resource<Users>> = safeApiCall(
-        context = context,
-        apiCall = { api.getSearchedUsers(nickname,lastUserId)},
-        mapToResource = { it.toUsers() }
-    )
+    override fun getSearchedUsers(
+        nickname: String
+    ): Flow<PagingData<User>> = createPager {
+        val strategy = UserStrategy(api = api, nickname = nickname)
+        GenericPagingSource(strategy)
+    }
 
     override suspend fun toggleFollowUser(userId: Int): Flow<Resource<ToggleFollowResult>> = safeApiCall(
         context = context,
@@ -40,12 +37,11 @@ class UserRepositoryImpl @Inject constructor(
         mapToResource = { it.toToggleFollowResult()}
     )
 
-    override suspend fun getUserInfo(userId: Int): Flow<Resource<Users>> = safeApiCall(
+    override suspend fun getUserInfo(userId: Int): Flow<Resource<List<User>>> = safeApiCall(
         context = context,
-        apiCall = { api.getUserInfo(userId)},
+        apiCall = { api.getUserInfo(userId) },
         mapToResource = {
-            it.toUsers(
-            )
+            it.users.map{ user -> user.toDomain()}
         }
     )
 

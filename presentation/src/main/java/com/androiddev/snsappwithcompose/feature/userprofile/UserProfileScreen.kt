@@ -31,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
@@ -77,7 +79,8 @@ fun UserProfileScreen(
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val pagerNestedScrollConnection = rememberNestedScrollConnection(scrollState)
-    val isFollowing = userViewModel.followUserStatusMap[args.userId]
+    val userStateMap by userViewModel.userStateMap.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
     val imageLoader = remember {
         context.imageLoader.newBuilder()
@@ -89,7 +92,14 @@ fun UserProfileScreen(
 
 
     val userInfoState = userViewModel.userInfo.value
-
+    val isFollowing = remember(userInfoState, userStateMap) {
+        val userId = userInfoState?.userId
+        if (userId != null && userStateMap.containsKey(userId)) {
+            userStateMap[userId]?.following == 1
+        } else {
+            userInfoState?.following == 1
+        }
+    }
     val openMediaViewer: (List<MediaPost>, Int, UserContent) -> Unit =
         { mediaList, index, type ->
 
@@ -114,10 +124,7 @@ fun UserProfileScreen(
             }
         }
     LaunchedEffect(args.userId) {
-
-        //userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
         userViewModel.refreshUser(args.userId)
-        //userPostsViewModel.initUserPosts(args.userId)
     }
     Scaffold(
         topBar = {
@@ -157,8 +164,13 @@ fun UserProfileScreen(
 
                 ActionSection(
                     modifier = Modifier.padding(horizontal = 19.dp),
-                    isFollowing = isFollowing?:false,
-                    toggleFollow = { userViewModel.onEvent(UserEvent.ToggleFollowUser(args.userId))}
+                    isFollowing = isFollowing,
+                    toggleFollow = {
+                        userInfoState?.let {
+                            userViewModel.onEvent(UserEvent.ToggleFollowUser(it))
+                        }
+
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))

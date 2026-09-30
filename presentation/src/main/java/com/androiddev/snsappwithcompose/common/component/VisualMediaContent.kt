@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,7 +29,7 @@ import androidx.core.content.ContextCompat.getString
 import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItem
+import com.androiddev.data.MediaItem.MediaItem
 import com.androiddev.snsappwithcompose.feature.upload_post.component.MediaItemView
 
 @Composable

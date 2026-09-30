@@ -35,7 +35,6 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.ProfileImage
 @Composable
 fun UserItem(
     user: User,
-    following:Boolean,
     onUserClick:()->Unit,
     onFollowClick:()->Unit
 ) {
@@ -89,7 +88,7 @@ fun UserItem(
             }
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                imageVector = if (following) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                imageVector = if (user.following == 1) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = null,
                 modifier = Modifier.align(Alignment.CenterVertically).clickable { onFollowClick() },
                 tint = Color.Gray

@@ -1,10 +1,9 @@
-package com.androiddev.snsappwithcompose.feature.upload_post.component
+package com.androiddev.data.MediaItem
 
 import android.graphics.Bitmap
 import android.net.Uri
 import com.androiddev.domain.model.MediaParam
 import com.androiddev.domain.model.MediaType
-import kotlinx.serialization.Serializable
 
 data class MediaItem(
     val uri: Uri?=null,

@@ -11,7 +11,7 @@ data class UserDto(
     val followercount:Int?,
     val postcount:Int?
 )
-fun UserDto.toUser(
+fun UserDto.toDomain(
 
 ): User{
     return User(

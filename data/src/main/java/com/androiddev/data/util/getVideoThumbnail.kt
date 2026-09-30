@@ -1,4 +1,4 @@
-package com.androiddev.snsappwithcompose.feature.upload_post.util
+package com.androiddev.data.util
 
 import android.content.Context
 import android.graphics.Bitmap
