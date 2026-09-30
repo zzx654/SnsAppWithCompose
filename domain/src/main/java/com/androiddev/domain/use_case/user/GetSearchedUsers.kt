@@ -1,5 +1,7 @@
 package com.androiddev.domain.use_case.user
 
+import androidx.paging.PagingData
+import com.androiddev.domain.model.User
 import com.androiddev.domain.model.Users
 import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.util.Resource
@@ -9,8 +11,7 @@ import javax.inject.Inject
 class GetSearchedUsers @Inject constructor(
     private val repository: UserRepository
 ) {
-    suspend operator fun invoke(
-        nickname:String,
-        lastUserId:Int?
-    ): Flow<Resource<Users>> = repository.getSearchedUsers(nickname,lastUserId)
+    operator fun invoke(
+        nickname:String
+    ): Flow<PagingData<User>> = repository.getSearchedUsers(nickname)
 }

@@ -1,100 +1,72 @@
 package com.androiddev.snsappwithcompose.feature.home.user
 
-import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.User
 import com.androiddev.domain.model.Users
 import com.androiddev.domain.use_case.user.UserUseCases
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.util.Paginator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    @ApplicationContext context: Context,
     private val userUseCases: UserUseCases
-): BaseViewModel(context) {
-    private val _nicknameTextField = mutableStateOf("")
-    val nicknameTextField: State<String>
-        get() = _nicknameTextField
-    protected val _getUsersState = mutableStateOf(GetUsersState())
-    val getUsersState: State<GetUsersState> get() = _getUsersState
-    private val _followUserStatusMap = mutableStateMapOf<Int, Boolean>()
-    val followUserStatusMap: Map<Int, Boolean> get() = _followUserStatusMap
+): BaseViewModel() {
+    private val _nicknameSearchQuery = MutableStateFlow("")
+    val nicknameSearchQuery: StateFlow<String>
+        get() = _nicknameSearchQuery.asStateFlow()
 
+
+    private val _userStateMap = MutableStateFlow<Map<Int, User>>(emptyMap())
+    val userStateMap: StateFlow<Map<Int, User>> = _userStateMap.asStateFlow()
     private val _userInfo: MutableState<User?> = mutableStateOf(null)
     val userInfo: State<User?>
         get() = _userInfo
-    val userPaginator =
-        Paginator<Users, User>(
-            loadItems = { handleResult,refresh ->
-                viewModelScope.launch {
 
-                    var lastUserId: Int? = null
-                    with(getUsersState.value.users) {
-                        if (isNotEmpty() && !refresh) {
-                            lastUserId = last().userId
-                        }
-                    }
+    val searchedUsersPagingData: Flow<PagingData<User>> = _nicknameSearchQuery
+        .debounce(300L)
+        .distinctUntilChanged()
+        .flatMapLatest { query ->
+            val trimmedQuery = query.trim()
+            println("DEBUG_SEARCH: flatMapLatest 진입 -> query: '$trimmedQuery'")
 
-                    if(nicknameTextField.value.isNotEmpty()) {
-
-                        userUseCases.getSearchedUsers(nicknameTextField.value,lastUserId)
-                            .collect {
-
-                                handleResult(it)
-                            }
-                    }
-                }
-
-
-            },
-            onRefreshUpdated = {},
-            onLoadUpdated = { isLoading ->
-                _getUsersState.value = _getUsersState.value.copy(isLoading = isLoading)
-
-            },
-            onError = { message ->
-                _getUsersState.value = getUsersState.value.copy(error = message)
-            },
-            onSuccess = { users,refresh ->
-                updateFollowingStateForNewUsers(users)
-                _getUsersState.value = getUsersState.value.copy(
-                    users = getUsersState.value.users + users,
-                    endReached = users.isEmpty() && getUsersState.value.users.isNotEmpty()
-                )
-            },
-            extractItems = { response -> response.users }
-        )
-    private fun updateFollowingStateForNewUsers(users:List<User>) {
-        users.forEach { user ->
-            _followUserStatusMap[user.userId] = user.following == 1
+            if (trimmedQuery.isEmpty()) {
+                println("DEBUG_SEARCH: 빈 쿼리 -> PagingData.empty() 방출")
+                flowOf(PagingData.empty())
+            } else {
+                println("DEBUG_SEARCH: API 호출 진입 -> query: '$trimmedQuery'")
+                userUseCases.getSearchedUsers(trimmedQuery)
+            }
         }
-
-    }
+        .cachedIn(viewModelScope)
     private fun fetchUserInfo(userId:Int) {
         viewModelScope.launch {
             userUseCases.getUserInfo(userId).collect { result ->
-                handleResource(
-                    resource = result,
-                    onSuccess = { data ->
-
-                        _userInfo.value = data.users[0]
-
-
-                    }
+                result.handle(
+                    onSuccess = { users-> _userInfo.value = users[0] }
                 )
-
             }
         }
     }
@@ -104,34 +76,29 @@ class UserViewModel @Inject constructor(
     fun onEvent(event:UserEvent) {
         when(event) {
             is UserEvent.TypeNickname-> {
-                _nicknameTextField.value = event.nickname
-                if(event.nickname.isNotEmpty()) {
-
-                    viewModelScope.launch {
-                        delay(20L)
-                        userPaginator.loadNextItems(refresh = true)
-                    }
-                } else {
-                    _getUsersState.value = getUsersState.value.copy(
-                        users = listOf()
-                    )
-                }
-            }
-            is UserEvent.LoadNext -> {
-                viewModelScope.launch {
-                    userPaginator.loadNextItems(refresh = false)
-                }
+                _nicknameSearchQuery.value = event.nickname
             }
             is UserEvent.ToggleFollowUser -> {
+                val user = event.user
+                val userId = user.userId ?: return
+                val currentIsFollowed = user.following == 1
+                val targetIsFollowed = !currentIsFollowed
+
+                val updatedUser = user.toggleFollow(isFollowed = targetIsFollowed)
                 viewModelScope.launch {
-                    userUseCases.toggleFollowUser(event.userId).collect { result ->
-                        handleResource(
-                            resource = result,
-                            onSuccess = { data ->
-                                _followUserStatusMap[event.userId] = data.isFollowing
+                    userUseCases.toggleFollowUser(userId).collect { result ->
+                        result.handle(
+                            onSuccess = {
+                                _userStateMap.update { currentMap ->
+                                    currentMap + (userId to updatedUser)
+                                }
+                            },
+                            onError = {
+                                _userStateMap.update { currentMap ->
+                                    currentMap + (userId to user) // 원래 상태로 원복
+                                }
                             }
                         )
-
                     }
                 }
 
