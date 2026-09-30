@@ -124,10 +124,7 @@ fun UserProfileScreen(
             }
         }
     LaunchedEffect(args.userId) {
-
-        //userViewModel.onEvent(UserEvent.GetUserInfo(args.userId))
         userViewModel.refreshUser(args.userId)
-        //userPostsViewModel.initUserPosts(args.userId)
     }
     Scaffold(
         topBar = {

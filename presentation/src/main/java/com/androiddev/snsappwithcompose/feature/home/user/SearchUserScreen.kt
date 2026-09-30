@@ -34,6 +34,7 @@ import com.androiddev.snsappwithcompose.common.component.paging.PagingListConten
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun SearchUserScreen(
@@ -75,7 +76,7 @@ fun SearchUserScreen(
                 .padding(vertical = 20.dp),
             text = { searchQuery },
             onTextChange = { viewModel.onEvent(UserEvent.TypeNickname(it)) },
-            hint = getString(context, R.string.searchtag_hint)
+            hint = stringResource(R.string.searchuser_hint)
         )
 
         PagingListContent(
@@ -89,42 +90,14 @@ fun SearchUserScreen(
                     onUserClick = { viewModel.onEvent(UserEvent.SelectUser(user.userId))},
                     onFollowClick = { viewModel.onEvent(UserEvent.ToggleFollowUser(user))}
                 )
-            }
-        )
-        /**LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            items(state.users.size) { index ->
-                val followUserStatus = viewModel.followUserStatusMap[state.users[index].userId]?: false
-                UserItem(
-                    user = state.users[index],
-                    following = followUserStatus,
-                    onUserClick = { viewModel.onEvent(UserEvent.SelectUser(state.users[index].userId))},
-                    onFollowClick = { viewModel.onEvent(UserEvent.ToggleFollowUser(state.users[index].userId))}
+            },
+            dividerContent = { item ->
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = Color.LightGray.copy(alpha = 0.8f)
                 )
 
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(0.85f),
-                    thickness = 1.dp,
-                    color = Color.LightGray
-                )
             }
-            if(state.isLoading && state.users.isNotEmpty()) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(color = Color.Black.copy(alpha = 0.7f))
-                    }
-                }
-            }
-        }**/
+        )
     }
 }
