@@ -125,7 +125,6 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch {
             if(signinResult.isMember) {
                 //가입된 계정일때
-                userPreferences.saveAuthToken(signinResult.token)
                 if(signinResult.profileWritten) {
                     //홈화면으로 이동
                     setEvent(

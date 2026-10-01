@@ -1,8 +1,9 @@
 package com.androiddev.data.repository.signin
 
 import android.content.Context
+import com.androiddev.data.local.UserPreferences
 import com.androiddev.data.remote.api.signin.SignInApi
-import com.androiddev.data.remote.dto.toSigninResult
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.remote.dto.toSigninWithTokenResult
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.SigninResult
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 class SigninRepositoryImpl @Inject constructor(
     private val api: SignInApi,
-    private val context: Context
+    private val context: Context,
+    private val userPreferences: UserPreferences
 ) : SigninRepository {
     override suspend fun socialSignIn(
         platform: String,
@@ -23,8 +25,13 @@ class SigninRepositoryImpl @Inject constructor(
     ): Flow<Resource<SigninResult>> = safeApiCall(
         context = context,
         apiCall = { api.socialSignIn(platform,account,fcmToken) },
-        mapToResource = { it.toSigninResult(
-        )}
+        mapToResource = {
+            it.toDomain()
+        },
+        onSuccess = {
+            if(it.isMember&&it.token.isNullOrEmpty())
+                userPreferences.saveAuthToken(it.token)
+        }
     )
     override suspend fun emailSignIn(
         account: String,
@@ -33,13 +40,19 @@ class SigninRepositoryImpl @Inject constructor(
     ): Flow<Resource<SigninResult>> = safeApiCall(
         context = context,
         apiCall = { api.emailSignIn(account,password,fcmToken) },
-        mapToResource = { it.toSigninResult()}
+        mapToResource = { it.toDomain()},
+        onSuccess = {
+            if(it.isMember&&it.token.isNullOrEmpty())
+                userPreferences.saveAuthToken(it.token)
+        }
     )
 
     override suspend fun signInWithToken(): Flow<Resource<SigninWithTokenResult>> =
         safeApiCall(
             context = context,
             apiCall = { api.signInWithToken() },
-            mapToResource = { it.toSigninWithTokenResult()}
+            mapToResource = {
+                it.toSigninWithTokenResult()
+            }
         )
 }
