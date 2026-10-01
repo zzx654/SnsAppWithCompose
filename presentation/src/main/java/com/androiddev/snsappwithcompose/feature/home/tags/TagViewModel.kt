@@ -1,28 +1,20 @@
 package com.androiddev.snsappwithcompose.feature.home.tags
 
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.Tag
 import com.androiddev.domain.use_case.tag.TagUseCases
-import com.androiddev.domain.util.Resource
-import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
-import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.util.UiText
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TagViewModel @Inject constructor(
-    @ApplicationContext context: Context,
     private val tagUseCases: TagUseCases
-): BaseViewModel(context) {
+): BaseViewModel() {
     private val _tagTextField = mutableStateOf("")
     val tagTextField: State<String>
         get() = _tagTextField
@@ -46,8 +38,7 @@ class TagViewModel @Inject constructor(
     private fun fetchTags() {
         viewModelScope.launch {
             tagUseCases.getTags().collect { result ->
-                handleResource(
-                    resource = result,
+                result.handle(
                     onSuccess = { data ->
                         _getTagsState.value = _getTagsState.value.copy(
                             isLoading = false,
@@ -69,36 +60,22 @@ class TagViewModel @Inject constructor(
         viewModelScope.launch {
             delay(50L)
             tagUseCases.searchTag(query).collect { result ->
-                when (result) {
-
-                    is Resource.Success -> {
-                        result.data?.let {
-                            if (tagTextField.value.isNotBlank()) {
-                                _getTagsState.value = _getTagsState.value.copy(
-                                    searchedTags = it.searchedTags
-                                )
-                            }
+                result.handle(
+                    onSuccess = { result ->
+                        if (tagTextField.value.isNotBlank()) {
+                            _getTagsState.value = _getTagsState.value.copy(
+                                searchedTags = result.searchedTags
+                            )
                         }
                     }
-                    is Resource.Error -> {
-                        setEvent(
-                            UiEvent.ShowToast(
-                                UiText.DynamicString("")
-
-                                //result.message ?: getString(context, R.string.error)
-                            )
-                        )
-                    }
-                    else -> Unit
-                }
+                )
             }
         }
     }
     private fun toggleFavorite(tagId: Int) {
         viewModelScope.launch {
             tagUseCases.toggleFavoriteTag(tagId).collect { result ->
-                handleResource(
-                    resource = result,
+                result.handle(
                     onSuccess = { data ->
                         _getTagsState.value = _getTagsState.value.copy(
                             favoriteTags = data.favoriteTags,
@@ -107,7 +84,6 @@ class TagViewModel @Inject constructor(
                                 if (tag.tagid == tagId) tag.copy(isliked = if(tag.isliked==1) 0 else 1) else tag
                             }
                         )
-
                     }
                 )
             }
