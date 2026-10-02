@@ -1,77 +1,50 @@
 package com.androiddev.snsappwithcompose.feature.auth.signin
 
-import android.content.Context
-import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
-import com.androiddev.data.local.UserPreferences
 import com.androiddev.domain.model.SigninResult
 import com.androiddev.domain.use_case.signin.SignInUseCases
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.state.AlertDialogState
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.withFcmToken
-import com.kakao.sdk.user.UserApiClient
-import com.navercorp.nid.NidOAuth
-import com.navercorp.nid.oauth.util.NidOAuthCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val signInUseCases: SignInUseCases,
-    private val userPreferences: UserPreferences,
-    @ApplicationContext context: Context,
-) : BaseViewModel(context) {
+) : BaseViewModel() {
     private val _account = mutableStateOf("")
     val account: State<String>
         get() = _account
     private val _password = mutableStateOf("")
     val password: State<String>
         get() = _password
-    private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
-    val alertDialogState: State<AlertDialogState>
-        get() = _alertDialogState
+    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
+    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
     init {
         resetSignIn()
     }
     fun resetSignIn() {
-        UserApiClient.instance.me { user, error ->
-            if(user!=null) {
-                UserApiClient.instance.logout { error ->
-                    if(error !=null)
-                        Log.e("kakaoErr", error.message?: "kakaologout error")
-                    else
-                        naverLogout()
-                }
-            } else naverLogout()
-        }
-    }
-    fun naverLogout() {
-        NidOAuth.logout( object : NidOAuthCallback {
-            override fun onSuccess() {
-                //클라이언트에서 토큰 삭제를 성공한 상태
-                Log.i("naver","naverLogoutSuccess")
-            }
-            override fun onFailure(
-                errorCode: String,
-                errorDesc: String,
-            ) {
-                viewModelScope.launch {
+        viewModelScope.launch {
+            signInUseCases.resetSocialSignIn()
+                .onFailure { exception ->
+                    // Repository에서 던진 에러 메시지를 수신하여 UI 이벤트 발행
                     setEvent(
                         UiEvent.ShowToast(
-                            UiText.DynamicString("errorCode:$errorCode, errorDesc:$errorDesc"))
+                            UiText.DynamicString(exception.message ?: "소셜 로그아웃 실패")
+                        )
                     )
                 }
-            }
-        })
+        }
     }
     fun onEvent(event: SignInEvent) {
         when(event) {
@@ -89,10 +62,9 @@ class SignInViewModel @Inject constructor(
                             password = password.value,
                             fcmToken = token
                         ).collect { result ->
-                            handleResource(
-                                resource = result,
-                                onSuccess = { data ->
-                                    handleSigninResult(event,data)
+                            result.handle(
+                                onSuccess =  {
+                                    handleSigninResult(event,it)
                                 }
                             )
                         }
@@ -108,10 +80,9 @@ class SignInViewModel @Inject constructor(
                             account = event.account,
                             fcmToken = token
                         ).collect { result ->
-                            handleResource(
-                                resource = result,
-                                onSuccess = { data ->
-                                    handleSigninResult(event,data)
+                            result.handle(
+                                onSuccess = {
+                                    handleSigninResult(event,it)
                                 }
                             )
                         }
@@ -153,21 +124,21 @@ class SignInViewModel @Inject constructor(
                     )
                 }
                 else {
-                    showSignInFialedAlert()
+                    showSignInFailedAlert()
                 }
             }
         }
     }
-    private fun showSignInFialedAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(context,R.string.signin_failed),
-            confirmText = getString(context,R.string.confirm),
+    private fun showSignInFailedAlert() {
+        _alertDialogState.value = AlertDialogStateV2(
+            title = UiText.StringResource(R.string.signin_failed),
+            confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
                 resetDialogState()
             }
         )
     }
     protected fun resetDialogState() {
-        _alertDialogState.value = AlertDialogState()
+        _alertDialogState.value = AlertDialogStateV2()
     }
 }

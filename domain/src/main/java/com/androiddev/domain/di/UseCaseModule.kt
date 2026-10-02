@@ -48,7 +48,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object UseCaseModule {
-    @Provides
+    /**@Provides
     @Singleton
     fun provideSignInUseCases(repository: SigninRepository): SignInUseCases {
         return SignInUseCases(
@@ -56,7 +56,7 @@ object UseCaseModule {
             emailSignIn = EmailSignIn(repository),
             signInWithToken = SignInWithToken(repository)
         )
-    }
+    }**/
     @Provides
     @Singleton
     fun provideAuthPhoneUseCases(repository: AuthPhoneRepository, @ApplicationContext context: Context): AuthPhoneUseCases {

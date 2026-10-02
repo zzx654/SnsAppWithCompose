@@ -46,6 +46,21 @@ android {
 
 dependencies {
     implementation(project(":domain"))
+
+    //네이버로그인
+    implementation(libs.navercorp.nid.oauth)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.support.core.utils)
+    implementation(libs.navercorp.nid.oauth)
+    implementation (libs.androidx.security.crypto)
+    implementation (libs.support.core.utils)
+    implementation (libs.androidx.browser)
+
+    //카톡로그인
+    implementation(libs.kakao.v2.all) // 전체 모듈 설치, 2.11.0 버전부터 지원
+    implementation(libs.kakao.v2.user)
+    //snapper fling behavior
+    implementation(libs.dev.chrisbanes.snapper)
     //location service
     implementation(libs.service.location)
     implementation(libs.kotlinx.coroutines.play.services)
