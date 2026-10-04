@@ -6,6 +6,7 @@ import com.androiddev.data.local.UserPreferences
 import com.androiddev.data.remote.api.signin.SignInApi
 import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.remote.dto.toSigninWithTokenResult
+import com.androiddev.data.util.getFcmToken
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.SigninResult
 import com.androiddev.domain.model.SigninWithTokenResult
@@ -73,29 +74,33 @@ class SigninRepositoryImpl @Inject constructor(
 
     override suspend fun socialSignIn(
         platform: String,
-        account: String,
-        fcmToken: String
+        account: String
     ): Flow<Resource<SigninResult>> = safeApiCall(
         context = context,
-        apiCall = { api.socialSignIn(platform,account,fcmToken) },
+        apiCall = {
+            val fcmToken = getFcmToken()
+            api.socialSignIn(platform,account,fcmToken)
+                  },
         mapToResource = {
             it.toDomain()
         },
         onSuccess = {
-            if(it.isMember&&it.token.isNullOrEmpty())
+            if(it.isMember&&!it.token.isNullOrEmpty())
                 userPreferences.saveAuthToken(it.token)
         }
     )
     override suspend fun emailSignIn(
         account: String,
         password: String,
-        fcmToken: String,
     ): Flow<Resource<SigninResult>> = safeApiCall(
         context = context,
-        apiCall = { api.emailSignIn(account,password,fcmToken) },
+        apiCall = {
+            val fcmToken = getFcmToken()
+            api.emailSignIn(account,password,fcmToken)
+                  },
         mapToResource = { it.toDomain()},
         onSuccess = {
-            if(it.isMember&&it.token.isNullOrEmpty())
+            if(it.isMember&&!it.token.isNullOrEmpty())
                 userPreferences.saveAuthToken(it.token)
         }
     )

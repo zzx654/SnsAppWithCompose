@@ -47,6 +47,10 @@ android {
 dependencies {
     implementation(project(":domain"))
 
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.analytics)
+
     //네이버로그인
     implementation(libs.navercorp.nid.oauth)
     implementation(libs.androidx.security.crypto)
@@ -71,6 +75,7 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+
 
     // Retrofit
     implementation (libs.retrofit)

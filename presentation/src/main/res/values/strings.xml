@@ -20,6 +20,7 @@
     <string name="authenticate">인증하기</string>
     <string name="enter_email">이메일을 입력해주세요</string>
     <string name="check_email">이메일을 확인해주세요</string>
+    <string name="invalid_email">유효하지 않은 이메일입니다</string>
     <string name="password_rule">영문,숫자,특수문자 포함 8자-15자</string>
     <string name="enter_password">비밀번호를 입력해주세요</string>
     <string name="error">에러가 발생했습니다</string>

@@ -73,8 +73,8 @@ abstract class RepositoryModule {
 
         @Provides
         @Singleton
-        fun provideSignInRepository(api: SignInApi, @ApplicationContext context: Context): SigninRepository {
-            return SigninRepositoryImpl(api, context)
+        fun provideSignInRepository(api: SignInApi, @ApplicationContext context: Context,userPreferences: UserPreferences): SigninRepository {
+            return SigninRepositoryImpl(api, context,userPreferences)
         }
 
         @Provides

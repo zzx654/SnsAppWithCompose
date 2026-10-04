@@ -5,13 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.SigninResult
 import com.androiddev.domain.use_case.signin.SignInUseCases
+import com.androiddev.domain.use_case.validation.EmailValidationError
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
 import com.androiddev.snsappwithcompose.common.util.UiText
-import com.androiddev.snsappwithcompose.common.util.withFcmToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,12 +55,37 @@ class SignInViewModel @Inject constructor(
                 _password.value = event.password
             }
             is SignInEvent.EmailSignIn -> {
-                withFcmToken { token ->
+                val emailError = signInUseCases.validateEmail(account.value) // EmailValidationError 반환 또는 Boolean
+                val isPasswordValid = signInUseCases.validatePassword(password.value)
+
+                if (emailError!=null) {
+                    val errorMessage = when (emailError) {
+                        EmailValidationError.EMPTY -> UiText.StringResource(R.string.enter_email)
+                        EmailValidationError.INVALID_FORMAT -> UiText.StringResource(R.string.invalid_email)
+                        null -> null
+                    }
+
+                    errorMessage?.let {
+                        viewModelScope.launch { setEvent(UiEvent.ShowToast(it)) }
+                    }
+                    return
+                }
+
+                if (!isPasswordValid) {
                     viewModelScope.launch {
-                        signInUseCases.emailSignIn(
-                            account = account.value,
-                            password = password.value,
-                            fcmToken = token
+                        setEvent(
+                            UiEvent.ShowToast(
+                                UiText.StringResource(R.string.enter_password) // "비밀번호를 입력해주세요"
+                            )
+                        )
+                    }
+                    return
+                }
+
+                viewModelScope.launch {
+                    signInUseCases.emailSignIn(
+                        account = account.value,
+                        password = password.value,
                         ).collect { result ->
                             result.handle(
                                 onSuccess =  {
@@ -69,23 +94,20 @@ class SignInViewModel @Inject constructor(
                             )
                         }
                     }
-                }
+
             }
             is SignInEvent.SocialSignIn -> {
 
-                withFcmToken { token ->
-                    viewModelScope.launch {
-                        signInUseCases.socialSignIn(
-                            platform = event.platform,
-                            account = event.account,
-                            fcmToken = token
-                        ).collect { result ->
-                            result.handle(
-                                onSuccess = {
-                                    handleSigninResult(event,it)
-                                }
-                            )
-                        }
+                viewModelScope.launch {
+                    signInUseCases.socialSignIn(
+                        platform = event.platform,
+                        account = event.account
+                    ).collect { result ->
+                        result.handle(
+                            onSuccess = {
+                                handleSigninResult(event,it)
+                            }
+                        )
                     }
                 }
             }
