@@ -15,7 +15,8 @@ import com.androiddev.domain.util.DataError
 fun <T, R> safeApiCall(
     context: Context,
     apiCall: suspend () -> Response<BaseApiResponse<T>>,
-    mapToResource: (T) -> R
+    mapToResource: (T) -> R,
+    onSuccess: (suspend (T) -> Unit)? = null
 ): Flow<Resource<R>> = flow {
     try {
         emit(Resource.Loading())
@@ -28,7 +29,14 @@ fun <T, R> safeApiCall(
                 // 토큰 처리
                 emit(Resource.TokenExpired<R>()) // 타입 안전!
             } else if (result.resultCode == 200 ) {
-                    emit(Resource.Success(result.data?.let(mapToResource)))
+                val rawData = result.data
+                if (rawData != null) {
+                    // 성공 시 토큰 저장 등 suspend 부가 작업 처리
+                    onSuccess?.invoke(rawData)
+                    emit(Resource.Success(mapToResource(rawData)))
+                } else {
+                    emit(Resource.Success(null))
+                }
             } else {
                 emit(Resource.Error(getString(context, com.androiddev.data.R.string.server_error)))
             }

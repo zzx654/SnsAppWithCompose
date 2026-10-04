@@ -8,12 +8,11 @@ data class SigninResultDto (
     val userId: Int?,
     val token: String,
 )
-fun SigninResultDto.toSigninResult(
+fun SigninResultDto.toDomain(
 ): SigninResult {
     return SigninResult(
         isMember = isMember,
         profileWritten = profileWritten,
         userId = userId,
-        token = token
     )
 }

@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
@@ -49,6 +51,7 @@ import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
@@ -63,6 +66,7 @@ fun SignInScreen(
     notificationViewModel: NotificationViewModel
 ) {
     val context = LocalContext.current
+    val alertDialogState by signinViewModel.alertDialogState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -104,12 +108,12 @@ fun SignInScreen(
     LoadingDialog {
         signinViewModel.isLoading.value
     }
-    AlertDialog(
-        title = { signinViewModel.alertDialogState.value.title },
-        cancelText = { signinViewModel.alertDialogState.value.cancelText },
-        confirmText = { signinViewModel.alertDialogState.value.confirmText },
-        onClickConfirm = signinViewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = signinViewModel.alertDialogState.value.onClickCancel
+    AlertDialogg(
+        title =  alertDialogState.title?.asString()?:"" ,
+        cancelText = alertDialogState.cancelText?.asString() ?:"",
+        confirmText = alertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = alertDialogState.onClickConfirm,
+        onClickCancel = alertDialogState.onClickCancel
     )
 
     Column(
