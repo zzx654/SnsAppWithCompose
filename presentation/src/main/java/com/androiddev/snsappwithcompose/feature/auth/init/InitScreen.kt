@@ -1,7 +1,5 @@
 package com.androiddev.snsappwithcompose.feature.auth.init
 
-import android.view.Gravity
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,20 +9,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
-import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingProgressIndicator
-import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun InitScreen(
@@ -33,35 +30,26 @@ fun InitScreen(
     currentUserViewModel: CurrentUserViewModel,
     notificationViewModel: NotificationViewModel
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(key1 = true) {
-        viewModel.eventFlow.collectLatest { event ->
-            when(event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
-                }
-                is UiEvent.navigate -> {
-                    event.userId?.let {
-                        currentUserViewModel.setUserId(it)
-                    }
-                    navController.navigate(event.screen)
-                }
+    val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
 
-                else -> null
-            }
-        }
-    }
-    AlertDialog(
-        title = {viewModel.alertDialogState.value.title},
-        cancelText = {viewModel.alertDialogState.value.cancelText},
-        confirmText = {viewModel.alertDialogState.value.confirmText},
-        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    AlertDialogg(
+        title =  alertDialogState.title?.asString()?:"" ,
+        cancelText = alertDialogState.cancelText?.asString() ?:"",
+        confirmText = alertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = alertDialogState.onClickConfirm,
+        onClickCancel = alertDialogState.onClickCancel
     )
+    BaseScreen(
+        viewModel = viewModel,
+        currentUserViewModel = currentUserViewModel,
+        navController = navController,
+        loadingContent = {
+            Box(modifier = Modifier.fillMaxSize()) {
+                LoadingProgressIndicator(modifier = Modifier.align(Alignment.BottomCenter).padding(150.dp),{ viewModel.isLoading.value})
+            }
 
+        }
+    ) {
         Box(
             modifier = Modifier.fillMaxSize(),
 
@@ -75,8 +63,12 @@ fun InitScreen(
                 Spacer(modifier = Modifier.height(30.dp))
             }
 
-            LoadingProgressIndicator(modifier = Modifier.align(Alignment.BottomCenter).padding(150.dp),{ viewModel.isLoading.value})
+
         }
+
+    }
+
+
 
 
 }

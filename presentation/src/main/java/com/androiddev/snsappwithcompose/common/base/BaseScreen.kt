@@ -13,11 +13,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
+import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun BaseScreen(
     viewModel: UiStateProvider,
+    currentUserViewModel: CurrentUserViewModel? = null,
     navController: NavController? = null,
     loadingContent: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
@@ -36,6 +38,9 @@ fun BaseScreen(
                     }
                 }
                 is UiEvent.navigate -> {
+                    event.userId?.let {
+                        currentUserViewModel?.setUserId(it)
+                    }
                     navController?.navigate(event.screen)
                 }
 
