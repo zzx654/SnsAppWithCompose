@@ -1,31 +1,29 @@
 package com.androiddev.snsappwithcompose.feature.auth.init
 
-import android.content.Context
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getString
+
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.use_case.signin.SignInUseCases
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.state.AlertDialogState
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SignInWithTokenViewModel @Inject constructor(
-    private val signInUseCases: SignInUseCases,
-    @ApplicationContext context: Context,
-) : BaseViewModel(context) {
+    private val signInUseCases: SignInUseCases
+) : BaseViewModel() {
 
-    private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
-    val alertDialogState: State<AlertDialogState>
-        get() = _alertDialogState
+    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
+    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+
 
     init {
         signInWithToken()
@@ -34,14 +32,11 @@ class SignInWithTokenViewModel @Inject constructor(
         viewModelScope.launch {
             signInUseCases.signInWithToken().collect { result->
                 launch {
-                    handleResource(
-                        resource = result,
+                    result.handle(
                         onSuccess = { data ->
+                            if (data.signInResult) {
 
-
-                            if(data.signInResult) {
-
-                                if(data.profileWritten) {
+                                if (data.profileWritten) {
                                     //홈화면
                                     setEvent(
                                         UiEvent.navigate(
@@ -54,7 +49,7 @@ class SignInWithTokenViewModel @Inject constructor(
                                     setEvent(
                                         UiEvent.navigate(
                                             screen = Screen.CreateprofileScreen,
-                                            userId=  data.userId
+                                            userId = data.userId
                                         )
                                     )
                                 }
@@ -67,7 +62,7 @@ class SignInWithTokenViewModel @Inject constructor(
                                 )
                             }
                         },
-                        onError = { showSignInFialedAlert(result.message) },
+                        onError = { showSignInFailedAlert(result.message) },
                         onTokenExpired = {
                             setEvent(
                                 UiEvent.navigate(
@@ -80,10 +75,10 @@ class SignInWithTokenViewModel @Inject constructor(
             }
         }
     }
-    private fun showSignInFialedAlert(message:String?) {
-        _alertDialogState.value = AlertDialogState(
-            title = message?: getString(context,R.string.error),
-            confirmText = getString(context, R.string.retry),
+    private fun showSignInFailedAlert(message:String?) {
+        _alertDialogState.value = AlertDialogStateV2(
+            title = message?.let{ UiText.DynamicString(it) }?: UiText.StringResource(R.string.error),
+            confirmText = UiText.StringResource(R.string.retry),
             onClickConfirm = {
                 resetDialogState()
                 signInWithToken()
@@ -91,6 +86,6 @@ class SignInWithTokenViewModel @Inject constructor(
         )
     }
     protected fun resetDialogState() {
-        _alertDialogState.value = AlertDialogState()
+        _alertDialogState.value = AlertDialogStateV2()
     }
 }
