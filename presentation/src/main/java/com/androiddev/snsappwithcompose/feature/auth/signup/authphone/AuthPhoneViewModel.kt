@@ -14,6 +14,8 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.common.util.withFcmToken
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,8 +28,7 @@ class AuthPhoneViewModel @Inject constructor(
     private val authPhoneUseCases: AuthPhoneUseCases,
     private val signUpUseCase: SocialSignUpUseCase,
     private val userPreferences: UserPreferences,
-    @ApplicationContext context: Context,
-) : AuthViewModel(context) {
+) : AuthViewModel() {
     private val _phoneNumber = mutableStateOf("")
     val phoneNumber: State<String>
         get() = _phoneNumber
@@ -82,7 +83,7 @@ class AuthPhoneViewModel @Inject constructor(
                                 onSuccess = { data ->
                                     if(data.isCorrect) {
                                         timerJob?.cancel()
-                                        if(event.platform == getString(context,R.string.email)) {
+                                        if(event.platform == Platform.EMAIL) {
                                             setEvent(
                                                 UiEvent.navigate(Screen.SignUpScreen(phoneNumber.value))
                                             )
@@ -90,7 +91,7 @@ class AuthPhoneViewModel @Inject constructor(
                                             //sns가입시도
                                             withFcmToken { token ->
                                                 socialSignUp(
-                                                    platform = event.platform,
+                                                    platform = event.platform.apiKey,
                                                     account = event.account!!,
                                                     phoneNumber = phoneNumber.value,
                                                     fcmToken = token
@@ -127,9 +128,9 @@ class AuthPhoneViewModel @Inject constructor(
         }
     }
     private fun showPhoneExistAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(context,R.string.phonenumber_exist),
-            confirmText = getString(context,R.string.confirm),
+        _alertDialogState.value = AlertDialogStateV2(
+            title = UiText.StringResource(R.string.phonenumber_exist),
+            confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
                 resetDialogState()
             }
@@ -140,4 +141,12 @@ class AuthPhoneViewModel @Inject constructor(
         super.onCleared()
         timerJob?.cancel()
     }
+}
+enum class Platform(val apiKey: String) {
+    EMAIL("email"),
+    NAVER("naver"),
+    KAKAO("kakao");
+
+    val isSocial: Boolean
+        get() = this != EMAIL
 }

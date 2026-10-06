@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
@@ -45,6 +46,7 @@ import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.component.TopBar
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -59,6 +61,7 @@ fun AuthPhoneScreen(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val limitTime by viewModel.limitTime.collectAsState()
+    val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -80,12 +83,12 @@ fun AuthPhoneScreen(
     LoadingDialog {
         viewModel.isLoading.value
     }
-    AlertDialog(
-        title = { viewModel.alertDialogState.value.title },
-        cancelText = { viewModel.alertDialogState.value.cancelText },
-        confirmText = { viewModel.alertDialogState.value.confirmText },
-        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    AlertDialogg(
+        title =  alertDialogState.title?.asString()?:"" ,
+        cancelText = alertDialogState.cancelText?.asString() ?:"",
+        confirmText = alertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = alertDialogState.onClickConfirm,
+        onClickCancel = alertDialogState.onClickCancel
     )
     BaseScaffold(
         focusManager = focusManager,

@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
@@ -44,6 +45,7 @@ import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.component.TopBar
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import kotlinx.coroutines.flow.collectLatest
 import java.util.regex.Pattern
 
@@ -58,15 +60,16 @@ fun EmailSignUpScreen(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val limitTime by viewModel.limitTime.collectAsState()
+    val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
     LoadingDialog {
         viewModel.isLoading.value
     }
-    AlertDialog(
-        title = {viewModel.alertDialogState.value.title},
-        cancelText = {viewModel.alertDialogState.value.cancelText},
-        confirmText = {viewModel.alertDialogState.value.confirmText},
-        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    AlertDialogg(
+        title =  alertDialogState.title?.asString()?:"" ,
+        cancelText = alertDialogState.cancelText?.asString() ?:"",
+        confirmText = alertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = alertDialogState.onClickConfirm,
+        onClickCancel = alertDialogState.onClickCancel
     )
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -89,7 +92,7 @@ fun EmailSignUpScreen(
         focusManager = focusManager,
         topBar = {
             TopBar(
-                title = getString(context,R.string.signup),
+                title = stringResource(R.string.signup),
                 onBackClick = { navController.popBackStack(Screen.SignInScreen,false) }
             )
         },
@@ -97,10 +100,13 @@ fun EmailSignUpScreen(
             BottomButton(
                 buttonText = stringResource(id = R.string.request_signup),
                 activeButton = {
-                    viewModel.password.value == viewModel.repeatPw.value &&
+                    viewModel.isPasswordMatching &&
+                            viewModel.isCodeReceived.value &&
+                            viewModel.authCodeField.value.code.isNotEmpty()
+                    /**viewModel.password.value == viewModel.repeatPw.value &&
                             viewModel.isCodeReceived.value&&
                             Pattern.matches( PASSWORD_REGEX,viewModel.password.value)&&
-                            viewModel.authCodeField.value.code.isNotEmpty() },
+                            viewModel.authCodeField.value.code.isNotEmpty() **/},
                 onClick = { viewModel.onEvent(EmailSignUpEvent.EmailSignUp(args.phoneNumber))}
             )
         },
@@ -167,11 +173,12 @@ fun EmailSignUpScreen(
             )
             Spacer(modifier = Modifier.height(13.dp))
             PasswordHelper {
-                viewModel.password.value == viewModel.repeatPw.value &&
+                /**viewModel.password.value == viewModel.repeatPw.value &&
                         Pattern.matches(
                             PASSWORD_REGEX,
                             viewModel.password.value
-                        )
+                        )**/
+                viewModel.isPasswordMatching
             }
         }
     )
