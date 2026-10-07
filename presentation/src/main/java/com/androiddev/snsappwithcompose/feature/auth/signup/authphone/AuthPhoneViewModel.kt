@@ -98,14 +98,12 @@ class AuthPhoneViewModel @Inject constructor(
                                             )
                                         } else {
                                             //sns가입시도
-                                            withFcmToken { token ->
-                                                socialSignUp(
-                                                    platform = args.platform,
-                                                    account = account?:"",
-                                                    phoneNumber = phoneNumber.value,
-                                                    fcmToken = token
-                                                )
-                                            }
+                                            socialSignUp(
+                                                platform = args.platform,
+                                                account = account?:"",
+                                                phoneNumber = phoneNumber.value,
+                                            )
+
 
                                         }
                                     }
@@ -118,13 +116,12 @@ class AuthPhoneViewModel @Inject constructor(
             }
         }
     }
-    private fun socialSignUp(platform: String,account: String,phoneNumber: String,fcmToken: String) {
+    private fun socialSignUp(platform: String,account: String,phoneNumber: String) {
         viewModelScope.launch {
-            signUpUseCase(platform,account,phoneNumber,fcmToken)
+            signUpUseCase(platform,account,phoneNumber)
                 .collect{ result ->
                     result.handle(
                         onSuccess = { data ->
-                            userPreferences.saveAuthToken(data.token)
                             setEvent(
                                 UiEvent.navigate(
                                     Screen.CreateprofileScreen

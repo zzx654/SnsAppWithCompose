@@ -5,7 +5,6 @@ import android.util.Log
 import com.androiddev.data.local.UserPreferences
 import com.androiddev.data.remote.api.signin.SignInApi
 import com.androiddev.data.remote.dto.toDomain
-import com.androiddev.data.remote.dto.toSigninWithTokenResult
 import com.androiddev.data.util.getFcmToken
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.SigninResult
@@ -23,7 +22,6 @@ import kotlin.coroutines.resumeWithException
 
 class SigninRepositoryImpl @Inject constructor(
     private val api: SignInApi,
-    private val context: Context,
     private val userPreferences: UserPreferences
 ) : SigninRepository {
     override suspend fun resetSocialSignIn(): Result<Unit> {
@@ -76,7 +74,6 @@ class SigninRepositoryImpl @Inject constructor(
         platform: String,
         account: String
     ): Flow<Resource<SigninResult>> = safeApiCall(
-        context = context,
         apiCall = {
             val fcmToken = getFcmToken()
             api.socialSignIn(platform,account,fcmToken)
@@ -85,7 +82,7 @@ class SigninRepositoryImpl @Inject constructor(
             it.toDomain()
         },
         onSuccess = {
-            if(it.isMember&&!it.token.isNullOrEmpty())
+            if(it.isMember&& it.token.isNotEmpty())
                 userPreferences.saveAuthToken(it.token)
         }
     )
@@ -93,24 +90,22 @@ class SigninRepositoryImpl @Inject constructor(
         account: String,
         password: String,
     ): Flow<Resource<SigninResult>> = safeApiCall(
-        context = context,
         apiCall = {
             val fcmToken = getFcmToken()
             api.emailSignIn(account,password,fcmToken)
                   },
         mapToResource = { it.toDomain()},
         onSuccess = {
-            if(it.isMember&&!it.token.isNullOrEmpty())
+            if(it.isMember&& it.token.isNotEmpty())
                 userPreferences.saveAuthToken(it.token)
         }
     )
 
     override suspend fun signInWithToken(): Flow<Resource<SigninWithTokenResult>> =
         safeApiCall(
-            context = context,
             apiCall = { api.signInWithToken() },
             mapToResource = {
-                it.toSigninWithTokenResult()
+                it.toDomain()
             }
         )
 }

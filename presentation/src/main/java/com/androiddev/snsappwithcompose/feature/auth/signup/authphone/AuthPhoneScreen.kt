@@ -58,7 +58,7 @@ fun AuthPhoneScreen(
     navBackStackEntry: NavBackStackEntry,
     viewModel: AuthPhoneViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
-    var args = navBackStackEntry.toRoute<Screen.AuthPhoneScreen>()
+
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val isCodeReceived by viewModel.isCodeReceived.collectAsState()
