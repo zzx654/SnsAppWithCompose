@@ -43,6 +43,7 @@ import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
 import com.androiddev.snsappwithcompose.feature.auth.components.KakaoSignInButton
 import com.androiddev.snsappwithcompose.feature.auth.components.NaverSignInButton
@@ -73,26 +74,6 @@ fun SignInScreen(
     ) { permissionsMap ->
     }
     LaunchedEffect(key1 = true) {
-        signinViewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
-                }
-
-                is UiEvent.navigate -> {
-                    event.userId?.let {
-                        currentUserViewModel.setUserId(it)
-                    }
-                    navController.navigate(event.screen)
-                }
-                else -> null
-            }
-        }
-    }
-    LaunchedEffect(key1 = true) {
         NotificationPermissionUtils.checkNotificationPermission(
             context = context,
             onUnGranted = {
@@ -103,10 +84,6 @@ fun SignInScreen(
                 )
             }
         )
-
-    }
-    LoadingDialog {
-        signinViewModel.isLoading.value
     }
     AlertDialogg(
         title =  alertDialogState.title?.asString()?:"" ,
@@ -116,191 +93,200 @@ fun SignInScreen(
         onClickCancel = alertDialogState.onClickCancel
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .addFocusCleaner(focusManager)
+    BaseScreen(
+        viewModel = signinViewModel,
+        currentUserViewModel = currentUserViewModel,
+        navController = navController,
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.8f)
-        ) {
-            Image(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 20.dp)
-                    .size(100.dp),
-                painter = painterResource(id = R.drawable.dog),
-                contentDescription = null
-            )
-        }
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 30.dp)
-
+                .fillMaxSize()
+                .addFocusCleaner(focusManager)
         ) {
-
-            Text(
-                text = stringResource(R.string.signin),
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(start = 10.dp)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            SignInTextField(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                text = { signinViewModel.account.value },
-                focusManager = focusManager,
-                onDone = { focusManager.moveFocus(FocusDirection.Next) },
-                onTextChange = { signinViewModel.onEvent(SignInEvent.TypeAccount(it)) },
-                keyboardType = KeyboardType.Email,
-                hint = stringResource(R.string.email_hint)
-            )
-            Spacer(modifier = Modifier.weight(0.2f))
-            SignInTextField(
+                    .weight(0.8f)
+            ) {
+                Image(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 20.dp)
+                        .size(100.dp),
+                    painter = painterResource(id = R.drawable.dog),
+                    contentDescription = null
+                )
+            }
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                text = { signinViewModel.password.value },
-                focusManager = focusManager,
-                onTextChange = { signinViewModel.onEvent(SignInEvent.TypePwd(it)) },
-                keyboardType = KeyboardType.Password,
-                hint = stringResource(R.string.password_hint)
-            )
+                    .weight(1f)
+                    .padding(horizontal = 30.dp)
 
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)) {
-                Row(
-                    modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+
+                Text(
+                    text = stringResource(R.string.signin),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(start = 10.dp)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                SignInTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    text = { signinViewModel.account.value },
+                    focusManager = focusManager,
+                    onDone = { focusManager.moveFocus(FocusDirection.Next) },
+                    onTextChange = { signinViewModel.onEvent(SignInEvent.TypeAccount(it)) },
+                    keyboardType = KeyboardType.Email,
+                    hint = stringResource(R.string.email_hint)
+                )
+                Spacer(modifier = Modifier.weight(0.2f))
+                SignInTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    text = { signinViewModel.password.value },
+                    focusManager = focusManager,
+                    onTextChange = { signinViewModel.onEvent(SignInEvent.TypePwd(it)) },
+                    keyboardType = KeyboardType.Password,
+                    hint = stringResource(R.string.password_hint)
+                )
+
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)) {
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.find_id),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                        Spacer(modifier = Modifier.width(15.dp))
+                        Text(
+                            text = stringResource(R.string.find_pw),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    onClick = { signinViewModel.onEvent(SignInEvent.EmailSignIn) },
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.find_id),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
-                    Spacer(modifier = Modifier.width(15.dp))
-                    Text(
-                        text = stringResource(R.string.find_pw),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        text = stringResource(R.string.login),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
                     )
                 }
             }
 
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black
-                ),
+
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                onClick = { signinViewModel.onEvent(SignInEvent.EmailSignIn) },
-                shape = RoundedCornerShape(10.dp)
+                    .weight(1f)
+                    .padding(horizontal = 30.dp)
+
             ) {
-                Text(
-                    text = stringResource(R.string.login),
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
-                )
+
+
+                Spacer(modifier = Modifier.height(30.dp))
+                Row(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.width(50.dp),
+                        color = Color.Gray,
+                        thickness = 1.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.social_login),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    HorizontalDivider(
+                        modifier = Modifier.width(50.dp),
+                        color = Color.Gray,
+                        thickness = 1.dp
+                    )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
+                Row(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    KakaoSignInButton(
+                        onKaKaoSignInCompleted = { account ->
+                            signinViewModel.onEvent(
+                                SignInEvent.SocialSignIn(
+                                    getString(context, R.string.kakao),
+                                    account
+                                )
+                            )
+                        },
+                        onError = { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
+                    )
+                    Spacer(modifier = Modifier.width(20.dp))
+                    NaverSignInButton(
+                        onNaverSignInCompleted = { account ->
+                            signinViewModel.onEvent(
+                                SignInEvent.SocialSignIn(
+                                    getString(context, R.string.naver),
+                                    account
+                                )
+                            )
+                        },
+                        onError = { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
+                    )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
+                Row(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_account),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Text(
+                        modifier = Modifier.clickable {
+                            navController.navigate(
+                                Screen.AuthPhoneScreen(
+                                    platform = getString(context, R.string.email),
+                                    account = null
+                                )
+                            )
+                        },
+                        text = stringResource(R.string.create_account),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = Color.Black
+                    )
+                }
             }
         }
 
-
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 30.dp)
-
-        ) {
-
-
-            Spacer(modifier = Modifier.height(30.dp))
-            Row(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.width(50.dp),
-                    color = Color.Gray,
-                    thickness = 1.dp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.social_login),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                HorizontalDivider(
-                    modifier = Modifier.width(50.dp),
-                    color = Color.Gray,
-                    thickness = 1.dp
-                )
-            }
-            Spacer(modifier = Modifier.height(30.dp))
-            Row(
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                KakaoSignInButton(
-                    onKaKaoSignInCompleted = { account ->
-                        signinViewModel.onEvent(
-                            SignInEvent.SocialSignIn(
-                                getString(context, R.string.kakao),
-                                account
-                            )
-                        )
-                    },
-                    onError = { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                NaverSignInButton(
-                    onNaverSignInCompleted = { account ->
-                        signinViewModel.onEvent(
-                            SignInEvent.SocialSignIn(
-                                getString(context, R.string.naver),
-                                account
-                            )
-                        )
-                    },
-                    onError = { error -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show() }
-                )
-            }
-            Spacer(modifier = Modifier.height(30.dp))
-            Row(
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text(
-                    text = stringResource(R.string.no_account),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.width(15.dp))
-                Text(
-                    modifier = Modifier.clickable {
-                        navController.navigate(
-                            Screen.AuthPhoneScreen(
-                                platform = getString(context, R.string.email),
-                                account = null
-                            )
-                        )
-                    },
-                    text = stringResource(R.string.create_account),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    color = Color.Black
-                )
-            }
-        }
     }
+
+
 
 }

@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.androiddev.data.local.UserPreferences
 import com.androiddev.domain.use_case.signup.authphone.AuthPhoneUseCases
 import com.androiddev.domain.use_case.signup.authphone.InvalidPhoneNumberException
@@ -28,7 +30,14 @@ class AuthPhoneViewModel @Inject constructor(
     private val authPhoneUseCases: AuthPhoneUseCases,
     private val signUpUseCase: SocialSignUpUseCase,
     private val userPreferences: UserPreferences,
+    savedStateHandle: SavedStateHandle
 ) : AuthViewModel() {
+    private val args = savedStateHandle.toRoute<Screen.AuthPhoneScreen>()
+
+    //  String -> Platform Enum으로 관리하여 타입 안정성 확보
+    private val platform: Platform = Platform.fromKey(args.platform)
+    private val account: String = args.account.orEmpty()
+
     private val _phoneNumber = mutableStateOf("")
     val phoneNumber: State<String>
         get() = _phoneNumber
@@ -46,12 +55,13 @@ class AuthPhoneViewModel @Inject constructor(
             }
             is AuthPhoneEvent.RequestAuthCode -> {
                 viewModelScope.launch {
+
                     try {
                         authPhoneUseCases.requestAuthCode(phoneNumber.value).collect { result ->
-                            handleResource(
-                                resource = result,
+                            result.handle (
                                 onSuccess = { data ->
                                     if(data.isValid) {
+
                                         _isCodeReceived.value = true
                                         _limitTime.value = AUTH_LIMITEDTIME
                                         _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
@@ -63,11 +73,11 @@ class AuthPhoneViewModel @Inject constructor(
                             )
                         }
                     } catch (e: InvalidPhoneNumberException) {
-                        //setEvent(
-                         //   UiEvent.ShowToast(
-                          //      message = e.message ?: getString(context,R.string.check_phonenumber)
-                           // )
-                        //)
+                        setEvent(
+                            UiEvent.ShowToast(
+                                message = e.message?.let{ UiText.DynamicString(it)} ?: UiText.StringResource(R.string.check_phonenumber)
+                            )
+                        )
                     }
                 }
             }
@@ -78,12 +88,11 @@ class AuthPhoneViewModel @Inject constructor(
                 viewModelScope.launch {
                     authPhoneUseCases.authenticateCode(phoneNumber.value, authCodeField.value.code)
                         .collect { result ->
-                            handleResource(
-                                resource = result,
+                            result.handle(
                                 onSuccess = { data ->
                                     if(data.isCorrect) {
                                         timerJob?.cancel()
-                                        if(event.platform == Platform.EMAIL) {
+                                        if(!platform.isSocial) {
                                             setEvent(
                                                 UiEvent.navigate(Screen.SignUpScreen(phoneNumber.value))
                                             )
@@ -91,8 +100,8 @@ class AuthPhoneViewModel @Inject constructor(
                                             //sns가입시도
                                             withFcmToken { token ->
                                                 socialSignUp(
-                                                    platform = event.platform.apiKey,
-                                                    account = event.account!!,
+                                                    platform = args.platform,
+                                                    account = account?:"",
                                                     phoneNumber = phoneNumber.value,
                                                     fcmToken = token
                                                 )
@@ -113,8 +122,7 @@ class AuthPhoneViewModel @Inject constructor(
         viewModelScope.launch {
             signUpUseCase(platform,account,phoneNumber,fcmToken)
                 .collect{ result ->
-                    handleResource(
-                        resource = result,
+                    result.handle(
                         onSuccess = { data ->
                             userPreferences.saveAuthToken(data.token)
                             setEvent(
@@ -149,4 +157,10 @@ enum class Platform(val apiKey: String) {
 
     val isSocial: Boolean
         get() = this != EMAIL
+
+    companion object {
+        fun fromKey(key: String): Platform {
+            return entries.find { it.apiKey.lowercase() == key.lowercase() } ?: EMAIL
+        }
+    }
 }

@@ -17,7 +17,7 @@ abstract class AuthViewModel: BaseViewModel() {
     protected val _authCodeField = mutableStateOf(AuthTextFieldState())
     val authCodeField: State<AuthTextFieldState>
         get() = _authCodeField
-    protected val _isLoading = mutableStateOf(false)
+
 
     protected val _isCodeReceived = MutableStateFlow(false)
     val isCodeReceived = _isCodeReceived.asStateFlow()
