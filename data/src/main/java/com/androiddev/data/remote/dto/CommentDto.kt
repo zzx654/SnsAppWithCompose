@@ -41,23 +41,3 @@ fun CommentDto.toDomain(
         commentLiked = commentliked
     )
 }
-fun CommentDto.toComment(
-): Comment {
-    return Comment(
-        postId = postid,
-        commentId = commentid,
-        userId = userid,
-        text = text,
-        ref = ref,
-        date = date,
-        depth = depth,
-        anonymousNickname = anonymous,
-        nickname = nickname?:"",
-        gender = gender,
-        profileImage = profileimage,
-        replyCount = replycount,
-        likeCount = likecount,
-        score = score,
-        commentLiked = commentliked
-    )
-}

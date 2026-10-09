@@ -6,12 +6,12 @@ data class NotificationCommentDto(
     val comment:CommentDto,
     val reply:CommentDto?
 )
-fun NotificationCommentDto.toNotificationComment(
+fun NotificationCommentDto.toDomain(
 ): NotificationComment {
     return NotificationComment(
-        comment = comment.toComment(
+        comment = comment.toDomain(
         ),
-        reply = reply?.toComment(
+        reply = reply?.toDomain(
         )
     )
 }

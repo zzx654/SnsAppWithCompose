@@ -2,8 +2,7 @@ package com.androiddev.data.repository.tag
 
 import android.content.Context
 import com.androiddev.data.remote.api.tag.TagApi
-import com.androiddev.data.remote.dto.toSearchTags
-import com.androiddev.data.remote.dto.toTags
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.SearchedTags
 import com.androiddev.domain.model.Tags
@@ -19,7 +18,7 @@ class TagRepositoryImpl @Inject constructor(
     override suspend fun getTags(): Flow<Resource<Tags>> = safeApiCall(
         context = context,
         apiCall = { api.getTags() },
-        mapToResource = { it.toTags()
+        mapToResource = { it.toDomain()
         }
     )
     override suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<Tags>> =
@@ -27,7 +26,7 @@ class TagRepositoryImpl @Inject constructor(
             context = context,
             apiCall = { api.toggleFavoriteTag(tagId) },
             mapToResource = {
-                it.toTags(
+                it.toDomain(
                 )
             }
         )
@@ -36,7 +35,7 @@ class TagRepositoryImpl @Inject constructor(
             context = context,
             apiCall = { api.searchTag(tag) },
             mapToResource = {
-                it.toSearchTags(
+                it.toDomain(
                 )
             }
         )

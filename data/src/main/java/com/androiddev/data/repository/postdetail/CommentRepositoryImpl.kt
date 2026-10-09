@@ -9,7 +9,6 @@ import com.androiddev.data.paging.pagingstrategy.OldestReplyStrategy
 import com.androiddev.data.paging.pagingstrategy.PopularCommentStrategy
 import com.androiddev.data.remote.api.postdetail.CommentApi
 import com.androiddev.data.remote.dto.toDomain
-import com.androiddev.data.remote.dto.toNotificationComment
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.CommentSortType
@@ -31,7 +30,7 @@ class CommentRepositoryImpl @Inject constructor(
             context = context,
             apiCall = { api.getNotificationComment(commentId)},
             mapToResource = {
-                it.toNotificationComment()
+                it.toDomain()
             }
         )
     override suspend fun getReplies(

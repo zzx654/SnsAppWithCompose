@@ -1,7 +1,7 @@
 package com.androiddev.data.repository.postdetail
 
 import com.androiddev.data.remote.api.postdetail.PostApi
-import com.androiddev.data.remote.dto.toPosts
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.Post
 import com.androiddev.domain.repository.postdetail.PostRepository
@@ -46,7 +46,7 @@ class PostRepositoryImpl @Inject constructor(
                 if (!tokenValid) {
                     emit(Resource.TokenExpired())
                 } else if (result.resultCode == 200) {
-                    val posts = result.data?.toPosts()
+                    val posts = result.data?.toDomain()
                     posts?.let {
                         if(it.isNotEmpty())
                             _postDetailState.value = it[0]
