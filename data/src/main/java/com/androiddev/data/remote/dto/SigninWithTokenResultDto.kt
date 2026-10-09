@@ -8,7 +8,7 @@ data class SigninWithTokenResultDto(
     val profileWritten:Boolean,
     val userId: Int?,
 )
-fun SigninWithTokenResultDto.toSigninWithTokenResult(
+fun SigninWithTokenResultDto.toDomain(
 ):SigninWithTokenResult {
     return SigninWithTokenResult(
         signInResult = signInResult,

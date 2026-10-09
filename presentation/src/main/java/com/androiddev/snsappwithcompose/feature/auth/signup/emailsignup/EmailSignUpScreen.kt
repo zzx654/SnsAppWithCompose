@@ -29,12 +29,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.common.util.Constants.PASSWORD_REGEX
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.feature.auth.components.AuthNumberTextField
 import com.androiddev.snsappwithcompose.feature.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.feature.auth.components.BottomButton
@@ -44,6 +46,7 @@ import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.component.TopBar
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import kotlinx.coroutines.flow.collectLatest
 import java.util.regex.Pattern
 
@@ -57,122 +60,117 @@ fun EmailSignUpScreen(
     var args = navBackStackEntry.toRoute<Screen.SignUpScreen>()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val limitTime by viewModel.limitTime.collectAsState()
-    LoadingDialog {
-        viewModel.isLoading.value
-    }
-    AlertDialog(
-        title = {viewModel.alertDialogState.value.title},
-        cancelText = {viewModel.alertDialogState.value.cancelText},
-        confirmText = {viewModel.alertDialogState.value.confirmText},
-        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = viewModel.alertDialogState.value.onClickCancel
+    val limitTime by viewModel.limitTime.collectAsStateWithLifecycle()
+    val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
+    val isCodeReceived by viewModel.isCodeReceived.collectAsStateWithLifecycle()
+
+    AlertDialogg(
+        title =  alertDialogState.title?.asString()?:"" ,
+        cancelText = alertDialogState.cancelText?.asString() ?:"",
+        confirmText = alertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = alertDialogState.onClickConfirm,
+        onClickCancel = alertDialogState.onClickCancel
     )
-    LaunchedEffect(key1 = true) {
-        viewModel.eventFlow.collectLatest { event ->
-            when(event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
+
+    BaseScreen(
+        viewModel = viewModel,
+        navController = navController
+    ) {
+        BaseScaffold(
+            focusManager = focusManager,
+            topBar = {
+                TopBar(
+                    title = stringResource(R.string.signup),
+                    onBackClick = { navController.popBackStack(Screen.SignInScreen,false) }
+                )
+            },
+            bottomBar = {
+                BottomButton(
+                    buttonText = stringResource(id = R.string.request_signup),
+                    activeButton = {
+                        viewModel.isPasswordMatching &&
+                                isCodeReceived &&
+                                viewModel.authCodeField.value.code.isNotEmpty()
+                        /**viewModel.password.value == viewModel.repeatPw.value &&
+                        viewModel.isCodeReceived.value&&
+                        Pattern.matches( PASSWORD_REGEX,viewModel.password.value)&&
+                        viewModel.authCodeField.value.code.isNotEmpty() **/},
+                    onClick = { viewModel.onEvent(EmailSignUpEvent.EmailSignUp(args.phoneNumber))}
+                )
+            },
+            content = {
+                Spacer(modifier = Modifier.height(30.dp))
+                Text(text = stringResource(R.string.enter_email), fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(13.dp))
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max)) {
+                    AuthTextField(
+                        modifier = Modifier
+                            .weight(5f)
+                            .fillMaxHeight() ,
+                        text = {
+                            viewModel.email.value },
+                        focusManager = focusManager,
+                        onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypeEmail(it)) },
+                        keyboardType = KeyboardType.Email)
+
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Button(   colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black
+                    ),modifier = Modifier
+                        .weight(3f)
+                        .fillMaxHeight(),shape = RoundedCornerShape(4.dp),onClick = {viewModel.onEvent(
+                        EmailSignUpEvent.RequestAuthCode
+                    ) }) {
+                        Text(
+                            text = if(isCodeReceived)stringResource(R.string.resend_authcode) else stringResource(R.string.send_authcode),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+                        )
                     }
                 }
-                is UiEvent.navigate -> {//네비게이션
-                    navController.popBackStack(event.screen,false)
-
-                }
-                else -> null
-            }
-        }
-    }
-    BaseScaffold(
-        focusManager = focusManager,
-        topBar = {
-            TopBar(
-                title = getString(context,R.string.signup),
-                onBackClick = { navController.popBackStack(Screen.SignInScreen,false) }
-            )
-        },
-        bottomBar = {
-            BottomButton(
-                buttonText = stringResource(id = R.string.request_signup),
-                activeButton = {
-                    viewModel.password.value == viewModel.repeatPw.value &&
-                            viewModel.isCodeReceived.value&&
-                            Pattern.matches( PASSWORD_REGEX,viewModel.password.value)&&
-                            viewModel.authCodeField.value.code.isNotEmpty() },
-                onClick = { viewModel.onEvent(EmailSignUpEvent.EmailSignUp(args.phoneNumber))}
-            )
-        },
-        content = {
-            Spacer(modifier = Modifier.height(30.dp))
-            Text(text = stringResource(R.string.enter_email), fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(13.dp))
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Max)) {
+                Spacer(modifier = Modifier.height(20.dp))
+                AuthNumberTextField(
+                    isNumberReceived = { isCodeReceived },
+                    limitTime = { limitTime },
+                    number = { viewModel.authCodeField.value.code },
+                    onNumberChange = { viewModel.onEvent(EmailSignUpEvent.TypeAuthCode(it)) },
+                    hint = stringResource(id = R.string.enter_authcode),
+                    inCorrect = { viewModel.authCodeField.value.isError }
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                Text(text = stringResource(id = R.string.enter_password), fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(13.dp))
                 AuthTextField(
                     modifier = Modifier
-                        .weight(5f)
-                        .fillMaxHeight() ,
-                    text = {
-                        viewModel.email.value },
+                        .fillMaxWidth(),
+                    text = { viewModel.password.value },
                     focusManager = focusManager,
-                    onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypeEmail(it)) },
-                    keyboardType = KeyboardType.Email)
-
-                Spacer(modifier = Modifier.width(10.dp))
-                Button(   colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black
-                ),modifier = Modifier
-                    .weight(3f)
-                    .fillMaxHeight(),shape = RoundedCornerShape(4.dp),onClick = {viewModel.onEvent(
-                    EmailSignUpEvent.RequestAuthCode
-                ) }) {
-                    Text(
-                        text = if(viewModel.isCodeReceived.value)stringResource(R.string.resend_authcode) else stringResource(R.string.send_authcode),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
-                    )
+                    onDone = { focusManager.moveFocus(FocusDirection.Next) },
+                    onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypePwd(it)) },
+                    keyboardType = KeyboardType.Password
+                )
+                Spacer(modifier = Modifier.height(13.dp))
+                AuthTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = { viewModel.repeatPw.value  },
+                    focusManager = focusManager,
+                    onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypeRepeatPwd(it)) },
+                    keyboardType = KeyboardType.Password
+                )
+                Spacer(modifier = Modifier.height(13.dp))
+                PasswordHelper {
+                    /**viewModel.password.value == viewModel.repeatPw.value &&
+                    Pattern.matches(
+                    PASSWORD_REGEX,
+                    viewModel.password.value
+                    )**/
+                    viewModel.isPasswordMatching
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            AuthNumberTextField(
-                isNumberReceived = { viewModel.isCodeReceived.value },
-                limitTime = { limitTime },
-                number = { viewModel.authCodeField.value.code },
-                onNumberChange = { viewModel.onEvent(EmailSignUpEvent.TypeAuthCode(it)) },
-                hint = stringResource(id = R.string.enter_authcode),
-                inCorrect = { viewModel.authCodeField.value.isError }
-            )
-            Spacer(modifier = Modifier.height(30.dp))
-            Text(text = stringResource(id = R.string.enter_password), fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(13.dp))
-            AuthTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = { viewModel.password.value },
-                focusManager = focusManager,
-                onDone = { focusManager.moveFocus(FocusDirection.Next) },
-                onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypePwd(it)) },
-                keyboardType = KeyboardType.Password
-            )
-            Spacer(modifier = Modifier.height(13.dp))
-            AuthTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = { viewModel.repeatPw.value  },
-                focusManager = focusManager,
-                onTextChange = { viewModel.onEvent(EmailSignUpEvent.TypeRepeatPwd(it)) },
-                keyboardType = KeyboardType.Password
-            )
-            Spacer(modifier = Modifier.height(13.dp))
-            PasswordHelper {
-                viewModel.password.value == viewModel.repeatPw.value &&
-                        Pattern.matches(
-                            PASSWORD_REGEX,
-                            viewModel.password.value
-                        )
-            }
-        }
-    )
+        )
+
+    }
+
 }

@@ -7,7 +7,7 @@ data class SearchedTagsDto(
     val searchedTags:List<Tag>
 )
 
-fun SearchedTagsDto.toSearchTags(
+fun SearchedTagsDto.toDomain(
 ): SearchedTags {
     return SearchedTags(searchedTags = searchedTags)
 }

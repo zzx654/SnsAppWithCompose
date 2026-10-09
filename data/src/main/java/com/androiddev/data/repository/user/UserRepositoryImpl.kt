@@ -8,13 +8,11 @@ import com.androiddev.data.paging.pagingstrategy.MediaPostStrategy
 import com.androiddev.data.paging.pagingstrategy.UserStrategy
 import com.androiddev.data.remote.api.user.UserApi
 import com.androiddev.data.remote.dto.toDomain
-import com.androiddev.data.remote.dto.toToggleFollowResult
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.location.LocationState
 import com.androiddev.domain.model.MediaPost
 import com.androiddev.domain.model.ToggleFollowResult
 import com.androiddev.domain.model.User
-import com.androiddev.domain.model.Users
 import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +32,7 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun toggleFollowUser(userId: Int): Flow<Resource<ToggleFollowResult>> = safeApiCall(
         context = context,
         apiCall = { api.toggleFollowUser(userId)},
-        mapToResource = { it.toToggleFollowResult()}
+        mapToResource = { it.toDomain()}
     )
 
     override suspend fun getUserInfo(userId: Int): Flow<Resource<List<User>>> = safeApiCall(
@@ -53,25 +51,4 @@ class UserRepositoryImpl @Inject constructor(
         val strategy = MediaPostStrategy(api = api,userId = userId,type = type,locationState = locationState)
         GenericPagingSource(strategy)
     }
-
-    /**{
-        return Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                prefetchDistance = 5
-            ),
-
-            pagingSourceFactory = {
-                MediaPostPagingSource(
-                    api,
-                    MediaPostQuery(
-                        userId = userId,
-                        type = type,
-                        latitude = latitude,
-                        longitude = longitude
-                    )
-                )
-            }
-        ).flow
-    }**/
 }

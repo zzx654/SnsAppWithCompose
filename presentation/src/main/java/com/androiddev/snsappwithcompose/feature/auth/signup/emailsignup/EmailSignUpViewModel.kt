@@ -12,6 +12,8 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,8 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EmailSignUpViewModel @Inject constructor(
     private val emailSignUpUseCases: EmailSignUpUseCases,
-    @ApplicationContext context: Context,
-) : AuthViewModel(context) {
+) : AuthViewModel() {
 
 
 
@@ -37,45 +38,71 @@ class EmailSignUpViewModel @Inject constructor(
     private val _repeatPw = mutableStateOf("")
     val repeatPw: State<String>
         get() = _repeatPw
+
+    val isPasswordMatching: Boolean
+        get() = _password.value.isNotEmpty() &&
+                _password.value == _repeatPw.value &&
+                emailSignUpUseCases.validateSignUpPassword(_password.value)
+
+    private fun requestAuthCode() {
+        //  개별 이메일 검증 UseCase 사용
+        if (emailSignUpUseCases.validateEmail(email.value)!=null) {
+            viewModelScope.launch {
+                setEvent(UiEvent.ShowToast(UiText.StringResource(R.string.check_email)))
+            }
+            return
+        }
+        viewModelScope.launch {
+            emailSignUpUseCases.requestAuthCode(email.value).collect { result ->
+
+                result.handle(
+                    onSuccess = { data ->
+                        if (!data.isValid) {
+                            showEmailExistAlert()
+                        } else {
+                            _isCodeReceived.value = true
+                            _limitTime.value = Constants.AUTH_LIMITEDTIME
+                            _authCodeField.value = authCodeField.value.copy(code = "", isError = false)
+                            timerStart()
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    private fun performEmailSignUp(phoneNumber: String) {
+        viewModelScope.launch {
+            emailSignUpUseCases.emailSignUp(
+                account = email.value,
+                password = password.value,
+                phonenumber = phoneNumber,
+                authCode = authCodeField.value.code
+            ).collect { result ->
+                result.handle(
+                    onSuccess = { data ->
+                        if (data.isCorrect) {
+                            showSignUpCompletedAlert()
+                        } else {
+                            showWrongCodeAlert()
+                        }
+                    }
+                )
+            }
+        }
+    }
     fun onEvent(event: EmailSignUpEvent) {
         when(event) {
             is EmailSignUpEvent.TypeEmail -> {
                 _email.value = event.email
                 if (isCodeReceived.value) {
-                    //코드를 이미 받은상태이면
-                    _isCodeReceived.value = false//이값에 따라 인증번호 칸이 사라지고 인증하기 버튼 비활성화
+                    _isCodeReceived.value = false
                     timerJob?.cancel()
                 }
             }
-            is EmailSignUpEvent.RequestAuthCode -> {
-                viewModelScope.launch {
-                    try {
-                        emailSignUpUseCases.requestAuthCode(email.value).collect { result ->
-                            handleResource(
-                                resource = result,
-                                onSuccess = { data ->
-                                    if(!data.isValid) { // 이미 존재하는 이메일
-                                        //다이얼로그 추가
-                                        showEmailExistAlert()
-                                    } else {
-                                        _isCodeReceived.value = true
-                                        _limitTime.value = Constants.AUTH_LIMITEDTIME
-                                        _authCodeField.value = authCodeField.value.copy(code = "",isError = false)
-                                        timerStart()
-                                    }
+            is EmailSignUpEvent.RequestAuthCode -> requestAuthCode()
+            is EmailSignUpEvent.EmailSignUp -> performEmailSignUp(event.phonenumber)
 
-                                }
-                            )
-                        }
-                    } catch (e: InvalidEmailException) {
-                        //setEvent(
-                         //   UiEvent.ShowToast(
-                          //      message = e.message ?: getString(context,R.string.check_email)
-                           // )
-                        //)
-                    }
-                }
-            }
             is EmailSignUpEvent.TypeAuthCode -> {
                 _authCodeField.value = authCodeField.value.copy(code = event.authCode)
             }
@@ -85,51 +112,30 @@ class EmailSignUpViewModel @Inject constructor(
             is EmailSignUpEvent.TypeRepeatPwd -> {
                 _repeatPw.value = event.repeatPwd
             }
-            is EmailSignUpEvent.EmailSignUp -> {
-                viewModelScope.launch {
-                    emailSignUpUseCases.emailSignUp(email.value,password.value,event.phonenumber,authCodeField.value.code)
-                        .collect { result ->
-                            handleResource(
-                                resource = result,
-                                onSuccess = { data ->
-                                    if(data.isCorrect) {
-                                        // 확인누르면 로그인화면으로 가는 다이얼로그추가
-                                        showSignUpCompletedAlert()
-                                    }
-                                    else {
-                                        //인증번호가 틀렸다는 다이얼로그 추가
-                                        showWrongCodeAlert()
-                                    }
-
-                                }
-                            )
-                        }
-                }
-            }
         }
     }
     private fun showEmailExistAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(context,R.string.email_exist),
-            confirmText = getString(context,R.string.confirm),
+        _alertDialogState.value = AlertDialogStateV2(
+            title = UiText.StringResource(R.string.email_exist),
+            confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
                 resetDialogState()
             }
         )
     }
     private fun showWrongCodeAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(context,R.string.wrong_code),
-            confirmText = getString(context,R.string.confirm),
+        _alertDialogState.value = AlertDialogStateV2(
+            title = UiText.StringResource(R.string.wrong_code),
+            confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
                 resetDialogState()
             }
         )
     }
     private fun showSignUpCompletedAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(context,R.string.signup_completed),
-            confirmText = getString(context,R.string.confirm),
+        _alertDialogState.value = AlertDialogStateV2(
+            title = UiText.StringResource(R.string.signup_completed),
+            confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
                 resetDialogState()
                 viewModelScope.launch {

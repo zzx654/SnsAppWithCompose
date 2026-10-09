@@ -8,7 +8,7 @@ data class TagsDto(
     val popularTags:List<Tag>
 )
 
-fun TagsDto.toTags(
+fun TagsDto.toDomain(
 ): Tags {
     return Tags(
         favoriteTags = favoriteTags,

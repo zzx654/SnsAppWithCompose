@@ -5,5 +5,5 @@ import com.androiddev.domain.model.TokenResult
 data class TokenResultDto (
     val token: String
 )
-fun TokenResultDto.toTokenResult(
+fun TokenResultDto.toDomain(
 ): TokenResult = TokenResult(token)

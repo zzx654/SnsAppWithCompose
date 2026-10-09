@@ -49,7 +49,8 @@ fun <T, R> safeApiCall(
 }
 fun <T, R> safeApiCall(
     apiCall: suspend () -> Response<BaseApiResponse<T>>,
-    mapToResource: (T) -> R
+    mapToResource: (T) -> R,
+    onSuccess: (suspend (T) -> Unit)? = null
 ): Flow<Resource<R>> = flow {
     try {
         emit(Resource.Loading())
@@ -61,7 +62,14 @@ fun <T, R> safeApiCall(
             if (!tokenValid) {
                 emit(Resource.TokenExpired())
             } else if (result.resultCode == 200) {
-                emit(Resource.Success(result.data?.let(mapToResource)))
+                val rawData = result.data
+                if (rawData != null) {
+                    // 성공 시 토큰 저장 등 suspend 부가 작업 처리
+                    onSuccess?.invoke(rawData)
+                    emit(Resource.Success(mapToResource(rawData)))
+                } else {
+                    emit(Resource.Success(null))
+                }
             } else {
                 // R.string 대신 Enum을 던짐!
                 emit(Resource.Error(DataError.Network.SERVER_ERROR))

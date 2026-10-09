@@ -3,6 +3,7 @@ package com.androiddev.data.repository.uploadpost
 import android.content.Context
 import android.net.Uri
 import com.androiddev.data.remote.api.uploadpost.UploadPostApi
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.remote.dto.toPosts
 import com.androiddev.data.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
@@ -93,7 +94,7 @@ class UploadPostRepositoryImpl @Inject constructor(
                 text = body.text
             )
         },
-        mapToResource = { it.toPosts() }
+        mapToResource = { it.toDomain() }
     )
     private fun buildRequestBodies(
         param: UploadPostParam,

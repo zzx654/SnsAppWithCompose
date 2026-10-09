@@ -10,7 +10,7 @@ data class ReadNotificationDto(
     val reason:String?,
     val unreadCount:Int?
 )
-fun ReadNotificationDto.toReadNotificationResult(
+fun ReadNotificationDto.toDomain(
 ): ReadNotificationResult {
     return ReadNotificationResult(
         notificationActionResult = if(status == SUCCESS &&reason==null) NotificationActionResult.Navigate else NotificationActionResult.TargetDeleted(DeleteReason.valueOf(reason!!)),

@@ -70,14 +70,14 @@ object UseCaseModule {
     fun provideSocialSignUpUseCase(repository: SignupRepository): SocialSignUpUseCase {
         return SocialSignUpUseCase(repository)
     }
-    @Provides
+    /**@Provides
     @Singleton
     fun provideEmailSignUpUseCase(repository: SignupRepository, @ApplicationContext context: Context): EmailSignUpUseCases {
         return EmailSignUpUseCases(
             requestAuthCode = RequestEmailAuthCode(repository,context),
             emailSignUp = EmailSignUp(repository)
         )
-    }
+    }**/
     @Provides
     @Singleton
     fun provideCreateProfileUseCases(repository: CreateProfileRepository): CreateProfileUseCases {

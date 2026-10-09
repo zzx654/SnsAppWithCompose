@@ -5,7 +5,7 @@ import com.androiddev.domain.model.ValidationResult
 data class ValidationResultDto (
     val isValid:Boolean
 )
-fun ValidationResultDto.toValidationResult(
+fun ValidationResultDto.toDomain(
 ): ValidationResult {
     return ValidationResult(isValid = isValid)
 }

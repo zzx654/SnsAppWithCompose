@@ -9,7 +9,7 @@ data class VoteInfoDto(
     val selectedChoiceId: Int?,
     val voteOptions: List<VoteOptionInfo>
 )
-fun VoteInfoDto.toVoteInfo(
+fun VoteInfoDto.toDomain(
 ): VoteInfo = VoteInfo(
     isMyPost = isMyPost,
     hasVoted = hasVoted,

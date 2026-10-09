@@ -5,7 +5,7 @@ import com.androiddev.domain.model.ToggleFollowResult
 data class ToggleFollowDto(
     val isFollowing:Boolean
 )
-fun ToggleFollowDto.toToggleFollowResult(
+fun ToggleFollowDto.toDomain(
 ): ToggleFollowResult {
     return ToggleFollowResult(isFollowing = isFollowing )
 }
