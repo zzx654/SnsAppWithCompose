@@ -12,17 +12,21 @@ import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
-import com.androiddev.snsappwithcompose.common.base.viewmodel.BaseViewModel
+import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
 import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.domain.model.MediaType
+import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
+import com.androiddev.snsappwithcompose.feature.PostDetail.CommentOption
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -32,13 +36,10 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateProfileViewModel @Inject constructor(
     private val createProfileUseCases: CreateProfileUseCases,
-    @ApplicationContext context: Context,
-): BaseViewModel(context) {
-    private val _customBottomSheetDialogState: MutableState<CustomBottomSheetDialogState> = mutableStateOf(
-        CustomBottomSheetDialogState()
-    )
-    val customBottomSheetDialogState: State<CustomBottomSheetDialogState>
-        get() = _customBottomSheetDialogState
+): BaseViewModel() {
+    private val _bottomSheetDialogState =  MutableStateFlow(BottomSheetDialogState<CreateProfileImageOption>())
+    val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
+
 
     private val _bottomWheelDialogState: MutableState<BottomWheelState> = mutableStateOf(
         BottomWheelState()
@@ -147,32 +148,41 @@ class CreateProfileViewModel @Inject constructor(
         }
     }
     private fun showBottomSheetDialog() {
-        val items: MutableList<BottomSheetItem> = mutableListOf(
-            BottomSheetItem(R.drawable.camera_outlined,getString(context,R.string.take_picture)) {
+        val options = if(profileBmap.value!=null) {
+            listOf(CreateProfileImageOption.Camera,CreateProfileImageOption.Gallery,CreateProfileImageOption.Delete)
+        } else {
+            listOf(CreateProfileImageOption.Camera,CreateProfileImageOption.Gallery)
+        }
+
+        _bottomSheetDialogState.value = BottomSheetDialogState(
+            showDialog = true,
+            options = options,
+            onOptionSelected = { option ->
+                resetBottomSheetDialogState()
+                handleProfileImageOption(option)
+            },
+            onClickCancel = { resetBottomSheetDialogState() }
+        )
+
+    }
+    private fun handleProfileImageOption(option: CreateProfileImageOption) {
+        when (option) {
+            CreateProfileImageOption.Camera -> {
                 resetBottomSheetDialogState()
                 launchCamera()
-
-            },
-            BottomSheetItem(R.drawable.photo_library,getString(context,R.string.choose_from_gallery)) {
+            }
+            CreateProfileImageOption.Gallery -> {
                 resetBottomSheetDialogState()
                 launchGallery()
             }
-        )
-        profileBmap.value?.let {
-            items.add(
-                BottomSheetItem(R.drawable.delete,getString(context,R.string.delete_profileimage)){
-                    resetBottomSheetDialogState()
-                    _profileBmap.value = null
-                }
-            )
+            CreateProfileImageOption.Delete -> {
+                resetBottomSheetDialogState()
+                _profileBmap.value = null
+            }
         }
-        _customBottomSheetDialogState.value = CustomBottomSheetDialogState(
-            showDialog = true,
-            items,
-        ) { resetBottomSheetDialogState() }
     }
     private fun resetBottomSheetDialogState() {
-        _customBottomSheetDialogState.value = CustomBottomSheetDialogState()
+        _bottomSheetDialogState.value = BottomSheetDialogState()
     }
     private fun showBottomWheelDialog() {
         _bottomWheelDialogState.value = BottomWheelState(
