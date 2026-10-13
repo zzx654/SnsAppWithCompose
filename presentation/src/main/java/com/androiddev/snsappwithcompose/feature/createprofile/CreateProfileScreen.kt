@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.feature.auth.components.BirthTextField
@@ -47,24 +46,24 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.provider.MediaStore
 import android.util.Log
-import android.view.Gravity
-import android.widget.Toast
 import androidx.compose.foundation.background
 import com.androiddev.snsappwithcompose.ui.theme.LightGray
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.androiddev.data.util.getImageUri
+import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
-import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.feature.createprofile.component.GenderRadioButtons
-import com.androiddev.snsappwithcompose.common.component.LoadingDialog
-import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.component.AlertDialogg
+import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
-import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.N)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,12 +74,23 @@ fun CreateProfileScreen(
     viewModel: CreateProfileViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
 
+
+    val profileBmap by viewModel.profileBmap.collectAsStateWithLifecycle()
     val rotateMatrix = Matrix().also{
         it.postRotate(0f)
     }
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val encodedCroppedBitmap = navBackStackEntry.savedStateHandle.get<String>(getString(context,R.string.encodedBitmap))
+    val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
+    val bottomSheetDialogState by viewModel.bottomSheetDialogState.collectAsStateWithLifecycle()
+    val bottomWheelDialogState by viewModel.bottomWheelState.collectAsStateWithLifecycle()
+    val isNicknameChecking by viewModel.isNicknameChecking.collectAsStateWithLifecycle()
+    val isTyping by viewModel.isTyping.collectAsStateWithLifecycle()
+    val nickname by viewModel.nickname.collectAsStateWithLifecycle()
+    val isNicknameValid by viewModel.isNicknameValid.collectAsStateWithLifecycle()
+    val birthYear by viewModel.birthYear.collectAsStateWithLifecycle()
+    val gender by viewModel.gender.collectAsStateWithLifecycle()
     encodedCroppedBitmap?.let {
         viewModel.setProfileBmap(decodeBase64(it))
         navBackStackEntry.savedStateHandle.set<String>(getString(context,R.string.encodedBitmap),null)
@@ -141,7 +151,7 @@ fun CreateProfileScreen(
                 launcherMultiplePermissions.launch(permissions)
             }
         )
-        viewModel.eventFlow.collectLatest { event ->
+        /**viewModel.eventFlow.collectLatest { event ->
             when(event) {
                 is UiEvent.ShowToast -> {
                     Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
@@ -154,7 +164,7 @@ fun CreateProfileScreen(
                 }
                 else -> null
             }
-        }
+        }**/
     }
 
     val year = Calendar.getInstance().get(Calendar.YEAR)
@@ -162,30 +172,26 @@ fun CreateProfileScreen(
         openGalleryOnly()
     })
 
+    SelectorBottomSheetDialog(bottomSheetDialogState)
 
-    CustomBottomSheetDialog(
-        { viewModel.customBottomSheetDialogState.value.showDialog },
-        { viewModel.customBottomSheetDialogState.value.items },
-        viewModel.customBottomSheetDialogState.value.onClickCancel
-    )
     BottomWheelPicker(
-        initValue = { viewModel.birthYear.value?: 2005 },
+        initValue = { birthYear?: 2005 },
         min = year-70,
         max = year-15,
         pickerMaxHeight = 250,
-        showDialog = { viewModel.bottomWheelState.value.showDialog },
+        showDialog = { bottomWheelDialogState.showDialog },
         onClickConfirm = {
             viewModel.onEvent(CreateProfileEvent.SetBirthYear(it))
         },
         onClickCancel = viewModel.bottomWheelState.value.onClickCancel,
     )
-    LoadingDialog { viewModel.isLoading.value }
-    AlertDialog(
-        title = {viewModel.alertDialogState.value.title},
-        cancelText = {viewModel.alertDialogState.value.cancelText},
-        confirmText = {viewModel.alertDialogState.value.confirmText},
-        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = viewModel.alertDialogState.value.onClickCancel,
+    //LoadingDialog { viewModel.isLoading.value }
+    AlertDialogg(
+        title = alertDialogState.title?.asString() ?:"",
+        cancelText = alertDialogState.cancelText?.asString() ?:"",
+        confirmText = alertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = alertDialogState.onClickConfirm,
+        onClickCancel = alertDialogState.onClickCancel,
         content = {
             Box(modifier = Modifier
                 .width(160.dp)
@@ -198,19 +204,19 @@ fun CreateProfileScreen(
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "닉네임: ${viewModel.nickname.value}",
+                        text = "닉네임: ${nickname}",
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "성별: ${viewModel.gender.value}",
+                        text = "성별: ${gender}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "출생: ${viewModel.birthYear.value}",
+                        text = "출생: ${birthYear}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -218,71 +224,79 @@ fun CreateProfileScreen(
             }
         }
     )
-    BaseScaffold(
-        focusManager = focusManager,
-        topBar = {
-            CenterAlignedTopBar(
-                title = stringResource(R.string.createProfile)
-            )
-        },
-        bottomBar = {
-            BottomButton(
-                buttonText = stringResource(id = R.string.request_signup),
-                activeButton = {
-                    viewModel.isNicknameValid.value
-                            && viewModel.birthYear.value != null
-                            && viewModel.gender.value.isNotBlank()
-                },
-                onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert)}
-            )
-        },
-        content = {
-            Spacer(modifier = Modifier.height(30.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                EditProfileImage(
-                    profileBmap = {viewModel.profileBmap.value},
-                    modifier = Modifier.align(Alignment.Center).clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() } // This is mandatory
-                    ){
-                        viewModel.onEvent(CreateProfileEvent.ShowProfileImageOptions)
-                    }
+    BaseScreen(
+        viewModel = viewModel,
+        navController = navController
+    ) {
+        BaseScaffold(
+            focusManager = focusManager,
+            topBar = {
+                CenterAlignedTopBar(
+                    title = stringResource(R.string.createProfile)
                 )
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            NicknameTextField(
-                modifier = Modifier.fillMaxWidth(),
-                focusManager = focusManager,
-                text = { viewModel.nickname.value },
-                hint = getString(context,R.string.nickname_hint),
-                onTextChange = {
-                    viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
-                },
-                isTyping = { viewModel.isTyping.value },
-                isNicknameValid = { viewModel.isNicknameValid.value },
-                isNicknameChecking = { viewModel.isNicknameChecking.value }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            BirthTextField(
-                birth = { viewModel.birthYear.value },
-                onClick = { viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions) }
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-
-            ) {
-                GenderRadioButtons(
-                    listOf(getString(context,R.string.male),getString(context,R.string.female),getString(context,R.string.private_info)),
-                    { viewModel.gender.value },
-                    { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
+            },
+            bottomBar = {
+                BottomButton(
+                    buttonText = stringResource(id = R.string.request_signup),
+                    activeButton = {
+                        isNicknameValid
+                        birthYear!= null
+                                && gender.isNotBlank()
+                    },
+                    onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert(getImageUri(context,profileBmap)))}
                 )
+            },
+            content = {
+                Spacer(modifier = Modifier.height(30.dp))
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    EditProfileImage(
+                        profileBmap = {profileBmap},
+                        modifier = Modifier.align(Alignment.Center).clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() } // This is mandatory
+                        ){
+                            viewModel.onEvent(CreateProfileEvent.ShowProfileImageOptions)
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                NicknameTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    focusManager = focusManager,
+                    text = { nickname },
+                    hint = getString(context,R.string.nickname_hint),
+                    onTextChange = {
+                        viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
+                    },
+                    isTyping = { isTyping },
+                    isNicknameValid = { isNicknameValid },
+                    isNicknameChecking = { isNicknameChecking }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                BirthTextField(
+                    birth = { birthYear },
+                    onClick = { viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions) }
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+
+                ) {
+                    GenderRadioButtons(
+                        listOf(stringResource(R.string.male),stringResource(R.string.female),
+                            stringResource(R.string.private_info)),
+                        { gender },
+                        { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
+                    )
+                }
             }
-        }
-    )
+        )
+
+    }
+
 }

@@ -1,7 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.createprofile
 
-import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -13,19 +13,18 @@ import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
-import com.androiddev.snsappwithcompose.common.model.BottomSheetItem
-import com.androiddev.snsappwithcompose.common.state.CustomBottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.domain.model.MediaType
+import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
 import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
-import com.androiddev.snsappwithcompose.feature.PostDetail.CommentOption
+import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -41,40 +40,38 @@ class CreateProfileViewModel @Inject constructor(
     val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
 
 
-    private val _bottomWheelDialogState: MutableState<BottomWheelState> = mutableStateOf(
-        BottomWheelState()
-    )
-    val bottomWheelState: State<BottomWheelState>
-        get() = _bottomWheelDialogState
-    private val _profileBmap:MutableState<Bitmap?> = mutableStateOf(null)
-    val profileBmap:State<Bitmap?>
-        get() = _profileBmap
+    private val _bottomWheelDialogState = MutableStateFlow(BottomWheelState())
+    val bottomWheelState: StateFlow<BottomWheelState>
+        get() = _bottomWheelDialogState.asStateFlow()
+    private val _profileBmap:MutableStateFlow<Bitmap?> = MutableStateFlow(null)
+    val profileBmap:StateFlow<Bitmap?>
+        get() = _profileBmap.asStateFlow()
 
-    private val _isNicknameChecking = mutableStateOf(false)
-    val isNicknameChecking: State<Boolean>
-        get() = _isNicknameChecking
+    private val _isNicknameChecking = MutableStateFlow(false)
+    val isNicknameChecking: StateFlow<Boolean>
+        get() = _isNicknameChecking.asStateFlow()
 
-    private val _isTyping = mutableStateOf(false)
-    val isTyping: State<Boolean>
-        get() = _isTyping
-    private val _nickname = mutableStateOf("")
-    val nickname: State<String>
-        get() = _nickname
+    private val _isTyping = MutableStateFlow(false)
+    val isTyping: StateFlow<Boolean>
+        get() = _isTyping.asStateFlow()
+    private val _nickname = MutableStateFlow("")
+    val nickname: StateFlow<String>
+        get() = _nickname.asStateFlow()
 
-    private val _isNicknameValid = mutableStateOf(false)
-    val isNicknameValid: State<Boolean>
-        get() = _isNicknameValid
+    private val _isNicknameValid = MutableStateFlow(false)
+    val isNicknameValid: StateFlow<Boolean>
+        get() = _isNicknameValid.asStateFlow()
 
-    private val _birthYear = mutableStateOf<Int?>(null)
-    val birthYear: State<Int?>
-        get() = _birthYear
+    private val _birthYear = MutableStateFlow<Int?>(null)
+    val birthYear: StateFlow<Int?>
+        get() = _birthYear.asStateFlow()
 
-    private val _gender = mutableStateOf("")
-    val gender: State<String>
-        get() = _gender
-    private val _alertDialogState: MutableState<AlertDialogState> = mutableStateOf(AlertDialogState())
-    val alertDialogState: State<AlertDialogState>
-        get() = _alertDialogState
+    private val _gender = MutableStateFlow("")
+    val gender: StateFlow<String>
+        get() = _gender.asStateFlow()
+    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
+    val alertDialogState: StateFlow<AlertDialogStateV2>
+        get() = _alertDialogState.asStateFlow()
     var launchCamera:()->Unit = {}
     var launchGallery:()->Unit = {}
     fun setLauncher(cameraLauncher:()->Unit,galleryLauncher:()->Unit) {
@@ -143,7 +140,7 @@ class CreateProfileViewModel @Inject constructor(
                 }
             }
             is CreateProfileEvent.ShowCreateProfileAlert -> {
-                showCreateProfileAlert()
+                showCreateProfileAlert(event.imageUri)
             }
         }
     }
@@ -193,23 +190,17 @@ class CreateProfileViewModel @Inject constructor(
     private fun resetBottomWheelDialogState() {
         _bottomWheelDialogState.value = BottomWheelState()
     }
-    private fun showCreateProfileAlert() {
-        _alertDialogState.value = AlertDialogState(
-            title = getString(context,R.string.check_profile),
-            cancelText = getString(context,R.string.cancel),
-            confirmText = getString(context,R.string.confirm),
+    private fun showCreateProfileAlert(imageUri: Uri?) {
+        _alertDialogState.value = AlertDialogStateV2(
+            title = UiText.StringResource(R.string.check_profile),
+            cancelText = UiText.StringResource(R.string.cancel),
+            confirmText = UiText.StringResource(R.string.confirm),
             onClickCancel = {
                 resetDialogState()
             },
             onClickConfirm = {
                 viewModelScope.launch {
-
-                    var requestImage: MultipartBody.Part? = null
-                    val requestNickname = nickname.value.toRequestBody("text/plain".toMediaTypeOrNull())
-                    val requestGender = gender.value.toRequestBody("text/plain".toMediaTypeOrNull())
-                    profileBmap.value?.let {
-                        requestImage = getMultipartBody(uri = getImageUri(context,it),context = context,type = MediaType.IMAGE) }
-                    createProfileUseCases.createProfile(requestImage,requestNickname,birthYear.value!!,requestGender)
+                    createProfileUseCases.createProfile(imageUri,nickname.value,birthYear.value?:2005,gender.value)
                         .collect { result ->
 
                             handleResource(
@@ -231,6 +222,6 @@ class CreateProfileViewModel @Inject constructor(
     }
 
     protected fun resetDialogState() {
-        _alertDialogState.value = AlertDialogState()
+        _alertDialogState.value = AlertDialogStateV2()
     }
 }
