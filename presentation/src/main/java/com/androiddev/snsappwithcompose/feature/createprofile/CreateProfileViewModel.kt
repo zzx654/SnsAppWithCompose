@@ -2,30 +2,24 @@ package com.androiddev.snsappwithcompose.feature.createprofile
 
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
-import com.androiddev.data.util.getImageUri
 import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
 import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
-import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.data.util.getMultipartBody
-import com.androiddev.domain.model.MediaType
 import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
 import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,112 +31,94 @@ class CreateProfileViewModel @Inject constructor(
     val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
 
 
+    private val _uiState = MutableStateFlow(CreateProfileUiState())
+    val uiState: StateFlow<CreateProfileUiState> = _uiState.asStateFlow()
     private val _bottomWheelDialogState = MutableStateFlow(BottomWheelState())
     val bottomWheelState: StateFlow<BottomWheelState>
         get() = _bottomWheelDialogState.asStateFlow()
-    private val _profileBmap:MutableStateFlow<Bitmap?> = MutableStateFlow(null)
-    val profileBmap:StateFlow<Bitmap?>
-        get() = _profileBmap.asStateFlow()
-
-    private val _isNicknameChecking = MutableStateFlow(false)
-    val isNicknameChecking: StateFlow<Boolean>
-        get() = _isNicknameChecking.asStateFlow()
-
-    private val _isTyping = MutableStateFlow(false)
-    val isTyping: StateFlow<Boolean>
-        get() = _isTyping.asStateFlow()
-    private val _nickname = MutableStateFlow("")
-    val nickname: StateFlow<String>
-        get() = _nickname.asStateFlow()
-
-    private val _isNicknameValid = MutableStateFlow(false)
-    val isNicknameValid: StateFlow<Boolean>
-        get() = _isNicknameValid.asStateFlow()
-
-    private val _birthYear = MutableStateFlow<Int?>(null)
-    val birthYear: StateFlow<Int?>
-        get() = _birthYear.asStateFlow()
-
-    private val _gender = MutableStateFlow("")
-    val gender: StateFlow<String>
-        get() = _gender.asStateFlow()
     private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
     val alertDialogState: StateFlow<AlertDialogStateV2>
         get() = _alertDialogState.asStateFlow()
-    var launchCamera:()->Unit = {}
-    var launchGallery:()->Unit = {}
-    fun setLauncher(cameraLauncher:()->Unit,galleryLauncher:()->Unit) {
-       launchCamera = cameraLauncher
-       launchGallery = galleryLauncher
-    }
+
+    private var nicknameCheckJob: Job? = null
 
     fun setProfileBmap(bitmap:Bitmap?) {
-        _profileBmap.value = bitmap
+        _uiState.update { it.copy(profileBitmap = bitmap) }
     }
     fun onEvent(event: CreateProfileEvent) {
-        when(event) {
-            is CreateProfileEvent.ShowProfileImageOptions -> {
-                showBottomSheetDialog()
-            }
-            is CreateProfileEvent.ShowBirthYearOptions -> {
-                showBottomWheelDialog()
-            }
+        when (event) {
+            is CreateProfileEvent.TypeNickname -> handleNicknameInput(event.nickname)
             is CreateProfileEvent.SetGender -> {
-                _gender.value = event.gender
+                _uiState.update { it.copy(gender = event.gender) }
+                validateForm()
             }
             is CreateProfileEvent.SetBirthYear -> {
-                _birthYear.value = event.birthYear
+                _uiState.update { it.copy(birthYear = event.birthYear) }
                 resetBottomWheelDialogState()
+                validateForm()
             }
-            is CreateProfileEvent.TypeNickname -> {
-                _nickname.value = event.nickname
-                _isTyping.value = true
+            is CreateProfileEvent.ShowProfileImageOptions -> showBottomSheetDialog()
+            is CreateProfileEvent.ShowBirthYearOptions -> showBottomWheelDialog()
+            is CreateProfileEvent.ShowCreateProfileAlert -> showCreateProfileAlert(event.imageUri)
+        }
+    }
 
-                viewModelScope.launch {
-                    delay(1000)
-                    _isTyping.value = false
-                }
-                if(event.nickname.length >= 2) {
-                    viewModelScope.launch {
-                        delay(500L)
-                        createProfileUseCases.checkNickname(event.nickname)
-                            .collect { result ->
-                                when(result) {
+    private fun handleNicknameInput(input: String) {
+        _uiState.update {
+            it.copy(
+                nickname = input,
+                isTyping = true,
+                isNicknameValid = false
+            )
+        }
+        validateForm()
 
-                                    is Resource.Success -> {
-                                        _isNicknameChecking.value = false
-                                        result.data?.let {
-                                            _isNicknameValid.value = it.isValid
-                                        }
-                                    }
-                                    is Resource.Error -> {
-                                        _isNicknameChecking.value = false
-                                    }
-                                    is Resource.Loading -> {
-                                        _isNicknameChecking.value = true
-                                    }
+        // 이전 닉네임 검증 타이머 Job 취소 (Debounce 처리)
+        nicknameCheckJob?.cancel()
 
-                                    is Resource.TokenExpired -> {
-                                        setEvent(
-                                            UiEvent.navigate(
-                                                screen = Screen.SignInScreen
-                                            )
-                                        )
-                                    }
-                                }
-                            }
+        if (input.length < 2) {
+            _uiState.update { it.copy(isTyping = false, isNicknameChecking = false) }
+            return
+        }
+
+        nicknameCheckJob = viewModelScope.launch {
+            delay(500L) // 0.5초 동안 입력이 없으면 중복검사 API 호출
+            _uiState.update { it.copy(isTyping = false, isNicknameChecking = true) }
+
+            createProfileUseCases.checkNickname(input).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        val isValid = result.data?.isValid ?: false
+                        _uiState.update {
+                            it.copy(isNicknameChecking = false, isNicknameValid = isValid)
+                        }
+                        validateForm()
                     }
-                } else {
-                    _isNicknameValid.value = false
+                    is Resource.Error -> {
+                        _uiState.update { it.copy(isNicknameChecking = false, isNicknameValid = false) }
+                        validateForm()
+                    }
+                    is Resource.Loading -> {
+                        _uiState.update { it.copy(isNicknameChecking = true) }
+                    }
+                    is Resource.TokenExpired -> {
+                        setEvent(UiEvent.navigate(screen = Screen.SignInScreen))
+                    }
                 }
-            }
-            is CreateProfileEvent.ShowCreateProfileAlert -> {
-                showCreateProfileAlert(event.imageUri)
             }
         }
     }
+
+    private fun validateForm() {
+        val state = _uiState.value
+        val isValid = state.isNicknameValid &&
+                state.birthYear != null &&
+                state.gender.isNotBlank()
+
+        _uiState.update { it.copy(isFormValid = isValid) }
+    }
     private fun showBottomSheetDialog() {
-        val options = if(profileBmap.value!=null) {
+        val options = if(_uiState.value.profileBitmap != null) {
             listOf(CreateProfileImageOption.Camera,CreateProfileImageOption.Gallery,CreateProfileImageOption.Delete)
         } else {
             listOf(CreateProfileImageOption.Camera,CreateProfileImageOption.Gallery)
@@ -163,15 +139,20 @@ class CreateProfileViewModel @Inject constructor(
         when (option) {
             CreateProfileImageOption.Camera -> {
                 resetBottomSheetDialogState()
-                launchCamera()
+                viewModelScope.launch {
+                    setEvent(UiEvent.LaunchCamera)
+                }
+
             }
             CreateProfileImageOption.Gallery -> {
                 resetBottomSheetDialogState()
-                launchGallery()
+                viewModelScope.launch {
+                    setEvent(UiEvent.LaunchGallery)
+                }
             }
             CreateProfileImageOption.Delete -> {
                 resetBottomSheetDialogState()
-                _profileBmap.value = null
+                setProfileBmap(null)
             }
         }
     }
@@ -188,6 +169,7 @@ class CreateProfileViewModel @Inject constructor(
         _bottomWheelDialogState.value = BottomWheelState()
     }
     private fun showCreateProfileAlert(imageUri: Uri?) {
+        val state = _uiState.value
         _alertDialogState.value = AlertDialogStateV2(
             title = UiText.StringResource(R.string.check_profile),
             cancelText = UiText.StringResource(R.string.cancel),
@@ -197,8 +179,12 @@ class CreateProfileViewModel @Inject constructor(
             },
             onClickConfirm = {
                 viewModelScope.launch {
-                    createProfileUseCases.createProfile(imageUri,nickname.value,birthYear.value?:2005,gender.value)
-                        .collect { result ->
+                    createProfileUseCases.createProfile(
+                        profileImage = imageUri,
+                        nickname = state.nickname,
+                        birth = state.birthYear ?: 2005,
+                        gender = state.gender
+                    ).collect { result ->
 
                             handleResource(
                                 resource = result,

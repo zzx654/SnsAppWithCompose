@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,7 +65,6 @@ import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
 
 @RequiresApi(Build.VERSION_CODES.N)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProfileScreen(
     navController: NavController,
@@ -74,8 +72,6 @@ fun CreateProfileScreen(
     viewModel: CreateProfileViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 ) {
 
-
-    val profileBmap by viewModel.profileBmap.collectAsStateWithLifecycle()
     val rotateMatrix = Matrix().also{
         it.postRotate(0f)
     }
@@ -85,12 +81,8 @@ fun CreateProfileScreen(
     val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
     val bottomSheetDialogState by viewModel.bottomSheetDialogState.collectAsStateWithLifecycle()
     val bottomWheelDialogState by viewModel.bottomWheelState.collectAsStateWithLifecycle()
-    val isNicknameChecking by viewModel.isNicknameChecking.collectAsStateWithLifecycle()
-    val isTyping by viewModel.isTyping.collectAsStateWithLifecycle()
-    val nickname by viewModel.nickname.collectAsStateWithLifecycle()
-    val isNicknameValid by viewModel.isNicknameValid.collectAsStateWithLifecycle()
-    val birthYear by viewModel.birthYear.collectAsStateWithLifecycle()
-    val gender by viewModel.gender.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     encodedCroppedBitmap?.let {
         viewModel.setProfileBmap(decodeBase64(it))
         navBackStackEntry.savedStateHandle.set<String>(getString(context,R.string.encodedBitmap),null)
@@ -154,14 +146,11 @@ fun CreateProfileScreen(
     }
 
     val year = Calendar.getInstance().get(Calendar.YEAR)
-    viewModel.setLauncher({cameraPermission.launch(Manifest.permission.CAMERA)},{
-        openGalleryOnly()
-    })
 
     SelectorBottomSheetDialog(bottomSheetDialogState)
 
     BottomWheelPicker(
-        initValue = { birthYear?: 2005 },
+        initValue = { uiState.birthYear?: 2005 },
         min = year-70,
         max = year-15,
         pickerMaxHeight = 250,
@@ -171,7 +160,6 @@ fun CreateProfileScreen(
         },
         onClickCancel = bottomWheelDialogState.onClickCancel,
     )
-    //LoadingDialog { viewModel.isLoading.value }
     AlertDialogg(
         title = alertDialogState.title?.asString() ?:"",
         cancelText = alertDialogState.cancelText?.asString() ?:"",
@@ -190,19 +178,20 @@ fun CreateProfileScreen(
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "닉네임: ${nickname}",
+                        text = stringResource(R.string.profile_dialog_nickname, uiState.nickname),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "성별: ${gender}",
+                        text = stringResource(R.string.profile_dialog_gender, uiState.gender),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
+
                     Text(
-                        text = "출생: ${birthYear}",
+                        text = stringResource(R.string.profile_dialog_birth, uiState.birthYear ?: 2005),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -212,7 +201,9 @@ fun CreateProfileScreen(
     )
     BaseScreen(
         viewModel = viewModel,
-        navController = navController
+        navController = navController,
+        onLaunchGallery = { openGalleryOnly() },
+        onLaunchCamera = { cameraPermission.launch(Manifest.permission.CAMERA) }
     ) {
         BaseScaffold(
             focusManager = focusManager,
@@ -225,11 +216,9 @@ fun CreateProfileScreen(
                 BottomButton(
                     buttonText = stringResource(id = R.string.request_signup),
                     activeButton = {
-                        isNicknameValid
-                        birthYear!= null
-                                && gender.isNotBlank()
+                        uiState.isFormValid
                     },
-                    onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert(getImageUri(context,profileBmap)))}
+                    onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert(getImageUri(context,uiState.profileBitmap)))}
                 )
             },
             content = {
@@ -238,7 +227,7 @@ fun CreateProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     EditProfileImage(
-                        profileBmap = {profileBmap},
+                        profileBmap = { uiState.profileBitmap },
                         modifier = Modifier.align(Alignment.Center).clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() } // This is mandatory
@@ -254,18 +243,18 @@ fun CreateProfileScreen(
                 NicknameTextField(
                     modifier = Modifier.fillMaxWidth(),
                     focusManager = focusManager,
-                    text = { nickname },
+                    text = { uiState.nickname },
                     hint = getString(context,R.string.nickname_hint),
                     onTextChange = {
                         viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
                     },
-                    isTyping = { isTyping },
-                    isNicknameValid = { isNicknameValid },
-                    isNicknameChecking = { isNicknameChecking }
+                    isTyping = { uiState.isTyping },
+                    isNicknameValid = { uiState.isNicknameValid },
+                    isNicknameChecking = { uiState.isNicknameChecking }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 BirthTextField(
-                    birth = { birthYear },
+                    birth = { uiState.birthYear },
                     onClick = {
                         focusManager.clearFocus()
                         viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions)
@@ -280,7 +269,7 @@ fun CreateProfileScreen(
                     GenderRadioButtons(
                         listOf(stringResource(R.string.male),stringResource(R.string.female),
                             stringResource(R.string.private_info)),
-                        { gender },
+                        { uiState.gender },
                         { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
                     )
                 }

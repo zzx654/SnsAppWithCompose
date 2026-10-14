@@ -141,6 +141,10 @@
     <string name="alert_deleted_reply"> 삭제된 답글입니다</string>
     <string name="alert_deleted_notification"> 삭제된 알림입니다</string>
 
+    <string name="profile_dialog_nickname">닉네임: %1$s</string>
+    <string name="profile_dialog_gender">성별: %1$s</string>
+    <string name="profile_dialog_birth">출생: %1$d</string>
+
 
 
 
