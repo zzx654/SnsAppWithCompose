@@ -1,6 +1,5 @@
 package com.androiddev.domain.model
 
-import android.graphics.Bitmap
 import android.net.Uri
 
 data class UploadPostParam(

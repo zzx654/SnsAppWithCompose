@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.androiddev.snsappwithcompose.common.util.Constants
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,8 +26,8 @@ abstract class AuthViewModel: BaseViewModel() {
 
     var timerJob: Job? = null
 
-    protected val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
-    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+    protected val _alertDialogState = MutableStateFlow(AlertDialogState())
+    val alertDialogState: StateFlow<AlertDialogState> = _alertDialogState.asStateFlow()
     protected fun timerStart() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -42,7 +42,7 @@ abstract class AuthViewModel: BaseViewModel() {
         }
     }
     protected fun resetDialogState() {
-        _alertDialogState.value = AlertDialogStateV2()
+        _alertDialogState.value = AlertDialogState()
     }
 
     override fun onCleared() {

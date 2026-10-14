@@ -59,7 +59,7 @@ import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.feature.createprofile.component.GenderRadioButtons
-import com.androiddev.snsappwithcompose.common.component.AlertDialogg
+import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
@@ -160,7 +160,7 @@ fun CreateProfileScreen(
         },
         onClickCancel = bottomWheelDialogState.onClickCancel,
     )
-    AlertDialogg(
+    AlertDialog(
         title = alertDialogState.title?.asString() ?:"",
         cancelText = alertDialogState.cancelText?.asString() ?:"",
         confirmText = alertDialogState.confirmText?.asString() ?:"",

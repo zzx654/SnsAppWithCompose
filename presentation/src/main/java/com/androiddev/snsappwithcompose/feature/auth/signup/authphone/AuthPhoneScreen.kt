@@ -2,8 +2,6 @@ package com.androiddev.snsappwithcompose.feature.auth.signup.authphone
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.view.Gravity
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -19,7 +17,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,7 +32,6 @@ import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.BaseScreen
@@ -43,12 +39,7 @@ import com.androiddev.snsappwithcompose.feature.auth.components.AuthNumberTextFi
 import com.androiddev.snsappwithcompose.feature.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.feature.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
-import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.component.TopBar
-import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.component.AlertDialogg
-import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.M)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -66,7 +57,7 @@ fun AuthPhoneScreen(
     val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
-    AlertDialogg(
+    AlertDialog(
         title =  alertDialogState.title?.asString()?:"" ,
         cancelText = alertDialogState.cancelText?.asString() ?:"",
         confirmText = alertDialogState.confirmText?.asString() ?:"",

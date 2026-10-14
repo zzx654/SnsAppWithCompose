@@ -70,7 +70,6 @@ import coil3.request.error
 import coil3.request.placeholder
 import coil3.size.Scale
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
-import com.androiddev.snsappwithcompose.BuildConfig
 import com.androiddev.snsappwithcompose.feature.PostDetail.audio.AudioViewModel
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
 import com.androiddev.snsappwithcompose.R
@@ -84,7 +83,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.androiddev.domain.model.Post
 import com.androiddev.snsappwithcompose.common.base.BaseScreen
-import com.androiddev.snsappwithcompose.common.component.AlertDialogg
+import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 import com.androiddev.snsappwithcompose.feature.PostDetail.component.PostDetailContent
@@ -193,7 +192,7 @@ fun PostDetailScreen(
 
         navBackStackEntry.savedStateHandle.set<PostPreview>(getString(context,R.string.editedPost),null)
     }
-    AlertDialogg (
+    AlertDialog (
         title = alertDialogState.title?.asString() ?:"",
         cancelText = alertDialogState.cancelText?.asString() ?:"",
         confirmText = alertDialogState.confirmText?.asString() ?:"",

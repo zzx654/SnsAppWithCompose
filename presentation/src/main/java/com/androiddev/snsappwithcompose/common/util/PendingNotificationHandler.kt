@@ -2,7 +2,6 @@ package com.androiddev.snsappwithcompose.common.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.COMMENT
@@ -10,19 +9,6 @@ import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LI
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.LIKEPOST
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.REPLY
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
-
-@Composable
-fun PendingNotificationHandler(
-    notificationViewModel: NotificationViewModel
-) {
-    val pending by notificationViewModel.pending.collectAsState()
-
-    LaunchedEffect(pending) {
-        if(pending != null)
-            notificationViewModel.consumePending()
-
-    }
-}
 
 @Composable
 fun PendingNotificationHandler(

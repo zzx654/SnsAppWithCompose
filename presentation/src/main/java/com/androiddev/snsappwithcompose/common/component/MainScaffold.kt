@@ -24,17 +24,14 @@ import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen.HomeScreen
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.androiddev.snsappwithcompose.common.util.MainScreenPendingHandler
+
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
-import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
+
 import com.androiddev.snsappwithcompose.feature.notification.NotificationScreen
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 

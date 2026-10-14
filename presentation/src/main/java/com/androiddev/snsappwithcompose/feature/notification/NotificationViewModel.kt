@@ -6,7 +6,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.insertHeaderItem
-import androidx.paging.map
 import com.androiddev.domain.model.DeleteReason
 import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.NotificationActionResult
@@ -16,7 +15,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.COMMENT
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType.FOLLOW
@@ -78,8 +77,8 @@ class NotificationViewModel @Inject constructor(
     private val _lastDeletedMaxId = MutableStateFlow(0L)
     val lastDeletedMaxId: StateFlow<Long> = _lastDeletedMaxId.asStateFlow()
 
-    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
-    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+    private val _alertDialogState = MutableStateFlow(AlertDialogState())
+    val alertDialogState: StateFlow<AlertDialogState> = _alertDialogState.asStateFlow()
     private var refreshStartMaxFcmId: Long = 0L
     private val basePagingFlow: Flow<PagingData<Notification>> =
         notificationUseCases.getNotifications().cachedIn(viewModelScope)
@@ -303,7 +302,7 @@ class NotificationViewModel @Inject constructor(
 
     private fun showReadAllNotificationAlert(targetMaxId: Long?) {
         targetMaxId?.let { targetId ->
-            _alertDialogState.value = AlertDialogStateV2(
+            _alertDialogState.value = AlertDialogState(
                 title = UiText.StringResource(R.string.read_all_notification),
                 cancelText = UiText.StringResource(R.string.cancel),
                 confirmText = UiText.StringResource(R.string.confirm),
@@ -327,7 +326,7 @@ class NotificationViewModel @Inject constructor(
 
     private fun showDeleteNotificationAlert(targetMaxId: Long?) {
         targetMaxId?.let { targetId ->
-            _alertDialogState.value = AlertDialogStateV2(
+            _alertDialogState.value = AlertDialogState(
                 title = UiText.StringResource(R.string.delete_notifications),
                 cancelText = UiText.StringResource(R.string.cancel),
                 confirmText = UiText.StringResource(R.string.confirm),
@@ -350,6 +349,6 @@ class NotificationViewModel @Inject constructor(
     }
 
     private fun resetDialogState() {
-        _alertDialogState.value = AlertDialogStateV2()
+        _alertDialogState.value = AlertDialogState()
     }
 }

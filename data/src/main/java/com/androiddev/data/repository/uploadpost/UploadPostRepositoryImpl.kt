@@ -1,14 +1,11 @@
 package com.androiddev.data.repository.uploadpost
 
 import android.content.Context
-import android.net.Uri
 import com.androiddev.data.remote.api.uploadpost.UploadPostApi
 import com.androiddev.data.remote.dto.toDomain
-import com.androiddev.data.remote.dto.toPosts
 import com.androiddev.data.util.generateAnonymousNickname
 import com.androiddev.data.util.getMultipartBody
 import com.androiddev.data.util.safeApiCall
-import com.androiddev.domain.location.LocationState
 import com.androiddev.domain.location.LocationTracker
 import com.androiddev.domain.model.MediaType
 import com.androiddev.domain.model.Post
@@ -17,7 +14,6 @@ import com.androiddev.domain.repository.uploadpost.UploadPostRepository
 import com.androiddev.domain.util.Resource
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody

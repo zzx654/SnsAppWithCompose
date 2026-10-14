@@ -2,7 +2,6 @@ package com.androiddev.snsappwithcompose.feature.auth.signin
 
 
 import android.Manifest
-import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -49,14 +48,10 @@ import com.androiddev.snsappwithcompose.feature.auth.components.KakaoSignInButto
 import com.androiddev.snsappwithcompose.feature.auth.components.NaverSignInButton
 import com.androiddev.snsappwithcompose.feature.auth.components.SignInTextField
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
-import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.component.AlertDialogg
 import com.androiddev.snsappwithcompose.common.util.NotificationPermissionUtils
 import com.androiddev.snsappwithcompose.common.util.addFocusCleaner
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
-import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
@@ -85,7 +80,7 @@ fun SignInScreen(
             }
         )
     }
-    AlertDialogg(
+    AlertDialog(
         title =  alertDialogState.title?.asString()?:"" ,
         cancelText = alertDialogState.cancelText?.asString() ?:"",
         confirmText = alertDialogState.confirmText?.asString() ?:"",

@@ -1,7 +1,6 @@
 package com.androiddev.data.remote.api.postdetail
 
 import com.androiddev.data.remote.BaseApiResponse
-import com.androiddev.data.remote.dto.GetPostsDto
 import com.androiddev.data.remote.dto.PostsDto
 import retrofit2.Response
 import retrofit2.http.Field

@@ -19,69 +19,23 @@ import kotlinx.coroutines.withContext
 
 abstract class BaseViewModel : ViewModel(), UiStateProvider {
 
-
-
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     override val eventFlow: SharedFlow<UiEvent> = _eventFlow.asSharedFlow()
 
-
-
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-
 
     fun emitUiEvent(event: UiEvent) {
         viewModelScope.launch {
             _eventFlow.emit(event)
         }
     }
-
     fun setLoading(loading: Boolean) {
         _isLoading.value = loading
     }
     suspend fun setEvent(event: UiEvent) = withContext(Dispatchers.Main) {
         _eventFlow.emit(event)
     }
-    protected suspend fun <T> handleResource(
-        resource: Resource<T>,
-        onSuccess: suspend (T) -> Unit = {},
-        onSuccessUnit: suspend () -> Unit = {},
-        onError: (suspend () -> Unit)? = null,
-        onTokenExpired: (suspend () -> Unit)? = null,
-        onFinally: () -> Unit = { setLoading(false) }
-    ) {
-        when (resource) {
-            is Resource.Success -> {
-                onFinally()
-                resource.data?.let {
-                    onSuccess(it)
-                } ?: run {
-                    onSuccessUnit()
-                }
-            }
-            is Resource.Loading -> setLoading(true)
-            is Resource.Error -> {
-                onFinally()
-                onError?.invoke()
-                //  ?: setEvent(
-                //     UiEvent.ShowToast(resource.message ?: getString(
-                //    R.string.error))
-                //)
-                return
-            }
-            is Resource.TokenExpired -> {
-                // 토큰 만료 시 공통 처리
-                onFinally()
-                onTokenExpired?.invoke()?:   setEvent(
-                    UiEvent.navigate(
-                        screen = Screen.SignInScreen
-                    )
-                )
-            }
-        }
-    }
-
     protected inline fun <T> Resource<T>.handle(
         onLoading: () -> Unit = { setLoading(true) },
         onSuccess: (T) -> Unit = {},
@@ -112,8 +66,6 @@ abstract class BaseViewModel : ViewModel(), UiStateProvider {
                 onTokenExpired()
             }
         }
-
         return this
     }
-
 }

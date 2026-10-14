@@ -23,7 +23,7 @@ import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.component.RadioChipButtons
 import com.androiddev.snsappwithcompose.common.component.paging.PagingListContent
 import com.androiddev.snsappwithcompose.common.mapper.toUiState
-import com.androiddev.snsappwithcompose.feature.home.component.PostPreviewItemm
+import com.androiddev.snsappwithcompose.feature.home.component.PostPreviewItem
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
@@ -57,7 +57,7 @@ fun NearbypostsScreen(
                 keyExtractor = { post -> post.postId},
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 itemContent = { post ->
-                    PostPreviewItemm(
+                    PostPreviewItem(
                         uiState = post.toUiState(),
                         modifier = Modifier.clickable{ viewModel.onClickPostItem(post.postId)}
                     )

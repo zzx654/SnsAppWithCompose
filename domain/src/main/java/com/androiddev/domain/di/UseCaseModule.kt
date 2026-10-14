@@ -8,7 +8,6 @@ import com.androiddev.domain.repository.signin.SigninRepository
 import com.androiddev.domain.repository.signup.SignupRepository
 import com.androiddev.domain.repository.tag.TagRepository
 import com.androiddev.domain.repository.postdetail.VoteRepository
-import com.androiddev.domain.repository.user.UserRepository
 import com.androiddev.domain.use_case.signup.authphone.AuthPhoneUseCases
 import com.androiddev.domain.use_case.signup.authphone.AuthenticateCode
 import com.androiddev.domain.use_case.postdetail.CancelVote
@@ -16,28 +15,16 @@ import com.androiddev.domain.use_case.createprofile.CheckNickname
 import com.androiddev.domain.use_case.createprofile.CreateProfile
 import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
-import com.androiddev.domain.use_case.signin.EmailSignIn
-import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUp
-import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUpUseCases
 import com.androiddev.domain.use_case.postdetail.GetVoteInfo
 import com.androiddev.domain.use_case.tag.GetTags
-import com.androiddev.domain.use_case.signup.emailsignup.RequestEmailAuthCode
 import com.androiddev.domain.use_case.signup.authphone.RequestPhoneAuthCode
 import com.androiddev.domain.use_case.tag.SearchTag
-import com.androiddev.domain.use_case.signin.SignInUseCases
-import com.androiddev.domain.use_case.signin.SignInWithToken
-import com.androiddev.domain.use_case.signin.SocialSignIn
 import com.androiddev.domain.use_case.signup.socialsignup.SocialSignUpUseCase
 import com.androiddev.domain.use_case.tag.TagUseCases
 import com.androiddev.domain.use_case.tag.ToggleFavoriteTag
 import com.androiddev.domain.use_case.postdetail.Vote
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
 
-import com.androiddev.domain.use_case.user.GetMediaPosts
-import com.androiddev.domain.use_case.user.GetSearchedUsers
-import com.androiddev.domain.use_case.user.GetUserInfo
-import com.androiddev.domain.use_case.user.ToggleFollowUser
-import com.androiddev.domain.use_case.user.UserUseCases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,15 +35,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object UseCaseModule {
-    /**@Provides
-    @Singleton
-    fun provideSignInUseCases(repository: SigninRepository): SignInUseCases {
-        return SignInUseCases(
-            socialSignIn = SocialSignIn(repository),
-            emailSignIn = EmailSignIn(repository),
-            signInWithToken = SignInWithToken(repository)
-        )
-    }**/
     @Provides
     @Singleton
     fun provideAuthPhoneUseCases(repository: AuthPhoneRepository, @ApplicationContext context: Context): AuthPhoneUseCases {
@@ -70,14 +48,6 @@ object UseCaseModule {
     fun provideSocialSignUpUseCase(repository: SignupRepository): SocialSignUpUseCase {
         return SocialSignUpUseCase(repository)
     }
-    /**@Provides
-    @Singleton
-    fun provideEmailSignUpUseCase(repository: SignupRepository, @ApplicationContext context: Context): EmailSignUpUseCases {
-        return EmailSignUpUseCases(
-            requestAuthCode = RequestEmailAuthCode(repository,context),
-            emailSignUp = EmailSignUp(repository)
-        )
-    }**/
     @Provides
     @Singleton
     fun provideCreateProfileUseCases(repository: CreateProfileRepository): CreateProfileUseCases {
@@ -95,32 +65,6 @@ object UseCaseModule {
             toggleFavoriteTag = ToggleFavoriteTag(repository)
         )
     }
-    /**@Provides
-    @Singleton
-    fun providePostDetailUseCases(
-        toggleLikePostRepository: ToggleLikePostRepository,
-        postRepository: PostRepository
-    ): PostDetailUseCases {
-        return PostDetailUseCases(
-            ToggleLikePost = ToggleLikePost(toggleLikePostRepository),
-            DeletePost = DeletePost(postRepository),
-            GetPost = GetPost(postRepository)
-        )
-    }**/
-    /**@Provides
-    @Singleton
-    fun provideCommentUseCases(
-        commentRepository: CommentRepository
-    ): CommentUseCases {
-        return CommentUseCases(
-            GetSelectedComment = GetSelectedComment(commentRepository),
-            GetComments = GetComments(commentRepository),
-            GetPopularComments = GetPopularComments(commentRepository),
-            PostComment = PostComment(commentRepository),
-            ToggleLikeComment = ToggleLikeComment(commentRepository),
-            GetNotificationComment = GetNotificationComment(commentRepository)
-        )
-    }**/
     @Provides
     @Singleton
     fun provideVoteUseCases(
@@ -139,28 +83,4 @@ object UseCaseModule {
     ): FcmTokenUseCase {
         return FcmTokenUseCase(fcmRepository)
     }
-    /**@Provides
-    @Singleton
-    fun provideNotificationUseCases(
-        notificationRepository: NotificationRepository
-    ): NotificationUseCases {
-        return NotificationUseCases(
-            getNotifications = GetNotifications(notificationRepository),
-            readAllNotifications = ReadAllNotifications(notificationRepository),
-            deleteNotifications = DeleteNotifications(notificationRepository),
-            readNotification = ReadNotification(notificationRepository)
-        )
-    }**/
-    /**@Provides
-    @Singleton
-    fun provideUserUseCases(
-        userRepository: UserRepository
-    ): UserUseCases {
-        return UserUseCases(
-            getSearchedUsers = GetSearchedUsers(userRepository),
-            toggleFollowUser = ToggleFollowUser(userRepository),
-            getUserInfo = GetUserInfo(userRepository),
-            getMediaPosts = GetMediaPosts(userRepository)
-        )
-    }**/
 }

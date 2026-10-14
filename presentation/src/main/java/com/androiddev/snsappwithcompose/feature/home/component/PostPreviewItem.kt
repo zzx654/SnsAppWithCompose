@@ -1,5 +1,8 @@
 package com.androiddev.snsappwithcompose.feature.home.component
 
+import com.androiddev.snsappwithcompose.common.mapper.PostPreviewUiState
+
+
 
 
 import android.annotation.SuppressLint
@@ -22,7 +25,6 @@ import androidx.compose.material.icons.outlined.Comment
 import androidx.compose.material.icons.outlined.HowToVote
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.ThumbUpAlt
 import androidx.compose.material3.HorizontalDivider
@@ -42,17 +44,13 @@ import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.util.DebugLogger
-import com.androiddev.domain.model.PostPreview
-import com.androiddev.snsappwithcompose.BuildConfig
-import com.androiddev.snsappwithcompose.common.base.viewmodel.PostUiState
 import com.androiddev.snsappwithcompose.common.component.Chips
 import com.androiddev.snsappwithcompose.common.component.CustomChip
-import com.androiddev.snsappwithcompose.common.util.generateDisplayName
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun PostPreviewItem(
-    uiState: PostUiState,
+    uiState: PostPreviewUiState,
     modifier: Modifier = Modifier
 ) {
     //로딩이랑 거리버튼 누르면 로딩되면서 불러오는 것 추가,위치권한 확인후 안되어있으면 텍스트 표시//
@@ -65,7 +63,7 @@ fun PostPreviewItem(
         modifier = modifier.fillMaxWidth().background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        uiState.post.tags?.let { tags ->
+        uiState.tags?.let { tags ->
             Chips(
                 modifier = Modifier.fillMaxWidth(0.9f).padding(top = 10.dp),
                 list = tags.map{"#$it"},
@@ -103,7 +101,7 @@ fun PostPreviewItem(
                         .build()
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(BuildConfig.BASE_URL+ uiState.imageUrls.first())
+                            .data(uiState.imageUrls.first())
                             .build(),
                         imageLoader = imageLoader,
                         modifier = Modifier
@@ -143,11 +141,11 @@ fun PostPreviewItem(
         ) {
 
 
-            Text(text = "${generateDisplayName(LocalContext.current,uiState.post.nickname,uiState.post.anonymousNickname)} · ${uiState.post.elapsedTime}", fontSize = 14.sp,color = Color.Gray)
+            Text(text = "${uiState.displayUserName.asString()} · ${uiState.elapsedTime}", fontSize = 14.sp,color = Color.Gray)
         }
 
         Spacer(modifier = Modifier.height(7.dp))
-        HorizontalDivider(color = Color.Gray.copy(0.7f), thickness = 1.dp)
+        HorizontalDivider(color = Color.LightGray.copy(0.75f), thickness = 1.dp)
         Spacer(modifier = Modifier.height(2.dp))
         Row(
             modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 10.dp),

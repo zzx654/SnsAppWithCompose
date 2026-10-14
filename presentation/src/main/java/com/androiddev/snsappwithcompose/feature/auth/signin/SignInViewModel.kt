@@ -10,7 +10,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,8 +28,8 @@ class SignInViewModel @Inject constructor(
     private val _password = mutableStateOf("")
     val password: State<String>
         get() = _password
-    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
-    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+    private val _alertDialogState = MutableStateFlow(AlertDialogState())
+    val alertDialogState: StateFlow<AlertDialogState> = _alertDialogState.asStateFlow()
     init {
         resetSignIn()
     }
@@ -152,7 +152,7 @@ class SignInViewModel @Inject constructor(
         }
     }
     private fun showSignInFailedAlert() {
-        _alertDialogState.value = AlertDialogStateV2(
+        _alertDialogState.value = AlertDialogState(
             title = UiText.StringResource(R.string.signin_failed),
             confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
@@ -161,6 +161,6 @@ class SignInViewModel @Inject constructor(
         )
     }
     protected fun resetDialogState() {
-        _alertDialogState.value = AlertDialogStateV2()
+        _alertDialogState.value = AlertDialogState()
     }
 }

@@ -1,7 +1,6 @@
 package com.androiddev.domain.use_case.postdetail
 
 import com.androiddev.domain.model.Comment
-import com.androiddev.domain.model.Comments
 import com.androiddev.domain.repository.postdetail.CommentRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow

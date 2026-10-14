@@ -4,12 +4,11 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.use_case.createprofile.CreateProfileUseCases
-import com.androiddev.domain.util.Resource
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
@@ -36,8 +35,8 @@ class CreateProfileViewModel @Inject constructor(
     private val _bottomWheelDialogState = MutableStateFlow(BottomWheelState())
     val bottomWheelState: StateFlow<BottomWheelState>
         get() = _bottomWheelDialogState.asStateFlow()
-    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
-    val alertDialogState: StateFlow<AlertDialogStateV2>
+    private val _alertDialogState = MutableStateFlow(AlertDialogState())
+    val alertDialogState: StateFlow<AlertDialogState>
         get() = _alertDialogState.asStateFlow()
 
     private var nicknameCheckJob: Job? = null
@@ -86,25 +85,25 @@ class CreateProfileViewModel @Inject constructor(
             _uiState.update { it.copy(isTyping = false, isNicknameChecking = true) }
 
             createProfileUseCases.checkNickname(input).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
+                result.handle(
+                    onSuccess = {
                         val isValid = result.data?.isValid ?: false
                         _uiState.update {
-                            it.copy(isNicknameChecking = false, isNicknameValid = isValid)
+                            it.copy(isNicknameValid = isValid)
                         }
                         validateForm()
-                    }
-                    is Resource.Error -> {
-                        _uiState.update { it.copy(isNicknameChecking = false, isNicknameValid = false) }
+                    },
+                    onError = {
+                        _uiState.update { it.copy(isNicknameValid = false) }
                         validateForm()
-                    }
-                    is Resource.Loading -> {
+                    },
+                    onLoading = {
                         _uiState.update { it.copy(isNicknameChecking = true) }
+                    },
+                    onFinally = {
+                        _uiState.update { it.copy(isNicknameChecking = false) }
                     }
-                    is Resource.TokenExpired -> {
-                        setEvent(UiEvent.navigate(screen = Screen.SignInScreen))
-                    }
-                }
+                )
             }
         }
     }
@@ -136,23 +135,12 @@ class CreateProfileViewModel @Inject constructor(
 
     }
     private fun handleProfileImageOption(option: CreateProfileImageOption) {
-        when (option) {
-            CreateProfileImageOption.Camera -> {
-                resetBottomSheetDialogState()
-                viewModelScope.launch {
-                    setEvent(UiEvent.LaunchCamera)
-                }
-
-            }
-            CreateProfileImageOption.Gallery -> {
-                resetBottomSheetDialogState()
-                viewModelScope.launch {
-                    setEvent(UiEvent.LaunchGallery)
-                }
-            }
-            CreateProfileImageOption.Delete -> {
-                resetBottomSheetDialogState()
-                setProfileBmap(null)
+        resetBottomSheetDialogState()
+        viewModelScope.launch {
+            when (option) {
+                CreateProfileImageOption.Camera -> setEvent(UiEvent.LaunchCamera)
+                CreateProfileImageOption.Gallery -> setEvent(UiEvent.LaunchGallery)
+                CreateProfileImageOption.Delete -> setProfileBmap(null)
             }
         }
     }
@@ -170,7 +158,7 @@ class CreateProfileViewModel @Inject constructor(
     }
     private fun showCreateProfileAlert(imageUri: Uri?) {
         val state = _uiState.value
-        _alertDialogState.value = AlertDialogStateV2(
+        _alertDialogState.value = AlertDialogState(
             title = UiText.StringResource(R.string.check_profile),
             cancelText = UiText.StringResource(R.string.cancel),
             confirmText = UiText.StringResource(R.string.confirm),
@@ -185,19 +173,16 @@ class CreateProfileViewModel @Inject constructor(
                         birth = state.birthYear ?: 2005,
                         gender = state.gender
                     ).collect { result ->
-
-                            handleResource(
-                                resource = result,
-                                onSuccessUnit = {
-                                    setEvent(
-                                        UiEvent.navigate(
-                                            screen = Screen.MainScreen
-                                        )
+                        result.handle(
+                            onSuccessUnit = {
+                                setEvent(
+                                    UiEvent.navigate(
+                                        screen = Screen.MainScreen
                                     )
-
-                                }
-                            )
-                        }
+                                )
+                            }
+                        )
+                    }
                 }
                 resetDialogState()
             }
@@ -205,6 +190,6 @@ class CreateProfileViewModel @Inject constructor(
     }
 
     protected fun resetDialogState() {
-        _alertDialogState.value = AlertDialogStateV2()
+        _alertDialogState.value = AlertDialogState()
     }
 }
