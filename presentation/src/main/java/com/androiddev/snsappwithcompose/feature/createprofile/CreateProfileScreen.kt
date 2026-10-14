@@ -151,20 +151,6 @@ fun CreateProfileScreen(
                 launcherMultiplePermissions.launch(permissions)
             }
         )
-        /**viewModel.eventFlow.collectLatest { event ->
-            when(event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
-                }
-                is UiEvent.navigate -> {
-                    navController.navigate(event.screen)
-                }
-                else -> null
-            }
-        }**/
     }
 
     val year = Calendar.getInstance().get(Calendar.YEAR)
@@ -183,7 +169,7 @@ fun CreateProfileScreen(
         onClickConfirm = {
             viewModel.onEvent(CreateProfileEvent.SetBirthYear(it))
         },
-        onClickCancel = viewModel.bottomWheelState.value.onClickCancel,
+        onClickCancel = bottomWheelDialogState.onClickCancel,
     )
     //LoadingDialog { viewModel.isLoading.value }
     AlertDialogg(
@@ -257,6 +243,7 @@ fun CreateProfileScreen(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() } // This is mandatory
                         ){
+                            focusManager.clearFocus()
                             viewModel.onEvent(CreateProfileEvent.ShowProfileImageOptions)
                         }
                     )
@@ -279,7 +266,10 @@ fun CreateProfileScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 BirthTextField(
                     birth = { birthYear },
-                    onClick = { viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions) }
+                    onClick = {
+                        focusManager.clearFocus()
+                        viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions)
+                    }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
