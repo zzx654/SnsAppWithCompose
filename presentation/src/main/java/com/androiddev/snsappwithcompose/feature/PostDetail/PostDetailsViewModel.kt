@@ -21,7 +21,7 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteState
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
 
 import com.androiddev.snsappwithcompose.common.util.UiText
@@ -48,8 +48,8 @@ class PostDetailsViewModel @Inject constructor(
 ) : BaseViewModel() {
     //로딩처리. 댓글 상단 고정
     val args:Screen.PostDetailScreen = savedStateHandle.toRoute<Screen.PostDetailScreen>()
-    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
-    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+    private val _alertDialogState = MutableStateFlow(AlertDialogState())
+    val alertDialogState: StateFlow<AlertDialogState> = _alertDialogState.asStateFlow()
     private val _bottomSheetDialogState =  MutableStateFlow(BottomSheetDialogState<CommentOption>())
     val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
 
@@ -381,7 +381,7 @@ class PostDetailsViewModel @Inject constructor(
     }
     private fun showDeleteAlert() {
 
-        _alertDialogState.value = AlertDialogStateV2(
+        _alertDialogState.value = AlertDialogState(
             title = UiText.StringResource(R.string.delete_post_alert),
             confirmText = UiText.StringResource(R.string.confirm),
             cancelText = UiText.StringResource(R.string.cancel),
@@ -404,7 +404,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
     protected fun resetDialogState() {
-        _alertDialogState.value = AlertDialogStateV2()
+        _alertDialogState.value = AlertDialogState()
     }
     private fun showBottomSheetDialog(myUserId: Int, commentUserId: Int) {
         val options = if (myUserId == commentUserId) {

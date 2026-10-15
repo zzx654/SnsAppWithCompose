@@ -14,7 +14,7 @@ import com.androiddev.domain.use_case.reply.ReplyUseCases
 import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.state.BottomSheetDialogState
 import com.androiddev.snsappwithcompose.common.util.generateAnonymousNickname
 import com.androiddev.snsappwithcompose.feature.PostDetail.CommentOption
@@ -60,8 +60,8 @@ class ReplyViewModel @Inject constructor(
 
 
 
-    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
-    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+    private val _alertDialogState = MutableStateFlow(AlertDialogState())
+    val alertDialogState: StateFlow<AlertDialogState> = _alertDialogState.asStateFlow()
     private val _bottomSheetDialogState =  MutableStateFlow(BottomSheetDialogState<CommentOption>())
     val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
     private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())

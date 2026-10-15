@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Dialog
 @Composable
-fun AlertDialogg(
+fun AlertDialog(
     title: String,
     content: @Composable () -> Unit = {},
     cancelText:String,

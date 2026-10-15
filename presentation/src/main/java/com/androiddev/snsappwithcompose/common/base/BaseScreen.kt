@@ -21,6 +21,8 @@ fun BaseScreen(
     viewModel: UiStateProvider,
     currentUserViewModel: CurrentUserViewModel? = null,
     navController: NavController? = null,
+    onLaunchCamera: (() -> Unit)? = null,  // 선택적 카메라 콜백 추가
+    onLaunchGallery: (() -> Unit)? = null,
     loadingContent: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
@@ -54,6 +56,12 @@ fun BaseScreen(
                             ?.set(event.key, event.value)
                     }
                     navController?.popBackStack()
+                }
+                is UiEvent.LaunchCamera -> {
+                    onLaunchCamera?.invoke()
+                }
+                is UiEvent.LaunchGallery -> {
+                    onLaunchGallery?.invoke()
                 }
                 else -> null
             }

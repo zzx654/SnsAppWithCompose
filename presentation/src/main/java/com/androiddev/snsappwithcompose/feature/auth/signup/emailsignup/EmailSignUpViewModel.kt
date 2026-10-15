@@ -1,22 +1,17 @@
 package com.androiddev.snsappwithcompose.feature.auth.signup.emailsignup
 
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.use_case.signup.emailsignup.EmailSignUpUseCases
-import com.androiddev.domain.use_case.signup.emailsignup.InvalidEmailException
 import com.androiddev.snsappwithcompose.common.util.Constants
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -115,7 +110,7 @@ class EmailSignUpViewModel @Inject constructor(
         }
     }
     private fun showEmailExistAlert() {
-        _alertDialogState.value = AlertDialogStateV2(
+        _alertDialogState.value = AlertDialogState(
             title = UiText.StringResource(R.string.email_exist),
             confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
@@ -124,7 +119,7 @@ class EmailSignUpViewModel @Inject constructor(
         )
     }
     private fun showWrongCodeAlert() {
-        _alertDialogState.value = AlertDialogStateV2(
+        _alertDialogState.value = AlertDialogState(
             title = UiText.StringResource(R.string.wrong_code),
             confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
@@ -133,7 +128,7 @@ class EmailSignUpViewModel @Inject constructor(
         )
     }
     private fun showSignUpCompletedAlert() {
-        _alertDialogState.value = AlertDialogStateV2(
+        _alertDialogState.value = AlertDialogState(
             title = UiText.StringResource(R.string.signup_completed),
             confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {

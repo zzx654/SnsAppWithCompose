@@ -21,14 +21,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.common.component.LoadingDialog
-import com.androiddev.snsappwithcompose.common.component.AlertDialogg
+import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.paging.PagingListContent
 import com.androiddev.snsappwithcompose.feature.notification.component.NotificationItem
 import androidx.compose.runtime.mutableStateOf
@@ -108,7 +107,7 @@ fun NotificationScreen(
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
-    AlertDialogg (
+    AlertDialog (
         title = alertDialogState.title?.asString() ?:"",
         cancelText = alertDialogState.cancelText?.asString() ?:"",
         confirmText = alertDialogState.confirmText?.asString() ?:"",

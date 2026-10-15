@@ -14,7 +14,7 @@ import com.androiddev.domain.audio.AudioRecorder
 import com.androiddev.domain.audio.RecordServiceController
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
+import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.util.UiText
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_IDLE
 import com.androiddev.snsappwithcompose.service.record.RecordStateConstants.STATE_PLAYING
@@ -47,8 +47,8 @@ class RecordViewModel @Inject constructor(
     private var startTime: Long = 0L
     private var maxDurationMillis = MAX_DURATION_MILLIS
 
-    private val _alertDialogState = MutableStateFlow(AlertDialogStateV2())
-    val alertDialogState: StateFlow<AlertDialogStateV2> = _alertDialogState.asStateFlow()
+    private val _alertDialogState = MutableStateFlow(AlertDialogState())
+    val alertDialogState: StateFlow<AlertDialogState> = _alertDialogState.asStateFlow()
 
     private val _uiState = MutableStateFlow(RecordUIState())
     val uiState: StateFlow<RecordUIState> = _uiState.asStateFlow()
@@ -277,7 +277,7 @@ class RecordViewModel @Inject constructor(
     }
 
     private fun showDeleteRecordingAlert() {
-        _alertDialogState.value = AlertDialogStateV2(
+        _alertDialogState.value = AlertDialogState(
             title = UiText.StringResource(R.string.confirm_delete_added_voice),
             confirmText = UiText.StringResource(R.string.confirm),
             cancelText = UiText.StringResource(R.string.cancel),
@@ -296,7 +296,7 @@ class RecordViewModel @Inject constructor(
     }
 
     private fun resetRecordingAlert() {
-        _alertDialogState.value = AlertDialogStateV2()
+        _alertDialogState.value = AlertDialogState()
     }
 }
 

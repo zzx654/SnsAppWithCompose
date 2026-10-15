@@ -16,18 +16,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AudioModule {
 
-    /**@Provides
-    @Singleton
-    fun provideAudioRecorder(
-        @ApplicationContext context: Context
-    ): AudioRecorder = AndroidAudioRecorder(context)
-
-    @Provides
-    @Singleton
-    fun provideAudioPlayer(
-        @ApplicationContext context: Context
-    ): AudioPlayer = AndroidAudioPlayer(context)**/
-
     @Binds
     @Singleton
     abstract fun bindAudioRecorder(

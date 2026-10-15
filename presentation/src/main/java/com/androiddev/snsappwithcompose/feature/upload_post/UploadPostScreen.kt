@@ -25,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -49,7 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androiddev.snsappwithcompose.common.base.BaseScreen
-import com.androiddev.snsappwithcompose.common.component.AlertDialogg
+import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.LoadingDialogWithText
 import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
@@ -212,7 +211,7 @@ fun UploadPostScreen(
         uiState = voteUiState,
         onVoteEvent = { createVoteViewModel.onEvent(it) }
     )
-    AlertDialogg (
+    AlertDialog (
         title = recordAlertDialogState.title?.asString() ?:"",
         cancelText = recordAlertDialogState.cancelText?.asString() ?:"",
         confirmText = recordAlertDialogState.confirmText?.asString() ?:"",

@@ -20,7 +20,7 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.viewmodel.CurrentUserViewModel
 import com.androiddev.snsappwithcompose.common.component.LoadingProgressIndicator
-import com.androiddev.snsappwithcompose.common.component.AlertDialogg
+import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 
 @Composable
@@ -32,7 +32,7 @@ fun InitScreen(
 ) {
     val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
 
-    AlertDialogg(
+    AlertDialog(
         title =  alertDialogState.title?.asString()?:"" ,
         cancelText = alertDialogState.cancelText?.asString() ?:"",
         confirmText = alertDialogState.confirmText?.asString() ?:"",

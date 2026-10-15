@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.androiddev.snsappwithcompose.common.component.CustomBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.feature.auth.components.BirthTextField
@@ -47,27 +45,26 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.provider.MediaStore
 import android.util.Log
-import android.view.Gravity
-import android.widget.Toast
 import androidx.compose.foundation.background
 import com.androiddev.snsappwithcompose.ui.theme.LightGray
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.androiddev.data.util.getImageUri
+import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
-import com.androiddev.snsappwithcompose.common.component.AlertDialog
 import com.androiddev.snsappwithcompose.common.component.CenterAlignedTopBar
 import com.androiddev.snsappwithcompose.feature.createprofile.component.GenderRadioButtons
-import com.androiddev.snsappwithcompose.common.component.LoadingDialog
-import com.androiddev.snsappwithcompose.common.base.UiEvent
+import com.androiddev.snsappwithcompose.common.component.AlertDialog
+import com.androiddev.snsappwithcompose.common.component.SelectorBottomSheetDialog
 import com.androiddev.snsappwithcompose.common.util.checkPermissions
 import com.androiddev.snsappwithcompose.feature.createprofile.event.CreateProfileEvent
-import kotlinx.coroutines.flow.collectLatest
 
 @RequiresApi(Build.VERSION_CODES.N)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProfileScreen(
     navController: NavController,
@@ -81,6 +78,11 @@ fun CreateProfileScreen(
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val encodedCroppedBitmap = navBackStackEntry.savedStateHandle.get<String>(getString(context,R.string.encodedBitmap))
+    val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
+    val bottomSheetDialogState by viewModel.bottomSheetDialogState.collectAsStateWithLifecycle()
+    val bottomWheelDialogState by viewModel.bottomWheelState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     encodedCroppedBitmap?.let {
         viewModel.setProfileBmap(decodeBase64(it))
         navBackStackEntry.savedStateHandle.set<String>(getString(context,R.string.encodedBitmap),null)
@@ -141,51 +143,29 @@ fun CreateProfileScreen(
                 launcherMultiplePermissions.launch(permissions)
             }
         )
-        viewModel.eventFlow.collectLatest { event ->
-            when(event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).also {
-                        it.setGravity(Gravity.BOTTOM, 0, 130)
-                        it.show()
-                    }
-                }
-                is UiEvent.navigate -> {
-                    navController.navigate(event.screen)
-                }
-                else -> null
-            }
-        }
     }
 
     val year = Calendar.getInstance().get(Calendar.YEAR)
-    viewModel.setLauncher({cameraPermission.launch(Manifest.permission.CAMERA)},{
-        openGalleryOnly()
-    })
 
+    SelectorBottomSheetDialog(bottomSheetDialogState)
 
-    CustomBottomSheetDialog(
-        { viewModel.customBottomSheetDialogState.value.showDialog },
-        { viewModel.customBottomSheetDialogState.value.items },
-        viewModel.customBottomSheetDialogState.value.onClickCancel
-    )
     BottomWheelPicker(
-        initValue = { viewModel.birthYear.value?: 2005 },
+        initValue = { uiState.birthYear?: 2005 },
         min = year-70,
         max = year-15,
         pickerMaxHeight = 250,
-        showDialog = { viewModel.bottomWheelState.value.showDialog },
+        showDialog = { bottomWheelDialogState.showDialog },
         onClickConfirm = {
             viewModel.onEvent(CreateProfileEvent.SetBirthYear(it))
         },
-        onClickCancel = viewModel.bottomWheelState.value.onClickCancel,
+        onClickCancel = bottomWheelDialogState.onClickCancel,
     )
-    LoadingDialog { viewModel.isLoading.value }
     AlertDialog(
-        title = {viewModel.alertDialogState.value.title},
-        cancelText = {viewModel.alertDialogState.value.cancelText},
-        confirmText = {viewModel.alertDialogState.value.confirmText},
-        onClickConfirm = viewModel.alertDialogState.value.onClickConfirm,
-        onClickCancel = viewModel.alertDialogState.value.onClickCancel,
+        title = alertDialogState.title?.asString() ?:"",
+        cancelText = alertDialogState.cancelText?.asString() ?:"",
+        confirmText = alertDialogState.confirmText?.asString() ?:"",
+        onClickConfirm = alertDialogState.onClickConfirm,
+        onClickCancel = alertDialogState.onClickCancel,
         content = {
             Box(modifier = Modifier
                 .width(160.dp)
@@ -198,19 +178,20 @@ fun CreateProfileScreen(
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "닉네임: ${viewModel.nickname.value}",
+                        text = stringResource(R.string.profile_dialog_nickname, uiState.nickname),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "성별: ${viewModel.gender.value}",
+                        text = stringResource(R.string.profile_dialog_gender, uiState.gender),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
+
                     Text(
-                        text = "출생: ${viewModel.birthYear.value}",
+                        text = stringResource(R.string.profile_dialog_birth, uiState.birthYear ?: 2005),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -218,71 +199,83 @@ fun CreateProfileScreen(
             }
         }
     )
-    BaseScaffold(
-        focusManager = focusManager,
-        topBar = {
-            CenterAlignedTopBar(
-                title = stringResource(R.string.createProfile)
-            )
-        },
-        bottomBar = {
-            BottomButton(
-                buttonText = stringResource(id = R.string.request_signup),
-                activeButton = {
-                    viewModel.isNicknameValid.value
-                            && viewModel.birthYear.value != null
-                            && viewModel.gender.value.isNotBlank()
-                },
-                onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert)}
-            )
-        },
-        content = {
-            Spacer(modifier = Modifier.height(30.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                EditProfileImage(
-                    profileBmap = {viewModel.profileBmap.value},
-                    modifier = Modifier.align(Alignment.Center).clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() } // This is mandatory
-                    ){
-                        viewModel.onEvent(CreateProfileEvent.ShowProfileImageOptions)
+    BaseScreen(
+        viewModel = viewModel,
+        navController = navController,
+        onLaunchGallery = { openGalleryOnly() },
+        onLaunchCamera = { cameraPermission.launch(Manifest.permission.CAMERA) }
+    ) {
+        BaseScaffold(
+            focusManager = focusManager,
+            topBar = {
+                CenterAlignedTopBar(
+                    title = stringResource(R.string.createProfile)
+                )
+            },
+            bottomBar = {
+                BottomButton(
+                    buttonText = stringResource(id = R.string.request_signup),
+                    activeButton = {
+                        uiState.isFormValid
+                    },
+                    onClick = { viewModel.onEvent(CreateProfileEvent.ShowCreateProfileAlert(getImageUri(context,uiState.profileBitmap)))}
+                )
+            },
+            content = {
+                Spacer(modifier = Modifier.height(30.dp))
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    EditProfileImage(
+                        profileBmap = { uiState.profileBitmap },
+                        modifier = Modifier.align(Alignment.Center).clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() } // This is mandatory
+                        ){
+                            focusManager.clearFocus()
+                            viewModel.onEvent(CreateProfileEvent.ShowProfileImageOptions)
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                NicknameTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    focusManager = focusManager,
+                    text = { uiState.nickname },
+                    hint = getString(context,R.string.nickname_hint),
+                    onTextChange = {
+                        viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
+                    },
+                    isTyping = { uiState.isTyping },
+                    isNicknameValid = { uiState.isNicknameValid },
+                    isNicknameChecking = { uiState.isNicknameChecking }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                BirthTextField(
+                    birth = { uiState.birthYear },
+                    onClick = {
+                        focusManager.clearFocus()
+                        viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions)
                     }
                 )
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+
+                ) {
+                    GenderRadioButtons(
+                        listOf(stringResource(R.string.male),stringResource(R.string.female),
+                            stringResource(R.string.private_info)),
+                        { uiState.gender },
+                        { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
+                    )
+                }
             }
+        )
 
-            Spacer(modifier = Modifier.height(30.dp))
+    }
 
-            NicknameTextField(
-                modifier = Modifier.fillMaxWidth(),
-                focusManager = focusManager,
-                text = { viewModel.nickname.value },
-                hint = getString(context,R.string.nickname_hint),
-                onTextChange = {
-                    viewModel.onEvent(CreateProfileEvent.TypeNickname(it))
-                },
-                isTyping = { viewModel.isTyping.value },
-                isNicknameValid = { viewModel.isNicknameValid.value },
-                isNicknameChecking = { viewModel.isNicknameChecking.value }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            BirthTextField(
-                birth = { viewModel.birthYear.value },
-                onClick = { viewModel.onEvent(CreateProfileEvent.ShowBirthYearOptions) }
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-
-            ) {
-                GenderRadioButtons(
-                    listOf(getString(context,R.string.male),getString(context,R.string.female),getString(context,R.string.private_info)),
-                    { viewModel.gender.value },
-                    { viewModel.onEvent(CreateProfileEvent.SetGender(it)) }
-                )
-            }
-        }
-    )
 }

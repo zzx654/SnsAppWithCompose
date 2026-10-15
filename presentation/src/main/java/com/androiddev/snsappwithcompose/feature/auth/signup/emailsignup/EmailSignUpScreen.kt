@@ -1,8 +1,6 @@
 package com.androiddev.snsappwithcompose.feature.auth.signup.emailsignup
 
 import android.annotation.SuppressLint
-import android.view.Gravity
-import android.widget.Toast
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -16,8 +14,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -28,13 +24,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
 import com.androiddev.snsappwithcompose.common.base.component.BaseScaffold
-import com.androiddev.snsappwithcompose.common.util.Constants.PASSWORD_REGEX
 import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.base.BaseScreen
 import com.androiddev.snsappwithcompose.feature.auth.components.AuthNumberTextField
@@ -42,13 +36,8 @@ import com.androiddev.snsappwithcompose.feature.auth.components.AuthTextField
 import com.androiddev.snsappwithcompose.feature.auth.components.BottomButton
 import com.androiddev.snsappwithcompose.feature.auth.components.PasswordHelper
 import com.androiddev.snsappwithcompose.common.component.AlertDialog
-import com.androiddev.snsappwithcompose.common.component.LoadingDialog
 import com.androiddev.snsappwithcompose.common.component.TopBar
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
-import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.component.AlertDialogg
-import kotlinx.coroutines.flow.collectLatest
-import java.util.regex.Pattern
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -64,7 +53,7 @@ fun EmailSignUpScreen(
     val alertDialogState by viewModel.alertDialogState.collectAsStateWithLifecycle()
     val isCodeReceived by viewModel.isCodeReceived.collectAsStateWithLifecycle()
 
-    AlertDialogg(
+    AlertDialog(
         title =  alertDialogState.title?.asString()?:"" ,
         cancelText = alertDialogState.cancelText?.asString() ?:"",
         confirmText = alertDialogState.confirmText?.asString() ?:"",

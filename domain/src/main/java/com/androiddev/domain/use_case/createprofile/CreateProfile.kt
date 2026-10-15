@@ -1,5 +1,6 @@
 package com.androiddev.domain.use_case.createprofile
 
+import android.net.Uri
 import com.androiddev.domain.repository.createprofile.CreateProfileRepository
 import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -11,9 +12,9 @@ class CreateProfile @Inject constructor(
     private val repository: CreateProfileRepository
 ) {
     suspend operator fun invoke(
-        profileImage: MultipartBody.Part?,
-        nickname: RequestBody,
+        profileImage: Uri?,
+        nickname: String,
         birth: Int,
-        gender: RequestBody
+        gender: String
     ):Flow<Resource<Unit>> = repository.createProfile(profileImage,nickname,birth,gender)
 }

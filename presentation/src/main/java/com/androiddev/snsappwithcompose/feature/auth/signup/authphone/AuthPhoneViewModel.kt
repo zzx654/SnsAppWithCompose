@@ -1,9 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.auth.signup.authphone
 
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -16,12 +14,9 @@ import com.androiddev.snsappwithcompose.R
 import com.androiddev.snsappwithcompose.common.state.AlertDialogState
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.base.UiEvent
-import com.androiddev.snsappwithcompose.common.state.AlertDialogStateV2
 import com.androiddev.snsappwithcompose.common.util.UiText
-import com.androiddev.snsappwithcompose.common.util.withFcmToken
 import com.androiddev.snsappwithcompose.feature.auth.signup.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -133,7 +128,7 @@ class AuthPhoneViewModel @Inject constructor(
         }
     }
     private fun showPhoneExistAlert() {
-        _alertDialogState.value = AlertDialogStateV2(
+        _alertDialogState.value = AlertDialogState(
             title = UiText.StringResource(R.string.phonenumber_exist),
             confirmText = UiText.StringResource(R.string.confirm),
             onClickConfirm = {
