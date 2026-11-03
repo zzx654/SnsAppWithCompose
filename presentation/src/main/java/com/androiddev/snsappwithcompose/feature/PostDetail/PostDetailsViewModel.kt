@@ -12,6 +12,7 @@ import com.androiddev.snsappwithcompose.common.base.BaseViewModel
 import com.androiddev.domain.model.Comment
 import com.androiddev.domain.model.CommentSortType
 import com.androiddev.domain.model.Media
+import com.androiddev.domain.use_case.chat.ChatUseCases
 import com.androiddev.domain.use_case.postdetail.CommentUseCases
 import com.androiddev.domain.use_case.postdetail.PostDetailUseCases
 import com.androiddev.domain.use_case.postdetail.VoteUseCases
@@ -44,6 +45,7 @@ class PostDetailsViewModel @Inject constructor(
     private val postDetailUseCases: PostDetailUseCases,
     private val commentUseCases: CommentUseCases,
     private val voteUseCases: VoteUseCases,
+    private val chatUseCases: ChatUseCases,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel() {
     //로딩처리. 댓글 상단 고정
@@ -279,7 +281,8 @@ class PostDetailsViewModel @Inject constructor(
             is CommentEvent.ShowCommentOptions -> {
                 showBottomSheetDialog(
                     myUserId = event.myUserId,
-                    commentUserId = event.commentUserId
+                    commentUserId = event.commentUserId,
+                    commentId = event.commentId
                 )
             }
             is CommentEvent.TypeComment -> {
@@ -377,7 +380,35 @@ class PostDetailsViewModel @Inject constructor(
             is PostDetailEvent.DeletePost -> {
               showDeleteAlert()
             }
+            is PostDetailEvent.RequestChat -> {
+                postDetailUiState.value.post?.let {
+                    requestChat(
+                        myUserId = event.myUserId,
+                        postId = it.postId.toLong()
+                    )
+                }
+            }
+
         }
+    }
+    private fun requestChat(myUserId:Long, postId:Long, commentId:Long? = null) {
+        viewModelScope.launch {
+            chatUseCases.createChatRequest(
+                targetUserId = myUserId,
+                postId = postId,
+                commentId = commentId
+            ).collect { result ->
+                result.handle(
+                    onSuccessUnit = {
+
+                    }
+                )
+
+            }
+        }
+
+
+
     }
     private fun showDeleteAlert() {
 
@@ -406,7 +437,7 @@ class PostDetailsViewModel @Inject constructor(
     protected fun resetDialogState() {
         _alertDialogState.value = AlertDialogState()
     }
-    private fun showBottomSheetDialog(myUserId: Int, commentUserId: Int) {
+    private fun showBottomSheetDialog(myUserId: Long, commentUserId: Long,commentId:Long) {
         val options = if (myUserId == commentUserId) {
             listOf(CommentOption.Edit, CommentOption.Delete)
         } else {
@@ -418,18 +449,30 @@ class PostDetailsViewModel @Inject constructor(
             options = options,
             onOptionSelected = { option ->
                 resetBottomSheetDialogState()
-                handleCommentOption(option)
+                handleCommentOption(
+                    option = option,
+                    myUserId = myUserId,
+                    commentId = commentId
+                )
             },
             onClickCancel = { resetBottomSheetDialogState() }
         )
     }
-    private fun handleCommentOption(option: CommentOption) {
+    private fun handleCommentOption(option: CommentOption,myUserId: Long,commentId:Long) {
         when (option) {
             CommentOption.Edit -> { resetBottomSheetDialogState() }
             CommentOption.Delete -> { resetBottomSheetDialogState() }
             CommentOption.Report -> { resetBottomSheetDialogState() }
             CommentOption.Block -> { resetBottomSheetDialogState() }
-            CommentOption.RequestChat -> { resetBottomSheetDialogState() }
+            CommentOption.RequestChat -> {
+                postDetailUiState.value.post?.let {
+                    requestChat(
+                        myUserId = myUserId,
+                        postId = it.postId.toLong(),
+                        commentId = commentId )
+                }
+
+            }
         }
     }
 

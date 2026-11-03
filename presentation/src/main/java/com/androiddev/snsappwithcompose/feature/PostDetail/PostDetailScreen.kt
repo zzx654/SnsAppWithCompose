@@ -130,7 +130,15 @@ fun PostDetailScreen(
         listOf(
             MenuItem(getString(context,R.string.block_user)){},
             MenuItem(getString(context,R.string.report)) {},
-            MenuItem(getString(context,R.string.request_chat)) {}
+            MenuItem(getString(context,R.string.request_chat)) {
+                userId?.let {
+                    postViewModel.onPostDetailEvent(
+                        PostDetailEvent.RequestChat(it.toLong())
+                    )
+                }
+
+
+            }
         )
     }
     var pendingScrollByCount by remember { mutableStateOf(0) }

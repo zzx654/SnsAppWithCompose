@@ -36,7 +36,8 @@ fun BoundCommentRow(
                     onCommentEvent(
                         CommentEvent.ShowCommentOptions(
                             myUserId = my,
-                            commentUserId = updatedComment.userId
+                            commentUserId = updatedComment.userId,
+                            commentId = updatedComment.commentId
                         )
                     )
                 }

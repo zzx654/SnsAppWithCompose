@@ -1,5 +1,6 @@
 package com.androiddev.data.di
 
+import com.androiddev.data.repository.chat.ChatRepositoryImpl
 import com.androiddev.data.repository.signup.AuthPhoneRepositoryImpl
 import com.androiddev.data.repository.postdetail.CommentRepositoryImpl
 import com.androiddev.data.repository.createprofile.CreateProfileRepositoryImpl
@@ -14,6 +15,7 @@ import com.androiddev.data.repository.uploadpost.UploadPostRepositoryImpl
 import com.androiddev.data.repository.postdetail.VoteRepositoryImpl
 import com.androiddev.data.repository.postlist.PostListRepositoryImpl
 import com.androiddev.data.repository.user.UserRepositoryImpl
+import com.androiddev.domain.repository.chat.ChatRepository
 import com.androiddev.domain.repository.signup.AuthPhoneRepository
 import com.androiddev.domain.repository.createprofile.CreateProfileRepository
 import com.androiddev.domain.repository.fcm.FcmRepository
@@ -120,6 +122,13 @@ abstract class RepositoryModule {
     abstract fun bindUserRepository(
         userRepositoryImpl: UserRepositoryImpl
     ): UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRepository(
+        chatRepositoryImpl: ChatRepositoryImpl
+    ): ChatRepository
+
 
 }
 
