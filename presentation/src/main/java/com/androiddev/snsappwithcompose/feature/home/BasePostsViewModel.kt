@@ -5,7 +5,7 @@ import com.androiddev.snsappwithcompose.common.base.UiEvent
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 
 abstract class BasePostsViewModel: BaseViewModel() {
-    open fun onClickPostItem(postId: Int) {
+    open fun onClickPostItem(postId: Long) {
         emitUiEvent(UiEvent.navigate(Screen.PostDetailScreen(postId)))
     }
 }

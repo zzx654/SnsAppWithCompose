@@ -3,12 +3,12 @@ package com.androiddev.data.paging.cursor
 sealed interface CommentCursor {
     // 1. 일반 댓글/답글 커서 (생성일자 및 ID 기준)
     data class Default(
-        val commentId: Int,
+        val commentId: Long,
         val commentDate: String
     ) : CommentCursor
 
     data class Popular(
-        val commentId: Int,
+        val commentId: Long,
         val commentScore: Int
     )
 

@@ -6,7 +6,7 @@ import com.androiddev.domain.model.VoteOptionInfo
 data class VoteInfoDto(
     val isMyPost: Boolean,
     val hasVoted: Boolean,
-    val selectedChoiceId: Int?,
+    val selectedChoiceId: Long?,
     val voteOptions: List<VoteOptionInfo>
 )
 fun VoteInfoDto.toDomain(

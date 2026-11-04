@@ -12,5 +12,5 @@ sealed class CommentEvent {
     data class ToggleLikeComment(val comment: Comment) : CommentEvent()
     data class ShowCommentOptions(val myUserId:Long, val commentUserId:Long,val commentId:Long): CommentEvent()
     data class SetCommentSortType(val commentSortType: CommentSortType): CommentEvent()
-    data class GotoReplyScreen(val commentId: Int): CommentEvent()
+    data class GotoReplyScreen(val commentId: Long): CommentEvent()
 }

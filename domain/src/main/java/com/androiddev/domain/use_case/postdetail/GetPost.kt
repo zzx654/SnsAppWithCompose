@@ -11,7 +11,7 @@ class GetPost @Inject constructor(
     private val repository: PostRepository,
     private val locationTracker: LocationTracker
 ) {
-    suspend operator fun invoke(postId: Int): Flow<Resource<List<Post>>> {
+    suspend operator fun invoke(postId: Long): Flow<Resource<List<Post>>> {
 
         val location = locationTracker.updateLocation()
 

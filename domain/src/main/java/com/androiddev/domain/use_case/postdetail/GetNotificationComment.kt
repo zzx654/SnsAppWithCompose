@@ -9,5 +9,5 @@ import javax.inject.Inject
 class GetNotificationComment @Inject constructor(
     private val repository: CommentRepository
 ) {
-    suspend operator fun invoke(commentId:Int): Flow<Resource<NotificationComment>> = repository.getNotificationComment(commentId)
+    suspend operator fun invoke(commentId: Long): Flow<Resource<NotificationComment>> = repository.getNotificationComment(commentId)
 }

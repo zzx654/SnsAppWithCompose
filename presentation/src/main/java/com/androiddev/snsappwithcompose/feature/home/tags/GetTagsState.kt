@@ -1,6 +1,5 @@
 package com.androiddev.snsappwithcompose.feature.home.tags
 
-import com.androiddev.domain.model.PostPreview
 import com.androiddev.domain.model.Tag
 
 data class GetTagsState(

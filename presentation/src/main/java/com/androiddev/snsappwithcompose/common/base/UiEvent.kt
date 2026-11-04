@@ -5,7 +5,7 @@ import com.androiddev.snsappwithcompose.common.util.UiText
 
 sealed class UiEvent {
     data class ShowToast(val message: UiText): UiEvent()
-    data class navigate(val screen: Screen, val userId:Int? = null): UiEvent()
+    data class navigate(val screen: Screen, val userId: Long? = null): UiEvent()
     data object popBackStack: UiEvent()
     data class PopBackStackWithResult<T>(val key: String, val value: T) : UiEvent()
     data object LaunchCamera : UiEvent()

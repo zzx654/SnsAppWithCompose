@@ -64,7 +64,7 @@ class UploadPostRepositoryImpl @Inject constructor(
 
 
     override suspend fun editPost(
-        postid: Int,
+        postid: Long,
         param: UploadPostParam,
         deletedVisualMedia:List<String>,
         deletedAudio:String?

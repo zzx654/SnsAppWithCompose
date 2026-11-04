@@ -27,19 +27,19 @@ sealed interface Screen {
     @Serializable
     data object NotificationScreen: Screen
     @Serializable
-    data class UploadPostScreen(val postId:Int? = null): Screen
+    data class UploadPostScreen(val postId: Long? = null): Screen
     @Serializable
     data object InitScreen: Screen
     @Serializable
     data class CropScreen(val encodedUri:String): Screen
     @Serializable
-    data class PostDetailScreen(val postId:Int,val notificationCommentId:Int? = null): Screen
+    data class PostDetailScreen(val postId:Long,val notificationCommentId:Long? = null): Screen
     @Serializable
-    data class ReplyScreen(val commentId:Int): Screen
+    data class ReplyScreen(val commentId: Long): Screen
     @Serializable
-    data class TagPostsScreen(val tagId:Int): Screen
+    data class TagPostsScreen(val tagId: Long): Screen
     @Serializable
-    data class UserProfileScreen(val userId:Int): Screen
+    data class UserProfileScreen(val userId:Long): Screen
     @Serializable
     data object MediaEditScreen: Screen
     @Serializable

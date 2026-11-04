@@ -13,7 +13,7 @@ class EditPost @Inject constructor(
     private val repository: UploadPostRepository
 ) {
     suspend operator fun invoke(
-        postid: Int,
+        postid: Long,
         param:UploadPostParam,
         deletedAudio:String?,
         deletedVisualMedia:List<String>

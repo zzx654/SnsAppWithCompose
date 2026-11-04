@@ -64,8 +64,8 @@ class ReplyViewModel @Inject constructor(
     val alertDialogState: StateFlow<AlertDialogState> = _alertDialogState.asStateFlow()
     private val _bottomSheetDialogState =  MutableStateFlow(BottomSheetDialogState<CommentOption>())
     val bottomSheetDialogState = _bottomSheetDialogState.asStateFlow()
-    private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())
-    val commentStateMap: StateFlow<Map<Int,Comment>> = _commentStateMap.asStateFlow()
+    private val _commentStateMap = MutableStateFlow<Map<Long, Comment>>(emptyMap())
+    val commentStateMap: StateFlow<Map<Long,Comment>> = _commentStateMap.asStateFlow()
 
     init {
         fetchComment()
@@ -166,7 +166,7 @@ class ReplyViewModel @Inject constructor(
 
     }
 
-    private fun showBottomSheetDialog(myUserId: Int, commentUserId: Int) {
+    private fun showBottomSheetDialog(myUserId: Long, commentUserId: Long) {
         val options = if (myUserId == commentUserId) {
             listOf(CommentOption.Edit, CommentOption.Delete)
         } else {

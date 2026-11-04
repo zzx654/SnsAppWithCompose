@@ -10,7 +10,7 @@ import retrofit2.Response
 
 class PopularCommentStrategy(
     private val api: CommentApi,
-    private val postId: Int
+    private val postId: Long
 ) : PagingStrategy<CommentsDto, Comment, CommentCursor.Popular> {
 
     override suspend fun fetch(

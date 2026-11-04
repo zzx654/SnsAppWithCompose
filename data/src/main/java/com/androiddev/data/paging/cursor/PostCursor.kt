@@ -3,12 +3,12 @@ package com.androiddev.data.paging.cursor
 sealed interface PostCursor {
 
     data class Recent(
-        val postId: Int,
+        val postId: Long,
         val postDate: String
     ) : PostCursor
 
     data class Popular(
-        val postId: Int,
+        val postId: Long,
         val postScore: Double
     )
 }

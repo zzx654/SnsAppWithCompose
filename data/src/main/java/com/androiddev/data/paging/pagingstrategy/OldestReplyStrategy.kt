@@ -10,7 +10,7 @@ import retrofit2.Response
 
 class OldestReplyStrategy(
     private val api: CommentApi,
-    private val ref: Int
+    private val ref: Long
 ) : PagingStrategy<CommentsDto, Comment, CommentCursor.Default> {
 
     override suspend fun fetch(

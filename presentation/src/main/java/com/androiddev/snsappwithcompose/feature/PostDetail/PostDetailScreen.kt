@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.androiddev.domain.model.PostPreview
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -197,8 +196,6 @@ fun PostDetailScreen(
     val editedPost = navBackStackEntry.savedStateHandle.get<Post>(getString(context,R.string.editedPost))
     editedPost?.let { post ->
         postViewModel.onPostDetailEvent(PostDetailEvent.LoadEditedPostDetails(post))
-
-        navBackStackEntry.savedStateHandle.set<PostPreview>(getString(context,R.string.editedPost),null)
     }
     AlertDialog (
         title = alertDialogState.title?.asString() ?:"",

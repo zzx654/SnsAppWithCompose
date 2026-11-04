@@ -8,5 +8,5 @@ import kotlinx.coroutines.flow.Flow
 interface TagRepository {
     suspend fun getTags(): Flow<Resource<Tags>>
     suspend fun searchTag(tag:String): Flow<Resource<SearchedTags>>
-    suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<Tags>>
+    suspend fun toggleFavoriteTag(tagId: Long): Flow<Resource<Tags>>
 }

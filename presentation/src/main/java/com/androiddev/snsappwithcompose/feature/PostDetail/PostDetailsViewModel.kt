@@ -57,8 +57,8 @@ class PostDetailsViewModel @Inject constructor(
 
     private val _postDetailUiState = MutableStateFlow(PostDetailUiState(isLoading = true))
     val postDetailUiState: StateFlow<PostDetailUiState> = _postDetailUiState.asStateFlow()
-    private val _commentStateMap = MutableStateFlow<Map<Int, Comment>>(emptyMap())
-    val commentStateMap: StateFlow<Map<Int,Comment>> = _commentStateMap.asStateFlow()
+    private val _commentStateMap = MutableStateFlow<Map<Long, Comment>>(emptyMap())
+    val commentStateMap: StateFlow<Map<Long,Comment>> = _commentStateMap.asStateFlow()
 
 
     private val _newlyAddedComments = MutableStateFlow<List<Comment>>(emptyList())
@@ -205,7 +205,7 @@ class PostDetailsViewModel @Inject constructor(
             }
         }
     }
-    private fun loadCommentByNotification(commentId: Int) {
+    private fun loadCommentByNotification(commentId: Long) {
         viewModelScope.launch {
             commentUseCases.GetNotificationComment(commentId).collect { result ->
                 result.handle (
@@ -423,7 +423,7 @@ class PostDetailsViewModel @Inject constructor(
             onClickCancel = { resetDialogState() }
         )
     }
-    private fun deletePost(postId: Int) {
+    private fun deletePost(postId: Long) {
         viewModelScope.launch {
             postDetailUseCases.DeletePost(postId).collect { result ->
                 result.handle(

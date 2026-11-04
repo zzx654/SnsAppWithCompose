@@ -33,8 +33,8 @@ class UserViewModel @Inject constructor(
         get() = _nicknameSearchQuery.asStateFlow()
 
 
-    private val _userStateMap = MutableStateFlow<Map<Int, User>>(emptyMap())
-    val userStateMap: StateFlow<Map<Int, User>> = _userStateMap.asStateFlow()
+    private val _userStateMap = MutableStateFlow<Map<Long, User>>(emptyMap())
+    val userStateMap: StateFlow<Map<Long, User>> = _userStateMap.asStateFlow()
     private val _userInfo: MutableState<User?> = mutableStateOf(null)
     val userInfo: State<User?>
         get() = _userInfo
@@ -55,7 +55,7 @@ class UserViewModel @Inject constructor(
             }
         }
         .cachedIn(viewModelScope)
-    private fun fetchUserInfo(userId:Int) {
+    private fun fetchUserInfo(userId:Long) {
         viewModelScope.launch {
             userUseCases.getUserInfo(userId).collect { result ->
                 result.handle(
@@ -64,7 +64,7 @@ class UserViewModel @Inject constructor(
             }
         }
     }
-    fun refreshUser(userId: Int) {
+    fun refreshUser(userId: Long) {
         onEvent(UserEvent.GetUserInfo(userId))
     }
     fun onEvent(event:UserEvent) {

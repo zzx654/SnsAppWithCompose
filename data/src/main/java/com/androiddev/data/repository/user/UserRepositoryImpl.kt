@@ -29,13 +29,13 @@ class UserRepositoryImpl @Inject constructor(
         GenericPagingSource(strategy)
     }
 
-    override suspend fun toggleFollowUser(userId: Int): Flow<Resource<ToggleFollowResult>> = safeApiCall(
+    override suspend fun toggleFollowUser(userId: Long): Flow<Resource<ToggleFollowResult>> = safeApiCall(
         context = context,
         apiCall = { api.toggleFollowUser(userId)},
         mapToResource = { it.toDomain()}
     )
 
-    override suspend fun getUserInfo(userId: Int): Flow<Resource<List<User>>> = safeApiCall(
+    override suspend fun getUserInfo(userId: Long): Flow<Resource<List<User>>> = safeApiCall(
         context = context,
         apiCall = { api.getUserInfo(userId) },
         mapToResource = {
@@ -44,7 +44,7 @@ class UserRepositoryImpl @Inject constructor(
     )
 
     override fun getMediaPosts(
-        userId: Int,
+        userId: Long,
         type: String,
         locationState:LocationState
     ): Flow<PagingData<MediaPost>> = createPager{

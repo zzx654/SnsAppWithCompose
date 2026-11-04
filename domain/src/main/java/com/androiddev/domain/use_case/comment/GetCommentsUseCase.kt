@@ -10,7 +10,7 @@ import javax.inject.Inject
 class GetCommentsUseCase @Inject constructor(
     private val repository: CommentRepository
 ) {
-    suspend operator fun invoke(postId: Int, sortType: CommentSortType): Flow<PagingData<Comment>> {
+    suspend operator fun invoke(postId: Long, sortType: CommentSortType): Flow<PagingData<Comment>> {
         return repository.getComments(postId, sortType)
     }
 }

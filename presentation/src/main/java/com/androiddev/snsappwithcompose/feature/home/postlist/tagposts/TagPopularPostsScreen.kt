@@ -17,7 +17,7 @@ import com.androiddev.snsappwithcompose.feature.home.postlist.popularposts.Popul
 @Composable
 fun TagPopularPostsScreen(
     navController: NavController,
-    tagId:Int,
+    tagId:Long,
     viewModel: PopularPostsViewModel = hiltViewModel()
 ) {
     val postItems =

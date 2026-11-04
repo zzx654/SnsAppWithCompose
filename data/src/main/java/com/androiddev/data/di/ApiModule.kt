@@ -13,6 +13,7 @@ import com.androiddev.data.remote.api.tag.TagApi
 import com.androiddev.data.remote.api.uploadpost.UploadPostApi
 import com.androiddev.data.remote.api.postdetail.VoteApi
 import com.androiddev.data.local.UserPreferences
+import com.androiddev.data.remote.api.chat.ChatApi
 import com.androiddev.data.remote.api.fcm.FcmApi
 import com.androiddev.data.remote.api.notification.NotificationApi
 import com.androiddev.data.remote.api.user.UserApi
@@ -118,4 +119,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideUserApi(retrofit: Retrofit): UserApi = retrofit.create(UserApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideChatApi(retrofit: Retrofit): ChatApi = retrofit.create(ChatApi::class.java)
 }

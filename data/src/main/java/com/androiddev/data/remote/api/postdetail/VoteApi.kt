@@ -11,19 +11,19 @@ interface VoteApi {
     @FormUrlEncoded
     @POST("postdetail/getVoteInfo")
     suspend fun getVoteInfo(
-        @Field("postid")postid: Int
+        @Field("postid")postid: Long
     ): Response<BaseApiResponse<VoteInfoDto>>
 
     @FormUrlEncoded
     @POST("postdetail/vote")
     suspend fun vote(
-        @Field("postid")postid: Int,
-        @Field("optionid")optionid: Int
+        @Field("postid")postid: Long,
+        @Field("optionid")optionid: Long
     ): Response<BaseApiResponse<VoteInfoDto>>
     @FormUrlEncoded
     @POST("postdetail/cancelVote")
     suspend fun cancelVote(
-        @Field("postid")postid: Int
+        @Field("postid")postid: Long
     ): Response<BaseApiResponse<Unit>>
 
 }

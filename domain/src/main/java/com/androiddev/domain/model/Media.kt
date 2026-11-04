@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class Media(
-    val id: Int,
+    val id: Long,
     val url: String,
     val type: String,
     val thumbnailUrl:String?

@@ -5,9 +5,9 @@ import com.androiddev.domain.model.MediaPost
 import kotlin.math.round
 
 data class MediaPostDto (
-    val id: Int,
-    val userid: Int,
-    val postid: Int,
+    val id: Long,
+    val userid: Long,
+    val postid: Long,
     val type: String,
     val url: String,
     val thumbnailurl: String?,

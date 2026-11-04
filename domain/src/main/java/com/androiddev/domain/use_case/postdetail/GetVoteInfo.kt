@@ -9,6 +9,6 @@ import javax.inject.Inject
 class GetVoteInfo @Inject constructor(
     private val repository: VoteRepository
 ) {
-    suspend operator fun invoke(postId:Int): Flow<Resource<VoteInfo>> = repository.getVoteInfo(postId)
+    suspend operator fun invoke(postId: Long): Flow<Resource<VoteInfo>> = repository.getVoteInfo(postId)
 
 }

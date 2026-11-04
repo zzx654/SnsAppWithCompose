@@ -14,7 +14,7 @@ interface ToggleLikePostApi {
     @FormUrlEncoded
     @POST("postdetail/toggleLikePost")
     suspend fun toggleLikePost(
-        @Field("postid")postid: Int,
+        @Field("postid")postid: Long,
     ): Response<BaseApiResponse<ToggleLikeDto>>
 
 }

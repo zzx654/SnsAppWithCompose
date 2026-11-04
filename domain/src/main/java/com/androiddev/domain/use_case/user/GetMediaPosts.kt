@@ -14,7 +14,7 @@ class GetMediaPosts @Inject constructor(
     private val locationTracker: LocationTracker
 ) {
      operator fun invoke(
-        userId:Int,
+        userId: Long,
         type:String
     ): Flow<PagingData<MediaPost>> = flow {
         val locationState = locationTracker.updateLocation()

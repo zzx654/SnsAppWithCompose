@@ -11,12 +11,12 @@ interface PostApi {
     @FormUrlEncoded
     @POST("postdetail/deletePost")
     suspend fun deletePost(
-        @Field("postid")postid: Int
+        @Field("postid")postid: Long
     ): Response<BaseApiResponse<Unit>>
     @FormUrlEncoded
     @POST("postdetail/getPost")
     suspend fun getPost(
-        @Field("postid")postid: Int,
+        @Field("postid")postid: Long,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
     ):Response<BaseApiResponse<PostsDto>>

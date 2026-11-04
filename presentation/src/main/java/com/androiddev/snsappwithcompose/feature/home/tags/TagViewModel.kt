@@ -72,7 +72,7 @@ class TagViewModel @Inject constructor(
             }
         }
     }
-    private fun toggleFavorite(tagId: Int) {
+    private fun toggleFavorite(tagId: Long) {
         viewModelScope.launch {
             tagUseCases.toggleFavoriteTag(tagId).collect { result ->
                 result.handle(
@@ -81,7 +81,7 @@ class TagViewModel @Inject constructor(
                             favoriteTags = data.favoriteTags,
                             popularTags = data.popularTags,
                             searchedTags = _getTagsState.value.searchedTags.map { tag ->
-                                if (tag.tagid == tagId) tag.copy(isliked = if(tag.isliked==1) 0 else 1) else tag
+                                if (tag.tagid == tagId) tag.copy(isliked = if(tag.isliked == 1) 0 else 1) else tag
                             }
                         )
                     }
@@ -89,7 +89,7 @@ class TagViewModel @Inject constructor(
             }
         }
     }
-    fun getTagById(tagId: Int): Tag? {
+    fun getTagById(tagId: Long): Tag? {
         return _getTagsState.value.favoriteTags.find { it.tagid == tagId }
             ?: _getTagsState.value.popularTags.find { it.tagid == tagId }
             ?: _getTagsState.value.searchedTags.find { it.tagid == tagId }

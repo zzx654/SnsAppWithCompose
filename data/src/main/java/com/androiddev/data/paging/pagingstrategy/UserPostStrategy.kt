@@ -11,7 +11,7 @@ import retrofit2.Response
 
 class UserPostStrategy(
     private val api:GetPostsApi,
-    private val userId:Int? = null,
+    private val userId: Long? = null,
     private val locationState:LocationState?
 ): PagingStrategy<PostsDto, Post,PostCursor.Recent> {
     override suspend fun fetch(cursor: PostCursor.Recent?): Response<BaseApiResponse<PostsDto>> {

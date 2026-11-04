@@ -22,7 +22,7 @@ class PostListRepositoryImpl @Inject constructor(
 
 
     override fun getRecentPosts(
-        tagId: Int?,
+        tagId: Long?,
         locationState: LocationState
     ): Flow<PagingData<Post>> = createPager {
         val strategy = RecentPostStrategy(api = api, tagId = tagId, locationState = locationState)
@@ -31,7 +31,7 @@ class PostListRepositoryImpl @Inject constructor(
 
 
     override fun getPopularPosts(
-        tagId: Int?,
+        tagId: Long?,
         locationState: LocationState
     ): Flow<PagingData<Post>> = createPager {
         val strategy = PopularPostStrategy(api = api, tagId = tagId, locationState = locationState)
@@ -51,7 +51,7 @@ class PostListRepositoryImpl @Inject constructor(
     }
 
     override fun getUserPosts(
-        userId: Int,
+        userId: Long,
         locationState: LocationState
     ): Flow<PagingData<Post>> = createPager {
         val strategy = UserPostStrategy(api = api, userId = userId, locationState = locationState)

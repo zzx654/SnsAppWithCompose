@@ -5,7 +5,7 @@ import com.androiddev.domain.model.SigninResult
 data class SigninResultDto (
     val isMember: Boolean,
     val profileWritten: Boolean,
-    val userId: Int?,
+    val userId: Long?,
     val token: String,
 )
 fun SigninResultDto.toDomain(

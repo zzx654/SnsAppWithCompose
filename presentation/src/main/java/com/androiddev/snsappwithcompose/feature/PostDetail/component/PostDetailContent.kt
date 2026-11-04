@@ -70,8 +70,8 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.vote.component.PollCa
 @Composable
 fun PostDetailContent(
     navController: NavController,
-    commentStateMap: Map<Int, Comment>,
-    userId:Int?,
+    commentStateMap: Map<Long, Comment>,
+    userId: Long?,
     commentSortType: CommentSortType,
     postDetailUiState: PostDetailUiState,
     onPostDetailEvent:(PostDetailEvent)->Unit,

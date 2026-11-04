@@ -5,5 +5,5 @@ import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface ToggleLikePostRepository {
-    suspend fun toggleLikePost(postid:Int) : Flow<Resource<ToggleLikeResult>>
+    suspend fun toggleLikePost(postid: Long) : Flow<Resource<ToggleLikeResult>>
 }

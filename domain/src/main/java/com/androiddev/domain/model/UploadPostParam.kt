@@ -3,7 +3,7 @@ package com.androiddev.domain.model
 import android.net.Uri
 
 data class UploadPostParam(
-    val postId: Int? = null,
+    val postId: Long? = null,
     val text: String,
     val tags: List<String> = emptyList(),
     val mediaItems: List<MediaParam> = emptyList(), // 로컬 Uri/Path 정보

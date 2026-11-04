@@ -22,13 +22,13 @@ class PostRepositoryImpl @Inject constructor(
 ): PostRepository {
     private val _postDetailState = MutableStateFlow<Post?>(null)
     override val postDetailState: StateFlow<Post?> = _postDetailState.asStateFlow()
-    override suspend fun deletePost(postId: Int): Flow<Resource<Unit>> =
+    override suspend fun deletePost(postId: Long): Flow<Resource<Unit>> =
         safeApiCall(
             apiCall = { api.deletePost(postId) },
             mapToResource = {}
         )
     override suspend fun getPost(
-        postId: Int,
+        postId: Long,
         latitude:Double?,
         longitude:Double?
     ): Flow<Resource<List<Post>>> = flow {
@@ -64,17 +64,11 @@ class PostRepositoryImpl @Inject constructor(
         }
 
     }
-
-    override fun getCachedPost(postId: Int): Post? {
+    override fun getCachedPost(postId: Long): Post? {
         val current = _postDetailState.value
         return if (current?.postId == postId) current else null
     }
-
     override fun updateCachedPost(updatedPost: Post) {
         _postDetailState.value = updatedPost
     }
-
-
-
-
 }

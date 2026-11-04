@@ -4,11 +4,11 @@ import com.androiddev.data.util.formatFullUrl
 import com.androiddev.domain.model.Comment
 
 data class CommentDto (
-    val postid: Int,
-    val commentid: Int,
-    val userid: Int,
+    val postid: Long,
+    val commentid: Long,
+    val userid: Long,
     val text: String,
-    val ref: Int,
+    val ref: Long,
     val date:String,
     val depth: Int,
     val anonymous: String?,

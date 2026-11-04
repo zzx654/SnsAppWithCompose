@@ -14,7 +14,7 @@ class GetUserPosts @Inject constructor(
     private val repository: PostListRepository,
     private val locationTracker: LocationTracker
 ) {
-    operator fun invoke(userId:Int):Flow<PagingData<Post>> = flow{
+    operator fun invoke(userId: Long):Flow<PagingData<Post>> = flow{
         val locationState = locationTracker.updateLocation()
         emitAll(repository.getUserPosts(userId = userId,locationState = locationState))
     }

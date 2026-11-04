@@ -6,7 +6,7 @@ import kotlin.math.sign
 data class SigninWithTokenResultDto(
     val signInResult:Boolean,
     val profileWritten:Boolean,
-    val userId: Int?,
+    val userId: Long?,
 )
 fun SigninWithTokenResultDto.toDomain(
 ):SigninWithTokenResult {

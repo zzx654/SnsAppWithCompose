@@ -7,9 +7,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class MediaPost (
-    val id: Int,
-    val postId:Int,
-    val userId:Int,
+    val id: Long,
+    val postId: Long,
+    val userId: Long,
     val nickname:String,
     val text: String,
     val date:String,

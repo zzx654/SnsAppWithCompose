@@ -14,8 +14,8 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.comment.CommentEvent
 fun BoundCommentRow(
     showReplyCount:Boolean = true,
     comment: Comment,
-    commentStateMap: Map<Int, Comment>,
-    userId: Int?,
+    commentStateMap: Map<Long, Comment>,
+    userId: Long?,
     imageLoader: ImageLoader,
     onCommentEvent: (CommentEvent) -> Unit = {}
 ) {
@@ -57,7 +57,8 @@ fun BoundCommentRow(
                     onCommentEvent(
                         CommentEvent.ShowCommentOptions(
                             myUserId = my,
-                            commentUserId = updatedComment.userId
+                            commentUserId = updatedComment.userId,
+                            commentId = updatedComment.commentId
                         )
                     )
                 }

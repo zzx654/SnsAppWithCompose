@@ -13,41 +13,41 @@ interface CommentApi {
     @FormUrlEncoded
     @POST("comment/postReply")
     suspend fun postReply(
-        @Field("postid")postid: Int,
-        @Field("ref")ref: Int,
+        @Field("postid")postid: Long,
+        @Field("ref")ref: Long,
         @Field("text")text: String,
         @Field("anonymousNick")anonymousNick : String?
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
     @POST("comment/getReplies")
     suspend fun getReplies(
-        @Field("ref")ref: Int,
-        @Field("commentid")commentid: Int?,
+        @Field("ref")ref: Long,
+        @Field("commentid")commentid: Long?,
         @Field("commentdate")commentdate : String?
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
     @POST("comment/getSelectedComment")
     suspend fun getSelectedComment(
-        @Field("commentid")commentid: Int?,
+        @Field("commentid")commentid: Long?,
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
     @POST("comment/getComments")
     suspend fun getComments(
-        @Field("postid")postid: Int,
-        @Field("commentid")commentid: Int?,
+        @Field("postid")postid: Long,
+        @Field("commentid")commentid: Long?,
         @Field("commentdate")commentdate : String?
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
     @POST("comment/getPopularComments")
     suspend fun getPopularComments(
-        @Field("postid")postid: Int,
-        @Field("commentid")commentid: Int?,
+        @Field("postid")postid: Long,
+        @Field("commentid")commentid: Long?,
         @Field("score")score : Int?
     ): Response<BaseApiResponse<CommentsDto>>
     @FormUrlEncoded
     @POST("comment/postComment")
     suspend fun postComments(
-        @Field("postid")postid: Int,
+        @Field("postid")postid: Long,
         @Field("text")text: String,
         @Field("anonymousNick")anonymousNick : String?
     ): Response<BaseApiResponse<CommentsDto>>
@@ -55,12 +55,12 @@ interface CommentApi {
     @FormUrlEncoded
     @POST("comment/toggleLikeComment")
     suspend fun toggleLikeComment(
-        @Field("commentid")commentid: Int,
+        @Field("commentid")commentid: Long,
     ): Response<BaseApiResponse<ToggleLikeDto>>
 
     @FormUrlEncoded
     @POST("comment/getNotificationComment")
     suspend fun getNotificationComment(
-        @Field("commentid")commentid: Int,
+        @Field("commentid")commentid: Long,
     ): Response<BaseApiResponse<NotificationCommentDto>>
 }

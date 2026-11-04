@@ -10,8 +10,8 @@ import com.androiddev.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
-    fun getSearchedUsers(nickname:String): Flow<PagingData<User>>
-    suspend fun toggleFollowUser(userId:Int): Flow<Resource<ToggleFollowResult>>
-    suspend fun getUserInfo(userId:Int): Flow<Resource<List<User>>>
-    fun getMediaPosts(userId:Int,type:String,locationState: LocationState):Flow<PagingData<MediaPost>>
+    fun getSearchedUsers(nickname: String): Flow<PagingData<User>>
+    suspend fun toggleFollowUser(userId: Long): Flow<Resource<ToggleFollowResult>>
+    suspend fun getUserInfo(userId: Long): Flow<Resource<List<User>>>
+    fun getMediaPosts(userId: Long,type: String,locationState: LocationState):Flow<PagingData<MediaPost>>
 }

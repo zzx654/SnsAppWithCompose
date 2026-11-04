@@ -17,7 +17,7 @@ import com.androiddev.snsappwithcompose.feature.home.postlist.recentposts.Recent
 @Composable
 fun TagRecentPostsScreen(
     navController: NavController,
-    tagId:Int,
+    tagId:Long,
     viewModel: RecentPostsViewModel = hiltViewModel()
 ) {
     val postItems =

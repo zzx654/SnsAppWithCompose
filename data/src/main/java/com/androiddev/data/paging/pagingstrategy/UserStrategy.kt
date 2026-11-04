@@ -11,8 +11,8 @@ import retrofit2.Response
 class UserStrategy (
     private val nickname:String,
     private val api: UserApi,
-): PagingStrategy<UsersDto, User, Int> {
-    override suspend fun fetch(cursor: Int?): Response<BaseApiResponse<UsersDto>> {
+): PagingStrategy<UsersDto, User, Long> {
+    override suspend fun fetch(cursor: Long?): Response<BaseApiResponse<UsersDto>> {
         return api.getSearchedUsers(
             nickname = nickname,
             lastuserid = cursor
@@ -24,7 +24,7 @@ class UserStrategy (
         return data.users.map{ it.toDomain() }
     }
 
-    override fun extractNextCursor(items: List<User>, pageSize: Int): Int? {
+    override fun extractNextCursor(items: List<User>, pageSize: Int): Long? {
         if (items.isEmpty() || items.size < pageSize) return null
         val lastItem = items.last()
         return lastItem.userId

@@ -19,7 +19,7 @@ class PopularPostsViewModel @Inject constructor(
 ) : BasePostsViewModel() {
 
     // NavArgs 또는 StateHandle에서 tagId 추출 (없으면 null)
-    private val tagId: Int? = savedStateHandle.get<Int>("tagId")
+    private val tagId: Long? = savedStateHandle.get<Long>("tagId")
 
     val pagingDataStream: Flow<PagingData<Post>> =
         getPostsUseCases.getRecentPosts(tagId).cachedIn(viewModelScope)//

@@ -21,6 +21,6 @@ interface TagApi {
     @FormUrlEncoded
     @POST("tag/ToggleFavoriteTag")
     suspend fun toggleFavoriteTag(
-        @Field("tagid")tagid: Int
+        @Field("tagid")tagid: Long
     ): Response<BaseApiResponse<TagsDto>>
 }

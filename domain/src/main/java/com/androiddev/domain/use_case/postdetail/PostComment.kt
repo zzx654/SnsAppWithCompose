@@ -9,5 +9,5 @@ import javax.inject.Inject
 class PostComment @Inject constructor(
     private val repository: CommentRepository
 ) {
-    suspend operator fun invoke(postId:Int,text:String,anonymousNick:String? = null): Flow<Resource<List<Comment>>> = repository.postComment(postId,text,anonymousNick)
+    suspend operator fun invoke(postId:Long,text:String,anonymousNick:String? = null): Flow<Resource<List<Comment>>> = repository.postComment(postId,text,anonymousNick)
 }

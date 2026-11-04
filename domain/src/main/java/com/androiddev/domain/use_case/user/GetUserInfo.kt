@@ -11,6 +11,6 @@ class GetUserInfo @Inject constructor(
     private val repository: UserRepository
 ) {
     suspend operator fun invoke(
-        userId:Int
+        userId: Long
     ): Flow<Resource<List<User>>> = repository.getUserInfo(userId)
 }

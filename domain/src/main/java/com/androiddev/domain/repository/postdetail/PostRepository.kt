@@ -7,13 +7,13 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface PostRepository {
     val postDetailState: StateFlow<Post?>
-    suspend fun deletePost(postId:Int): Flow<Resource<Unit>>
+    suspend fun deletePost(postId:Long): Flow<Resource<Unit>>
     suspend fun getPost(
-        postId:Int,
-        latitude:Double?,
-        longitude:Double?
+        postId: Long,
+        latitude: Double?,
+        longitude: Double?
     ):Flow<Resource<List<Post>>>
 
-    fun getCachedPost(postId: Int): Post?
+    fun getCachedPost(postId: Long): Post?
     fun updateCachedPost(updatedPost: Post)
 }

@@ -9,7 +9,7 @@ import javax.inject.Inject
 class GetRepliesUseCase @Inject constructor(
     private val repository: CommentRepository
 ) {
-    suspend operator fun invoke(ref:Int): Flow<PagingData<Comment>> {
+    suspend operator fun invoke(ref:Long): Flow<PagingData<Comment>> {
         return repository.getReplies(ref)
     }
 }

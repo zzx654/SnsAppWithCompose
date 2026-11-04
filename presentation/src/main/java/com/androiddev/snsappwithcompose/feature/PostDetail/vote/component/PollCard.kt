@@ -43,7 +43,7 @@ import com.androiddev.snsappwithcompose.feature.PostDetail.vote.VoteState
 @Composable
 fun PollCard(
     voteState: VoteState,
-    onOptionSelected:(Int) ->Unit,
+    onOptionSelected:(Long) ->Unit,
     onVoteClick:() ->Unit
 ) {
     val context = LocalContext.current

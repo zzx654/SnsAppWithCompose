@@ -10,5 +10,5 @@ import javax.inject.Inject
 class ToggleFavoriteTag @Inject constructor(
     private val repository: TagRepository
 ) {
-    suspend operator fun invoke(tagId:Int): Flow<Resource<Tags>> = repository.toggleFavoriteTag(tagId = tagId)
+    suspend operator fun invoke(tagId: Long): Flow<Resource<Tags>> = repository.toggleFavoriteTag(tagId = tagId)
 }

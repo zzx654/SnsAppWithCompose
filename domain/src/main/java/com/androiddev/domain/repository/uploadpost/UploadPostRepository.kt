@@ -12,7 +12,7 @@ interface UploadPostRepository {
         param: UploadPostParam
     ): Flow<Resource<Unit>>
     suspend fun editPost(
-        postid:Int,
+        postid:Long,
         param: UploadPostParam,
         deletedVisualMedia: List<String>,
         deletedAudio: String?,

@@ -9,6 +9,6 @@ import javax.inject.Inject
 class GetSelectedCommentUseCase @Inject constructor(
     private val repository: CommentRepository
 ) {
-    suspend operator fun invoke(commentId:Int): Flow<Resource<List<Comment>>> = repository.getSelectedComment(commentId)
+    suspend operator fun invoke(commentId: Long): Flow<Resource<List<Comment>>> = repository.getSelectedComment(commentId)
 
 }

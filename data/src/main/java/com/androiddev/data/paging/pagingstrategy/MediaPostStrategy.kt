@@ -11,11 +11,11 @@ import retrofit2.Response
 
 class MediaPostStrategy (
     private val api: UserApi,
-    private val userId:Int,
-    private val type:String,
+    private val userId: Long,
+    private val type: String,
     private val locationState: LocationState
-): PagingStrategy<MediaPostsDto, MediaPost, Int> {
-    override suspend fun fetch(cursor: Int?): Response<BaseApiResponse<MediaPostsDto>> {
+): PagingStrategy<MediaPostsDto, MediaPost, Long> {
+    override suspend fun fetch(cursor: Long?): Response<BaseApiResponse<MediaPostsDto>> {
         return api.getMedia(
             userid = userId,
             type = type,
@@ -30,7 +30,7 @@ class MediaPostStrategy (
         return data.mediaPosts.map{ it.toDomain() }
     }
 
-    override fun extractNextCursor(items: List<MediaPost>, pageSize: Int): Int? {
+    override fun extractNextCursor(items: List<MediaPost>, pageSize: Int): Long? {
         return  items.lastOrNull()?.id?.takeIf {
             items.size == pageSize
         }

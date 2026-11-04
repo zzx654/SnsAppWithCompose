@@ -5,7 +5,7 @@ import com.androiddev.data.util.formatFullUrl
 import com.androiddev.domain.model.Media
 
 data class MediaDto(
-    val id: Int,
+    val id: Long,
     val url: String,
     val type: String,
     val thumbnailurl: String?

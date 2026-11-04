@@ -25,7 +25,7 @@ class CommentRepositoryImpl @Inject constructor(
     private val context: Context
 ): CommentRepository {
 
-    override suspend fun getNotificationComment(commentId: Int): Flow<Resource<NotificationComment>>  =
+    override suspend fun getNotificationComment(commentId: Long): Flow<Resource<NotificationComment>>  =
         safeApiCall(
             context = context,
             apiCall = { api.getNotificationComment(commentId)},
@@ -34,13 +34,13 @@ class CommentRepositoryImpl @Inject constructor(
             }
         )
     override suspend fun getReplies(
-        ref: Int
+        ref: Long
     ): Flow<PagingData<Comment>> = createPager {
         GenericPagingSource(OldestReplyStrategy(api,ref))
     }
 
     override suspend fun getSelectedComment(
-        commentId: Int
+        commentId: Long
     ): Flow<Resource<List<Comment>>> = safeApiCall(
         context = context,
         apiCall = { api.getSelectedComment(commentId) },
@@ -50,7 +50,7 @@ class CommentRepositoryImpl @Inject constructor(
     )
 
     override suspend fun getComments(
-        postId: Int,
+        postId: Long,
         sortType: CommentSortType
     ): Flow<PagingData<Comment>> = createPager {
         val strategy = when (sortType) {
@@ -61,7 +61,7 @@ class CommentRepositoryImpl @Inject constructor(
     }
 
     override suspend fun postComment(
-        postId: Int,
+        postId: Long,
         text: String,
         anonymousNick: String?
     ): Flow<Resource<List<Comment>>> = safeApiCall(
@@ -73,8 +73,8 @@ class CommentRepositoryImpl @Inject constructor(
     )
 
     override suspend fun postReply(
-        postId: Int,
-        ref: Int,
+        postId: Long,
+        ref: Long,
         text: String,
         anonymousNick: String?
     ): Flow<Resource<List<Comment>>> = safeApiCall(
@@ -85,7 +85,7 @@ class CommentRepositoryImpl @Inject constructor(
         }
     )
 
-    override suspend fun toggleLikeComment(commentId: Int): Flow<Resource<ToggleLikeResult>> =
+    override suspend fun toggleLikeComment(commentId: Long): Flow<Resource<ToggleLikeResult>> =
         safeApiCall(
             context = context,
             apiCall = { api.toggleLikeComment(commentId) },

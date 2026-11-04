@@ -11,30 +11,30 @@ import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {
     suspend fun getNotificationComment(
-        commentId:Int
+        commentId: Long
     ): Flow<Resource<NotificationComment>>
     suspend fun getReplies(
-        ref: Int
+        ref: Long
     ): Flow<PagingData<Comment>>
     suspend fun getSelectedComment(
-        commentId:Int
+        commentId: Long
     ): Flow<Resource<List<Comment>>>
     suspend fun getComments(
-        postId: Int,
+        postId: Long,
         sortType: CommentSortType
     ): Flow<PagingData<Comment>>
 
     suspend fun postComment(
-        postId:Int,
+        postId: Long,
         text: String,
         anonymousNick:String?
     ): Flow<Resource<List<Comment>>>
     suspend fun postReply(
-        postId: Int,
-        ref: Int,
+        postId: Long,
+        ref: Long,
         text: String,
         anonymousNick: String?
     ): Flow<Resource<List<Comment>>>
 
-    suspend fun toggleLikeComment(commentId:Int) : Flow<Resource<ToggleLikeResult>>
+    suspend fun toggleLikeComment(commentId:Long) : Flow<Resource<ToggleLikeResult>>
 }

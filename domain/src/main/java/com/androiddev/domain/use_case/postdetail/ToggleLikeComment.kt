@@ -9,6 +9,6 @@ import javax.inject.Inject
 class ToggleLikeComment @Inject constructor(
     private val repository: CommentRepository
 ) {
-    suspend operator fun invoke(commentId:Int): Flow<Resource<ToggleLikeResult>> = repository.toggleLikeComment(commentId)
+    suspend operator fun invoke(commentId:Long): Flow<Resource<ToggleLikeResult>> = repository.toggleLikeComment(commentId)
 
 }

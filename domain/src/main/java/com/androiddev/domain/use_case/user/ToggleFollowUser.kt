@@ -10,6 +10,6 @@ class ToggleFollowUser @Inject constructor(
     private val repository: UserRepository
 ) {
     suspend operator fun invoke(
-        userId:Int
+        userId: Long
     ): Flow<Resource<ToggleFollowResult>> = repository.toggleFollowUser(userId = userId)
 }

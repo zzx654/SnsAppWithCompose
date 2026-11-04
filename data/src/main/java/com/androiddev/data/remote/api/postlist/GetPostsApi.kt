@@ -11,17 +11,17 @@ interface GetPostsApi {
     @FormUrlEncoded
     @POST("postlist/getNewTagPosts")
     suspend fun getTagRecentPosts(
-        @Field("postid")postid: Int?,
+        @Field("postid")postid: Long?,
         @Field("postdate")postdate:String?,
-        @Field("tagid")tagid: Int,
+        @Field("tagid")tagid: Long,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
     ): Response<BaseApiResponse<PostsDto>>
     @FormUrlEncoded
     @POST("postlist/getPopularTagPosts")
     suspend fun getTagPopularPosts(
-        @Field("postid")postid: Int?,
-        @Field("tagid")tagid: Int,
+        @Field("postid")postid: Long?,
+        @Field("tagid")tagid: Long,
         @Field("score")score : Double?,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
@@ -29,7 +29,7 @@ interface GetPostsApi {
     @FormUrlEncoded
     @POST("postlist/getNearPosts")
     suspend fun getNearbyPosts(
-        @Field("postid")postid: Int?,
+        @Field("postid")postid: Long?,
         @Field("postdate")postdate: String?,
         @Field("distancemax")distancemax : Int,
         @Field("latitude")latitude:Double,
@@ -39,7 +39,7 @@ interface GetPostsApi {
     @FormUrlEncoded
     @POST("postlist/getNewPosts")
     suspend fun getRecentPosts(
-        @Field("postid")postid: Int?,
+        @Field("postid")postid: Long?,
         @Field("postdate")postdate: String?,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?
@@ -48,8 +48,8 @@ interface GetPostsApi {
     @FormUrlEncoded
     @POST("postlist/getUserPosts")
     suspend fun getUserPosts(
-        @Field("userid")userid: Int?,
-        @Field("postid")postid: Int?,
+        @Field("userid")userid: Long?,
+        @Field("postid")postid: Long?,
         @Field("postdate")postdate: String?,
         @Field("latitude")latitude:Double?,
         @Field("longitude")longitude:Double?

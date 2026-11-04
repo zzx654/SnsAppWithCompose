@@ -1,10 +1,8 @@
 package com.androiddev.data.repository.postdetail
 
-import android.content.Context
 
 import com.androiddev.data.remote.api.postdetail.ToggleLikePostApi
 import com.androiddev.data.remote.dto.toDomain
-
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.ToggleLikeResult
 import com.androiddev.domain.repository.postdetail.ToggleLikePostRepository
@@ -16,7 +14,7 @@ class ToggleLikePostRepositoryImpl @Inject constructor(
     private val api: ToggleLikePostApi,
 ) : ToggleLikePostRepository {
 
-    override suspend fun toggleLikePost(postid: Int): Flow<Resource<ToggleLikeResult>> =
+    override suspend fun toggleLikePost(postid: Long): Flow<Resource<ToggleLikeResult>> =
         safeApiCall(
             apiCall = { api.toggleLikePost(postid) },
             mapToResource = { it.toDomain() }

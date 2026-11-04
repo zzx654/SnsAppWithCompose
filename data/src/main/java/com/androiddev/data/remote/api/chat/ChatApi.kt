@@ -15,5 +15,4 @@ interface ChatApi {
         @Field("postid") postid: Long?,
         @Field("commentid") commentid: Long?
     ): Response<BaseApiResponse<Unit>>
-
 }

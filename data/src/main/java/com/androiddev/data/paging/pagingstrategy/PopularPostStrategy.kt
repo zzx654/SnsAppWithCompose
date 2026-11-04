@@ -11,7 +11,7 @@ import retrofit2.Response
 
 class PopularPostStrategy(
     private val api:GetPostsApi,
-    private val tagId:Int? = null,
+    private val tagId: Long? = null,
     private val locationState:LocationState?
 ): PagingStrategy<PostsDto, Post,PostCursor.Popular> {
     override suspend fun fetch(cursor: PostCursor.Popular?): Response<BaseApiResponse<PostsDto>> {

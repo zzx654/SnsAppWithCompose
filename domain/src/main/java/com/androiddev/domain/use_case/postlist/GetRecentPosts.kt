@@ -13,7 +13,7 @@ class GetRecentPosts @Inject constructor(
     private val repository: PostListRepository,
     private val locationTracker: LocationTracker
 ) {
-    operator fun invoke(tagId:Int?): Flow<PagingData<Post>> = flow {
+    operator fun invoke(tagId: Long?): Flow<PagingData<Post>> = flow {
         val locationState = locationTracker.updateLocation()
         emitAll(repository.getRecentPosts(tagId = tagId,  locationState = locationState))
     }

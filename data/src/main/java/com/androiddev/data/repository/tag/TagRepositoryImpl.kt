@@ -21,7 +21,7 @@ class TagRepositoryImpl @Inject constructor(
         mapToResource = { it.toDomain()
         }
     )
-    override suspend fun toggleFavoriteTag(tagId:Int): Flow<Resource<Tags>> =
+    override suspend fun toggleFavoriteTag(tagId: Long): Flow<Resource<Tags>> =
         safeApiCall(
             context = context,
             apiCall = { api.toggleFavoriteTag(tagId) },
