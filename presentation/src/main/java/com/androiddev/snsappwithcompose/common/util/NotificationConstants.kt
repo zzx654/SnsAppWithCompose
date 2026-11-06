@@ -1,7 +1,7 @@
 package com.androiddev.snsappwithcompose.common.util
 
 object NotificationConstants {
-    const val CHANNEL_ID_CHAT= "chat_message_channel"
+    const val CHANNEL_ID_CHAT= "chat_channel"
     const val CHANNEL_ID_LIKE = "like_channel"
     const val CHANNEL_ID_COMMENT = "comment_channel"
     const val CHANNEL_ID_FOLLOW = "follow_channel"
@@ -9,6 +9,7 @@ object NotificationConstants {
     const val CHANNEL_ID_RECORD = "record_channel"
 
 
+    const val CHANNEL_NAME_CHAT = "채팅"
     const val CHANNEL_NAME_LIKE = "좋아요 알림"
     const val CHANNEL_NAME_COMMENT = "댓글 알림"
     const val CHANNEL_NAME_FOLLOW = "팔로우 알림"

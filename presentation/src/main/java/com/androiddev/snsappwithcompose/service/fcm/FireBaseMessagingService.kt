@@ -14,9 +14,11 @@ import com.androiddev.domain.model.NotificationExtra
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
 import com.androiddev.snsappwithcompose.MainActivity
 import com.androiddev.snsappwithcompose.R
+import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_CHAT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_COMMENT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_FOLLOW
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_ID_LIKE
+import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_CHAT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_COMMENT
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_FOLLOW
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_LIKE
@@ -47,22 +49,46 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         remoteMessage.data.isNotEmpty().let {
             val data = remoteMessage.data
-            val id = data[FcmKeys.NOTIFICATION_ID]?.toLong() ?: return
-            val type = data[FcmKeys.TYPE] ?: return
+
             val content = data[FcmKeys.CONTENT] ?: ""
             val extraJson = data[FcmKeys.EXTRA_JSON] ?: "{}"
             val date = data[FcmKeys.DATE] ?: ""
             val title = data[FcmKeys.TITLE] ?: ""
             val body = data[FcmKeys.BODY] ?: ""
+            val type = data[FcmKeys.TYPE] ?: NotificationType.CHAT
+            val chatRequestIdStr = data[FcmKeys.CHAT_REQUEST_ID]
+
+            // 이미 채팅요청목록 화면에 있을때 bus로 전달해서 표시하기 위한 데이터
+            val requesterNickname = data[FcmKeys.REQUESTER_NICKNAME] ?: ""
+            val requesterGender = data[FcmKeys.REQUESTER_GENDER] ?: ""
+            val requesterProfileImage = data[FcmKeys.REQUESTER_PROFILEIMAGE] ?: "
+
+            val intent: Intent
+            val id:Long
+
+            if (chatRequestIdStr != null) {
+                //채팅요청 FCM
+                id = chatRequestIdStr.toLongOrNull() ?: return
+                intent = Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    putExtra(FcmKeys.CHAT_REQUEST_ID, id)
+                    putExtra(FcmKeys.EXTRA_JSON, extraJson)
+                }
+            } else {
+                //채팅외 Notification
+                id = data[FcmKeys.NOTIFICATION_ID]?.toLong() ?: return
+
+                intent = Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    putExtra(FcmKeys.NOTIFICATION_ID,id)
+                    putExtra(FcmKeys.TYPE, type)
+                    putExtra(FcmKeys.EXTRA_JSON, extraJson)
+                }
+            }
+
 
             val extra = Gson().fromJson(extraJson, NotificationExtra::class.java)
 
-            val intent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra(FcmKeys.NOTIFICATION_ID,id)
-                putExtra(FcmKeys.TYPE, type)
-                putExtra(FcmKeys.EXTRA_JSON, extraJson)
-            }
 
             val pendingIntent = PendingIntent.getActivity(
                 this,
@@ -92,7 +118,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
 
-    private fun showNotification(id:Int,title: String, messageBody: String, type:String,pendingIntent:PendingIntent) {
+    private fun showNotification(
+        id:Int,title: String,
+        messageBody: String,
+        type:String,
+        pendingIntent:PendingIntent
+    ) {
 
         Log.d("MyFirebaseMessagingService", "Notification received: $title,")
         // Android 13+ 알림 권한 체크
@@ -103,12 +134,14 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
         val channelId = when(type) {
+            NotificationType.CHAT -> CHANNEL_ID_CHAT
             NotificationType.LIKEPOST,NotificationType.LIKECOMMENT -> CHANNEL_ID_LIKE
             NotificationType.COMMENT,NotificationType.REPLY -> CHANNEL_ID_COMMENT
             NotificationType.FOLLOW -> CHANNEL_ID_FOLLOW
             else -> ""
         }
         val channelName = when(type) {
+            NotificationType.CHAT -> CHANNEL_NAME_CHAT
             NotificationType.LIKEPOST, NotificationType.LIKECOMMENT -> CHANNEL_NAME_LIKE
             NotificationType.COMMENT, NotificationType.REPLY -> CHANNEL_NAME_COMMENT
             NotificationType.FOLLOW -> CHANNEL_NAME_FOLLOW

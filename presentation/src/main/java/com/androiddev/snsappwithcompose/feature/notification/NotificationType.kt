@@ -7,4 +7,5 @@ object NotificationType {
     const val FOLLOW = "FOLLOW"
     const val LIKECOMMENT = "LIKECOMMENT"
     const val LIKEREPLY = "LIKEREPLY"
+    const val CHAT = "CHAT"
 }
