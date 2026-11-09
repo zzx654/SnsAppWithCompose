@@ -30,8 +30,16 @@ class ChatViewModel @Inject constructor(
     private val chatUseCases: ChatUseCases
 ): BaseViewModel() {
 
+    // 페이징 여부 확인
+    // 채팅요청목록 개수 상태
+    // 채팅수락 id
+    //채팅거절 id
+
+
     // 앱 실행 중 FCM으로 들어온 실시간 채팅요청 목록
     private val _fcmChatRequests = MutableStateFlow<List<ChatRequest>>(emptyList())
     val fcmChatRequests: StateFlow<List<ChatRequest>> = _fcmChatRequests.asStateFlow()
 
+    private val _serverUnreadCount = MutableStateFlow(0)
+    val serverUnreadCount: StateFlow<Int> = _serverUnreadCount.asStateFlow()
 }
