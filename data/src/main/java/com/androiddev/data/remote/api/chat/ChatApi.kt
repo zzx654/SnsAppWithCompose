@@ -1,14 +1,21 @@
 package com.androiddev.data.remote.api.chat
 
 import com.androiddev.data.remote.BaseApiResponse
+import com.androiddev.data.remote.dto.ChatRequestsCountDto
 import com.androiddev.data.remote.dto.ChatRequestsDto
 import com.androiddev.data.remote.dto.NotificationsDto
+import com.androiddev.domain.use_case.chat.GetChatRequests
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
 interface ChatApi {
+
+    @FormUrlEncoded
+    @POST("chat/getChatRequestsCount")
+    suspend fun getChatRequestsCount(
+    ): Response<BaseApiResponse<ChatRequestsCountDto>>
 
     @FormUrlEncoded
     @POST("chat/createChatRequest")
@@ -24,5 +31,6 @@ interface ChatApi {
         @Field("chatrequestid")chatrequestid: Long?,
         @Field("chatrequestdate")chatrequestdate : String?
     ):Response<BaseApiResponse<ChatRequestsDto>>
+
 
 }

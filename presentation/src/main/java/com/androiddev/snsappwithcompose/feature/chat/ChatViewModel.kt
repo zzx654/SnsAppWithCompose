@@ -1,6 +1,7 @@
 package com.androiddev.snsappwithcompose.feature.chat
 
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.androiddev.domain.model.ChatRequest
 import com.androiddev.domain.use_case.chat.ChatUseCases
 import com.androiddev.snsappwithcompose.common.base.BaseViewModel
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 object ChatRequestEventBus {
@@ -42,4 +44,18 @@ class ChatViewModel @Inject constructor(
 
     private val _serverUnreadCount = MutableStateFlow(0)
     val serverUnreadCount: StateFlow<Int> = _serverUnreadCount.asStateFlow()
+
+    private fun fetchUnreadCount() {
+        viewModelScope.launch {
+            chatUseCases.getChatRequestsCount().collect { result ->
+                result.handle(
+                    onLoading = {
+                    },
+                    onSuccess = { count ->
+                        _serverUnreadCount.value = count
+                    }
+                )
+            }
+        }
+    }
 }

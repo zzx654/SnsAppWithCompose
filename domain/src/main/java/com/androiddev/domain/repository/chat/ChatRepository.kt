@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface ChatRepository {
     fun getChatRequests(): Flow<PagingData<ChatRequest>>
+    suspend fun getChatRequestsCount(): Flow<Resource<Int>>
     suspend fun createChatRequest(
         targetUserId: Long,
         postId: Long?,

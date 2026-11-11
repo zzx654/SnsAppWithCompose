@@ -5,6 +5,7 @@ import com.androiddev.data.paging.createPager
 import com.androiddev.data.paging.pagingsource.GenericPagingSource
 import com.androiddev.data.paging.pagingstrategy.ChatRequestStrategy
 import com.androiddev.data.remote.api.chat.ChatApi
+import com.androiddev.data.remote.dto.toDomain
 import com.androiddev.data.util.safeApiCall
 import com.androiddev.domain.model.ChatRequest
 import com.androiddev.domain.repository.chat.ChatRepository
@@ -20,6 +21,12 @@ class ChatRepositoryImpl @Inject constructor(
             ChatRequestStrategy(api = api)
         )
     }
+
+    override suspend fun getChatRequestsCount(): Flow<Resource<Int>> = safeApiCall(
+        apiCall = { api.getChatRequestsCount() },
+        mapToResource = { it.toDomain() }
+    )
+
     override suspend fun createChatRequest(
         targetUserId: Long,
         postId: Long?,
