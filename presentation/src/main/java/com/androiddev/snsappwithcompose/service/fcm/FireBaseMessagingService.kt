@@ -9,6 +9,8 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.androiddev.data.notification.NotificationHelper
+import com.androiddev.domain.model.ChatRequest
+import com.androiddev.domain.model.ChatRequestExtra
 import com.androiddev.domain.model.Notification
 import com.androiddev.domain.model.NotificationExtra
 import com.androiddev.domain.use_case.fcm.FcmTokenUseCase
@@ -23,6 +25,7 @@ import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNE
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_FOLLOW
 import com.androiddev.snsappwithcompose.common.util.NotificationConstants.CHANNEL_NAME_LIKE
 import com.androiddev.snsappwithcompose.common.util.isAppInForeground
+import com.androiddev.snsappwithcompose.feature.chat.ChatRequestEventBus
 import com.androiddev.snsappwithcompose.feature.notification.NotificationEventBus
 import com.androiddev.snsappwithcompose.feature.notification.NotificationType
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -61,7 +64,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             // 이미 채팅요청목록 화면에 있을때 bus로 전달해서 표시하기 위한 데이터
             val requesterNickname = data[FcmKeys.REQUESTER_NICKNAME] ?: ""
             val requesterGender = data[FcmKeys.REQUESTER_GENDER] ?: ""
-            val requesterProfileImage = data[FcmKeys.REQUESTER_PROFILEIMAGE] ?: "
+            val requesterProfileImage = data[FcmKeys.REQUESTER_PROFILEIMAGE] ?: ""
 
             val intent: Intent
             val id:Long
@@ -74,6 +77,19 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     putExtra(FcmKeys.CHAT_REQUEST_ID, id)
                     putExtra(FcmKeys.EXTRA_JSON, extraJson)
                 }
+                val extra = Gson().fromJson(extraJson, ChatRequestExtra::class.java)
+                val chatRequestItem = ChatRequest(
+                    id = id,
+                    requesterId = extra.requesterId,
+                    postId = extra.postId,
+                    commentId = extra.commentId,
+                    createdAt = date,
+                    requesterNickname = requesterNickname,
+                    requesterGender = requesterGender,
+                    requesterProfileimage = requesterProfileImage,
+                    content = content
+                )
+                ChatRequestEventBus.emit(chatRequestItem)
             } else {
                 //채팅외 Notification
                 id = data[FcmKeys.NOTIFICATION_ID]?.toLong() ?: return
@@ -84,12 +100,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     putExtra(FcmKeys.TYPE, type)
                     putExtra(FcmKeys.EXTRA_JSON, extraJson)
                 }
+                val extra = Gson().fromJson(extraJson, NotificationExtra::class.java)
+                val notificationItem = Notification(
+                    id = id,
+                    type = type,
+                    content = content,
+                    extrajson = extra,
+                    isRead = false,
+                    date = date
+                )
+                // EventBus로 전달
+                NotificationEventBus.emit(notificationItem)
             }
-
-
-            val extra = Gson().fromJson(extraJson, NotificationExtra::class.java)
-
-
             val pendingIntent = PendingIntent.getActivity(
                 this,
                 System.currentTimeMillis().toInt(),
@@ -98,26 +120,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             )
             if(!isAppInForeground())
                 showNotification(id.toInt(),title, body, type, pendingIntent)
-
-            val notificationItem = Notification(
-                id = id,
-                type = type,
-                content = content,
-                extrajson = extra,
-                isRead = false,
-                date = date
-            )
-
-            // EventBus로 전달
-            NotificationEventBus.emit(notificationItem)
-
         }
     }
-
-
-
-
-
     private fun showNotification(
         id:Int,title: String,
         messageBody: String,
@@ -161,6 +165,5 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             smallIcon = R.drawable.dog
         )
         NotificationManagerCompat.from(this).notify(id,notification)
-
     }
 }

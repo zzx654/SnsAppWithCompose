@@ -131,7 +131,5 @@ class ChatViewModel @Inject constructor(
                 listOf(chatRequest) + currentList
             } else currentList
         }
-
-
     }
 }

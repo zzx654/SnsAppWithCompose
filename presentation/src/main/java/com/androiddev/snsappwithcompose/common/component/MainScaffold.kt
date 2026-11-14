@@ -23,11 +23,13 @@ import com.androiddev.snsappwithcompose.feature.home.HomeScreen
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen
 import com.androiddev.snsappwithcompose.common.navigation.component.Screen.HomeScreen
 import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Notifications
 
 import androidx.compose.runtime.getValue
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.androiddev.snsappwithcompose.feature.chat.ChatViewModel
 
 import com.androiddev.snsappwithcompose.feature.home.tags.TagViewModel
 import com.androiddev.snsappwithcompose.feature.home.user.UserViewModel
@@ -43,10 +45,12 @@ fun MainScaffold(
     tagViewModel: TagViewModel,
     userViewModel: UserViewModel,
     notificationViewModel: NotificationViewModel,
+    chatViewModel: ChatViewModel,
     onHomeReadyChange: (Boolean) -> Unit
 ) {
     val tabNavController = rememberNavController()
     val hasNewNoti by notificationViewModel.hasUnreadNotification.collectAsStateWithLifecycle()
+    val chatRequestsCount by chatViewModel.chatRequestsCount.collectAsStateWithLifecycle()
 
     Scaffold(
         bottomBar = {
@@ -56,7 +60,9 @@ fun MainScaffold(
                     items = listOf(
                         BottomNavItem("홈", HomeScreen, Icons.Default.Home),
                         BottomNavItem("글쓰기", Screen.UploadPostScreen(), Icons.Default.Create),
-                        BottomNavItem("알림", Screen.NotificationScreen,Icons.Default.Notifications,hasNewNoti)
+                        BottomNavItem("알림", Screen.NotificationScreen,Icons.Default.Notifications,hasNewNoti),
+                        BottomNavItem("채팅",Screen.ChatNotificationScreen,Icons.Default.ChatBubble,chatRequestsCount>0)
+
                         //여기다가 hasNew포함 알림처리
                     ),
                     initialScreen = Screen.InitScreen::class,
@@ -100,6 +106,10 @@ fun MainScaffold(
                 BackHandler(true) {
                 }
                 NotificationScreen(viewModel = notificationViewModel)
+            }
+            composable<Screen.ChatNotificationScreen> {
+                BackHandler(true) {
+                }
             }
         }
 

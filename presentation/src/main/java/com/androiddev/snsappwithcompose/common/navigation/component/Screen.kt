@@ -27,6 +27,8 @@ sealed interface Screen {
     @Serializable
     data object NotificationScreen: Screen
     @Serializable
+    data object ChatNotificationScreen: Screen
+    @Serializable
     data class UploadPostScreen(val postId: Long? = null): Screen
     @Serializable
     data object InitScreen: Screen

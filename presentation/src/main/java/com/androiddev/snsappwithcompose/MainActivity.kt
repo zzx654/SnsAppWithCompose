@@ -28,6 +28,7 @@ import com.androiddev.snsappwithcompose.ui.theme.SnsAppWithComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import com.androiddev.snsappwithcompose.feature.chat.ChatViewModel
 import com.androiddev.snsappwithcompose.feature.notification.NotificationViewModel
 import com.androiddev.snsappwithcompose.feature.notification.PendingNotification
 import com.androiddev.snsappwithcompose.service.fcm.FcmKeys
@@ -35,6 +36,7 @@ import com.androiddev.snsappwithcompose.service.fcm.FcmKeys
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val notificationViewModel: NotificationViewModel by viewModels()
+    private val chatViewModel: ChatViewModel by viewModels()
 
     @SuppressLint("RestrictedApi", "UnusedMaterial3ScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.N)

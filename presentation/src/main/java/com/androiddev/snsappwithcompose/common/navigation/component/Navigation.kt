@@ -44,6 +44,7 @@ import com.androiddev.snsappwithcompose.feature.userprofile.UserProfileViewModel
 import kotlinx.coroutines.flow.collectLatest
 import androidx.navigation.compose.navigation
 import com.androiddev.snsappwithcompose.feature.PostDetail.VisualMediaScreen
+import com.androiddev.snsappwithcompose.feature.chat.ChatViewModel
 import com.androiddev.snsappwithcompose.feature.mediaviewer.imageviewer.ImageViewerScreen
 import com.androiddev.snsappwithcompose.feature.mediaviewer.videoviewer.VideoViewerScreen
 import com.androiddev.snsappwithcompose.feature.upload_post.UploadPostViewModel
@@ -54,7 +55,11 @@ import com.androiddev.snsappwithcompose.feature.upload_post.VisualMediaEditScree
 @RequiresApi(Build.VERSION_CODES.N)
 @SuppressLint("UnrememberedGetBackStackEntry", "NewApi")
 @Composable
-fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHostController,modifier:Modifier) {
+fun Navigation(
+    notificationViewModel: NotificationViewModel,
+    chatViewModel: ChatViewModel,
+    navController: NavHostController,
+    modifier:Modifier) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentUserViewModel: CurrentUserViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
     val pending by notificationViewModel.pending.collectAsState()
@@ -111,6 +116,7 @@ fun Navigation(notificationViewModel: NotificationViewModel,navController: NavHo
                 tagViewModel = tagViewModel,
                 userViewModel = userViewModel,
                 notificationViewModel = notificationViewModel,
+                chatViewModel = chatViewModel,
                 onHomeReadyChange = {
                     isHomeReady = it
                 }
